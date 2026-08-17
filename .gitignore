@@ -219,3 +219,6 @@ __marimo__/
 
 # Imágenes generadas de mapas de HeroQuest
 juegos/heroquest/mapas/
+
+# Caché de datos descargados de APIs (Pokémon Champions)
+juegos/pokemon-champions/data/cache/
