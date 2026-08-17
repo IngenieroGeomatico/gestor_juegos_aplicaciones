@@ -1,0 +1,121 @@
+[
+  {
+    "nombre": "El Refugio del Guardián",
+    "tablero": "original",
+    "nivel": 1,
+    "introduccion": "El Guardián de los Valles ha desaparecido. Las leyendas cuentan que fue arrastrado a las profundidades del Refugio, una antigua fortaleza enana ahora tomada por el Caos.",
+    "objetivo": "Encuentra al Guardián retenido en la mazmorra y devuélvelo sano y salvo a la superficie.",
+    "recompensa": "100 monedas de oro y la gratitud del Rey de los Valles.",
+    "entrada_heroes": [
+      {
+        "x": 13,
+        "y": 1
+      },
+      {
+        "x": 12,
+        "y": 1
+      }
+    ],
+    "puertas": [
+      {
+        "x": 5,
+        "y": 4
+      },
+      {
+        "x": 9,
+        "y": 6
+      },
+      {
+        "x": 6,
+        "y": 13
+      }
+    ],
+    "salas": [
+      {
+        "numero": 1,
+        "nombre": "La Antesala",
+        "descripcion": "Puertas oxidadas y huesos de rata. El silencio se corta con el viento que entra por las grietas.",
+        "monstruos": [
+          {
+            "nombre": "Trasgo",
+            "x": 1,
+            "y": 2
+          },
+          {
+            "nombre": "Trasgo",
+            "x": 4,
+            "y": 3
+          }
+        ],
+        "tesoros": []
+      },
+      {
+        "numero": 8,
+        "nombre": "Cámara del Pozo",
+        "descripcion": "Un pozo sin fondo domina la sala y el agua brota de sus muros. Algo se mueve en la oscuridad.",
+        "monstruos": [
+          {
+            "nombre": "Trasgo",
+            "x": 6,
+            "y": 5
+          },
+          {
+            "nombre": "Orco",
+            "x": 8,
+            "y": 6
+          }
+        ],
+        "tesoros": [
+          {
+            "nombre": "Poción de curación",
+            "x": 7,
+            "y": 8
+          }
+        ]
+      },
+      {
+        "numero": 11,
+        "nombre": "La Cripta",
+        "descripcion": "Sarcófagos vacíos alinean las paredes. La losa central está caliente al tacto.",
+        "monstruos": [
+          {
+            "nombre": "Fimir",
+            "x": 13,
+            "y": 8
+          },
+          {
+            "nombre": "Orco",
+            "x": 12,
+            "y": 10
+          }
+        ],
+        "tesoros": [
+          {
+            "nombre": "Espada corta",
+            "x": 15,
+            "y": 7
+          }
+        ]
+      },
+      {
+        "numero": 16,
+        "nombre": "Guarida del Guardián",
+        "descripcion": "El Guardián yace encadenado frente a un Guerrero del Caos que vigila con paciencia de piedra.",
+        "monstruos": [
+          {
+            "nombre": "Guerrero del Caos",
+            "x": 22,
+            "y": 11
+          }
+        ],
+        "tesoros": [
+          {
+            "nombre": "Poción de curación",
+            "x": 24,
+            "y": 10
+          }
+        ]
+      }
+    ]
+  }
+]

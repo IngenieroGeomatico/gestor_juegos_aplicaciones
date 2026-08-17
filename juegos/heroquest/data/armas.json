@@ -1,0 +1,82 @@
+[
+  {
+    "nombre": "Daga",
+    "tipo": "Arma cuerpo a cuerpo",
+    "ataque": 1,
+    "defensa": 0,
+    "coste": 25,
+    "descripcion": "Pequeña hoja fácil de ocultar."
+  },
+  {
+    "nombre": "Espada corta",
+    "tipo": "Arma cuerpo a cuerpo",
+    "ataque": 2,
+    "defensa": 0,
+    "coste": 75,
+    "descripcion": "Hoja equilibrada y fiable."
+  },
+  {
+    "nombre": "Hacha de batalla",
+    "tipo": "Arma cuerpo a cuerpo",
+    "ataque": 3,
+    "defensa": 0,
+    "coste": 100,
+    "descripcion": "Hacha pesada de gran impacto."
+  },
+  {
+    "nombre": "Mandoble",
+    "tipo": "Arma cuerpo a cuerpo",
+    "ataque": 3,
+    "defensa": 0,
+    "coste": 150,
+    "descripcion": "Espada de dos manos reservada a los mas fuertes."
+  },
+  {
+    "nombre": "Ballesta",
+    "tipo": "Arma a distancia",
+    "ataque": 3,
+    "defensa": 0,
+    "coste": 175,
+    "descripcion": "Permite atacar a distancia con precision."
+  },
+  {
+    "nombre": "Báculo del mago",
+    "tipo": "Arma cuerpo a cuerpo",
+    "ataque": 1,
+    "defensa": 0,
+    "coste": 10,
+    "descripcion": "Principal herramienta del mago para canalizar sus conjuros."
+  },
+  {
+    "nombre": "Yelmo",
+    "tipo": "Armadura",
+    "ataque": 0,
+    "defensa": 1,
+    "coste": 100,
+    "descripcion": "Proteje la cabeza de los golpes."
+  },
+  {
+    "nombre": "Escudo",
+    "tipo": "Armadura",
+    "ataque": 0,
+    "defensa": 1,
+    "coste": 200,
+    "descripcion": "Bloque de madera y metal para detener ataques."
+  },
+  {
+    "nombre": "Armadura de placas",
+    "tipo": "Armadura",
+    "ataque": 0,
+    "defensa": 2,
+    "coste": 400,
+    "descripcion": "Pesada armadura metalica de maxima proteccion."
+  },
+  {
+    "nombre": "Poción de curación",
+    "tipo": "Poción",
+    "ataque": 0,
+    "defensa": 0,
+    "coste": 300,
+    "descripcion": "Cura un punto de cuerpo al consumirse."
+  }
+]
