@@ -12,6 +12,7 @@ Ejemplos:
     uv run juegos/pokemon-champions/scripts/mejores_equipos.py --meta
     uv run juegos/pokemon-champions/scripts/mejores_equipos.py --meta --formato singles
     uv run juegos/pokemon-champions/scripts/mejores_equipos.py --mis-pokemon mis_pokemons.json
+    uv run juegos/pokemon-champions/scripts/mejores_equipos.py --mis-pokemon mis_pokemons.json --sets
 """
 
 from __future__ import annotations
@@ -41,7 +42,8 @@ def _leer_mis_pokemon(ruta: str) -> list[str]:
     if isinstance(datos, list):
         ítems = datos
     elif isinstance(datos, dict):
-        ítems = datos.get("pokemon") or datos.get("especies") or []
+        ítems = (datos.get("pokemon") or datos.get("especies")
+                 or datos.get("fijos", []) + datos.get("temporales", []))
     else:
         ítems = []
     nombres: list[str] = []
@@ -120,8 +122,70 @@ def _analizar_cobertura(equipo: list[dict]) -> None:
         ct.analizar(especies)
 
 
-def run(formato: str, mis: list[str] | None = None) -> int:
+def _rol_especie(nombre: str) -> str:
+    especie = ds.buscar_especie(nombre)
+    if not especie:
+        return "general"
+    s = ds.stats(especie)
+    fis = s.get("ataque", 0)
+    esp = s.get("ataque_esp", 0)
+    vel = s.get("velocidad", 0)
+    ps = s.get("ps", 0)
+    if max(fis, esp) < 80:
+        return "tanque" if ps >= 90 else "apoyo"
+    if vel >= 100 and fis >= esp:
+        return "sweeper físico rápido"
+    if vel >= 100 and esp >= fis:
+        return "sweeper especial rápido"
+    if fis >= esp:
+        return "sweeper físico"
+    return "sweeper especial"
+
+
+def _estrategia(entrada: dict, rol: str, velocidad: int) -> str:
+    l = [f"Rol: {rol}."]
+    if velocidad < 80:
+        l.append("Poco veloz: necesita Espacio Raro, lluvia/sol aliados o Priority para actuar.")
+    elif velocidad >= 100:
+        l.append(f"Rápido (Vel base {velocidad}): suele actuar primero.")
+    if "Protección" in entrada.get("movimientos", []):
+        l.append("Lleva Protección: clave en dobles para posicionarse junto a un aliado.")
+    if entrada.get("companeros"):
+        l.append("Sinergia habitual: " + ", ".join(entrada["companeros"][:3]) + ".")
+    return " ".join(l)
+
+
+def _sets_de_caja(meta: dict, mis: list[str]) -> None:
+    for formato in FORMATOS:
+        orden = meta.get("formato", {}).get(formato, [])
+        print(f"\n########## SETS DEL META — {formato} ##########")
+        for e in orden:
+            if not _en_mis_pokemon(e["nombre"], mis):
+                continue
+            especie = ds.buscar_especie(e["nombre"]) or {}
+            velocidad = ds.stats(especie).get("velocidad", 0)
+            rol = _rol_especie(e["nombre"])
+            e = dict(e)
+            e["movimientos"] = (e.get("movimientos") or [])[:4]
+            print(f"\n—— {e['nombre']} ({'/'.join(e.get('tipos', []))}) — ranking {e['posicion']} ——")
+            print(f"  Movimientos: {' / '.join(e['movimientos'])}")
+            print(f"  Objeto: {e.get('objeto', '—')} | Naturaleza: {e.get('naturaleza', '—')} | "
+                  f"Habilidad: {e.get('habilidad', '—')}")
+            if e.get("evs"):
+                print(f"  EVs: {e['evs'][0]}  (alt.: {e['evs'][1]})")
+            if e.get("companeros"):
+                print(f"  Compañeros: {', '.join(e['companeros'][:5])}")
+            print(f"  Estrategia: {_estrategia(e, rol, velocidad)}")
+
+
+def run(formato: str, mis: list[str] | None = None, sets: bool = False) -> int:
     meta = _cargar_meta()
+    if sets:
+        if not mis:
+            print("Error: --sets requiere --mis-pokemon (un archivo o --py ...).")
+            return 1
+        _sets_de_caja(meta, mis)
+        return 0
     formatos = [formato] if formato else FORMATOS
     for fmt in formatos:
         orden = meta.get("formato", {}).get(fmt, [])
@@ -147,18 +211,18 @@ def _alias_formato(valor: str) -> str:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Sugiere los mejores equipos de Pokémon Champions")
-    grupo = parser.add_mutually_exclusive_group()
-    grupo.add_argument("--meta", action="store_true",
-                       help="Usar los mejores del ranking actual (default)")
-    grupo.add_argument("--mis-pokemon", metavar="ARCHIVO", default=None,
-                       help="JSON con mis Pokémon: ['Garchomp', ...] o {\"pokemon\": [...]}")
+    parser.add_argument("--mis-pokemon", metavar="ARCHIVO", default=None,
+                        help="JSON con mis Pokémon: ['Garchomp', ...] o {\"pokemon\": [...]}")
+    parser.add_argument("--sets", action="store_true",
+                        help="Mostrar el set del meta (movimientos, objeto, naturaleza, "
+                             "habilidad, EVs, compañeros y estrategia) de cada Pokémon de mis-pokemon")
     parser.add_argument("--formato", default=None,
                         help="Solo un formato (singles/dobles o singles/doubles); si no, ambos")
     args = parser.parse_args()
 
     formato = _alias_formato(args.formato) if args.formato else None
     mis = _leer_mis_pokemon(args.mis_pokemon) if args.mis_pokemon else None
-    return run(formato, mis)
+    return run(formato, mis, sets=args.sets)
 
 
 if __name__ == "__main__":

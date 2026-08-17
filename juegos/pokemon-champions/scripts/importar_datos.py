@@ -150,6 +150,7 @@ OBJETOS_EN_ES = {
     "Black Belt": "Cinturón Negro", "Black Glasses": "Gafas Oscuras",
     "Bright Powder": "Polvo Brillante", "Charcoal": "Carbón",
     "Charti Berry": "Baya Charti", "Chesto Berry": "Baya Caqui",
+    "Choice Scarf": "Pañuelo Elegido",
     "Chople Berry": "Baya Chople", "Coba Berry": "Baya Coba",
     "Colbur Berry": "Baya Colbur", "Damp Rock": "Roca Húmeda",
     "Dragon Fang": "Colmillo Dragón", "Expert Belt": "Cinto Pro",
@@ -358,6 +359,7 @@ def importar(sin_cache: bool) -> int:
                 "naturaleza": top.get("stat_alignment", {}).get("name"),
                 "habilidad": top.get("ability", {}).get("name"),
                 "companeros": (val.get("teammate") or [])[:5],
+                "evs": (val.get("stat_points") or [])[:2],
             })
 
     print("Traduciendo movimientos a español vía PokeAPI...")
@@ -402,6 +404,13 @@ def importar(sin_cache: bool) -> int:
           f"y movimientos.json ({len(movimientos)} movimientos)")
 
     # --- meta.json: ranking por formato con el set recomendado de cada especie ---
+    EVS_EN_ES = {"HP": "PS", "Atk": "Atq", "Def": "Def", "SpA": "AtqE", "SpD": "DefE", "Spe": "Vel"}
+
+    def _evs_es(cadena: str) -> str:
+        for en, es in EVS_EN_ES.items():
+            cadena = cadena.replace(en, es)
+        return cadena
+
     for fmt, entradas in meta_por_formato.items():
         entradas.sort(key=lambda e: e["posicion"])
         for e in entradas:
@@ -410,6 +419,7 @@ def importar(sin_cache: bool) -> int:
             e["naturaleza"] = NATURALEZAS_EN_ES.get(e["naturaleza"], e["naturaleza"])
             e["habilidad"] = mapa_habilidades_es.get(e["habilidad"], e["habilidad"])
             e["companeros"] = [mapa_nombres_es.get(c, c) for c in e["companeros"]]
+            e["evs"] = [_evs_es(ev) for ev in e.get("evs", [])]
     ds.guardar("meta", {
         "formato": {fmt: entradas for fmt, entradas in meta_por_formato.items()},
         "nota": "Ranking y sets recomendados por formato (Singles/Doubles) del meta actual.",
