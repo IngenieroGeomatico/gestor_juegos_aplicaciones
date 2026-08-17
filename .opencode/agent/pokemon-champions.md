@@ -31,6 +31,7 @@ Cumples tres funciones:
 | Movimientos | `data/movimientos.json` | nombre, tipo, categoria (Físico/Especial/Estado), potencia, precision, pp, prioridad, efecto |
 | Tipos | `data/tipos.json` | tipo, debilidades[], resistencias[], inmunidades[] |
 | Equipos | `data/equipos.json` | nombre, pokemon[] {especie, tipos[], rol} |
+| Meta | `data/meta.json` | formato (Singles/Doubles) → posicion, nombre, tipos[], movimientos[], objeto, naturaleza, habilidad, companeros[] |
 
 Todos los nombres en **español**. Las stats base y los tipos se toman de la
 pokedex; los movimientos disponibles de cada especie se listan en su campo
@@ -44,6 +45,10 @@ Los scripts viven en `juegos/pokemon-champions/scripts/`:
   equipo y muestra cobertura; con `--auto` elige 6 al azar (prioriza legendarios)
 - `cobertura_tipos.py --equipo "..."` o `--pokemon ...` — analiza cobertura
   ofensiva, debilidades defensivas y recomendaciones
+- `mejores_equipos.py --meta` — mejor equipo actual del ranking por formato
+  (Singles/Doubles); con `--formato singles|dobles` acota; con
+  `--mis-pokemon ARCHIVO` arma el mejor equipo a partir de un JSON con los
+  Pokémon del usuario
 - `data_store.py` — funciones compartidas (cargar, guardar, efectividad, buscar)
 
 ## Cómo trabajar
@@ -78,8 +83,8 @@ Fuentes de datos de referencia para Pokémon Champions:
 Si el usuario aporta un archivo o API de datos (p.ej. PokeAPI), conviértelo a
 los esquemas de esta carpeta antes de usarlo en los scripts.
 
-`pokedex.json` y `movimientos.json` los genera `scripts/importar_datos.py`
-(descarga de championsbattledata.com y traduce a español con PokeAPI, con
-caché en `data/cache/`). Puedes reejecutarlo con
+`pokedex.json`, `movimientos.json` y `meta.json` los genera
+`scripts/importar_datos.py` (descarga de championsbattledata.com y traduce a
+español con PokeAPI, con caché en `data/cache/`). Puedes reejecutarlo con
 `uv run juegos/pokemon-champions/scripts/importar_datos.py` para actualizar los
-datos reales.
+datos reales y el ranking del meta.

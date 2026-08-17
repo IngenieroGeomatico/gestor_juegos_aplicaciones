@@ -1,9 +1,10 @@
 """Importa datos reales de Pokémon Champions desde championsbattledata.com
 y los traduce a español usando PokeAPI para los nombres.
 
-Genera data/pokedex.json y data/movimientos.json a partir de la API. Guarda en
-data/cache/ las respuestas raw de ambas APIs para poder actualizar los ficheros
-sin volver a golpear la red (borra caché con --sin-cache).
+Genera data/pokedex.json, data/movimientos.json y data/meta.json (ranking por
+formato con sets recomendados) a partir de la API. Guarda en data/cache/ las
+respuestas raw de ambas APIs para poder actualizar los ficheros sin volver a
+golpear la red (borra caché con --sin-cache).
 
 Ejemplo:
     uv run juegos/pokemon-champions/scripts/importar_datos.py
@@ -132,6 +133,69 @@ MOVIMIENTOS_SLUG = {
     "Forest's Curse": "forests-curse",
 }
 
+# Naturalezas EN -> ES (solo las que aparecen en la meta de championsbattledata).
+NATURALEZAS_EN_ES = {
+    "Adamant": "Firme", "Bold": "Osado", "Brave": "Audaz", "Calm": "Sereno",
+    "Careful": "Cauteloso", "Gentle": "Amable", "Hardy": "Fuerte",
+    "Hasty": "Activo", "Impish": "Brusco", "Jolly": "Alegre", "Lax": "Descuidado",
+    "Lonely": "Huraño", "Mild": "Afable", "Modest": "Modesto",
+    "Naive": "Ingenuo", "Naughty": "Imperfecto", "Quiet": "Manso",
+    "Quirky": "Raro", "Rash": "Alocado", "Relaxed": "Flojo", "Serious": "Serio",
+    "Sassy": "Fuerte", "Timid": "Miedoso",
+}
+
+# Objetos EN -> ES (los no mega evolucionan con la regla -ite -> -ita).
+OBJETOS_EN_ES = {
+    "Babiri Berry": "Baya Babiri", "Big Root": "Raíz Grande",
+    "Black Belt": "Cinturón Negro", "Black Glasses": "Gafas Oscuras",
+    "Bright Powder": "Polvo Brillante", "Charcoal": "Carbón",
+    "Charti Berry": "Baya Charti", "Chesto Berry": "Baya Caqui",
+    "Chople Berry": "Baya Chople", "Coba Berry": "Baya Coba",
+    "Colbur Berry": "Baya Colbur", "Damp Rock": "Roca Húmeda",
+    "Dragon Fang": "Colmillo Dragón", "Expert Belt": "Cinto Pro",
+    "Fairy Feather": "Pluma Hada", "Focus Band": "Cinta Focus",
+    "Focus Sash": "Cinta Focus", "Haban Berry": "Baya Haban",
+    "Hard Stone": "Piedra Dura", "Heat Rock": "Roca Caliente",
+    "Icy Rock": "Roca Helada", "Iron Ball": "Bola de Hierro",
+    "Kasib Berry": "Baya Kasib", "Kebia Berry": "Baya Kebia",
+    "King's Rock": "Roca del Rey", "Leftovers": "Restos",
+    "Life Orb": "Bola de Vida", "Light Ball": "Bola de Luz",
+    "Light Clay": "Arcilla Especial", "Lum Berry": "Baya Zafiro",
+    "Magnet": "Imán", "Mental Herb": "Hierba Mental",
+    "Metal Coat": "Revestimiento Metálico", "Metronome": "Metrónomo",
+    "Miracle Seed": "Semilla Milagro", "Muscle Band": "Banda Power",
+    "Mystic Water": "Agua Mística", "Never-Melt Ice": "Hielo Eterno",
+    "Occa Berry": "Baya Occa", "Oran Berry": "Baya Oran",
+    "Passho Berry": "Baya Passho", "Payapa Berry": "Baya Payapa",
+    "Poison Barb": "Púa Venenosa", "Quick Claw": "Garra Rápida",
+    "Rindo Berry": "Baya Rindo", "Roseli Berry": "Baya Roseli",
+    "Scope Lens": "Lente Focal", "Sharp Beak": "Pico Afilado",
+    "Shed Shell": "Mudar Concha", "Shell Bell": "Campana Concha",
+    "Shuca Berry": "Baya Shuca", "Silk Scarf": "Pañuelo Seda",
+    "Silver Powder": "Polvo Plateado", "Sitrus Berry": "Baya Zidra",
+    "Smooth Rock": "Roca Suave", "Soft Sand": "Arena Fina",
+    "Spell Tag": "Hechizo", "Tanga Berry": "Baya Tanga",
+    "Twisted Spoon": "Cuchara Torcida", "Wacan Berry": "Baya Wacan",
+    "White Herb": "Hierba Blanca", "Wide Lens": "Lupa",
+    "Wise Glasses": "Gafas Mañas", "Yache Berry": "Baya Yache",
+    "Zoom Lens": "Zoom",
+}
+
+
+def _objeto_es(nombre: str | None) -> str | None:
+    """Traduce un objeto EN a ES (regla -ite -> -ita para mega piedras)."""
+    if not nombre:
+        return nombre
+    if nombre in OBJETOS_EN_ES:
+        return OBJETOS_EN_ES[nombre]
+    if nombre.endswith("ite"):
+        return nombre[:-3] + "ita"
+    if nombre.endswith("ite X"):
+        return nombre[:-5] + "ita X"
+    if nombre.endswith("ite Y"):
+        return nombre[:-5] + "ita Y"
+    return nombre
+
 
 def _bajar(url: str, cache: str) -> dict:
     """Descarga JSON de una URL y lo cachea en data/cache/<cache>."""
@@ -216,6 +280,9 @@ def importar(sin_cache: bool) -> int:
     movs_vistos: dict[str, None] = {}
     sin_traduccion = []
     vistos: set[str] = set()
+    meta_por_formato: dict[str, list[dict]] = {"Doubles": [], "Singles": []}
+    mapa_nombres_es: dict[str, str] = {}
+    mapa_habilidades_es: dict[str, str] = {}
 
     for p in pokemon_list:
         nombre = p.get("name") or ""
@@ -269,6 +336,30 @@ def importar(sin_cache: bool) -> int:
             "movimientos": movimientos,
         })
 
+        mapa_nombres_es[nombre] = nombre_final
+        for hab_en, hab_es in zip(habilidades, habilidades_final):
+            mapa_habilidades_es[hab_en] = hab_es
+
+        batalla = (resumen.get("battleSummary") or {}).get("Current") or {}
+        for fmt in ("Doubles", "Singles"):
+            info = batalla.get(fmt) or {}
+            pos = info.get("position")
+            if not pos:
+                continue
+            top = info.get("top") or {}
+            val = info.get("values") or {}
+            meta_por_formato[fmt].append({
+                "posicion": pos,
+                "nombre": nombre_final,
+                "numero": es_data.get("numero"),
+                "tipos": tipos,
+                "movimientos": val.get("move") or [],
+                "objeto": top.get("held_item", {}).get("name"),
+                "naturaleza": top.get("stat_alignment", {}).get("name"),
+                "habilidad": top.get("ability", {}).get("name"),
+                "companeros": (val.get("teammate") or [])[:5],
+            })
+
     print("Traduciendo movimientos a español vía PokeAPI...")
     movimientos = []
     sin_mov = []
@@ -309,6 +400,22 @@ def importar(sin_cache: bool) -> int:
     legendarios = sum(1 for e in pokedex if e["legendario"])
     print(f"Guardados pokedex.json ({len(pokedex)} especies, {legendarios} legendarias) "
           f"y movimientos.json ({len(movimientos)} movimientos)")
+
+    # --- meta.json: ranking por formato con el set recomendado de cada especie ---
+    for fmt, entradas in meta_por_formato.items():
+        entradas.sort(key=lambda e: e["posicion"])
+        for e in entradas:
+            e["movimientos"] = [mapa_movs_es.get(m, m) for m in e["movimientos"]]
+            e["objeto"] = _objeto_es(e["objeto"])
+            e["naturaleza"] = NATURALEZAS_EN_ES.get(e["naturaleza"], e["naturaleza"])
+            e["habilidad"] = mapa_habilidades_es.get(e["habilidad"], e["habilidad"])
+            e["companeros"] = [mapa_nombres_es.get(c, c) for c in e["companeros"]]
+    ds.guardar("meta", {
+        "formato": {fmt: entradas for fmt, entradas in meta_por_formato.items()},
+        "nota": "Ranking y sets recomendados por formato (Singles/Doubles) del meta actual.",
+    })
+    print(f"Guardado meta.json ({len(meta_por_formato['Doubles'])} en Doubles, "
+          f"{len(meta_por_formato['Singles'])} en Singles)")
     if sin_traduccion:
         print(f"  {len(sin_traduccion)} especies sin traducción PokeAPI (nombre original):")
         for n, s in sin_traduccion:
