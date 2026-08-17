@@ -1,0 +1,20 @@
+[
+  { "tipo": "Normal", "debilidades": ["Lucha"], "resistencias": [], "inmunidades": ["Fantasma"] },
+  { "tipo": "Fuego", "debilidades": ["Agua", "Tierra", "Roca"], "resistencias": ["Bicho", "Acero", "Fuego", "Hierba", "Hielo", "Hada"], "inmunidades": [] },
+  { "tipo": "Agua", "debilidades": ["Eléctrico", "Hierba"], "resistencias": ["Acero", "Fuego", "Agua", "Hielo"], "inmunidades": [] },
+  { "tipo": "Eléctrico", "debilidades": ["Tierra"], "resistencias": ["Acero", "Eléctrico", "Volador"], "inmunidades": [] },
+  { "tipo": "Hierba", "debilidades": ["Bicho", "Fuego", "Hielo", "Veneno", "Volador"], "resistencias": ["Agua", "Eléctrico", "Hierba", "Tierra"], "inmunidades": [] },
+  { "tipo": "Hielo", "debilidades": ["Acero", "Fuego", "Lucha", "Roca"], "resistencias": ["Hielo"], "inmunidades": [] },
+  { "tipo": "Lucha", "debilidades": ["Hada", "Psíquico", "Volador"], "resistencias": ["Bicho", "Roca", "Siniestro"], "inmunidades": [] },
+  { "tipo": "Veneno", "debilidades": ["Psíquico", "Tierra"], "resistencias": ["Bicho", "Hada", "Lucha", "Planta", "Veneno"], "inmunidades": [] },
+  { "tipo": "Tierra", "debilidades": ["Agua", "Hielo", "Hierba"], "resistencias": ["Veneno", "Roca"], "inmunidades": ["Eléctrico"] },
+  { "tipo": "Volador", "debilidades": ["Eléctrico", "Hielo", "Roca"], "resistencias": ["Bicho", "Lucha", "Hierba"], "inmunidades": ["Tierra"] },
+  { "tipo": "Psíquico", "debilidades": ["Bicho", "Fantasma", "Siniestro"], "resistencias": ["Lucha", "Psíquico"], "inmunidades": [] },
+  { "tipo": "Bicho", "debilidades": ["Fuego", "Roca", "Volador"], "resistencias": ["Hierba", "Lucha", "Tierra"], "inmunidades": [] },
+  { "tipo": "Roca", "debilidades": ["Agua", "Acero", "Hierba", "Lucha", "Tierra"], "resistencias": ["Fuego", "Normal", "Veneno", "Volador"], "inmunidades": [] },
+  { "tipo": "Fantasma", "debilidades": ["Fantasma", "Siniestro"], "resistencias": ["Bicho", "Veneno"], "inmunidades": ["Lucha", "Normal"] },
+  { "tipo": "Dragón", "debilidades": ["Dragón", "Hada", "Hielo"], "resistencias": ["Agua", "Eléctrico", "Fuego", "Hierba"], "inmunidades": [] },
+  { "tipo": "Siniestro", "debilidades": ["Bicho", "Hada", "Lucha"], "resistencias": ["Fantasma", "Siniestro"], "inmunidades": ["Psíquico"] },
+  { "tipo": "Acero", "debilidades": ["Fuego", "Lucha", "Tierra"], "resistencias": ["Bicho", "Dragón", "Hada", "Hielo", "Normal", "Planta", "Psíquico", "Roca", "Volador", "Acero"], "inmunidades": ["Veneno"] },
+  { "tipo": "Hada", "debilidades": ["Acero", "Veneno"], "resistencias": ["Bicho", "Lucha", "Siniestro", "Dragón"], "inmunidades": [] }
+]

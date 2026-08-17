@@ -28,7 +28,8 @@ uv run <script>   # ejecuta cualquier script dentro del entorno
 
 | Nombre | Tipo | Contenido | Agente |
 |--------|------|-----------|--------|
-| HeroQuest | Juego de mesa | héroes, armas, monstruos, misiones | `heroquest` |
+| HeroQuest | Juego de mesa | héroes, armas, monstruos, misiones, tableros | `heroquest` |
+| Pokémon Champions | Combate competitivo | pokedex, movimientos, equipos, sets | `pokemon-champions` |
 
 Cómo trabajar con **HeroQuest**: ver [juegos/heroquest/README.md](juegos/heroquest/README.md).
 Para añadir un nuevo juego o aplicación, sigue el patrón de `juegos/heroquest/`.
