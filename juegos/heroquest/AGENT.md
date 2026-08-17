@@ -33,8 +33,11 @@ Situación de los datos y scripts:
 | Héroes | `juegos/heroquest/data/personajes.json` | nombre, clase, ataque, defensa, cuerpo, mente, movimiento, descripcion |
 | Armas y equipo | `juegos/heroquest/data/armas.json` | nombre, tipo (Arma cuerpo a cuerpo / Arma a distancia / Armadura / Poción), ataque, defensa, coste, descripcion |
 | Monstruos | `juegos/heroquest/data/monstruos.json` | nombre, ataque, defensa, cuerpo, mente, movimiento, descripcion |
+| Hechizos | `juegos/heroquest/data/hechizos.json` | nombre, escuela (Mago / Hechicero), coste_mente, descripcion |
 | Misiones | `juegos/heroquest/data/misiones.json` | nombre, tablero, nivel, introduccion, objetivo, recompensa, entrada_heroes[], puertas[], salas[] |
 | Tableros | `juegos/heroquest/data/tableros.json` | id, nombre, columnas, filas, salas[] (rects en coordenadas globales de la cuadrícula) |
+| Modelos 3D | `juegos/heroquest/data/impresion3d.json` | recurso de referencia (no editable): plataformas, categorías y buscadores/tags de archivos 3D gratuitos (héroes, monstruos, mobiliario, tablero, dados) |
+| Modelos 3D WH40K | `juegos/heroquest/data/impresion3d_warhammer40k.json` | recurso de referencia (no editable): mismo esquema que `impresion3d.json` pero para Warhammer 40K por facciones (marines del caos, demonios del caos, tiránidos, eldars, taus, orkos, necrones, marines espaciales proxy y terreno de tablero) |
 
 Las misiones **se montan en uno de los dos tableros del juego** (HeroQuest: El
 Despertar). Las coordenadas son **globales** de la cuadrícula del tablero
@@ -52,12 +55,22 @@ Consulta el tablero (salas numeradas, `.` = pasillo) con
 Los scripts de utilidad viven en `juegos/heroquest/scripts/`:
 
 - `listar.py` — ver el contenido actual
+- `nueva_carta.py` — añade una carta genérica con `--tipo` (`personaje`, `arma`,
+  `armadura`, `pocion`, `monstruo`, `hechizo`); sustituye a `nueva_arma.py`,
+  `nuevo_monstruo.py` y `nuevo_personaje.py`
 - `nueva_arma.py`, `nuevo_monstruo.py`, `nuevo_personaje.py`, `nueva_mision.py`
 - `eliminar.py` — borrar una entrada por nombre
 - `tablero.py` — `ver` imprime un tablero; `validar` comprueba todas las misiones
   contra sus tableros
 - `mapa.py` — genera una imagen PNG/SVG del tablero y/o de una misión montada
   (`--tablero original --mision "Nombre" --svg`), en `juegos/heroquest/mapas/`
+- `mision_html.py` — genera la ficha de máster de una misión en un HTML
+  autocontenido (mapa SVG embebido, cada sala con sus monstruos/tesoros y
+  casillas de vida, y referencia de héroes/armas/hechizos), en
+  `juegos/heroquest/mapas/`
+- `carta_item.py` — genera una carta individual de juego (arma, armadura,
+  poción, hechizo, personaje o monstruo) con aspecto de carta de tesoro, en
+  `juegos/heroquest/cartas/`
 - `data_store.py` — funciones compartidas (cargar, guardar, añadir, existe)
 
 ## Cómo trabajar

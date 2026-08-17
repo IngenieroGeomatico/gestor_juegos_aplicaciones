@@ -7,7 +7,7 @@ from pathlib import Path
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 
-TIPOS = ("personajes", "armas", "monstruos", "misiones")
+TIPOS = ("personajes", "armas", "monstruos", "hechizos", "misiones")
 
 
 def _ruta(tipo: str) -> Path:
