@@ -16,7 +16,7 @@ Ficheros JSON en español:
 - `equipos.json` — equipos guardados: `{ nombre, pokemon[] { especie, tipos[], rol } }`
 - `meta.json` — ranking actual por formato (Singles/Doubles) con el set
   recomendado de cada especie: `{ posicion, nombre, tipos[], movimientos[],
-  objeto, naturaleza, habilidad, companeros[] }`
+  objeto, naturaleza, habilidad, evs[], companeros[] }`
 
 > `pokedex.json`, `movimientos.json` y `meta.json` se generan desde la API de
 > datos reales de championsbattledata.com y se traducen a español con PokeAPI.
@@ -36,7 +36,34 @@ Ficheros JSON en español:
 
 ## Scripts (`scripts/`)
 
-Ejecutar desde la raíz del repositorio con `uv run`:
+### Cómo ejecutarlos: `uv run` o activar el entorno virtual
+
+El proyecto Python usa la herramienta **uv** (`pyproject.toml` + `uv.lock`), que
+crea y sincroniza automáticamente el entorno virtual en `.venv/`. Hay dos formas
+equivalentes de lanzar los scripts desde la raíz del repositorio:
+
+**Opción A — `uv run` (recomendada):** uv detecta el entorno y ejecuta con él.
+Si `uv` no está en el PATH de tu terminal, añádelo antes:
+
+```bash
+export PATH="$HOME/snap/code/257/.local/share/../bin:$PATH"
+uv run juegos/pokemon-champions/scripts/mejores_equipos.py --meta
+```
+
+**Opción B — activar el entorno virtual a mano:** como ya existe `.venv/`,
+puedes activarlo y usar `python` directamente (no necesitas `uv`):
+
+```bash
+source .venv/bin/activate          # en Windows: .venv\Scripts\activate
+python juegos/pokemon-champions/scripts/mejores_equipos.py --meta
+```
+
+> Diferencia clave: `uv run` es el gestor del proyecto (rellena el entorno si
+> cambian las dependencias). `source .venv/bin/activate` solo activa el entorno
+> ya creado. Si alguien añade una librería nueva, recuerda `uv sync` (o `uv run`,
+> que lo hace solo) para que `.venv` se actualice.
+
+### Ejemplos
 
 ```bash
 # Set competitivo de una especie (naturaleza, EVs, objeto, habilidad, movimientos)
@@ -58,6 +85,11 @@ uv run juegos/pokemon-champions/scripts/mejores_equipos.py --meta --formato sing
 
 # Mejores equipos a partir de mis Pokémon (JSON con nombres)
 uv run juegos/pokemon-champions/scripts/mejores_equipos.py --mis-pokemon mis_pokemons.json
+# Ejemplo con tu caja: data/mis_pokemons.json (claves "fijos" y "temporales")
+
+# Set completo del meta (movimientos, objeto, naturaleza, habilidad, EVs,
+# compañeros y estrategia) de cada Pokémon de mis-pokemon, para ambos formatos
+uv run juegos/pokemon-champions/scripts/mejores_equipos.py --mis-pokemon mis_pokemons.json --sets
 ```
 
 - `generador_set.py` deduce el rol de las stats base (sweeper físico/especial,
@@ -68,10 +100,12 @@ uv run juegos/pokemon-champions/scripts/mejores_equipos.py --mis-pokemon mis_pok
   sus debilidades defensivas agregadas y las coberturas que faltan.
 - `mejores_equipos.py` construye el mejor equipo de 6 a partir del ranking del
   meta (`--meta`) o de un JSON con los Pokémon del usuario (`--mis-pokemon`,
-  acepta `["Garchomp", ...]` o `{"pokemon": [...]}`). Combina posición en el
-  ranking con cobertura ofensiva y diversidad de tipos, mostrando el set
-  recomendado (movimientos, objeto, naturaleza, habilidad) y compañeros
-  habituales de cada miembro.
+  acepta `["Garchomp", ...]`, `{"pokemon": [...]}` o `{"fijos": [...],
+  "temporales": [...]}`). Combina posición en el ranking con cobertura ofensiva
+  y diversidad de tipos, mostrando set recomendado y compañeros habituales de
+  cada miembro. Con `--sets` imprime el set completo del meta (movimientos,
+  objeto, naturaleza, habilidad, EVs, compañeros y una estrategia básica) de
+  todos los Pokémon del JSON para Singles y Doubles.
 
 ## Agente
 
