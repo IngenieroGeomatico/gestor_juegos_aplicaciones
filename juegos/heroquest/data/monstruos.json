@@ -1,0 +1,47 @@
+[
+  {
+    "nombre": "Trasgo",
+    "ataque": 2,
+    "defensa": 1,
+    "cuerpo": 1,
+    "mente": 3,
+    "movimiento": 2,
+    "descripcion": "Criatura pequeña y huidiza, debil pero numerosa."
+  },
+  {
+    "nombre": "Orco",
+    "ataque": 2,
+    "defensa": 2,
+    "cuerpo": 1,
+    "mente": 4,
+    "movimiento": 2,
+    "descripcion": "Bruto de piel verduzca, mas resistente que el Trasgo."
+  },
+  {
+    "nombre": "Fimir",
+    "ataque": 3,
+    "defensa": 3,
+    "cuerpo": 2,
+    "mente": 3,
+    "movimiento": 3,
+    "descripcion": "Siniestro ser de un solo ojo que empuña una maza en su unico brazo."
+  },
+  {
+    "nombre": "Guerrero del Caos",
+    "ataque": 4,
+    "defensa": 3,
+    "cuerpo": 2,
+    "mente": 5,
+    "movimiento": 2,
+    "descripcion": "Campeon del Caos atrapado en una armadura negra. Muy peligroso."
+  },
+  {
+    "nombre": "Gárgola",
+    "ataque": 3,
+    "defensa": 4,
+    "cuerpo": 1,
+    "mente": 3,
+    "movimiento": 2,
+    "descripcion": "Estatua viviente de piedra, casi impenetrable a los golpes."
+  }
+]

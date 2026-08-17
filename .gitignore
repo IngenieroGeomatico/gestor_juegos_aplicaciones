@@ -216,3 +216,6 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Imágenes generadas de mapas de HeroQuest
+juegos/heroquest/mapas/

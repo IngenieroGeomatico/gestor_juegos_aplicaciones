@@ -1,0 +1,47 @@
+[
+  {
+    "id": "original",
+    "nombre": "El Original",
+    "columnas": 26,
+    "filas": 19,
+    "salas": [
+      { "numero": 1, "rects": [{ "x": 1, "y": 1, "ancho": 4, "alto": 3 }] },
+      { "numero": 2, "rects": [{ "x": 5, "y": 1, "ancho": 4, "alto": 3 }] },
+      { "numero": 3, "rects": [{ "x": 9, "y": 1, "ancho": 3, "alto": 5 }] },
+      { "numero": 4, "rects": [{ "x": 14, "y": 1, "ancho": 3, "alto": 5 }] },
+      { "numero": 5, "rects": [{ "x": 17, "y": 1, "ancho": 4, "alto": 4 }] },
+      { "numero": 6, "rects": [{ "x": 21, "y": 1, "ancho": 4, "alto": 4 }] },
+      { "numero": 7, "rects": [{ "x": 1, "y": 4, "ancho": 4, "alto": 5 }] },
+      { "numero": 8, "rects": [{ "x": 5, "y": 4, "ancho": 4, "alto": 5 }] },
+      { "numero": 9, "rects": [{ "x": 17, "y": 5, "ancho": 4, "alto": 4 }] },
+      { "numero": 10, "rects": [{ "x": 21, "y": 5, "ancho": 4, "alto": 4 }] },
+      { "numero": 11, "rects": [{ "x": 10, "y": 7, "ancho": 6, "alto": 5 }] },
+      { "numero": 12, "rects": [{ "x": 1, "y": 10, "ancho": 4, "alto": 4 }] },
+      { "numero": 13, "rects": [{ "x": 5, "y": 10, "ancho": 2, "alto": 3 }] },
+      { "numero": 14, "rects": [{ "x": 7, "y": 10, "ancho": 2, "alto": 3 }] },
+      {
+        "numero": 15,
+        "rects": [
+          { "x": 17, "y": 10, "ancho": 4, "alto": 3 },
+          { "x": 18, "y": 13, "ancho": 4, "alto": 1 }
+        ]
+      },
+      { "numero": 16, "rects": [{ "x": 21, "y": 10, "ancho": 4, "alto": 4 }] },
+      { "numero": 17, "rects": [{ "x": 5, "y": 13, "ancho": 4, "alto": 5 }] },
+      { "numero": 18, "rects": [{ "x": 9, "y": 13, "ancho": 3, "alto": 5 }] },
+      { "numero": 19, "rects": [{ "x": 14, "y": 13, "ancho": 4, "alto": 5 }] },
+      { "numero": 20, "rects": [{ "x": 1, "y": 14, "ancho": 4, "alto": 4 }] },
+      { "numero": 21, "rects": [{ "x": 18, "y": 14, "ancho": 3, "alto": 4 }] },
+      { "numero": 22, "rects": [{ "x": 21, "y": 14, "ancho": 4, "alto": 4 }] }
+    ],
+    "nota": "Cuadrícula derivada del SVG de Wikipedia (Heroquest_board.svg, CC BY-SA 4.0 / GFDL). Las casillas no cubiertas por una sala se consideran pasillo."
+  },
+  {
+    "id": "cara-b",
+    "nombre": "Cara B (pendiente de foto)",
+    "columnas": 0,
+    "filas": 0,
+    "salas": [],
+    "nota": "Pendiente: enviar foto del reverso del tablero para modelar sus salas en la cuadrícula."
+  }
+]
