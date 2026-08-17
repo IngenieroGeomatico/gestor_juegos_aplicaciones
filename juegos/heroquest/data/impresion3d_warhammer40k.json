@@ -1,0 +1,507 @@
+{
+  "descripcion": "Enlaces gratuitos de archivos 3D imprimibles para Warhammer 40K (miniaturas proxies, terreno, escenografía, plantillas de tablero y accesorios).",
+  "actualizado": "2026-08-17",
+  "plataformas": [
+    {
+      "nombre": "Thingiverse",
+      "plataforma": null,
+      "url": "https://www.thingiverse.com",
+      "nota": "Uno de los mayores repositorios de modelos 3D gratis. Búsqueda por 'warhammer 40k', con grupo dedicado.",
+      "gratuito": true
+    },
+    {
+      "nombre": "Printables (Prusa)",
+      "plataforma": null,
+      "url": "https://www.printables.com",
+      "nota": "Repositorio de modelos gratuitos de Prusa Research, con tags 'warhammer40k' y 'warhammer+40k+terrain' (filtro only_free).",
+      "gratuito": true
+    },
+    {
+      "nombre": "MakerWorld (Bambu Lab)",
+      "plataforma": null,
+      "url": "https://makerworld.com/en",
+      "nota": "Plataforma de Bambu Lab con modelos gratuitos y perfiles de impresión listos para Bambu Studio. Tiene versión en español: https://makerworld.com/es.",
+      "gratuito": true
+    },
+    {
+      "nombre": "Cults3D",
+      "plataforma": null,
+      "url": "https://cults3d.com",
+      "nota": "Mercado con una sección de modelos gratuitos grande. Tags como 'warhammer_40k' o 'space_marines' filtran solo gratuitos con '?only_free=true'.",
+      "gratuito": true
+    },
+    {
+      "nombre": "MyMiniFactory",
+      "plataforma": null,
+      "url": "https://www.myminifactory.com",
+      "nota": "Especializado en miniaturas para juegos de mesa y rol; gratis y de pago. Hay colecciones dedicadas a Space Marines y terreno 40K.",
+      "gratuito": true
+    },
+    {
+      "nombre": "STLFinder",
+      "plataforma": null,
+      "url": "https://www.stlfinder.com/3dmodels/thingiverse-40k",
+      "nota": "Buscador que indexa modelos de 14 plataformas y permite filtrar por gratuitos; la búsqueda 'thingiverse-40k' agrega resultados de Thingiverse.",
+      "gratuito": true
+    },
+    {
+      "nombre": "Yeggi",
+      "plataforma": null,
+      "url": "https://www.yeggi.com/q/free+warhammer+40k+terrain/",
+      "nota": "Motor de búsqueda que agrega modelos imprimibles de muchas plataformas (no aloja ficheros). Búsqueda de terreno 40K gratis.",
+      "gratuito": true
+    },
+    {
+      "nombre": "Grupo Warhammer 40K en Thingiverse",
+      "plataforma": null,
+      "url": "https://www.thingiverse.com/groups/warhammer-40k",
+      "nota": "Comunidad de Thingiverse dedicada a modelos imprimibles de Warhammer 40K.",
+      "gratuito": true
+    }
+  ],
+  "categorias": {
+    "colecciones_completas": [
+      {
+        "nombre": "40k — colección de uoDism",
+        "plataforma": "MakerWorld",
+        "url": "https://makerworld.com/en/collections/6016313-40k",
+        "nota": "Colección curada con 115 modelos: miniaturas proxies (Space Soldier Super Pack, TerminatOrc, Chaos Space Marine), cabezas/helmets, vehículos, marcadores, bases y accesorios.",
+        "gratuito": true
+      },
+      {
+        "nombre": "Grimdark wargame terrain — colección de Wargame Terrain Print",
+        "plataforma": "MakerWorld",
+        "url": "https://makerworld.com/en/collections/5187936-grimdark-wargame-terrain",
+        "nota": "Colección oficial del autor de las ruinas góticas Grimdark Gothic (ruins modulares, puertas, catedrales) ideal para 40K.",
+        "gratuito": true
+      },
+      {
+        "nombre": "Warhammer terrain — colección de MakerWorld",
+        "plataforma": "MakerWorld",
+        "url": "https://makerworld.com/en/collections/4891424-warhammer-terrain",
+        "nota": "Colección curada de terreno para Warhammer (trincheras, ruinas, escenografía de mesa).",
+        "gratuito": true
+      },
+      {
+        "nombre": "40K - Space Marines — colección de VaL1cE",
+        "plataforma": "Cults3D",
+        "url": "https://cults3d.com/en/design-collections/VaL1cE/40k-space-marines",
+        "nota": "Colección con 71 diseños de Space Marines; la mayoría son gratuitos (Free) y algunos de precio libre.",
+        "gratuito": true
+      },
+      {
+        "nombre": "40k Terrain — colección de haydenkelley",
+        "plataforma": "Cults3D",
+        "url": "https://cults3d.com/en/design-collections/haydenkelley/40k-terrain",
+        "nota": "Colección con 134 ficheros de terreno para partidas de Warhammer 40k (crusade/match play).",
+        "gratuito": true
+      },
+      {
+        "nombre": "Warhammer 40K Space Marines — colección de Auroch",
+        "plataforma": "MyMiniFactory",
+        "url": "https://www.myminifactory.com/users/Auroch/collection/warhammer-40k-space-marines",
+        "nota": "Colección de miniaturas y partes de Space Marines.",
+        "gratuito": true
+      },
+      {
+        "nombre": "Chaos Space Marines — colección de Fujillama",
+        "plataforma": "MyMiniFactory",
+        "url": "https://www.myminifactory.com/users/Fujillama/collection/chaos-space-marines",
+        "nota": "Colección de miniaturas Chaos Space Marines.",
+        "gratuito": true
+      }
+    ],
+    "terreno_y_tablero": [
+      {
+        "nombre": "WTC Style Terrain Pack (MyMans)",
+        "plataforma": "Thingiverse",
+        "url": "https://www.thingiverse.com/thing:4847906",
+        "nota": "Pack de terreno estilo WTC (World Team Championship) para tablero competitivo de 40K.",
+        "gratuito": true
+      },
+      {
+        "nombre": "Wargame terrain Small ruin Grimdark Gothic (Wargame Terrain Print)",
+        "plataforma": "Printables",
+        "url": "https://www.printables.com/model/1088777-wargame-terrain-small-ruin-grimdark-gothic",
+        "nota": "Ruina pequeña gótica sin soportes, ideal para terreno de 40K.",
+        "gratuito": true
+      },
+      {
+        "nombre": "Wargame terrain ruin Grimdark Gothic Alpha (Wargame Terrain Print)",
+        "plataforma": "MakerWorld",
+        "url": "https://makerworld.com/en/models/677640-wargame-terrain-ruin-grimdark-gothic-alpha",
+        "nota": "Ruina Alpha en 2 partes, sin soportes y compatible con imanes 5x2 entre plantas.",
+        "gratuito": true
+      },
+      {
+        "nombre": "Wargame terrain The Door ruin Grimdark Gothic (Wargame Terrain Print)",
+        "plataforma": "MakerWorld",
+        "url": "https://makerworld.com/en/models/694191-wargame-terrain-the-door-ruin-grimdark-gothic",
+        "nota": "Ruina puerta en 2 partes compatible con placa de A1 mini.",
+        "gratuito": true
+      },
+      {
+        "nombre": "11th Edition 40k Terrain Footprints / Templates (spud2077)",
+        "plataforma": "MakerWorld",
+        "url": "https://makerworld.com/en/models/2963021-11th-edition-40k-terrain-footprints-templates",
+        "nota": "Plantillas de las áreas de terreno oficiales de la 11ª edición para marcar zonas Obscuring/Hidden.",
+        "gratuito": true
+      },
+      {
+        "nombre": "40k 11th Edition Terrain Footprints / Templates (Freya)",
+        "plataforma": "MakerWorld",
+        "url": "https://makerworld.com/en/models/2637799-40k-11th-edition-terrain-footprints-templates",
+        "nota": "Plantillas impresas de los footprints oficiales de la 11ª edición (rectángulos, triángulos y líneas).",
+        "gratuito": true
+      },
+      {
+        "nombre": "FREE 11th Edition Terrain Templates (TinkerJunkie)",
+        "plataforma": "MyMiniFactory",
+        "url": "https://www.myminifactory.com/object/3d-print-free-11th-edition-terrain-templates-791451",
+        "nota": "34 STL + 3MF multimaterial con footprints y siluetas de terreno de la 11ª edición, indicando secciones de más/menos de 4\".",
+        "licencia": "CC-BY-NC-SA",
+        "gratuito": true
+      },
+      {
+        "nombre": "Terrain Pack for Warhammer 40,000 GT (craigvalvano)",
+        "plataforma": "Cults3D",
+        "url": "https://cults3d.com/en/3d-model/game/terrain-pack-for-warhammer-40-000-gt",
+        "nota": "Pack de terreno compatible con los esquemas del Pariah Nexus Tournament Companion: ruinas en C y L, y vallas scatter.",
+        "licencia": "CC-BY-NC-SA",
+        "gratuito": true
+      },
+      {
+        "nombre": "Simplified terrain for 11th edition (ventiss)",
+        "plataforma": "MakerWorld",
+        "url": "https://makerworld.com/en/models/2956014-simplified-terrain-for-11th-edition",
+        "nota": "Terreno simplificado para la 11ª edición (~700 g de filamento por set).",
+        "licencia": "CC-BY-NC-SA",
+        "gratuito": true
+      },
+      {
+        "nombre": "Gothic scifi ruin (Terrain4Print)",
+        "plataforma": "MakerWorld",
+        "url": "https://makerworld.com/en/models/1129751-gothic-scifi-ruin",
+        "nota": "Ciudad de ruinas góticas modulares sin soportes, con plantas ensamblables por pivotes.",
+        "licencia": "CC-BY-NC-SA",
+        "gratuito": true
+      }
+    ],
+    "caos": [
+      {
+        "nombre": "Chaos Space Marine (user_3623803494)",
+        "plataforma": "MakerWorld",
+        "url": "https://makerworld.com/en/models/593583-chaos-space-marine",
+        "nota": "Remix de un Space Marine del Caos de Warhammer 40K (basado en escultura de Sketchfab), con bólter.",
+        "licencia": "CC-BY-ND",
+        "gratuito": true
+      },
+      {
+        "nombre": "Chaos Space Marines — colección de Fujillama",
+        "plataforma": "MyMiniFactory",
+        "url": "https://www.myminifactory.com/users/Fujillama/collection/chaos-space-marines",
+        "nota": "Colección de miniaturas de Chaos Space Marines (gratis y de pago).",
+        "gratuito": true
+      }
+    ],
+    "demonios_del_caos": [
+      {
+        "nombre": "Bloodthirster proxie (user_2978958570)",
+        "plataforma": "MakerWorld",
+        "url": "https://makerworld.com/en/models/2608381-bloodthirster-proxie",
+        "nota": "Proxy de príncipe demonio de Khorne, útil como Bloodthirster o Bel'akor para ejército de demonios del caos.",
+        "licencia": "CC-BY",
+        "gratuito": true
+      },
+      {
+        "nombre": "Epic Scale Greater Blood Demon (EpicRich)",
+        "plataforma": "Cults3D",
+        "url": "https://cults3d.com/en/3d-model/art/epic-scale-greater-blood-demon",
+        "nota": "Gran demonio de sangre en escala Epic (6mm) presoportado. Créditos a jimjimjimmyjim (thing:4071504) y kombatunit (thing:2740021).",
+        "gratuito": true
+      },
+      {
+        "nombre": "Epic scale Blood Demons (EpicRich)",
+        "plataforma": "Cults3D",
+        "url": "https://cults3d.com/en/3d-model/art/epic-scale-blood-demons",
+        "nota": "Set de demonios de sangre (Bloodletters) en escala Epic, remodelados y engrosados para imprimir mejor. También en Thingiverse: thing:4680054.",
+        "licencia": "CC-BY-NC",
+        "gratuito": true
+      },
+      {
+        "nombre": "Epic Scale Blood Rider Demons (EpicRich)",
+        "plataforma": "Cults3D",
+        "url": "https://cults3d.com/en/3d-model/art/epic-scale-blood-rider-demons",
+        "nota": "Bloodcrushers (jinetes de demonios de sangre) en escala Epic, 4 archivos STL.",
+        "licencia": "CC-BY-NC-SA",
+        "gratuito": true
+      },
+      {
+        "nombre": "Slaanesh Soulgrinder (Raylane)",
+        "plataforma": "Thingiverse",
+        "url": "https://www.thingiverse.com/thing:3133446",
+        "nota": "Proxy de Soulgrinder de Slaanesh (motor demoníaco), modelado a mano para uso personal y sin vender.",
+        "gratuito": true
+      },
+      {
+        "nombre": "Soul Grinder of Khorne (jimjimjimmyjim)",
+        "plataforma": "Thingiverse",
+        "url": "https://www.thingiverse.com/thing:5359012",
+        "nota": "Proxy gratuito del Soul Grinder de Khorne, el devorador de almas. Licencia CC-BY.",
+        "licencia": "CC-BY",
+        "gratuito": true
+      },
+      {
+        "nombre": "Bloodthirster - tm (jimjimjimmyjim)",
+        "plataforma": "Thingiverse",
+        "url": "https://www.thingiverse.com/thing:5232764",
+        "nota": "Proxy del Bloodthirster de Khorne, el gran príncipe demonio, del mismo autor del Soul Grinder.",
+        "licencia": "CC-BY",
+        "gratuito": true
+      },
+      {
+        "nombre": "Chaos daemon proxies — colección de JellyGolem (Paul Miller)",
+        "plataforma": "MyMiniFactory",
+        "url": "https://www.myminifactory.com/users/JellyGolem/collection/chaos-daemon-proxies",
+        "nota": "Colección con 70 objetos de proxies de demonios del caos (puede mezclar gratis y de pago).",
+        "gratuito": true
+      }
+    ],
+    "tiranidos": [
+      {
+        "nombre": "Tyranid Hive Tyrant - Swarm Lord (Cadel)",
+        "plataforma": "MakerWorld",
+        "url": "https://makerworld.com/en/models/2620689-tyranid-hive-tyrant-swarm-lord",
+        "nota": "Hive Tyrant, comandante del enjambre Tyranid, con perfil de impresión listo.",
+        "gratuito": true
+      },
+      {
+        "nombre": "Tyranid Mawloc - Terror from Below (Cadel)",
+        "plataforma": "MakerWorld",
+        "url": "https://makerworld.com/en/models/2620714-tyranid-mawloc-terror-from-below",
+        "nota": "Mawloc emergiendo del suelo, ideal como pieza central.",
+        "gratuito": true
+      },
+      {
+        "nombre": "Epic Scale Tyranids — serie de socialtertiary",
+        "plataforma": "Cults3D",
+        "url": "https://cults3d.com/en/users/socialtertiary",
+        "nota": "Serie de 9 modelos gratis en escala Epic (6mm): Soothsayer, Dominator, Bats, Bat Carrier, Serpent, Burrower, Magician, Hierophant y Carnifex.",
+        "gratuito": true
+      }
+    ],
+    "eldars": [
+      {
+        "nombre": "Epic Scale Eldar Wraith Lord Proxy (chris262)",
+        "plataforma": "Thingiverse",
+        "url": "https://www.thingiverse.com/thing:1657463",
+        "nota": "Proxy de Wraith Lord Eldar en escala Epic para 40K/Armageddon; requiere pegamento y es delicado.",
+        "gratuito": true
+      }
+    ],
+    "taus": [
+      {
+        "nombre": "stealth suit - tau - tm (jimjimjimmyjim)",
+        "plataforma": "Thingiverse",
+        "url": "https://www.thingiverse.com/thing:4230839",
+        "nota": "Stealth suit Tau XV25, proxy gratuito para ejército T'au.",
+        "licencia": "CC-BY",
+        "gratuito": true
+      },
+      {
+        "nombre": "Tau Stealth Suit 2 (StarKiller63)",
+        "plataforma": "Thingiverse",
+        "url": "https://www.thingiverse.com/thing:3223029",
+        "nota": "Stealth Suit Tau en 28mm (remix), proxy gratuito.",
+        "gratuito": true
+      }
+    ],
+    "orkos": [
+      {
+        "nombre": "Orc Boy (3DRetroMania)",
+        "plataforma": "MakerWorld",
+        "url": "https://makerworld.com/en/models/2769325-orc-boy",
+        "nota": "Minisura Ork personalizada de 55 mm (escalable a 32 mm) de la colección Wargame Customs, con perfil de impresión 0.16mm.",
+        "licencia": "SDFL-C",
+        "gratuito": true
+      },
+      {
+        "nombre": "Ork Cannon Boy (3DRetroMania)",
+        "plataforma": "MakerWorld",
+        "url": "https://makerworld.com/en/models/2922831-ork-cannon-boy",
+        "nota": "Segunda mini Ork del autor, con cañón, de la colección Wargame Customs.",
+        "gratuito": true
+      }
+    ],
+    "necrones": [
+      {
+        "nombre": "Necron Warrior Proxy (Rubeebee)",
+        "plataforma": "Cults3D",
+        "url": "https://cults3d.com/en/3d-model/game/necron-warrior-proxy",
+        "nota": "Proxy gratuito de Necron Warrior con rifle gauss. También en Thingiverse: thing:4960990.",
+        "gratuito": true
+      },
+      {
+        "nombre": "Necron Warrior Proxy (Rubeebee) en Thingiverse",
+        "plataforma": "Thingiverse",
+        "url": "https://www.thingiverse.com/thing:4960990",
+        "nota": "Mismo modelo que el anterior, alojado en Thingiverse.",
+        "gratuito": true
+      },
+      {
+        "nombre": "Necron Warrior Base with hexagon recess 32mm (Gladop)",
+        "plataforma": "MakerWorld",
+        "url": "https://makerworld.com/en/models/2187596-necron-warrior-base-with-hexagon-recess-32mm",
+        "nota": "Base compatible con Necron Warriors de 32 mm con hueco hexagonal para pegar sin cola.",
+        "licencia": "CC-BY-NC-SA",
+        "gratuito": true
+      }
+    ],
+    "miniaturas_proxy": [
+      {
+        "nombre": "Space Soldier Super Pack 1 (sky1Army)",
+        "plataforma": "MakerWorld",
+        "url": "https://makerworld.com/en/models/2805019-space-soldier-super-pack-1",
+        "nota": "13 miniaturas de soldado espacial de 44 mm + base 32 mm, listas para pintar, compatibles con wargames de escala heroica.",
+        "gratuito": true
+      },
+      {
+        "nombre": "Space Soldier Team Pack 1 (sky1Army)",
+        "plataforma": "MakerWorld",
+        "url": "https://makerworld.com/en/models/3007357-space-soldier-team-pack-1",
+        "nota": "Pack de 6 miniaturas de 40 mm del tipo armadura clara.",
+        "gratuito": true
+      },
+      {
+        "nombre": "TerminatOrc - Heavy Armor Cyber-Brute (Gulp79)",
+        "plataforma": "MakerWorld",
+        "url": "https://makerworld.com/en/models/2822651-terminatorc-heavy-armor-cyber-brute",
+        "nota": "Proxy de unidad élite de armadura pesada para mesa (base sugerida 80 mm, escalable).",
+        "gratuito": true
+      },
+      {
+        "nombre": "60x Marine Heads & Helmets | 32mm Miniature Bits (Mikey3D)",
+        "plataforma": "MakerWorld",
+        "url": "https://makerworld.com/en/models/2797464-60x-marine-heads-helmets-32mm-miniature-bits",
+        "nota": "60 cabezas y cascos de marine en 32 mm para personalizar miniaturas.",
+        "gratuito": true
+      }
+    ]
+  },
+  "buscadores_y_tags": [
+    {
+      "nombre": "Warhammer 40k en Cults3D (solo gratis)",
+      "url": "https://cults3d.com/en/tags/warhammer_40k?only_free=true",
+      "nota": "Miles de modelos gratuitos de Warhammer 40k (7,9k resultados con el tag, filtrables a gratis).",
+      "gratuito": true
+    },
+    {
+      "nombre": "Chaos Space Marines en Cults3D (solo gratis)",
+      "url": "https://cults3d.com/en/tags/chaos+space+marines?only_free=true",
+      "nota": "Modelos gratuitos de Chaos Space Marines.",
+      "gratuito": true
+    },
+    {
+      "nombre": "Tyranid en Cults3D (solo gratis)",
+      "url": "https://cults3d.com/en/tags/tyranid?only_free=true",
+      "nota": "274 modelos gratuitos de Tiránidos (proxy, terreno y accesorios).",
+      "gratuito": true
+    },
+    {
+      "nombre": "Tag tyranid en MakerWorld",
+      "url": "https://makerworld.com/en/search/models?keyword=tag%3A+tyranid",
+      "nota": "Modelos gratuitos de Tiránidos (Hive Tyrant, Mawloc, escenografía xenos...).",
+      "gratuito": true
+    },
+    {
+      "nombre": "40k terrain en Cults3D (solo gratis)",
+      "url": "https://cults3d.com/en/tags/40k+terrain",
+      "nota": "16 modelos gratuitos de terreno 40K.",
+      "gratuito": true
+    },
+    {
+      "nombre": "Tag warhammer40k en Printables",
+      "url": "https://www.printables.com/tag/warhammer40k",
+      "nota": "Galería de modelos etiquetados warhammer40k.",
+      "gratuito": true
+    },
+    {
+      "nombre": "Tag warhammer+40k+terrain en Printables (solo gratis)",
+      "url": "https://www.printables.com/tag/warhammer+40k+terrain?only_free=true",
+      "nota": "Modelos de terreno 40K gratuitos.",
+      "gratuito": true
+    },
+    {
+      "nombre": "Tag space marine en MakerWorld",
+      "url": "https://makerworld.com/en/search/models?keyword=tag%3A+space+marine",
+      "nota": "Modelos gratuitos de Space Marines y proxies con perfiles de impresión.",
+      "gratuito": true
+    },
+    {
+      "nombre": "40k terrain en MakerWorld",
+      "url": "https://makerworld.com/en/search/models?keyword=40k+terrain",
+      "nota": "Búsqueda de terreno 40K con perfiles de impresión, con versión española en makerworld.com/es.",
+      "gratuito": true
+    },
+    {
+      "nombre": "STLFinder - thingiverse-40k",
+      "url": "https://www.stlfinder.com/3dmodels/thingiverse-40k",
+      "nota": "Buscador que agrega resultados de Thingiverse para 40K con filtro gratis.",
+      "gratuito": true
+    },
+    {
+      "nombre": "Yeggi - free warhammer 40k terrain",
+      "url": "https://www.yeggi.com/q/free+warhammer+40k+terrain/",
+      "nota": "Buscador agregado de modelos imprimibles de terreno 40K gratis.",
+      "gratuito": true
+    },
+    {
+      "nombre": "Tag chaos daemons en Cults3D (solo gratis)",
+      "url": "https://cults3d.com/en/tags/chaos+daemons?only_free=true",
+      "nota": "26 modelos gratuitos de demonios del caos.",
+      "gratuito": true
+    },
+    {
+      "nombre": "Tag khorne en Cults3D (solo gratis)",
+      "url": "https://cults3d.com/en/tags/khorne?only_free=true",
+      "nota": "149 modelos gratuitos de Khorne (Soul Grinders, Bloodthirsters, Heraldos, Bloodletters).",
+      "gratuito": true
+    },
+    {
+      "nombre": "Tag tyranid en MakerWorld",
+      "url": "https://makerworld.com/en/search/models?keyword=tag%3A+tyranid",
+      "nota": "Modelos gratuitos de Tiránidos (Hive Tyrant, Mawloc, escenografía xenos...).",
+      "gratuito": true
+    },
+    {
+      "nombre": "Tag tyranid en Cults3D (solo gratis)",
+      "url": "https://cults3d.com/en/tags/tyranid?only_free=true",
+      "nota": "274 modelos gratuitos de Tiránidos (proxy, terreno y accesorios).",
+      "gratuito": true
+    },
+    {
+      "nombre": "Tag aeldari en Cults3D (solo gratis)",
+      "url": "https://cults3d.com/en/tags/aeldari?only_free=true",
+      "nota": "149 modelos gratuitos de Aeldari/Eldar.",
+      "gratuito": true
+    },
+    {
+      "nombre": "Tau Stealth Suit en STLFinder",
+      "url": "https://www.stlfinder.com/3dmodels/tau-stealth-suit",
+      "nota": "16 modelos de Stealth Suit Tau agregados desde Thingiverse.",
+      "gratuito": true
+    },
+    {
+      "nombre": "Tag ork en Cults3D (solo gratis)",
+      "url": "https://cults3d.com/en/tags/ork?only_free=true",
+      "nota": "Miles de modelos de Orkos gratuitos.",
+      "gratuito": true
+    },
+    {
+      "nombre": "Tag necron warrior en Cults3D (solo gratis)",
+      "url": "https://cults3d.com/en/tags/necron+warrior?only_free=true",
+      "nota": "Modelos gratuitos de Necron Warrior.",
+      "gratuito": true
+    }
+  ]
+}

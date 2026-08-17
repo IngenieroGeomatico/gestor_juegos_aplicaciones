@@ -1,0 +1,354 @@
+{
+  "descripcion": "Enlaces gratuitos de archivos 3D imprimibles para Hero Quest (figuritas, héroes, monstruos, mobiliario, puertas, tablero y accesorios).",
+  "actualizado": "2026-08-17",
+  "plataformas": [
+    {
+      "nombre": "Thingiverse",
+      "plataforma": null,
+      "url": "https://www.thingiverse.com",
+      "nota": "Uno de los mayores repositorios de modelos 3D gratis. Búsqueda directamente por 'heroquest'.",
+      "gratuito": true
+    },
+    {
+      "nombre": "Printables (Prusa)",
+      "plataforma": null,
+      "url": "https://www.printables.com",
+      "nota": "Repositorio de modelos gratuitos de Prusa Research, con tag 'heroquest'.",
+      "gratuito": true
+    },
+    {
+      "nombre": "MakerWorld (Bambu Lab)",
+      "plataforma": null,
+      "url": "https://makerworld.com/en",
+      "nota": "Plataforma de Bambu Lab con modelos gratuitos y perfiles de impresión listos para Bambu Studio. Tiene versión en español: https://makerworld.com/es.",
+      "gratuito": true
+    },
+    {
+      "nombre": "Cults3D",
+      "plataforma": null,
+      "url": "https://cults3d.com",
+      "nota": "Mercado con una sección de modelos gratuitos grande. Búsqueda 'heroquest?only_free=true' filtra solo gratuitos.",
+      "gratuito": true
+    },
+    {
+      "nombre": "MyMiniFactory",
+      "plataforma": null,
+      "url": "https://www.myminifactory.com",
+      "nota": "Especializado en miniaturas para juegos de mesa y rol; gratis y de pago. Hay colecciones dedicadas a HeroQuest.",
+      "gratuito": true
+    },
+    {
+      "nombre": "CGTrader",
+      "plataforma": null,
+      "url": "https://www.cgtrader.com/free-3d-print-models",
+      "nota": "TIene una sección de modelos de impresión gratuitos (Free 3D print models) además de modelos de pago.",
+      "gratuito": true
+    },
+    {
+      "nombre": "Thangs",
+      "plataforma": null,
+      "url": "https://thangs.com",
+      "nota": "Buscador y comunidad de modelos 3D que agrega Thingiverse, Printables, MakerWorld y más, con filtro gratuito.",
+      "gratuito": true
+    },
+    {
+      "nombre": "3DSEARCH",
+      "plataforma": null,
+      "url": "https://3dsearch.net",
+      "nota": "Buscador que indexa más de 8.6 millones de STL gratuitos de Printables, Thingiverse, MakerWorld, MyMiniFactory y Cults3D, con slicer integrado.",
+      "gratuito": true
+    },
+    {
+      "nombre": "Yeggi",
+      "plataforma": null,
+      "url": "https://www.yeggi.com",
+      "nota": "Motor de búsqueda que agrega modelos imprimibles de muchas plataformas (no aloja ficheros).",
+      "gratuito": true
+    },
+    {
+      "nombre": "STLFinder",
+      "plataforma": null,
+      "url": "https://www.stlfinder.com",
+      "nota": "Buscador que indexa más de 7 millones de modelos de 14 plataformas y permite filtrar por gratuitos.",
+      "gratuito": true
+    },
+    {
+      "nombre": "3Drop",
+      "plataforma": null,
+      "url": "https://three-drop.com",
+      "nota": "Buscador multi-plataforma (Printables, Thingiverse, MakerWorld...) con filtro gratis/pago.",
+      "gratuito": true
+    },
+    {
+      "nombre": "LayerUp",
+      "plataforma": null,
+      "url": "https://layerup.games",
+      "nota": "Agregador de modelos por juego de mesa (incluye HeroQuest): miniaturas, mobiliario, tablero, dados, con filtro 'Free only'.",
+      "gratuito": true
+    },
+    {
+      "nombre": "Grupo HeroQuest en Thingiverse",
+      "plataforma": null,
+      "url": "https://www.thingiverse.com/groups/heroquest",
+      "nota": "Comunidad de Thingiverse dedicada a modelos imprimibles de HeroQuest y sus expansiones.",
+      "gratuito": true
+    }
+  ],
+  "categorias": {
+    "colecciones_completas": [
+      {
+        "nombre": "HeroQuest Miniatures (set completo, NeoTrace)",
+        "plataforma": "MakerWorld",
+        "url": "https://makerworld.com/cs/models/1673399-heroquest-miniatures",
+        "nota": "Set completo: 4 héroes + monstruos, remasterizado para impresión moderna.",
+        "licencia": "CC-BY-NC-SA",
+        "gratuito": true
+      },
+      {
+        "nombre": "HeroQuest All Miniatures (JackTheTinkerer)",
+        "plataforma": "Thingiverse",
+        "url": "https://www.thingiverse.com/thing:5534832",
+        "nota": "Todas las miniaturas del juego base en un solo modelo.",
+        "licencia": "CC-BY",
+        "gratuito": true
+      },
+      {
+        "nombre": "HeroQuest - reshaped Heroes (enfenix)",
+        "plataforma": "Thingiverse",
+        "url": "https://www.thingiverse.com/thing:4366547",
+        "nota": "Bárbaro, Enano, Elfo y Mago remodelados con detalles de armas mejorados.",
+        "licencia": "CC-BY-NC-SA",
+        "gratuito": true
+      },
+      {
+        "nombre": "HEROQUEST — colección de locobardo",
+        "plataforma": "MakerWorld",
+        "url": "https://makerworld.com/en/collections/3546819-heroquest",
+        "nota": "Colección curada con 52 modelos: tablero modular 3D, marcadores de trampas (pit, spear, rubble, trapdoor), puertas, monedas, escenografía y miniaturas de varios autores.",
+        "gratuito": true
+      },
+      {
+        "nombre": "Heroquest — colección de NeoTrace",
+        "plataforma": "MakerWorld",
+        "url": "https://makerworld.com/en/collections/8784204-heroquest",
+        "nota": "Colección oficial del autor de las miniaturas remasterizadas: 39 modelos entre miniaturas (héroes y monstruos) y mobiliario.",
+        "licencia": "CC-BY-NC-SA",
+        "gratuito": true
+      },
+      {
+        "nombre": "hero quest — colección de Burv",
+        "plataforma": "MakerWorld",
+        "url": "https://makerworld.com/en/collections/21117737-hero-quest",
+        "nota": "Colección curada con 49 modelos de varios autores: miniaturas NeoTrace, tableros modulares, pasajes secretos, trampas y accesorios.",
+        "gratuito": true
+      },
+      {
+        "nombre": "HeroQuest — colección de meepleforge",
+        "plataforma": "MyMiniFactory",
+        "url": "https://www.myminifactory.com/users/meepleforge/collection/heroquest",
+        "nota": "Escenografía y accesorios diseñados para HeroQuest o juegos similares (12 objetos).",
+        "gratuito": true
+      },
+      {
+        "nombre": "Heroquest — colección de topnotchit",
+        "plataforma": "MyMiniFactory",
+        "url": "https://www.myminifactory.com/users/topnotchit/collection/heroquest",
+        "nota": "Colección de miniaturas y accesorios HeroQuest.",
+        "gratuito": true
+      }
+    ],
+    "heroes": [
+      {
+        "nombre": "HeroQuest Miniature Wizard",
+        "plataforma": "MakerWorld",
+        "url": "https://makerworld.com/en/models/2039208",
+        "nota": "Mago, optimizado con perfiles de impresión.",
+        "licencia": "CC-BY-NC-SA",
+        "gratuito": true
+      },
+      {
+        "nombre": "HeroQuest Miniature Elf",
+        "plataforma": "MakerWorld",
+        "url": "https://makerworld.com/en/models/2039201",
+        "licencia": "CC-BY-NC-SA",
+        "gratuito": true
+      },
+      {
+        "nombre": "HeroQuest Miniature Dwarf",
+        "plataforma": "MakerWorld",
+        "url": "https://makerworld.com/en/models/2039192",
+        "licencia": "CC-BY-NC-SA",
+        "gratuito": true
+      },
+      {
+        "nombre": "HeroQuest Miniature Barbarian",
+        "plataforma": "MakerWorld",
+        "url": "https://makerworld.com/en/models/2039187",
+        "licencia": "CC-BY-NC-SA",
+        "gratuito": true
+      },
+      {
+        "nombre": "HeroQuest - Barbarian (Carlbark)",
+        "plataforma": "Thingiverse",
+        "url": "https://www.thingiverse.com/thing:2964376",
+        "licencia": "CC-BY",
+        "gratuito": true
+      }
+    ],
+    "monstruos": [
+      {
+        "nombre": "HeroQuest - Goblins (selas)",
+        "plataforma": "Thingiverse",
+        "url": "https://www.thingiverse.com/thing:4245990",
+        "nota": "Goblins del juego base.",
+        "licencia": "CC-BY",
+        "gratuito": true
+      },
+      {
+        "nombre": "HeroQuest Miniature Goblin Sword / Dagger",
+        "plataforma": "MakerWorld",
+        "url": "https://makerworld.com/en/models/2036607",
+        "licencia": "CC-BY-NC-SA",
+        "gratuito": true
+      },
+      {
+        "nombre": "HeroQuest Miniature Orc Sword / Mace / Cleaver",
+        "plataforma": "MakerWorld",
+        "url": "https://makerworld.com/en/models/2036651",
+        "licencia": "CC-BY-NC-SA",
+        "gratuito": true
+      },
+      {
+        "nombre": "HeroQuest Miniature Skeleton",
+        "plataforma": "MakerWorld",
+        "url": "https://makerworld.com/en/models/2036466",
+        "licencia": "CC-BY-NC-SA",
+        "gratuito": true
+      },
+      {
+        "nombre": "HeroQuest Miniature Zombie",
+        "plataforma": "MakerWorld",
+        "url": "https://makerworld.com/en/models/2036353",
+        "licencia": "CC-BY-NC-SA",
+        "gratuito": true
+      },
+      {
+        "nombre": "HeroQuest Miniature Mummy",
+        "plataforma": "MakerWorld",
+        "url": "https://makerworld.com/en/models/2036513",
+        "licencia": "CC-BY-NC-SA",
+        "gratuito": true
+      },
+      {
+        "nombre": "HeroQuest Miniature Fimir",
+        "plataforma": "MakerWorld",
+        "url": "https://makerworld.com/en/models/2035895",
+        "licencia": "CC-BY-NC-SA",
+        "gratuito": true
+      },
+      {
+        "nombre": "HeroQuest Miniature Chaos Warrior / Chaos Mage",
+        "plataforma": "MakerWorld",
+        "url": "https://makerworld.com/en/models/2036494",
+        "licencia": "CC-BY-NC-SA",
+        "gratuito": true
+      }
+    ],
+    "mobiliario_y_puertas": [
+      {
+        "nombre": "HeroQuest Functional Door (SpruceForge)",
+        "plataforma": "MakerWorld",
+        "url": "https://makerworld.com/en/models/858815",
+        "nota": "Puerta funcional con mecanismo de apertura.",
+        "gratuito": true
+      },
+      {
+        "nombre": "Heroquest Furniture Open Door",
+        "plataforma": "MakerWorld",
+        "url": "https://makerworld.com/en/models/2039243",
+        "nota": "Incluye perfil de impresión para Bambu Studio.",
+        "gratuito": true
+      },
+      {
+        "nombre": "HeroQuest Wood & Metal Doors with Skull (Superzook)",
+        "plataforma": "Printables",
+        "url": "https://www.printables.com/model/692772",
+        "nota": "Puertas de madera y metal sustituindo a las marrones/azules.",
+        "gratuito": true
+      },
+      {
+        "nombre": "Lightweight HeroQuest Dungeon Walls and Doors (Corey)",
+        "plataforma": "Printables",
+        "url": "https://www.printables.com/model/772823",
+        "nota": "Muros y puertas ligeros de impresión fácil.",
+        "gratuito": true
+      }
+    ],
+    "tablero_y_dados": [
+      {
+        "nombre": "Hero Quest 3D (Matthew Connolly)",
+        "plataforma": "Printables",
+        "url": "https://www.printables.com/model/649279",
+        "nota": "Ficheros para imprimir tu propio tablero 3D de Hero Quest (requiere Fusion 360/Blender para personalizar).",
+        "gratuito": true
+      },
+      {
+        "nombre": "HeroQuest Dice",
+        "plataforma": "Thingiverse",
+        "url": "https://www.thingiverse.com/thing:2365241",
+        "nota": "Dados HeroQuest personalizados.",
+        "gratuito": true
+      }
+    ]
+  },
+  "buscadores_y_tags": [
+    {
+      "nombre": "Heroquest en Cults3D (solo gratis)",
+      "url": "https://cults3d.com/en/tags/heroquest?only_free=true",
+      "nota": "329 modelos gratuitos de Heroquest.",
+      "gratuito": true
+    },
+    {
+      "nombre": "Hero Quest en MakerWorld",
+      "url": "https://makerworld.com/en/search/models?keyword=tag%3A+hero+quest",
+      "nota": "Modelos gratuitos y perfiles de impresión, con versión española en makerworld.com/es.",
+      "gratuito": true
+    },
+    {
+      "nombre": "Tag HEROQUEST en Printables",
+      "url": "https://www.printables.com/tag/heroquest",
+      "nota": "Galería de modelos etiquetados HeroQuest.",
+      "gratuito": true
+    },
+    {
+      "nombre": "Tag heroquest en Meshy (IA)",
+      "url": "https://www.meshy.ai/tags/heroquest",
+      "nota": "Modelos generados con IA descargables gratis en STL/OBJ/FBX (CC0 los de la galería; CC BY 4.0 los generados).",
+      "gratuito": true
+    },
+    {
+      "nombre": "Colección HeroQuest de BeastMTL en MyMiniFactory",
+      "url": "https://www.myminifactory.com/users/beastmtl/collection/heroquest",
+      "nota": "Colección de miniaturas y partes.",
+      "gratuito": true
+    },
+    {
+      "nombre": "STLFinder - heroquest",
+      "url": "https://www.stlfinder.com/3dmodels/heroquest",
+      "nota": "Buscador que agrega ~989 resultados de 14 plataformas (Thingiverse, Cults3D, Printables...) con filtro gratis.",
+      "gratuito": true
+    },
+    {
+      "nombre": "yeggi - heroquest figures",
+      "url": "https://www.yeggi.com/q/heroquest+figures/",
+      "nota": "Buscador agregado de modelos imprimibles.",
+      "gratuito": true
+    },
+    {
+      "nombre": "LayerUp - HeroQuest (1989)",
+      "url": "https://layerup.games/game/HeroQuest-1989",
+      "nota": "Agregador con filtro \"Free only\" por categoría (miniaturas, mobiliario, tablero, dados...).",
+      "gratuito": true
+    }
+  ]
+}

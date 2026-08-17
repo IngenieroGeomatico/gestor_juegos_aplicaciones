@@ -9,9 +9,18 @@ Ficheros JSON con el contenido del juego:
 - `personajes.json` — Héroes (clase, ataque, defensa, cuerpo, mente, movimiento)
 - `armas.json` — Armas, armaduras y pociones (ataque, defensa, coste)
 - `monstruos.json` — Enemigos (ataque, defensa, cuerpo, mente, movimiento)
+- `hechizos.json` — Conjuros y cartas de magia (nombre, escuela, coste_mente, descripcion)
 - `misiones.json` — Misiones montables en tablero (con coordenadas en la cuadrícula)
 - `tableros.json` — Los tableros del juego: "El Original" (derivado del SVG de
   Wikipedia, CC BY-SA 4.0 / GFDL) y "Cara B" (pendiente de foto)
+- `impresion3d.json` — Enlaces gratuitos a archivos 3D imprimibles para Hero Quest:
+  plataformas de descarga, colecciones y modelos concretos (héroes, monstruos,
+  mobiliario, puertas, tablero y dados), con su licencia cuando se conoce
+- `impresion3d_warhammer40k.json` — Enlaces gratuitos a archivos 3D imprimibles
+  para Warhammer 40K, mismo esquema que `impresion3d.json`. Categorizado por
+  facciones: marines del caos, demonios del caos (incluido el Soul Grinder de
+  Khorne), tiránidos, eldars/aeldari, t'au, orkos, necrones y marines espaciales
+  proxy, además de terreno y plantillas de tablero
 
 ### Los tableros y las misiones
 
@@ -50,6 +59,10 @@ uv run juegos/heroquest/scripts/listar.py --tipo personajes
 # Añadir una nueva arma / armadura / poción
 uv run juegos/heroquest/scripts/nueva_arma.py --nombre "Espada encantada" --tipo "Arma cuerpo a cuerpo" --ataque 4 --coste 500
 
+# Añadir una nueva carta (personaje, arma, armadura, poción, monstruo o hechizo)
+uv run juegos/heroquest/scripts/nueva_carta.py --tipo hechizo --nombre "Bola de fuego" \
+  --escuela Mago --coste_mente 2 --descripcion "Causa 1 punto de daño a un monstruo adyacente"
+
 # Añadir un nuevo monstruo
 uv run juegos/heroquest/scripts/nuevo_monstruo.py --nombre "Basilisco" --ataque 3 --defensa 3 --cuerpo 2 --mente 5
 
@@ -70,6 +83,9 @@ uv run juegos/heroquest/scripts/tablero.py validar
 # Generar una imagen (PNG/SVG) del tablero o de una misión montada
 uv run juegos/heroquest/scripts/mapa.py --tablero original --mision "El Refugio del Guardián" --svg
 
+# Ficha de máster de una misión en un único HTML (mapa + salas + stats + casillas de vida)
+uv run juegos/heroquest/scripts/mision_html.py --mision "El Refugio del Guardián"
+
 # Eliminar una entrada por nombre
 uv run juegos/heroquest/scripts/eliminar.py --tipo monstruos --nombre "Basilisco"
 ```
@@ -78,6 +94,23 @@ uv run juegos/heroquest/scripts/eliminar.py --tipo monstruos --nombre "Basilisco
 `--salida <ruta>` para elegir dónde guardarlas. Dibuja las salas por colores, los
 pasillos, y sobre la misión: entrada (verde), puertas (marrón), monstruos (rojo)
 y tesoros (dorado), con su leyenda.
+
+`mision_html.py` es una ficha autocontenida (CSS embebido) lista para abrir en el
+navegador o tablet: datos de la misión, mapa en SVG, cada sala con sus monstruos
+(stats y casillas para marcar el daño) y tesoros, y tablas de referencia de
+héroes, armas y hechizos. Se guarda en `juegos/heroquest/mapas/` (ignorado por
+git); usa `--salida <ruta>` para otra ubicación.
+
+`carta_item.py` genera una carta individual con aspecto de carta de tesoro del
+juego (borde ornamentado, ilustración, stats y coste) para `--tipo arma`,
+`armadura`, `pocion`, `hechizo`, `personaje` o `monstruo`, p. ej.:
+
+```bash
+uv run juegos/heroquest/scripts/carta_item.py --tipo arma --nombre "Espada corta"
+```
+
+Se guarda en `juegos/heroquest/cartas/` (ignorado por git); usa `--salida <ruta>`
+para otra ubicación.
 
 Cada script valida que el nombre no exista ya y muestra ayuda con `-h`. `nueva_mision.py`
 valida además que cada monstruo/tesoro caiga dentro de la sala indicada y dentro del tablero.
