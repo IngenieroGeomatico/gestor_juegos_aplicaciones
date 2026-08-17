@@ -14,10 +14,13 @@ Ficheros JSON en español:
   potencia, precision, pp }`
 - `tipos.json` — chart de tipos (18 tipos): `{ tipo, debilidades[], resistencias[], inmunidades[] }`
 - `equipos.json` — equipos guardados: `{ nombre, pokemon[] { especie, tipos[], rol } }`
+- `meta.json` — ranking actual por formato (Singles/Doubles) con el set
+  recomendado de cada especie: `{ posicion, nombre, tipos[], movimientos[],
+  objeto, naturaleza, habilidad, companeros[] }`
 
-> `pokedex.json` y `movimientos.json` se generan desde la API de datos reales de
-> championsbattledata.com y se traducen a español con PokeAPI. Para
-> regenerarlos o actualizarlos: `uv run
+> `pokedex.json`, `movimientos.json` y `meta.json` se generan desde la API de
+> datos reales de championsbattledata.com y se traducen a español con PokeAPI.
+> Para regenerarlos o actualizarlos: `uv run
 > juegos/pokemon-champions/scripts/importar_datos.py` (usa `--sin-cache` para
 > redescargarlo todo). Las respuestas crudas de ambas APIs quedan cacheadas en
 > `data/cache/` (ignorado por git).
@@ -48,6 +51,13 @@ uv run juegos/pokemon-champions/scripts/constructor_equipos.py --auto --nombre "
 # Analizar cobertura de tipos de un equipo o de un grupo
 uv run juegos/pokemon-champions/scripts/cobertura_tipos.py --equipo "Equipo legendario"
 uv run juegos/pokemon-champions/scripts/cobertura_tipos.py --pokemon Groudon --pokemon Rayquaza
+
+# Mejor equipo actual del meta (ambos formatos, o uno solo)
+uv run juegos/pokemon-champions/scripts/mejores_equipos.py --meta
+uv run juegos/pokemon-champions/scripts/mejores_equipos.py --meta --formato singles
+
+# Mejores equipos a partir de mis Pokémon (JSON con nombres)
+uv run juegos/pokemon-champions/scripts/mejores_equipos.py --mis-pokemon mis_pokemons.json
 ```
 
 - `generador_set.py` deduce el rol de las stats base (sweeper físico/especial,
@@ -56,6 +66,12 @@ uv run juegos/pokemon-champions/scripts/cobertura_tipos.py --pokemon Groudon --p
   priorizando legendarios.
 - `cobertura_tipos.py` muestra qué tipos golpea super-efectivamente el equipo,
   sus debilidades defensivas agregadas y las coberturas que faltan.
+- `mejores_equipos.py` construye el mejor equipo de 6 a partir del ranking del
+  meta (`--meta`) o de un JSON con los Pokémon del usuario (`--mis-pokemon`,
+  acepta `["Garchomp", ...]` o `{"pokemon": [...]}`). Combina posición en el
+  ranking con cobertura ofensiva y diversidad de tipos, mostrando el set
+  recomendado (movimientos, objeto, naturaleza, habilidad) y compañeros
+  habituales de cada miembro.
 
 ## Agente
 
