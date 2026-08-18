@@ -60,11 +60,11 @@ def _validar(tablero_id: str, entrada: list[dict], puertas: list[dict], salas: l
         sys.exit(1)
     errores: list[str] = []
     for p in entrada:
-        errores += tablero._punto_valido(t, p, "entrada_heroes")
+        errores += tablero.punto_valido(t, p, "entrada_heroes")
     for p in puertas:
-        errores += tablero._punto_valido(t, p, "puerta")
+        errores += tablero.punto_valido(t, p, "puerta")
     for sala in salas:
-        errores += tablero._sala_pertenece(t, sala)
+        errores += tablero.sala_pertenece(t, sala)
     if errores:
         for e in errores:
             print(f"  ✗ {e} (tablero {tablero_id})")

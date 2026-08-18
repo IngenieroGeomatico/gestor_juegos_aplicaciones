@@ -55,13 +55,14 @@ Consulta el tablero (salas numeradas, `.` = pasillo) con
 Los scripts de utilidad viven en `juegos/heroquest/scripts/`:
 
 - `listar.py` — ver el contenido actual
-- `nueva_carta.py` — añade una carta genérica con `--tipo` (`personaje`, `arma`,
-  `armadura`, `pocion`, `monstruo`, `hechizo`); sustituye a `nueva_arma.py`,
-  `nuevo_monstruo.py` y `nuevo_personaje.py`
-- `nueva_arma.py`, `nuevo_monstruo.py`, `nuevo_personaje.py`, `nueva_mision.py`
+- `nueva_carta.py` — añade una carta de cualquier tipo con `--tipo` (`personaje`,
+  `arma`, `armadura`, `pocion`, `monstruo`, `hechizo`). Es un orquestador: la
+  lógica de cada tipo (campos, validación) vive en el paquete `tipos_carta/`.
+  Sustituye a los antiguos `nueva_arma.py`, `nuevo_monstruo.py` y `nuevo_personaje.py`
+- `nueva_mision.py` — añade una misión montable en tablero
 - `eliminar.py` — borrar una entrada por nombre
 - `tablero.py` — `ver` imprime un tablero; `validar` comprueba todas las misiones
-  contra sus tableros
+  contra sus tableros (API pública: `punto_valido`, `sala_pertenece`)
 - `mapa.py` — genera una imagen PNG/SVG del tablero y/o de una misión montada
   (`--tablero original --mision "Nombre" --svg`), en `juegos/heroquest/mapas/`
 - `mision_html.py` — genera la ficha de máster de una misión en un HTML
@@ -69,9 +70,16 @@ Los scripts de utilidad viven en `juegos/heroquest/scripts/`:
   casillas de vida, y referencia de héroes/armas/hechizos), en
   `juegos/heroquest/mapas/`
 - `carta_item.py` — genera una carta individual de juego (arma, armadura,
-  poción, hechizo, personaje o monstruo) con aspecto de carta de tesoro, en
+  poción, hechizo, personaje o monstruo). Orquestador que usa `render_carta.py`
+  (anverso en SVG y PNG) y los reversos de `sources/reversos/`, en
   `juegos/heroquest/cartas/`
-- `data_store.py` — funciones compartidas (cargar, guardar, añadir, existe)
+- `preparar_reversos.py` — recorta/endereza las fotos `*_back.jpg` de `sources/`
+  hacia `sources/reversos/`
+- `render_carta.py` — dibuja el anverso de una carta (SVG y PNG) según su familia
+- `tipos_carta/` — paquete con un módulo por tipo de carta (campos, stats,
+  validación, arte, reverso) y un registro común (`registro.py`)
+- `data_store.py` — funciones compartidas (cargar, guardar, añadir, existe,
+  eliminar, listar; helpers `slug` y `cargar_json`)
 
 ## Cómo trabajar
 

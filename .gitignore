@@ -223,5 +223,8 @@ juegos/heroquest/mapas/
 # Cartas HTML generadas de HeroQuest
 juegos/heroquest/cartas/
 
+# Reversos de cartas derivados de sources/ (los genera preparar_reversos.py)
+juegos/heroquest/sources/reversos/
+
 # Caché de datos descargados de APIs (Pokémon Champions)
 juegos/pokemon-champions/data/cache/

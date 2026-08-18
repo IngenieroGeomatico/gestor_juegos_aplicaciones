@@ -52,7 +52,8 @@ OBJETOS = {
 ROLES = ("sweeper_fisico", "sweeper_especial", "tanque", "defensivo", "utilidad")
 
 
-def _analizar(especie: dict) -> dict:
+def _analizar(especie: dict) -> str:
+    """Deduce el rol competitivo de una especie a partir de sus stats base."""
     s = ds.stats(especie)
     fisico = s.get("ataque", 0)
     especial = s.get("ataque_esp", 0)

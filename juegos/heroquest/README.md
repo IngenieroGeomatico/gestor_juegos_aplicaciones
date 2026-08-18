@@ -56,18 +56,13 @@ Ejecutar desde la raíz del repositorio con `uv run`:
 # Listar contenido (héroes, armas, monstruos, misiones)
 uv run juegos/heroquest/scripts/listar.py --tipo personajes
 
-# Añadir una nueva arma / armadura / poción
-uv run juegos/heroquest/scripts/nueva_arma.py --nombre "Espada encantada" --tipo "Arma cuerpo a cuerpo" --ataque 4 --coste 500
-
-# Añadir una nueva carta (personaje, arma, armadura, poción, monstruo o hechizo)
+# Añadir una nueva carta (personaje, arma, armadura, poción, monstruo o hechizo).
+# Un único script para todos los tipos; cada tipo declara sus campos.
 uv run juegos/heroquest/scripts/nueva_carta.py --tipo hechizo --nombre "Bola de fuego" \
   --escuela Mago --coste_mente 2 --descripcion "Causa 1 punto de daño a un monstruo adyacente"
-
-# Añadir un nuevo monstruo
-uv run juegos/heroquest/scripts/nuevo_monstruo.py --nombre "Basilisco" --ataque 3 --defensa 3 --cuerpo 2 --mente 5
-
-# Añadir un nuevo héroe
-uv run juegos/heroquest/scripts/nuevo_personaje.py --nombre "Semielfa" --clase "Ranger" --ataque 2 --defensa 3 --cuerpo 6 --mente 4
+uv run juegos/heroquest/scripts/nueva_carta.py --tipo arma --nombre "Espada encantada" --ataque 4 --coste 500
+uv run juegos/heroquest/scripts/nueva_carta.py --tipo monstruo --nombre "Basilisco" --ataque 3 --defensa 3 --cuerpo 2 --mente 5
+uv run juegos/heroquest/scripts/nueva_carta.py --tipo personaje --nombre "Semielfa" --clase "Ranger" --ataque 2 --defensa 3 --cuerpo 6 --mente 4
 
 # Añadir una nueva misión montable en tablero
 # (las salas y sus posiciones van en un JSON, ver esquema más abajo)
@@ -86,6 +81,9 @@ uv run juegos/heroquest/scripts/mapa.py --tablero original --mision "El Refugio 
 # Ficha de máster de una misión en un único HTML (mapa + salas + stats + casillas de vida)
 uv run juegos/heroquest/scripts/mision_html.py --mision "El Refugio del Guardián"
 
+# Preparar los reversos de las cartas a partir de las fotos de sources/
+uv run juegos/heroquest/scripts/preparar_reversos.py
+
 # Eliminar una entrada por nombre
 uv run juegos/heroquest/scripts/eliminar.py --tipo monstruos --nombre "Basilisco"
 ```
@@ -101,16 +99,34 @@ navegador o tablet: datos de la misión, mapa en SVG, cada sala con sus monstruo
 héroes, armas y hechizos. Se guarda en `juegos/heroquest/mapas/` (ignorado por
 git); usa `--salida <ruta>` para otra ubicación.
 
-`carta_item.py` genera una carta individual con aspecto de carta de tesoro del
-juego (borde ornamentado, ilustración, stats y coste) para `--tipo arma`,
-`armadura`, `pocion`, `hechizo`, `personaje` o `monstruo`, p. ej.:
+`carta_item.py` genera una carta individual con aspecto de carta de HeroQuest
+(pergamino, banner de título, ilustración simbólica, tabla de stats y descripción)
+para `--tipo arma`, `armadura`, `pocion`, `hechizo`, `personaje` o `monstruo`, p. ej.:
 
 ```bash
 uv run juegos/heroquest/scripts/carta_item.py --tipo arma --nombre "Espada corta"
+uv run juegos/heroquest/scripts/carta_item.py --tipo hechizo --nombre "Bola de fuego" --formato png
 ```
 
+Genera un `.html` autocontenido (anverso en SVG + reverso de la carta como imagen)
+y/o un `.png` del anverso (dibujado con Pillow). Elige con `--formato html|png|ambos`.
 Se guarda en `juegos/heroquest/cartas/` (ignorado por git); usa `--salida <ruta>`
 para otra ubicación.
+
+`preparar_reversos.py` recorta y endereza las fotos `*_back.jpg` de `sources/`
+(las cartas reales por su cara trasera) y deja los reversos limpios en
+`sources/reversos/` (ignorado por git), que `carta_item.py` usa como cara trasera.
+
+### Arquitectura de las cartas (`scripts/tipos_carta/`)
+
+Cada tipo de carta vive en su propio módulo dentro del paquete `tipos_carta/` y
+declara su lógica: campos y estadísticas, validación, descripción, arte frontal y
+reverso. `nueva_carta.py` (creación) y `carta_item.py` (dibujo, vía `render_carta.py`)
+son orquestadores que consumen esas definiciones desde un registro común
+(`tipos_carta/registro.py`), sin conocer los detalles de cada tipo. Añadir un tipo
+nuevo es crear un módulo y registrarlo. `render_carta.py` dibuja el anverso en dos
+familias de maquetación: `stats` (personaje, monstruo) y `descripcion` (arma,
+armadura, poción, hechizo), tanto en SVG como en PNG.
 
 Cada script valida que el nombre no exista ya y muestra ayuda con `-h`. `nueva_mision.py`
 valida además que cada monstruo/tesoro caiga dentro de la sala indicada y dentro del tablero.

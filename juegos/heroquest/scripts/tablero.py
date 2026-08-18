@@ -56,7 +56,8 @@ def pinta(tablero: dict) -> str:
     return "\n".join(lineas)
 
 
-def _punto_valido(tablero: dict, p: dict, contexto: str) -> list[str]:
+def punto_valido(tablero: dict, p: dict, contexto: str) -> list[str]:
+    """Comprueba que un punto {x, y} caiga dentro del tablero. Devuelve errores."""
     x, y = p.get("x"), p.get("y")
     if not isinstance(x, int) or not isinstance(y, int):
         return [f"{contexto}: coordenadas no enteras en {p}"]
@@ -72,7 +73,9 @@ def _punto_en_sala(sala: dict, x: int, y: int) -> bool:
     return False
 
 
-def _sala_pertenece(tablero: dict, sala: dict) -> list[str]:
+def sala_pertenece(tablero: dict, sala: dict) -> list[str]:
+    """Valida que una sala de misión exista en el tablero y que sus
+    monstruos/tesoros caigan dentro de ella. Devuelve la lista de errores."""
     errores: list[str] = []
     numero = sala.get("numero")
     sala_data = next((s for s in tablero["salas"] if s["numero"] == numero), None)
@@ -82,7 +85,7 @@ def _sala_pertenece(tablero: dict, sala: dict) -> list[str]:
         for item in sala.get(obstaculo, []):
             nombre = item.get("nombre", "?")
             contexto = f"sala {numero}.{obstaculo} '{nombre}'"
-            errores += _punto_valido(tablero, item, contexto)
+            errores += punto_valido(tablero, item, contexto)
             x, y = item.get("x"), item.get("y")
             if isinstance(x, int) and isinstance(y, int) and not _punto_en_sala(sala_data, x, y):
                 errores.append(f"{contexto}: ({x},{y}) no cae dentro de la sala {numero}")
@@ -100,11 +103,11 @@ def validar_misiones() -> int:
             errores.append(f"misión '{mision['nombre']}': el tablero '{tablero['id']}' aún no está modelado")
             continue
         for t in mision.get("entrada_heroes", []):
-            errores += _punto_valido(tablero, t, f"misión '{mision['nombre']}' entrada_heroes")
+            errores += punto_valido(tablero, t, f"misión '{mision['nombre']}' entrada_heroes")
         for p in mision.get("puertas", []):
-            errores += _punto_valido(tablero, p, f"misión '{mision['nombre']}' puerta")
+            errores += punto_valido(tablero, p, f"misión '{mision['nombre']}' puerta")
         for sala in mision.get("salas", []):
-            errores += _sala_pertenece(tablero, sala)
+            errores += sala_pertenece(tablero, sala)
 
     if errores:
         for e in errores:

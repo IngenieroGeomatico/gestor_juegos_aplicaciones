@@ -75,7 +75,7 @@ def _puntuar(entrada: dict, elegidos: list[dict], cubiertos: set[str]) -> tuple[
     """Puntuación de un candidato: ranking + cobertura nueva - redundancia."""
     score = 100.0 / entrada["posicion"] ** 0.75
     extra = _tipos_ataque_meta(entrada)
-    nuevos = sum(1 for t in extra if t in ct.TIPOS_ORDEN and t not in cubiertos)
+    nuevos = sum(1 for t in extra if t in ds.tipos_orden() and t not in cubiertos)
     score += 14.0 * min(nuevos, 5)
     ya_elegidos = {t for e in elegidos for t in e.get("tipos", [])}
     compartidos = len(set(entrada.get("tipos", [])) & ya_elegidos)
@@ -113,7 +113,7 @@ def _mostrar(formato: str, equipo: list[dict]) -> None:
 
 def _analizar_cobertura(equipo: list[dict]) -> None:
     names = [e["nombre"] for e in equipo]
-    especies, errores = ct._resolver_especies(names)
+    especies, errores = ds.resolver_especies(names)
     if errores:
         for err in errores:
             print(f"  ✗ {err}")
@@ -211,6 +211,9 @@ def _alias_formato(valor: str) -> str:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Sugiere los mejores equipos de Pokémon Champions")
+    parser.add_argument("--meta", action="store_true",
+                        help="Mejor equipo del ranking del meta (comportamiento por "
+                             "defecto si no se pasa --mis-pokemon)")
     parser.add_argument("--mis-pokemon", metavar="ARCHIVO", default=None,
                         help="JSON con mis Pokémon: ['Garchomp', ...] o {\"pokemon\": [...]}")
     parser.add_argument("--sets", action="store_true",

@@ -15,10 +15,10 @@ from __future__ import annotations
 
 import argparse
 import html
-import json
 import sys
 from pathlib import Path
 
+import data_store
 import mapa
 import tablero
 
@@ -26,35 +26,23 @@ DATA_DIR = tablero.DATA_DIR
 HTML_DIR = DATA_DIR.parent / "mapas"
 
 
-def _cargar(tipo: str) -> list[dict]:
-    ruta = DATA_DIR / f"{tipo}.json"
-    if not ruta.exists():
-        return []
-    with ruta.open(encoding="utf-8") as f:
-        return json.load(f)
-
-
 def _cargar_mision(nombre: str) -> dict:
-    for m in _cargar("misiones"):
+    for m in data_store.cargar("misiones"):
         if m["nombre"] == nombre:
             return m
     print(f"Error: no existe la misión '{nombre}'")
     sys.exit(1)
 
 
-def _slug(nombre: str) -> str:
-    return "".join(c if c.isalnum() else "_" for c in nombre).strip("_")
-
-
 def _stats_monstruo(nombre: str) -> dict | None:
-    for m in _cargar("monstruos"):
+    for m in data_store.cargar("monstruos"):
         if m["nombre"] == nombre:
             return m
     return None
 
 
 def _stat_tesoro(nombre: str) -> dict | None:
-    for a in _cargar("armas"):
+    for a in data_store.cargar("armas"):
         if a["nombre"] == nombre:
             return a
     return None
@@ -120,7 +108,7 @@ def _tabla_referencia(registros: list[dict], columnas: tuple[str, ...]) -> str:
 def _referencia() -> str:
     secciones = []
 
-    personajes = _cargar("personajes")
+    personajes = data_store.cargar("personajes")
     filas_p = "".join(
         f'<tr><td>{html.escape(p["nombre"])}</td><td>{html.escape(p["clase"])}</td>'
         f'<td>A{p["ataque"]}</td><td>D{p["defensa"]}</td><td>Cu{p["cuerpo"]}</td>'
@@ -136,7 +124,7 @@ def _referencia() -> str:
       </table></div>
     </section>""")
 
-    armas = _cargar("armas")
+    armas = data_store.cargar("armas")
     filas_a = "".join(
         f'<tr><td>{html.escape(a["nombre"])}</td><td>{html.escape(a["tipo"])}</td>'
         f'<td>{"A" + str(a["ataque"]) if a.get("ataque") else "—"}</td>'
@@ -153,7 +141,7 @@ def _referencia() -> str:
       </table></div>
     </section>""")
 
-    hechizos = _cargar("hechizos")
+    hechizos = data_store.cargar("hechizos")
     if hechizos:
         filas_h = "".join(
             f'<tr><td>{html.escape(h["nombre"])}</td><td>{html.escape(h["escuela"])}</td>'
@@ -174,7 +162,7 @@ def _referencia() -> str:
 
 def _render(mision: dict, t: dict) -> str:
     titulo = html.escape(mision["nombre"])
-    tablero_data = _cargar("tableros")
+    tablero_data = data_store.cargar_json("tableros")
     tablero_nombre = next((tb["nombre"] for tb in tablero_data if tb["id"] == t["id"]), t["id"])
 
     salas_html = []
@@ -301,7 +289,7 @@ def main() -> None:
         print(f"Error: el tablero '{t['id']}' aún no está modelado ({t.get('nota', '')})")
         sys.exit(1)
 
-    ruta = Path(args.salida) if args.salida else HTML_DIR / f"mision__{_slug(mision['nombre'])}.html"
+    ruta = Path(args.salida) if args.salida else HTML_DIR / f"mision__{data_store.slug(mision['nombre'])}.html"
     ruta.parent.mkdir(parents=True, exist_ok=True)
     ruta.write_text(_render(mision, t), encoding="utf-8")
     print(f"HTML: {ruta}")
