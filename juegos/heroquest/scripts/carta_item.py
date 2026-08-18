@@ -10,11 +10,13 @@ Formatos:
 - `html`: ficha autocontenida con el anverso (SVG, nítido y escalable) y, si
   existe, el reverso de la carta como imagen.
 - `png`: imagen del anverso dibujada con Pillow.
+- `doble`: hoja plegable (anverso | reverso lado a lado) en SVG y PNG, para
+  imprimir, doblar por la línea central y obtener la carta completa.
 - `ambos` (por defecto): genera los dos.
 
 Ejemplos:
     uv run juegos/heroquest/scripts/carta_item.py --tipo arma --nombre "Espada corta"
-    uv run juegos/heroquest/scripts/carta_item.py --tipo hechizo --nombre "Bola de fuego" --formato png
+    uv run juegos/heroquest/scripts/carta_item.py --tipo hechizo --nombre "Bola de fuego" --formato doble
 """
 
 from __future__ import annotations
@@ -31,7 +33,7 @@ import tipos_carta
 
 CARTAS_DIR = data_store.DATA_DIR.parent / "cartas"
 
-FORMATOS = ("html", "png", "ambos")
+FORMATOS = ("html", "png", "doble", "ambos")
 
 
 def _buscar(tipo: tipos_carta.TipoCarta, nombre: str) -> dict:
@@ -58,8 +60,9 @@ def _reverso_data_uri(tipo: tipos_carta.TipoCarta) -> str | None:
 
 
 def _html(tipo: tipos_carta.TipoCarta, entrada: dict) -> str:
-    """Ficha HTML autocontenida con anverso (SVG) y reverso (imagen)."""
+    """Ficha HTML autocontenida con anverso (SVG), reverso (imagen) y hoja plegable."""
     svg = render_carta.render_svg(tipo, entrada)
+    doble = render_carta.render_svg_doble(tipo, entrada)
     reverso = _reverso_data_uri(tipo)
     reverso_html = (
         f'<figure><img src="{reverso}" alt="Reverso de la carta"><figcaption>Reverso</figcaption></figure>'
@@ -80,6 +83,8 @@ def _html(tipo: tipos_carta.TipoCarta, entrada: dict) -> str:
   figure {{ margin:0; text-align:center; color:#e8d9b8; }}
   .anverso, figure img {{ width:340px; height:auto; border-radius:12px;
     box-shadow:0 10px 30px rgba(0,0,0,.5); background:#f3ecdd; }}
+  .doble svg {{ width:680px; height:auto; border-radius:12px;
+    box-shadow:0 10px 30px rgba(0,0,0,.5); }}
   figcaption {{ margin-top:8px; font-size:.9rem; letter-spacing:.5px; }}
 </style>
 </head>
@@ -89,6 +94,10 @@ def _html(tipo: tipos_carta.TipoCarta, entrada: dict) -> str:
     <figcaption>Anverso</figcaption>
   </figure>
   {reverso_html}
+  <figure>
+    <div class="doble">{doble}</div>
+    <figcaption>Hoja plegable: imprime, dobla por la línea central y recórtala</figcaption>
+  </figure>
 </body>
 </html>"""
 
@@ -102,7 +111,7 @@ def main() -> None:
     parser.add_argument("--salida", default=None,
                         help="Ruta base de salida (sin extensión). Por defecto en cartas/")
     parser.add_argument("--formato", choices=FORMATOS, default="ambos",
-                        help="Formato(s) a generar: html, png o ambos (predeterminado)")
+                        help="Formato(s) a generar: html, png, doble o ambos (predeterminado)")
     args = parser.parse_args()
 
     tipo = tipos_carta.obtener(args.tipo)
@@ -120,6 +129,13 @@ def main() -> None:
         ruta_png = base.with_suffix(".png")
         render_carta.render_png(tipo, entrada).save(ruta_png)
         print(f"PNG: {ruta_png}")
+
+    if args.formato in ("doble",):
+        base_doble = Path(str(base) + "__doble")
+        (base_doble.with_suffix(".svg")).write_text(
+            render_carta.render_svg_doble(tipo, entrada), encoding="utf-8")
+        render_carta.render_png_doble(tipo, entrada).save(base_doble.with_suffix(".png"))
+        print(f"Hoja plegable: {base_doble.with_suffix('.svg')} y {base_doble.with_suffix('.png')}")
 
 
 if __name__ == "__main__":
