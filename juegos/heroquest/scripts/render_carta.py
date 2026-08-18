@@ -9,7 +9,10 @@ Utiliza un sistema de tipos de carta para determinar el diseño y el contenido.
 from __future__ import annotations
 import xml.sax.saxutils
 import textwrap
+from pathlib import Path
 from typing import TYPE_CHECKING
+
+import data_store
 
 if TYPE_CHECKING:
     # Evita la importación circular y permite el tipado
@@ -41,6 +44,17 @@ DISENO_ALTO = 700
 # Hoja plegable (anverso | reverso lado a lado): el doble de ancho.
 DISENO_DOBLE_ANCHO = DISENO_ANCHO * 2
 PX_CARTA_DOBLE_ANCHO = PX_CARTA_ANCHO * 2
+
+# Categoría del reverso por defecto: se deriva del grupo de la foto
+# (p. ej. 'equipo_back.jpg' -> 'equipo'). Overridable por parámetro.
+LEYENDA_VERSO: str | None = None
+
+# Carpeta con el arte de los anversos: una imagen por carta.
+ARTE_DIR = Path(__file__).resolve().parent.parent / "sources" / "arte"
+# Extensiones admitidas para el arte embebido (por orden de prioridad).
+ARTE_EXTENSIONES = ("png", "jpg", "jpeg", "webp")
+# Carpeta con fondos alternativos para el reverso de la carta.
+FONDOS_DIR = Path(__file__).resolve().parent.parent / "sources" / "arte_fondos"
 
 
 def _escape(texto: str) -> str:
@@ -86,26 +100,58 @@ def _render_stats(
 
     # --- Banner del Título ---
     banner_svg = f'''
+        <defs>
+            <linearGradient id="grad-banner" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#fbf4e3" />
+                <stop offset="100%" stop-color="#ecdcc0" />
+            </linearGradient>
+        </defs>
         <g>
-            <path d="M 30 40 H {ancho - 30} L {ancho - 40} 75 L {ancho - 30} 110 H 30 L 40 75 Z" fill="{COLOR_BANNER}" stroke="{COLOR_BORDE}" stroke-width="1.5" />
+            <path d="M 30 40 H {ancho - 30} L {ancho - 40} 75 L {ancho - 30} 110 H 30 L 40 75 Z" fill="url(#grad-banner)" stroke="{COLOR_BORDE}" stroke-width="1.5" />
             <text x="{ancho / 2}" y="82" font-family="{FONT_FAMILY_SERIF}" font-size="32" font-weight="bold" fill="{COLOR_TEXTO_PRINCIPAL}" text-anchor="middle">{nombre}</text>
+            <rect x="150" y="112" width="{ancho - 300}" height="3" fill="{tipo.color}" opacity="0.6" />
         </g>
     '''
 
     # --- Área de Arte ---
+    arte_x = 50
     arte_y = 125
     arte_alto = 280
+    arte_ancho = ancho - 100
+    radio = 16
+    # Zona interior por debajo de la franja de acento.
+    img_x = arte_x + 4
+    img_y = arte_y + 20
+    img_ancho = arte_ancho - 8
+    img_alto = arte_alto - 24
+    ruta_arte = _ruta_arte(tipo, entrada)
+    if ruta_arte:
+        interior = (f'<image x="{img_x}" y="{img_y}" width="{img_ancho}" height="{img_alto}" '
+                    f'href="{_imagen_data_uri(ruta_arte, img_ancho, img_alto)}" />')
+    else:
+        interior = (f'<circle cx="{ancho / 2}" cy="{arte_y + (arte_alto + 20) / 2}" '
+                    f'r="105" fill="{tipo.color}" fill-opacity="0.28" />'
+                    f'<text x="{ancho / 2}" y="{arte_y + (arte_alto + 20) / 2 + 55}" '
+                    f'font-family="serif" font-size="150" fill="#ecd9a8" text-anchor="middle">{simbolo}</text>')
+    # Degradado de profundidad sobre el interior.
+    interior += (f'<linearGradient id="grad-humo" x1="0" y1="0" x2="0" y2="1">'
+                 f'<stop offset="60%" stop-color="#000000" stop-opacity="0" />'
+                 f'<stop offset="100%" stop-color="#000000" stop-opacity="0.35" /></linearGradient>'
+                 f'<rect x="{img_x}" y="{img_y}" width="{img_ancho}" height="{img_alto}" fill="url(#grad-humo)" />')
     arte_svg = f'''
     <defs>
-        <radialGradient id="grad-arte-stats">
-            <stop offset="10%" stop-color="{tipo.color}" stop-opacity="0.4" />
-            <stop offset="95%" stop-color="{COLOR_BORDE}" stop-opacity="0.2" />
-        </radialGradient>
+        <linearGradient id="grad-arte-stats" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#24150d" />
+            <stop offset="100%" stop-color="{tipo.color}" />
+        </linearGradient>
+        <clipPath id="clip-arte-stats"><rect x="{arte_x}" y="{arte_y}" width="{arte_ancho}" height="{arte_alto}" rx="{radio}" /></clipPath>
     </defs>
-    <rect x="50" y="{arte_y}" width="{ancho - 100}" height="{arte_alto}" fill="url(#grad-pergamino)" stroke="{COLOR_BORDE}" stroke-width="1.5" />
-    <circle cx="{ancho/2}" cy="{arte_y + arte_alto/2}" r="120" fill="url(#grad-arte-stats)" />
-    <circle cx="{ancho/2}" cy="{arte_y + arte_alto/2}" r="100" fill="none" stroke="{COLOR_BORDE}" stroke-width="1" stroke-opacity="0.5" />
-    <text x="{ancho/2}" y="{arte_y + arte_alto/2 + 40}" font-family="serif" font-size="160" fill="{COLOR_TEXTO_PRINCIPAL}" text-anchor="middle" opacity="0.5">{simbolo}</text>
+    <rect x="{arte_x + 6}" y="{arte_y + 7}" width="{arte_ancho}" height="{arte_alto}" rx="{radio}" fill="#000000" opacity="0.20" />
+    <rect x="{arte_x}" y="{arte_y}" width="{arte_ancho}" height="{arte_alto}" rx="{radio}" fill="url(#grad-arte-stats)" stroke="{COLOR_BORDE}" stroke-width="2.5" />
+    <rect x="{arte_x}" y="{arte_y}" width="{arte_ancho}" height="18" rx="9" fill="{tipo.color}" />
+    <g clip-path="url(#clip-arte-stats)">
+        {interior}
+    </g>
     '''
 
     # --- Tabla de Estadísticas ---
@@ -146,16 +192,47 @@ def _render_descripcion(
     simbolo = _escape(tipo.simbolo)
 
     # --- Título ---
-    titulo_svg = f'<text x="{ancho / 2}" y="75" font-family="{FONT_FAMILY_SERIF}" font-size="34" font-weight="bold" fill="{COLOR_TEXTO_PRINCIPAL}" text-anchor="middle">{nombre}</text>'
+    titulo_svg = (f'<text x="{ancho / 2}" y="75" font-family="{FONT_FAMILY_SERIF}" '
+                  f'font-size="34" font-weight="bold" fill="{COLOR_TEXTO_PRINCIPAL}" text-anchor="middle">{nombre}</text>'
+                  f'<rect x="170" y="88" width="{ancho - 340}" height="3" fill="{tipo.color}" opacity="0.6" />')
 
     # --- Área de Arte ---
-    arte_y = 100
+    arte_x = 80
+    arte_y = 105
     arte_alto = 220
+    arte_ancho = ancho - 160
+    radio = 16
+    img_x = arte_x + 4
+    img_y = arte_y + 18
+    img_ancho = arte_ancho - 8
+    img_alto = arte_alto - 22
+    ruta_arte = _ruta_arte(tipo, entrada)
+    if ruta_arte:
+        interior = (f'<image x="{img_x}" y="{img_y}" width="{img_ancho}" height="{img_alto}" '
+                    f'href="{_imagen_data_uri(ruta_arte, img_ancho, img_alto)}" />')
+    else:
+        interior = (f'<text x="{ancho / 2}" y="{arte_y + (arte_alto + 18) / 2 + 15}" '
+                    f'font-family="serif" font-size="150" fill="{tipo.color}" fill-opacity="0.85" '
+                    f'text-anchor="middle">{simbolo}</text>')
+    interior += (f'<linearGradient id="grad-humo-desc" x1="0" y1="0" x2="0" y2="1">'
+                 f'<stop offset="60%" stop-color="#000000" stop-opacity="0" />'
+                 f'<stop offset="100%" stop-color="#000000" stop-opacity="0.30" /></linearGradient>'
+                 f'<rect x="{img_x}" y="{img_y}" width="{img_ancho}" height="{img_alto}" fill="url(#grad-humo-desc)" />')
     arte_svg = f'''
+        <defs>
+            <linearGradient id="grad-arte-desc" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#24150d" />
+                <stop offset="100%" stop-color="{tipo.color}" />
+            </linearGradient>
+            <clipPath id="clip-arte-desc"><rect x="{arte_x}" y="{arte_y}" width="{arte_ancho}" height="{arte_alto}" rx="{radio}" /></clipPath>
+        </defs>
         <g>
-            <rect x="80" y="{arte_y}" width="{ancho - 160}" height="{arte_alto}" fill="{COLOR_PERGAMINO_CLARO}" stroke="{COLOR_BORDE}" stroke-width="3" />
-            <rect x="88" y="{arte_y + 8}" width="{ancho - 176}" height="{arte_alto - 16}" fill="none" stroke="{COLOR_BORDE}" stroke-width="1" />
-            <text x="{ancho/2}" y="{arte_y + arte_alto/2 + 45}" font-family="serif" font-size="180" fill="{tipo.color}" text-anchor="middle" opacity="0.8">{simbolo}</text>
+            <rect x="{arte_x + 6}" y="{arte_y + 7}" width="{arte_ancho}" height="{arte_alto}" rx="{radio}" fill="#000000" opacity="0.20" />
+            <rect x="{arte_x}" y="{arte_y}" width="{arte_ancho}" height="{arte_alto}" rx="{radio}" fill="url(#grad-arte-desc)" stroke="{COLOR_BORDE}" stroke-width="2.5" />
+            <rect x="{arte_x}" y="{arte_y}" width="{arte_ancho}" height="16" rx="8" fill="{tipo.color}" />
+            <g clip-path="url(#clip-arte-desc)">
+                {interior}
+            </g>
         </g>
     '''
 
@@ -226,32 +303,89 @@ def render_svg(tipo: TipoCarta, entrada: dict, ancho: int = DISENO_ANCHO, alto: 
     return "\n".join(svg_parts)
 
 
-def _reverso_data_uri(tipo: TipoCarta, ancho: int, alto: int) -> str | None:
-    """Foto del reverso como data URI, recortada y reescalada a la rejilla.
+def _ruta_arte(tipo: TipoCarta, entrada: dict) -> Path | None:
+    """Localiza la imagen de arte del anverso para una carta, o None.
 
-    Hace un recorte "cover" para llenar exactamente el panel de la carta
-    (proporción 63 × 88) y la reescala a la resolución de diseño, para que el
-    SVG incrustado sea ligero.
+    Orden de búsqueda:
+    1. La entrada puede declarar `arte` con el nombre de un fichero en
+       `sources/arte/` (p. ej. `"arte": "espada_corta.png"`).
+    2. Convención por nombre: `sources/arte/<slug(nombre)>.png|jpg|jpeg|webp`.
     """
+    candidatos: list[str] = []
+    declarado = entrada.get("arte")
+    if declarado:
+        candidatos.append(str(declarado))
+    candidatos.append(data_store.slug(entrada.get("nombre", "")))
+    for nombre in candidatos:
+        for ext in ARTE_EXTENSIONES:
+            ruta = ARTE_DIR / f"{nombre}.{ext}"
+            if ruta.exists():
+                return ruta
+    return None
+
+
+def _imagen_data_uri(ruta: Path, ancho: int, alto: int) -> str:
+    """Incrusta una imagen recortada "cover" a la rejilla como data URI."""
     import base64
     import io
     from PIL import Image, ImageOps
 
-    ruta = tipo.reverso()
-    if not ruta.exists():
-        return None
     with Image.open(ruta) as im:
         im = ImageOps.exif_transpose(im).convert("RGB")
         im = ImageOps.fit(im, (ancho, alto), Image.LANCZOS)
         buf = io.BytesIO()
         im.save(buf, format="JPEG", quality=85)
-    b64 = base64.b64encode(buf.getvalue()).decode("ascii")
-    return f"data:image/jpeg;base64,{b64}"
+    return f"data:image/jpeg;base64,{base64.b64encode(buf.getvalue()).decode('ascii')}"
 
 
-def _contenido_verso(tipo: TipoCarta, ancho: int, alto: int) -> str:
-    """Interior del SVG del reverso: foto real como fondo + capa vectorial."""
-    foto = _reverso_data_uri(tipo, ancho, alto)
+def _ruta_reverso(tipo: TipoCarta, fondo_verso: str | None = None) -> Path:
+    """Ruta de la imagen de fondo del reverso.
+
+    Si `fondo_verso` es un nombre de fichero se busca en `sources/arte_fondos/`;
+    si no, se usa el reverso estándar del tipo (`tipo.reverso()`).
+    """
+    if fondo_verso:
+        ruta = FONDOS_DIR / fondo_verso
+        if not ruta.exists():
+            raise FileNotFoundError(f"No existe el fondo de reverso: {ruta}")
+        return ruta
+    return tipo.reverso()
+
+
+def _reverso_data_uri(tipo: TipoCarta, ancho: int, alto: int,
+                      fondo_verso: str | None = None) -> str | None:
+    """Foto del reverso como data URI, recortada y reescalada a la rejilla.
+
+    Hace un recorte "cover" para llenar exactamente el panel de la carta
+    (proporción 63 × 88) y la reescala a la resolución de diseño, para que el
+    SVG incrustado sea ligero. `fondo_verso` permite elegir un fondo de
+    `sources/arte_fondos/` en lugar de la foto estándar del tipo.
+    """
+    ruta = _ruta_reverso(tipo, fondo_verso)
+    if not ruta.exists():
+        return None
+    return _imagen_data_uri(ruta, ancho, alto)
+
+
+def _categoria_verso(tipo: TipoCarta) -> str:
+    """Categoría del reverso: el grupo de la carta ('equipo', 'enemigo', ...).
+
+    Se deriva del nombre de la foto de reverso: 'equipo_back.jpg' -> 'equipo'.
+    """
+    return Path(tipo.reverso_img).stem.split("_")[0]
+
+
+def _contenido_verso(tipo: TipoCarta, ancho: int, alto: int, leyenda: str | None = LEYENDA_VERSO,
+                     fondo_verso: str | None = None) -> str:
+    """Interior del SVG del reverso: imagen como fondo + capa vectorial.
+
+    `leyenda` es la leyenda inferior; si es None se usa la categoría del tipo
+    de carta ('equipo', 'enemigo', 'heroe', 'tesoro', ...). `fondo_verso`
+    selecciona un fondo de `sources/arte_fondos/` en lugar de la foto estándar.
+    """
+    if not leyenda:
+        leyenda = _categoria_verso(tipo)
+    foto = _reverso_data_uri(tipo, ancho, alto, fondo_verso)
     if foto:
         fondo = (f'<image x="0" y="0" width="{ancho}" height="{alto}" '
                  f'href="{foto}" preserveAspectRatio="xMidYMid slice" />')
@@ -263,9 +397,15 @@ def _contenido_verso(tipo: TipoCarta, ancho: int, alto: int) -> str:
               f'fill="{COLOR_BANNER}" fill-opacity="0.92" stroke="{COLOR_BORDE}" stroke-width="1.5" />')
     titulo = (f'<text x="{ancho / 2}" y="82" font-family="{FONT_FAMILY_SERIF}" '
               f'font-size="34" font-weight="bold" fill="{COLOR_TEXTO_PRINCIPAL}" text-anchor="middle">HeroQuest</text>')
-    pie = (f'<text x="{ancho / 2}" y="{alto - 60}" font-family="{FONT_FAMILY_SERIF}" '
-           f'font-size="14" fill="{COLOR_TEXTO_PRINCIPAL}" text-anchor="middle" '
-           f'font-variant="small-caps">Carta de juego</text>')
+    # Leyenda inferior en una banda similar a la superior.
+    bajo_y = alto - 120
+    leyenda_banda = (f'<path d="M {ancho / 2 - 130} {bajo_y} H {ancho / 2 + 130} '
+                     f'L {ancho / 2 + 108} {bajo_y + 22} L {ancho / 2 + 130} {bajo_y + 44} '
+                     f'H {ancho / 2 - 130} L {ancho / 2 - 108} {bajo_y + 22} Z" '
+                     f'fill="{COLOR_BANNER}" fill-opacity="0.92" stroke="{COLOR_BORDE}" stroke-width="1.5" />')
+    leyenda_texto = (f'<text x="{ancho / 2}" y="{bajo_y + 26}" font-family="{FONT_FAMILY_SERIF}" '
+                     f'font-size="14" font-weight="bold" font-variant="small-caps" '
+                     f'fill="{COLOR_TEXTO_PRINCIPAL}" text-anchor="middle">{_escape(leyenda)}</text>')
     return "\n".join([
         fondo,
         f'<rect x="12" y="12" width="{ancho - 24}" height="{alto - 24}" fill="none" '
@@ -274,32 +414,34 @@ def _contenido_verso(tipo: TipoCarta, ancho: int, alto: int) -> str:
         f'stroke="{COLOR_BORDE}" stroke-width="1" />',
         banner,
         titulo,
-        pie,
+        leyenda_banda,
+        leyenda_texto,
     ])
 
 
-def render_verso_svg(tipo: TipoCarta, ancho: int = DISENO_ANCHO, alto: int = DISENO_ALTO) -> str:
+def render_verso_svg(tipo: TipoCarta, ancho: int = DISENO_ANCHO, alto: int = DISENO_ALTO,
+                     leyenda: str | None = LEYENDA_VERSO, fondo_verso: str | None = None) -> str:
     """Devuelve el SVG (str) del reverso de la carta."""
     px_ancho = round(ancho * PX_CARTA_ANCHO / DISENO_ANCHO)
     px_alto = round(alto * PX_CARTA_ALTO / DISENO_ALTO)
     return "\n".join([
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {ancho} {alto}" width="{px_ancho}" height="{px_alto}">',
-        _contenido_verso(tipo, ancho, alto),
+        _contenido_verso(tipo, ancho, alto, leyenda, fondo_verso),
         "</svg>",
     ])
 
 
-def render_svg_doble(tipo: TipoCarta, entrada: dict, ancho: int = DISENO_ANCHO, alto: int = DISENO_ALTO) -> str:
+def render_svg_doble(tipo: TipoCarta, entrada: dict, ancho: int = DISENO_ANCHO, alto: int = DISENO_ALTO,
+                     leyenda: str | None = LEYENDA_VERSO, fondo_verso: str | None = None) -> str:
     """SVG de la hoja plegable: anverso | reverso lado a lado (126 × 88 mm).
 
     Se dobla por la línea vertical central para obtener la carta completa con
-    el anverso por un lado y el reverso por el otro. Como la hoja se imprime a
-    una sola cara y se pliega "por fuera", el panel del reverso va espejado
-    horizontalmente: al doblar queda con la orientación correcta.
+    el anverso por un lado y el reverso por el otro. Ambos paneles se dibujan
+    con su orientación normal (las letras del reverso se ven bien).
     """
     ancho_doble = ancho * 2
     frente = f'<g transform="translate(0,0)">{_contenido_svg(tipo, entrada, ancho, alto)}</g>'
-    verso = f'<g transform="translate({ancho_doble},0) scale(-1,1)">{_contenido_verso(tipo, ancho, alto)}</g>'
+    verso = f'<g transform="translate({ancho},0)">{_contenido_verso(tipo, ancho, alto, leyenda, fondo_verso)}</g>'
     pliegue = "\n".join([
         f'<line x1="{ancho}" y1="0" x2="{ancho}" y2="{alto}" stroke="{COLOR_BORDE}" '
         f'stroke-width="1.5" stroke-dasharray="8 6" />',
@@ -351,17 +493,19 @@ def render_png(tipo: TipoCarta, entrada: dict, ancho: int = DISENO_ANCHO, alto: 
     return _rasterizar(svg, px_ancho, px_alto)
 
 
-def render_png_verso(tipo: TipoCarta, ancho: int = DISENO_ANCHO, alto: int = DISENO_ALTO) -> Image.Image:
+def render_png_verso(tipo: TipoCarta, ancho: int = DISENO_ANCHO, alto: int = DISENO_ALTO,
+                     leyenda: str | None = LEYENDA_VERSO, fondo_verso: str | None = None) -> Image.Image:
     """Devuelve una imagen Pillow del reverso de la carta (744 × 1039 px)."""
-    svg = render_verso_svg(tipo, ancho, alto)
+    svg = render_verso_svg(tipo, ancho, alto, leyenda, fondo_verso)
     px_ancho = round(ancho * PX_CARTA_ANCHO / DISENO_ANCHO)
     px_alto = round(alto * PX_CARTA_ALTO / DISENO_ALTO)
     return _rasterizar(svg, px_ancho, px_alto)
 
 
-def render_png_doble(tipo: TipoCarta, entrada: dict, ancho: int = DISENO_ANCHO, alto: int = DISENO_ALTO) -> Image.Image:
+def render_png_doble(tipo: TipoCarta, entrada: dict, ancho: int = DISENO_ANCHO, alto: int = DISENO_ALTO,
+                     leyenda: str | None = LEYENDA_VERSO, fondo_verso: str | None = None) -> Image.Image:
     """Devuelve la hoja plegable (anverso | reverso) a 126 × 88 mm (1488 × 1039 px)."""
-    svg = render_svg_doble(tipo, entrada, ancho, alto)
+    svg = render_svg_doble(tipo, entrada, ancho, alto, leyenda, fondo_verso)
     px_ancho = round(ancho * 2 * PX_CARTA_ANCHO / DISENO_ANCHO)
     px_alto = round(alto * PX_CARTA_ALTO / DISENO_ALTO)
     return _rasterizar(svg, px_ancho, px_alto)

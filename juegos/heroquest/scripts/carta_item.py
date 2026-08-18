@@ -6,17 +6,19 @@ Cada tipo de carta vive en el paquete `tipos_carta/` y el dibujo lo hace
 `render_carta.py` (anverso en SVG y en PNG). Aquí solo se localiza la entrada,
 se pide el render y se escribe el fichero.
 
-Formatos:
-- `html`: ficha autocontenida con el anverso (SVG, nítido y escalable) y, si
-  existe, el reverso de la carta como imagen.
-- `png`: imagen del anverso dibujada con Pillow.
-- `doble`: hoja plegable (anverso | reverso lado a lado) en SVG y PNG, para
-  imprimir, doblar por la línea central y obtener la carta completa.
-- `ambos` (por defecto): genera los dos.
+Formatos (`--formato`, varios separados por coma):
+- `png`: imagen del anverso (o de la carta completa si `--carta_completa`).
+- `svg`: vector del anverso (o de la carta completa si `--carta_completa`).
+- `html`: ficha de previsualización (opcional) con anverso, reverso y hoja
+  plegable.
+
+`--carta_completa`: genera la carta con sus dos caras (anverso | reverso lado a
+lado en una hoja plegable); sin él se genera solo la cara delantera.
 
 Ejemplos:
     uv run juegos/heroquest/scripts/carta_item.py --tipo arma --nombre "Espada corta"
-    uv run juegos/heroquest/scripts/carta_item.py --tipo hechizo --nombre "Bola de fuego" --formato doble
+    uv run juegos/heroquest/scripts/carta_item.py --tipo arma --nombre "Espada corta" --carta_completa
+    uv run juegos/heroquest/scripts/carta_item.py --tipo arma --nombre "Espada corta" --formato svg,png --carta_completa
 """
 
 from __future__ import annotations
@@ -33,7 +35,17 @@ import tipos_carta
 
 CARTAS_DIR = data_store.DATA_DIR.parent / "cartas"
 
-FORMATOS = ("html", "png", "doble", "ambos")
+FORMATOS = ("png", "svg", "html")
+
+
+def _formato_lista(valor: str) -> list[str]:
+    """Parsea '--formato svg,png' a una lista de formatos válidos."""
+    formatos = [f.strip().lower() for f in valor.split(",") if f.strip()]
+    invalidos = [f for f in formatos if f not in FORMATOS]
+    if invalidos:
+        raise argparse.ArgumentTypeError(
+            f"Formato(s) no válidos: {', '.join(invalidos)}. Válidos: {', '.join(FORMATOS)}")
+    return formatos
 
 
 def _buscar(tipo: tipos_carta.TipoCarta, nombre: str) -> dict:
@@ -48,9 +60,13 @@ def _buscar(tipo: tipos_carta.TipoCarta, nombre: str) -> dict:
     sys.exit(1)
 
 
-def _reverso_data_uri(tipo: tipos_carta.TipoCarta) -> str | None:
-    """Devuelve el reverso como data URI base64, o None si no hay imagen."""
-    ruta = tipo.reverso()
+def _reverso_data_uri(tipo: tipos_carta.TipoCarta, fondo_verso: str | None = None) -> str | None:
+    """Devuelve el reverso como data URI base64, o None si no hay imagen.
+
+    `fondo_verso` (nombre de fichero en sources/arte_fondos/) sustituye la foto
+    estándar del reverso del tipo.
+    """
+    ruta = render_carta._ruta_reverso(tipo, fondo_verso)
     if not ruta.exists():
         return None
     datos = base64.b64encode(ruta.read_bytes()).decode("ascii")
@@ -59,11 +75,11 @@ def _reverso_data_uri(tipo: tipos_carta.TipoCarta) -> str | None:
     return f"data:image/{mime};base64,{datos}"
 
 
-def _html(tipo: tipos_carta.TipoCarta, entrada: dict) -> str:
+def _html(tipo: tipos_carta.TipoCarta, entrada: dict, fondo_verso: str | None = None) -> str:
     """Ficha HTML autocontenida con anverso (SVG), reverso (imagen) y hoja plegable."""
     svg = render_carta.render_svg(tipo, entrada)
-    doble = render_carta.render_svg_doble(tipo, entrada)
-    reverso = _reverso_data_uri(tipo)
+    doble = render_carta.render_svg_doble(tipo, entrada, fondo_verso=fondo_verso)
+    reverso = _reverso_data_uri(tipo, fondo_verso)
     reverso_html = (
         f'<figure><img src="{reverso}" alt="Reverso de la carta"><figcaption>Reverso</figcaption></figure>'
         if reverso
@@ -110,32 +126,47 @@ def main() -> None:
     parser.add_argument("--nombre", required=True, help="Nombre de la entrada")
     parser.add_argument("--salida", default=None,
                         help="Ruta base de salida (sin extensión). Por defecto en cartas/")
-    parser.add_argument("--formato", choices=FORMATOS, default="ambos",
-                        help="Formato(s) a generar: html, png, doble o ambos (predeterminado)")
+    parser.add_argument("--formato", type=_formato_lista, default=["png"],
+                        help="Formato(s) a generar, separados por coma: png, svg, html (predeterminado: png)")
+    parser.add_argument("--carta_completa", action="store_true",
+                        help="Genera la carta con las dos caras (anverso | reverso; solo png/svg)")
+    parser.add_argument("--fondo_verso", default=None,
+                        help="Imagen de fondo para el reverso, buscada en sources/arte_fondos/ "
+                             "(p. ej. 'armario_armas.png'); por defecto usa la foto estándar del tipo")
     args = parser.parse_args()
 
     tipo = tipos_carta.obtener(args.tipo)
     entrada = _buscar(tipo, args.nombre)
 
+    if args.fondo_verso:
+        fondo = render_carta.FONDOS_DIR / args.fondo_verso
+        if not fondo.exists():
+            print(f"Error: no existe el fondo de reverso '{args.fondo_verso}' en {render_carta.FONDOS_DIR}")
+            sys.exit(1)
+
     base = Path(args.salida) if args.salida else CARTAS_DIR / f"carta_{tipo.id}__{data_store.slug(args.nombre)}"
     base.parent.mkdir(parents=True, exist_ok=True)
 
-    if args.formato in ("html", "ambos"):
+    if "html" in args.formato:
         ruta_html = base.with_suffix(".html")
-        ruta_html.write_text(_html(tipo, entrada), encoding="utf-8")
+        ruta_html.write_text(_html(tipo, entrada, args.fondo_verso), encoding="utf-8")
         print(f"HTML: {ruta_html}")
 
-    if args.formato in ("png", "ambos"):
-        ruta_png = base.with_suffix(".png")
-        render_carta.render_png(tipo, entrada).save(ruta_png)
-        print(f"PNG: {ruta_png}")
+    if "svg" in args.formato:
+        base_salida = Path(str(base) + ("__completa" if args.carta_completa else ""))
+        ruta = base_salida.with_suffix(".svg")
+        svg = (render_carta.render_svg_doble(tipo, entrada, fondo_verso=args.fondo_verso)
+               if args.carta_completa else render_carta.render_svg(tipo, entrada))
+        ruta.write_text(svg, encoding="utf-8")
+        print(f"SVG: {ruta}")
 
-    if args.formato in ("doble",):
-        base_doble = Path(str(base) + "__doble")
-        (base_doble.with_suffix(".svg")).write_text(
-            render_carta.render_svg_doble(tipo, entrada), encoding="utf-8")
-        render_carta.render_png_doble(tipo, entrada).save(base_doble.with_suffix(".png"))
-        print(f"Hoja plegable: {base_doble.with_suffix('.svg')} y {base_doble.with_suffix('.png')}")
+    if "png" in args.formato:
+        base_salida = Path(str(base) + ("__completa" if args.carta_completa else ""))
+        ruta = base_salida.with_suffix(".png")
+        img = (render_carta.render_png_doble(tipo, entrada, fondo_verso=args.fondo_verso)
+               if args.carta_completa else render_carta.render_png(tipo, entrada))
+        img.save(ruta)
+        print(f"PNG: {ruta}")
 
 
 if __name__ == "__main__":
