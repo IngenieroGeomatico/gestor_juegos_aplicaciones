@@ -16,6 +16,28 @@ def _ruta(tipo: str) -> Path:
     return DATA_DIR / f"{tipo}.json"
 
 
+def cargar_json(nombre: str) -> list[dict]:
+    """Carga un fichero JSON de data/ por nombre (sin extensión).
+
+    A diferencia de `cargar`, no valida `nombre` contra TIPOS, por lo que
+    sirve para ficheros auxiliares como `tableros`. Devuelve [] si no existe.
+    """
+    ruta = DATA_DIR / f"{nombre}.json"
+    if not ruta.exists():
+        return []
+    with ruta.open(encoding="utf-8") as f:
+        return json.load(f)
+
+
+def slug(nombre: str) -> str:
+    """Convierte un nombre en un identificador seguro para ficheros.
+
+    'Espada Larga' -> 'Espada_Larga'; conserva alfanuméricos y sustituye el
+    resto por '_', recortando los '_' de los extremos.
+    """
+    return "".join(c if c.isalnum() else "_" for c in nombre).strip("_")
+
+
 def cargar(tipo: str) -> list[dict]:
     """Devuelve la lista de entradas de un tipo de dato."""
     ruta = _ruta(tipo)

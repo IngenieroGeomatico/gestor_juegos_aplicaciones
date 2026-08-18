@@ -44,7 +44,7 @@ def main() -> None:
         print("Error: un equipo competitivo tiene 6 Pokémon como máximo")
         return sys.exit(1)
 
-    especies, errores = cobertura_tipos._resolver_especies(nombres)
+    especies, errores = ds.resolver_especies(nombres)
     if errores:
         for e in errores:
             print(f"  ✗ {e}")

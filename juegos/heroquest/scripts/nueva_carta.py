@@ -1,4 +1,16 @@
-"""Añade una nueva carta (personaje, arma, armadura, poción, monstruo o hechizo) a HeroQuest."""
+"""Añade una nueva carta a HeroQuest (personaje, arma, armadura, poción,
+monstruo o hechizo).
+
+Este script es un orquestador: no conoce los campos de cada tipo de carta. Cada
+tipo declara su propia lógica en el paquete `tipos_carta/` (campos, validación,
+cómo se construye la entrada). Aquí solo se elige el tipo, se construye el CLI a
+partir de sus campos y se guarda.
+
+Ejemplos:
+    uv run juegos/heroquest/scripts/nueva_carta.py --tipo hechizo --nombre "Bola de fuego" \\
+        --escuela Mago --coste_mente 2 --descripcion "Causa 1 punto de daño"
+    uv run juegos/heroquest/scripts/nueva_carta.py --tipo arma --nombre "Espada" --ataque 3 --coste 200
+"""
 
 from __future__ import annotations
 
@@ -6,129 +18,62 @@ import argparse
 import sys
 
 import data_store
-
-TIPOS_CARTA = ("personaje", "arma", "armadura", "pocion", "monstruo", "hechizo")
-
-
-def _anadir_y_validar(tipo: str, entrada: dict) -> None:
-    try:
-        data_store.añadir(tipo, entrada)
-    except ValueError as exc:
-        print(f"Error: {exc}")
-        sys.exit(1)
-    print(f"Añadido '{entrada['nombre']}' a {tipo}.json")
+import tipos_carta
 
 
-def main() -> None:
+def _construir_parser() -> argparse.ArgumentParser:
+    """Construye el CLI a partir de la unión de campos de todos los tipos.
+
+    Todos los campos van como opcionales en argparse (se validan después según
+    el tipo elegido), de modo que un mismo flag sirva para varios tipos.
+    """
     parser = argparse.ArgumentParser(
-        description="Añade una nueva carta de personaje, arma, armadura, poción, "
-        "monstruo o hechizo a HeroQuest",
+        description="Añade una nueva carta (personaje, arma, armadura, poción, "
+        "monstruo o hechizo) a HeroQuest",
     )
     parser.add_argument(
         "--tipo",
         required=True,
-        choices=TIPOS_CARTA,
+        choices=list(tipos_carta.TIPOS),
         help="Tipo de carta a crear",
     )
-    parser.add_argument("--nombre", required=True, help="Nombre de la carta")
-    parser.add_argument("--clase", help="Clase del personaje (Bárbaro, Mago, Ranger, ...)")
-    parser.add_argument("--ataque", type=int, default=0, help="Dados de ataque")
-    parser.add_argument("--defensa", type=int, default=0, help="Dados de defensa")
-    parser.add_argument("--cuerpo", type=int, help="Puntos de cuerpo")
-    parser.add_argument("--mente", type=int, help="Puntos de mente")
-    parser.add_argument("--movimiento", type=int, default=2, help="Movimiento en casillas")
-    parser.add_argument("--coste", type=int, help="Coste en monedas de oro")
-    parser.add_argument("--escuela", help="Escuela del hechizo (Mago o Hechicero)")
-    parser.add_argument("--coste_mente", type=int, help="Coste en puntos de mente del hechizo")
-    parser.add_argument("--descripcion", default="", help="Descripción opcional")
 
+    # Reunir todos los campos de todos los tipos, sin duplicar por nombre.
+    vistos: dict[str, tipos_carta.Campo] = {}
+    for tipo in tipos_carta.TIPOS.values():
+        for campo in tipo.campos():
+            vistos.setdefault(campo.nombre, campo)
+
+    for campo in vistos.values():
+        kwargs: dict = {"help": campo.ayuda}
+        if campo.tipo is int:
+            kwargs["type"] = int
+        parser.add_argument(f"--{campo.nombre}", **kwargs)
+    return parser
+
+
+def main() -> None:
+    parser = _construir_parser()
     args = parser.parse_args()
 
-    if args.tipo == "personaje":
-        if args.clase is None or args.cuerpo is None or args.mente is None:
-            parser.error("personaje requiere --clase, --cuerpo y --mente")
-        _anadir_y_validar(
-            "personajes",
-            {
-                "nombre": args.nombre,
-                "clase": args.clase,
-                "ataque": args.ataque,
-                "defensa": args.defensa,
-                "cuerpo": args.cuerpo,
-                "mente": args.mente,
-                "movimiento": args.movimiento,
-                "descripcion": args.descripcion,
-            },
-        )
-    elif args.tipo == "arma":
-        if args.coste is None:
-            parser.error("arma requiere --coste")
-        _anadir_y_validar(
-            "armas",
-            {
-                "nombre": args.nombre,
-                "tipo": "Arma cuerpo a cuerpo",
-                "ataque": args.ataque,
-                "defensa": args.defensa,
-                "coste": args.coste,
-                "descripcion": args.descripcion,
-            },
-        )
-    elif args.tipo == "armadura":
-        if args.coste is None:
-            parser.error("armadura requiere --coste")
-        _anadir_y_validar(
-            "armas",
-            {
-                "nombre": args.nombre,
-                "tipo": "Armadura",
-                "ataque": 0,
-                "defensa": args.defensa,
-                "coste": args.coste,
-                "descripcion": args.descripcion,
-            },
-        )
-    elif args.tipo == "pocion":
-        if args.coste is None:
-            parser.error("pocion requiere --coste")
-        _anadir_y_validar(
-            "armas",
-            {
-                "nombre": args.nombre,
-                "tipo": "Poción",
-                "ataque": 0,
-                "defensa": 0,
-                "coste": args.coste,
-                "descripcion": args.descripcion,
-            },
-        )
-    elif args.tipo == "monstruo":
-        if args.cuerpo is None or args.mente is None:
-            parser.error("monstruo requiere --cuerpo y --mente")
-        _anadir_y_validar(
-            "monstruos",
-            {
-                "nombre": args.nombre,
-                "ataque": args.ataque,
-                "defensa": args.defensa,
-                "cuerpo": args.cuerpo,
-                "mente": args.mente,
-                "movimiento": args.movimiento,
-                "descripcion": args.descripcion,
-            },
-        )
-    elif args.tipo == "hechizo":
-        if args.escuela is None or args.coste_mente is None:
-            parser.error("hechizo requiere --escuela y --coste_mente")
-        _anadir_y_validar(
-            "hechizos",
-            {
-                "nombre": args.nombre,
-                "escuela": args.escuela,
-                "coste_mente": args.coste_mente,
-                "descripcion": args.descripcion,
-            },
-        )
+    tipo = tipos_carta.obtener(args.tipo)
+    if tipo is None:  # argparse ya lo restringe con choices; defensivo
+        parser.error(f"Tipo '{args.tipo}' no válido")
+
+    entrada = tipo.construir_entrada(vars(args))
+
+    errores = tipo.validar(entrada)
+    if errores:
+        for e in errores:
+            print(f"Error: {e}")
+        sys.exit(1)
+
+    try:
+        data_store.añadir(tipo.fichero, entrada)
+    except ValueError as exc:
+        print(f"Error: {exc}")
+        sys.exit(1)
+    print(f"Añadido '{entrada['nombre']}' a {tipo.fichero}.json")
 
 
 if __name__ == "__main__":

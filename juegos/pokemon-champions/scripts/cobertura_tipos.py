@@ -17,12 +17,6 @@ import sys
 
 import data_store as ds
 
-TIPOS_ORDEN = [
-    "Normal", "Fuego", "Agua", "Eléctrico", "Hierba", "Hielo", "Lucha", "Veneno",
-    "Tierra", "Volador", "Psíquico", "Bicho", "Roca", "Fantasma", "Dragón",
-    "Siniestro", "Acero", "Hada",
-]
-
 
 def _tipos_ataque(especie: dict) -> list[str]:
     """Tipos ofensivos del miembro: STAB + tipos de sus movimientos si hay datos."""
@@ -34,29 +28,19 @@ def _tipos_ataque(especie: dict) -> list[str]:
     return tipos
 
 
-def _resolver_especies(nombres: list[str]) -> tuple[list[dict], list[str]]:
-    especies: list[dict] = []
-    errores: list[str] = []
-    for nombre in nombres:
-        e = ds.buscar_especie(nombre)
-        if e is None:
-            errores.append(f"'{nombre}' no está en data/pokedex.json")
-        else:
-            especies.append(e)
-    return especies, errores
-
-
 def analizar(especies: list[dict]) -> None:
     print(f"\n=== Cobertura del equipo ({len(especies)} miembros) ===\n")
+
+    tipos_orden = ds.tipos_orden()
 
     # --- Ofensiva ---
     cubre: dict[str, int] = {}
     for e in especies:
         for tipo_at in _tipos_ataque(e):
-            for tipo_obj in TIPOS_ORDEN:
+            for tipo_obj in tipos_orden:
                 if ds.efectividad_total(tipo_at, [tipo_obj]) >= 2.0:
                     cubre[tipo_obj] = cubre.get(tipo_obj, 0) + 1
-    sin_cubrir = [t for t in TIPOS_ORDEN if t not in cubre]
+    sin_cubrir = [t for t in tipos_orden if t not in cubre]
     print("Cobertura ofensiva (tipos golpeados super-efectivamente):")
     if not cubre:
         print("  (sin datos de tipos/movimientos para calcular)")
@@ -70,7 +54,7 @@ def analizar(especies: list[dict]) -> None:
     resist: dict[str, int] = {}
     inmune: dict[str, list[str]] = {}
     for e in especies:
-        for tipo_at in TIPOS_ORDEN:
+        for tipo_at in tipos_orden:
             mult = ds.efectividad_total(tipo_at, e.get("tipos", []))
             if mult >= 2.0:
                 debil.setdefault(tipo_at, []).append(e["nombre"])
@@ -120,7 +104,7 @@ def main() -> None:
         print("Indica miembros con --pokemon o un equipo con --equipo")
         return 1
 
-    especies, errores = _resolver_especies(nombres)
+    especies, errores = ds.resolver_especies(nombres)
     if errores:
         for e in errores:
             print(f"  ✗ {e}")

@@ -11,12 +11,12 @@ Ejemplos:
 from __future__ import annotations
 
 import argparse
-import json
 import sys
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
 
+import data_store
 import tablero
 
 DATA_DIR = tablero.DATA_DIR
@@ -55,21 +55,15 @@ def _color_celda(numero: int | None) -> str:
 def _cargar_mision(nombre: str | None) -> dict | None:
     if not nombre:
         return None
-    with (DATA_DIR / "misiones.json").open(encoding="utf-8") as f:
-        misiones = json.load(f)
-    for m in misiones:
+    for m in data_store.cargar("misiones"):
         if m["nombre"] == nombre:
             return m
     print(f"Error: no existe la misión '{nombre}'")
     sys.exit(1)
 
 
-def _slug(nombre: str) -> str:
-    return "".join(c if c.isalnum() else "_" for c in nombre).strip("_")
-
-
 def _nombre_archivo(tablero_id: str, mision: dict | None, ext: str) -> Path:
-    base = tablero_id if not mision else f"{tablero_id}__{_slug(mision['nombre'])}"
+    base = tablero_id if not mision else f"{tablero_id}__{data_store.slug(mision['nombre'])}"
     return MAPAS_DIR / f"{base}.{ext}"
 
 
