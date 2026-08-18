@@ -32,6 +32,20 @@ RGB_TEXTO_PRINCIPAL = (58, 36, 22)
 RGB_BANNER = (244, 233, 210)
 RGB_CELDA_STAT = (251, 246, 234)
 
+# --- Constantes de Tamaño de Carta ---
+# Tamaño estándar de carta de juego (póker/magic): 63 × 88 mm.
+MM_CARTA_ANCHO = 63
+MM_CARTA_ALTO = 88
+# Resolución de impresión estándar para el PNG.
+DPI_CARTA = 300
+# Dimensiones en píxeles a 300 DPI: 63 mm ≈ 744 px, 88 mm ≈ 1039 px.
+PX_CARTA_ANCHO = round(MM_CARTA_ANCHO / 25.4 * DPI_CARTA)
+PX_CARTA_ALTO = round(MM_CARTA_ALTO / 25.4 * DPI_CARTA)
+# Rejilla interna de diseño: las coordenadas del dibujo se definen en esta
+# escala y la salida final se ajusta al tamaño físico de la carta.
+DISENO_ANCHO = 500
+DISENO_ALTO = 700
+
 
 def _hex_a_rgb(color: str) -> tuple[int, int, int]:
     """Convierte '#rrggbb' a una tupla RGB."""
@@ -172,21 +186,28 @@ def _render_descripcion(
 
     return titulo_svg + arte_svg + desc_svg + stats_svg
 
-def render_svg(tipo: TipoCarta, entrada: dict, ancho: int = 500, alto: int = 700) -> str:
+def render_svg(tipo: TipoCarta, entrada: dict, ancho: int = DISENO_ANCHO, alto: int = DISENO_ALTO) -> str:
     """
     Devuelve el SVG (str) del anverso de la carta según su familia.
+
+    El dibujo usa las coordenadas de diseño (`ancho` `alto`) y el SVG declara su
+    tamaño físico de carta (63 × 88 mm) en píxeles a 300 DPI, para que se
+    represente y se imprima con las proporciones reales de una carta de juego.
 
     Args:
         tipo: La instancia de TipoCarta que define el diseño.
         entrada: Un diccionario con los datos específicos de la carta (nombre, etc.).
-        ancho: El ancho del SVG.
-        alto: El alto del SVG.
+        ancho: El ancho de la rejilla de diseño.
+        alto: El alto de la rejilla de diseño.
 
     Returns:
         Un string con el código SVG completo de la carta.
     """
+    # Escala del tamaño físico (px) respecto a la rejilla de diseño.
+    px_ancho = round(ancho * PX_CARTA_ANCHO / DISENO_ANCHO)
+    px_alto = round(alto * PX_CARTA_ALTO / DISENO_ALTO)
     svg_parts = [
-        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {ancho} {alto}" width="{ancho}" height="{alto}">',
+        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {ancho} {alto}" width="{px_ancho}" height="{px_alto}">',
         _fondo_pergamino(ancho, alto),
         _marco(ancho, alto)
     ]
@@ -344,17 +365,25 @@ def _render_descripcion_png(tipo: TipoCarta, entrada: dict, ancho: int, alto: in
     return img
 
 
-def render_png(tipo: TipoCarta, entrada: dict, ancho: int = 500, alto: int = 700) -> Image.Image:
-    """Devuelve una imagen Pillow del anverso de la carta según su familia."""
-    match tipo.familia:
-        case "stats":
-            return _render_stats_png(tipo, entrada, ancho, alto)
-        case "descripcion":
-            return _render_descripcion_png(tipo, entrada, ancho, alto)
-        case _:
-            img = _fondo_png(ancho, alto)
-            ImageDraw.Draw(img).text((50, 50), f"Familia desconocida: {tipo.familia}", fill="red")
-            return img
+def render_png(tipo: TipoCarta, entrada: dict, ancho: int = DISENO_ANCHO, alto: int = DISENO_ALTO) -> Image.Image:
+    """Devuelve una imagen Pillow del anverso de la carta según su familia.
+
+    El dibujo se renderiza en la rejilla de diseño y se reescala al tamaño
+    físico de la carta (63 × 88 mm, 744 × 1039 px a 300 DPI).
+    """
+    if tipo.familia == "stats":
+        img = _render_stats_png(tipo, entrada, ancho, alto)
+    elif tipo.familia == "descripcion":
+        img = _render_descripcion_png(tipo, entrada, ancho, alto)
+    else:
+        img = _fondo_png(ancho, alto)
+        ImageDraw.Draw(img).text((50, 50), f"Familia desconocida: {tipo.familia}", fill="red")
+
+    px_ancho = round(ancho * PX_CARTA_ANCHO / DISENO_ANCHO)
+    px_alto = round(alto * PX_CARTA_ALTO / DISENO_ALTO)
+    if (px_ancho, px_alto) != (ancho, alto):
+        img = img.resize((px_ancho, px_alto), Image.LANCZOS)
+    return img
 
 
 if __name__ == "__main__":
