@@ -78,5 +78,13 @@
     "defensa": 0,
     "coste": 300,
     "descripcion": "Cura un punto de cuerpo al consumirse."
+  },
+  {
+    "nombre": "Espada de gemas",
+    "tipo": "Arma cuerpo a cuerpo",
+    "ataque": 3,
+    "defensa": 0,
+    "coste": 400,
+    "descripcion": "Mandoble engarzado con tres gemas mágicas. Al usarla en combate, un héroe puede activar una de las gemas (elígelas al inicio de la misión)."
   }
 ]
