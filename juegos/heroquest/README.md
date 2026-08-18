@@ -11,8 +11,9 @@ Ficheros JSON con el contenido del juego:
 - `monstruos.json` — Enemigos (ataque, defensa, cuerpo, mente, movimiento)
 - `hechizos.json` — Conjuros y cartas de magia (nombre, escuela, coste_mente, descripcion)
 - `misiones.json` — Misiones montables en tablero (con coordenadas en la cuadrícula)
-- `tableros.json` — Los tableros del juego: "El Original" (derivado del SVG de
-  Wikipedia, CC BY-SA 4.0 / GFDL) y "Cara B" (pendiente de foto)
+- `tableros.json` — Los tableros del juego: "El Original" (generado desde el SVG
+  de Wikipedia, CC BY-SA 4.0 / GFDL) y "Cara B" (pendiente de su SVG). Se genera
+  de forma reproducible con `tablero_svg.py` (ver más abajo)
 - `impresion3d.json` — Enlaces gratuitos a archivos 3D imprimibles para Hero Quest:
   plataformas de descarga, colecciones y modelos concretos (héroes, monstruos,
   mobiliario, puertas, tablero y dados), con su licencia cuando se conoce
@@ -39,6 +40,72 @@ Ver el tablero (salas numeradas, `.` = pasillo) con:
 ```bash
 uv run juegos/heroquest/scripts/tablero.py ver --tablero original
 ```
+
+### Digitalizar un tablero desde su SVG (recomendado)
+
+La forma reproducible de mapear un tablero es a partir de su **SVG vectorial**
+(la fuente de verdad). Cada sala es un `<rect>` o `<path>` ortogonal dentro del
+grupo `<g id="rooms">`, en coordenadas de la cuadrícula; el `viewBox` fija el
+tamaño en casillas. `tablero_svg.py` parsea el SVG (incluidas las salas en L),
+numera las salas de forma canónica (orden de lectura por filas), guarda el color
+de cada sala y escribe `tableros.json` directamente. Todo lo no cubierto por una
+sala es pasillo.
+
+```bash
+# El Original (SVG de Wikipedia ya incluido en sources/)
+uv run juegos/heroquest/scripts/tablero_svg.py \
+  --svg juegos/heroquest/sources/heroquest_board_original.svg --id original
+
+# Cara B: deja su SVG en sources/ y ejecútalo con --id cara-b
+uv run juegos/heroquest/scripts/tablero_svg.py \
+  --svg juegos/heroquest/sources/heroquest_board_back.svg --id cara-b
+```
+
+Después, revisa el resultado:
+
+```bash
+uv run juegos/heroquest/scripts/tablero.py ver --tablero cara-b   # render ASCII
+uv run juegos/heroquest/scripts/mapa.py --tablero cara-b          # PNG para revisar
+```
+
+#### Qué debe cumplir el SVG (contrato de `tablero_svg.py`)
+
+**Obligatorio** (si falta, el script aborta con un error claro):
+
+1. **`viewBox` en el `<svg>`.** El tamaño del tablero se deduce solo:
+   `columnas = ancho_viewBox / escala`, `filas = alto_viewBox / escala`. En el
+   original es `viewBox="0 0 260 190"` con `transform="scale(10)"` → 26×19
+   casillas. No hay que indicar el tamaño a mano; sale del SVG.
+2. **Un grupo `<g id="rooms">`** que contenga TODAS las salas. Todo lo dibujado
+   fuera de ese grupo (marco, rejilla, texturas, título) se ignora: decora libre.
+3. **Cada sala es un `<rect>` o un `<path>` ortogonal** dentro de `#rooms`:
+   - `<rect x y width height fill="#rgb"/>` para salas rectangulares.
+   - `<path d="M … z" fill="#rgb"/>` para salas en L/compuestas. Solo se admiten
+     comandos ortogonales (`M`, `H/h`, `V/v`, `L/l`, `Z/z`); nada de curvas
+     (`C`, `Q`, `A`) ni diagonales (darían error "comando de path no soportado").
+
+**A tener en cuenta:**
+
+- **Coordenadas alineadas a la cuadrícula.** Cada valor se redondea al entero más
+  cercano; traza los bordes de las salas sobre líneas enteras de la rejilla.
+- **0-indexado → 1-indexado automático.** El SVG usa base 0 y el repo base 1; el
+  script suma +1 solo. Sigue el mismo criterio de márgenes que el SVG original.
+- **Los pasillos no se dibujan.** Todo lo que no cubre una sala es pasillo; no
+  añadas rects de pasillo.
+- **La numeración es automática** (orden de lectura por filas). Las etiquetas de
+  texto del SVG se ignoran, así que no dependas de ellas para el número de sala.
+- **El `fill` de cada sala se guarda como su color** para el render (opcional pero
+  recomendado: da colores distintos a cada sala para un mapa legible).
+
+**¿De dónde sacar el SVG de la Cara B?** Si hay uno de la comunidad
+(p. ej. HeroQuester.eu) que cumpla el contrato, úsalo. Si solo tienes la foto
+(`sources/heroquest_board_back.jpg`), trázalo a mano en Inkscape sobre la foto
+(rects alineados a la rejilla dentro de un `<g id="rooms">`) o usa la alternativa
+para fotos de abajo.
+
+> Alternativa para fotos (sin SVG): el flujo `tablero_calibrar.py` (endereza la
+> foto y dibuja una rejilla numerada) → trazar `data/<id>.rooms.txt` a mano →
+> `tablero_construir.py`. Es más laborioso; usa el SVG siempre que puedas.
 
 ## Agente
 
@@ -68,6 +135,9 @@ uv run juegos/heroquest/scripts/nueva_carta.py --tipo personaje --nombre "Semiel
 # (las salas y sus posiciones van en un JSON, ver esquema más abajo)
 uv run juegos/heroquest/scripts/nueva_mision.py --nombre "Las Minas de Karak" --tablero original \
   --objetivo "Salir de la mina" --entrada 13,1 --puerta 9,6 --habitaciones salas.json
+
+# Generar tableros.json desde el SVG de un tablero (fuente de verdad)
+uv run juegos/heroquest/scripts/tablero_svg.py --svg juegos/heroquest/sources/heroquest_board_original.svg --id original
 
 # Ver el mapa de un tablero (salas numeradas, '.' = pasillo)
 uv run juegos/heroquest/scripts/tablero.py ver --tablero original

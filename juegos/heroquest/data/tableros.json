@@ -5,36 +5,278 @@
     "columnas": 26,
     "filas": 19,
     "salas": [
-      { "numero": 1, "rects": [{ "x": 1, "y": 1, "ancho": 4, "alto": 3 }] },
-      { "numero": 2, "rects": [{ "x": 5, "y": 1, "ancho": 4, "alto": 3 }] },
-      { "numero": 3, "rects": [{ "x": 9, "y": 1, "ancho": 3, "alto": 5 }] },
-      { "numero": 4, "rects": [{ "x": 14, "y": 1, "ancho": 3, "alto": 5 }] },
-      { "numero": 5, "rects": [{ "x": 17, "y": 1, "ancho": 4, "alto": 4 }] },
-      { "numero": 6, "rects": [{ "x": 21, "y": 1, "ancho": 4, "alto": 4 }] },
-      { "numero": 7, "rects": [{ "x": 1, "y": 4, "ancho": 4, "alto": 5 }] },
-      { "numero": 8, "rects": [{ "x": 5, "y": 4, "ancho": 4, "alto": 5 }] },
-      { "numero": 9, "rects": [{ "x": 17, "y": 5, "ancho": 4, "alto": 4 }] },
-      { "numero": 10, "rects": [{ "x": 21, "y": 5, "ancho": 4, "alto": 4 }] },
-      { "numero": 11, "rects": [{ "x": 10, "y": 7, "ancho": 6, "alto": 5 }] },
-      { "numero": 12, "rects": [{ "x": 1, "y": 10, "ancho": 4, "alto": 4 }] },
-      { "numero": 13, "rects": [{ "x": 5, "y": 10, "ancho": 2, "alto": 3 }] },
-      { "numero": 14, "rects": [{ "x": 7, "y": 10, "ancho": 2, "alto": 3 }] },
+      {
+        "numero": 1,
+        "rects": [
+          {
+            "x": 2,
+            "y": 2,
+            "ancho": 4,
+            "alto": 3
+          }
+        ],
+        "color": "#960"
+      },
+      {
+        "numero": 2,
+        "rects": [
+          {
+            "x": 6,
+            "y": 2,
+            "ancho": 4,
+            "alto": 3
+          }
+        ],
+        "color": "#c33"
+      },
+      {
+        "numero": 3,
+        "rects": [
+          {
+            "x": 10,
+            "y": 2,
+            "ancho": 3,
+            "alto": 5
+          }
+        ],
+        "color": "#6cc"
+      },
+      {
+        "numero": 4,
+        "rects": [
+          {
+            "x": 15,
+            "y": 2,
+            "ancho": 3,
+            "alto": 5
+          }
+        ],
+        "color": "#c66"
+      },
+      {
+        "numero": 5,
+        "rects": [
+          {
+            "x": 18,
+            "y": 2,
+            "ancho": 4,
+            "alto": 4
+          }
+        ],
+        "color": "#ccf"
+      },
+      {
+        "numero": 6,
+        "rects": [
+          {
+            "x": 22,
+            "y": 2,
+            "ancho": 4,
+            "alto": 4
+          }
+        ],
+        "color": "#fc9"
+      },
+      {
+        "numero": 7,
+        "rects": [
+          {
+            "x": 2,
+            "y": 5,
+            "ancho": 4,
+            "alto": 5
+          }
+        ],
+        "color": "#699"
+      },
+      {
+        "numero": 8,
+        "rects": [
+          {
+            "x": 6,
+            "y": 5,
+            "ancho": 4,
+            "alto": 5
+          }
+        ],
+        "color": "#9c0"
+      },
+      {
+        "numero": 9,
+        "rects": [
+          {
+            "x": 18,
+            "y": 6,
+            "ancho": 4,
+            "alto": 4
+          }
+        ],
+        "color": "#c93"
+      },
+      {
+        "numero": 10,
+        "rects": [
+          {
+            "x": 22,
+            "y": 6,
+            "ancho": 4,
+            "alto": 4
+          }
+        ],
+        "color": "#cc0"
+      },
+      {
+        "numero": 11,
+        "rects": [
+          {
+            "x": 11,
+            "y": 8,
+            "ancho": 6,
+            "alto": 5
+          }
+        ],
+        "color": "#666"
+      },
+      {
+        "numero": 12,
+        "rects": [
+          {
+            "x": 2,
+            "y": 11,
+            "ancho": 4,
+            "alto": 4
+          }
+        ],
+        "color": "#fc0"
+      },
+      {
+        "numero": 13,
+        "rects": [
+          {
+            "x": 6,
+            "y": 11,
+            "ancho": 2,
+            "alto": 3
+          }
+        ],
+        "color": "#6cf"
+      },
+      {
+        "numero": 14,
+        "rects": [
+          {
+            "x": 8,
+            "y": 11,
+            "ancho": 2,
+            "alto": 3
+          }
+        ],
+        "color": "#9cc"
+      },
       {
         "numero": 15,
         "rects": [
-          { "x": 17, "y": 10, "ancho": 4, "alto": 3 },
-          { "x": 18, "y": 13, "ancho": 4, "alto": 1 }
-        ]
+          {
+            "x": 18,
+            "y": 11,
+            "ancho": 4,
+            "alto": 3
+          },
+          {
+            "x": 19,
+            "y": 14,
+            "ancho": 3,
+            "alto": 1
+          }
+        ],
+        "color": "#99c"
       },
-      { "numero": 16, "rects": [{ "x": 21, "y": 10, "ancho": 4, "alto": 4 }] },
-      { "numero": 17, "rects": [{ "x": 5, "y": 13, "ancho": 4, "alto": 5 }] },
-      { "numero": 18, "rects": [{ "x": 9, "y": 13, "ancho": 3, "alto": 5 }] },
-      { "numero": 19, "rects": [{ "x": 14, "y": 13, "ancho": 4, "alto": 5 }] },
-      { "numero": 20, "rects": [{ "x": 1, "y": 14, "ancho": 4, "alto": 4 }] },
-      { "numero": 21, "rects": [{ "x": 18, "y": 14, "ancho": 3, "alto": 4 }] },
-      { "numero": 22, "rects": [{ "x": 21, "y": 14, "ancho": 4, "alto": 4 }] }
+      {
+        "numero": 16,
+        "rects": [
+          {
+            "x": 22,
+            "y": 11,
+            "ancho": 4,
+            "alto": 4
+          }
+        ],
+        "color": "#c90"
+      },
+      {
+        "numero": 17,
+        "rects": [
+          {
+            "x": 6,
+            "y": 14,
+            "ancho": 4,
+            "alto": 5
+          }
+        ],
+        "color": "#c36"
+      },
+      {
+        "numero": 18,
+        "rects": [
+          {
+            "x": 10,
+            "y": 14,
+            "ancho": 3,
+            "alto": 5
+          }
+        ],
+        "color": "#c96"
+      },
+      {
+        "numero": 19,
+        "rects": [
+          {
+            "x": 15,
+            "y": 14,
+            "ancho": 4,
+            "alto": 5
+          }
+        ],
+        "color": "#c69"
+      },
+      {
+        "numero": 20,
+        "rects": [
+          {
+            "x": 2,
+            "y": 15,
+            "ancho": 4,
+            "alto": 4
+          }
+        ],
+        "color": "#669"
+      },
+      {
+        "numero": 21,
+        "rects": [
+          {
+            "x": 19,
+            "y": 15,
+            "ancho": 3,
+            "alto": 4
+          }
+        ],
+        "color": "#c60"
+      },
+      {
+        "numero": 22,
+        "rects": [
+          {
+            "x": 22,
+            "y": 15,
+            "ancho": 4,
+            "alto": 4
+          }
+        ],
+        "color": "#6c6"
+      }
     ],
-    "nota": "Cuadrícula derivada del SVG de Wikipedia (Heroquest_board.svg, CC BY-SA 4.0 / GFDL). Las casillas no cubiertas por una sala se consideran pasillo."
+    "nota": "Generado desde heroquest_board_original.svg (fuente vectorial). Las casillas no cubiertas por una sala son pasillo."
   },
   {
     "id": "cara-b",

@@ -228,3 +228,9 @@ juegos/heroquest/sources/reversos/
 
 # Caché de datos descargados de APIs (Pokémon Champions)
 juegos/pokemon-champions/data/cache/
+
+# Imágenes de calibración de tableros de HeroQuest (artefactos de trabajo)
+juegos/heroquest/_cal/
+
+# Directorio de trabajo de OpenCode
+.omo/

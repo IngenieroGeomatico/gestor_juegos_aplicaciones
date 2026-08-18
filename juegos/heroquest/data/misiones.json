@@ -38,7 +38,7 @@
         "monstruos": [
           {
             "nombre": "Trasgo",
-            "x": 1,
+            "x": 2,
             "y": 2
           },
           {
@@ -93,7 +93,7 @@
           {
             "nombre": "Espada corta",
             "x": 15,
-            "y": 7
+            "y": 8
           }
         ]
       },
@@ -112,7 +112,7 @@
           {
             "nombre": "Poción de curación",
             "x": 24,
-            "y": 10
+            "y": 11
           }
         ]
       }

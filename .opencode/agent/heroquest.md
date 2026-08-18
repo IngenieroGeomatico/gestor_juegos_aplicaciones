@@ -35,7 +35,7 @@ Situación de los datos y scripts:
 | Monstruos | `juegos/heroquest/data/monstruos.json` | nombre, ataque, defensa, cuerpo, mente, movimiento, descripcion |
 | Hechizos | `juegos/heroquest/data/hechizos.json` | nombre, escuela (Mago / Hechicero), coste_mente, descripcion |
 | Misiones | `juegos/heroquest/data/misiones.json` | nombre, tablero, nivel, introduccion, objetivo, recompensa, entrada_heroes[], puertas[], salas[] |
-| Tableros | `juegos/heroquest/data/tableros.json` | id, nombre, columnas, filas, salas[] (rects en coordenadas globales de la cuadrícula) |
+| Tableros | `juegos/heroquest/data/tableros.json` | id, nombre, columnas, filas, salas[] (numero, rects en coordenadas globales de la cuadrícula, color). Se genera desde el SVG del tablero con `tablero_svg.py` |
 | Modelos 3D | `juegos/heroquest/data/impresion3d.json` | recurso de referencia (no editable): plataformas, categorías y buscadores/tags de archivos 3D gratuitos (héroes, monstruos, mobiliario, tablero, dados) |
 | Modelos 3D WH40K | `juegos/heroquest/data/impresion3d_warhammer40k.json` | recurso de referencia (no editable): mismo esquema que `impresion3d.json` pero para Warhammer 40K por facciones (marines del caos, demonios del caos, tiránidos, eldars, taus, orkos, necrones, marines espaciales proxy y terreno de tablero) |
 
@@ -61,6 +61,11 @@ Los scripts de utilidad viven en `juegos/heroquest/scripts/`:
   Sustituye a los antiguos `nueva_arma.py`, `nuevo_monstruo.py` y `nuevo_personaje.py`
 - `nueva_mision.py` — añade una misión montable en tablero
 - `eliminar.py` — borrar una entrada por nombre
+- `tablero_svg.py` — genera `tableros.json` desde el **SVG** de un tablero
+  (`--svg <ruta> --id <tablero>`). Es la forma recomendada de digitalizar/corregir
+  un tablero: parsea salas (`<rect>` y `<path>` en L), las numera de forma canónica
+  (orden de lectura), guarda su color y deja el resto como pasillo. La alternativa
+  para fotos es `tablero_calibrar.py` + `.rooms.txt` + `tablero_construir.py`
 - `tablero.py` — `ver` imprime un tablero; `validar` comprueba todas las misiones
   contra sus tableros (API pública: `punto_valido`, `sala_pertenece`)
 - `mapa.py` — genera una imagen PNG/SVG del tablero y/o de una misión montada
@@ -96,6 +101,9 @@ Los scripts de utilidad viven en `juegos/heroquest/scripts/`:
   lo especifica (y qué tablero usar si no está claro), o propón una y llévala a
   cabo con datos coherentes. Toda misión debe referenciar un tablero modelado y
   sus coordenadas deben ser válidas (compruébalo con `tablero.py validar`).
+- Para **digitalizar o corregir un tablero**, parte de su SVG y usa
+  `tablero_svg.py` (fuente de verdad reproducible). Si cambian las coordenadas de
+  las salas, revalida las misiones y reubica monstruos/tesoros que queden fuera.
 - Tras modificar ficheros JSON, valida que sigan siendo JSON correcto.
 
 ## Recursos externos
