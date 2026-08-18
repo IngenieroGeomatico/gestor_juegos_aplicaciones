@@ -38,6 +38,10 @@ PX_CARTA_ALTO = round(MM_CARTA_ALTO / 25.4 * DPI_CARTA)
 DISENO_ANCHO = 500
 DISENO_ALTO = 700
 
+# Hoja plegable (anverso | reverso lado a lado): el doble de ancho.
+DISENO_DOBLE_ANCHO = DISENO_ANCHO * 2
+PX_CARTA_DOBLE_ANCHO = PX_CARTA_ANCHO * 2
+
 
 def _escape(texto: str) -> str:
     """Escapa caracteres especiales de XML en un string."""
@@ -173,6 +177,27 @@ def _render_descripcion(
 
     return titulo_svg + arte_svg + desc_svg + stats_svg
 
+def _contenido_svg(tipo: TipoCarta, entrada: dict, ancho: int, alto: int) -> str:
+    """Devuelve el interior del SVG del anverso (sin la etiqueta <svg> raíz)."""
+    svg_parts = [
+        _fondo_pergamino(ancho, alto),
+        _marco(ancho, alto)
+    ]
+
+    # Dispatcher de familia de renderizado
+    match tipo.familia:
+        case "stats":
+            svg_parts.append(_render_stats(tipo, entrada, ancho, alto))
+        case "descripcion":
+            svg_parts.append(_render_descripcion(tipo, entrada, ancho, alto))
+        case _:
+            # Fallback por si hay una familia no reconocida
+            error_msg = f"Familia de carta desconocida: {tipo.familia}"
+            svg_parts.append(f'<text x="50" y="50" fill="red">{error_msg}</text>')
+
+    svg_parts.append(_footer(ancho, alto))
+    return "\n".join(svg_parts)
+
 def render_svg(tipo: TipoCarta, entrada: dict, ancho: int = DISENO_ANCHO, alto: int = DISENO_ALTO) -> str:
     """
     Devuelve el SVG (str) del anverso de la carta según su familia.
@@ -195,25 +220,101 @@ def render_svg(tipo: TipoCarta, entrada: dict, ancho: int = DISENO_ANCHO, alto: 
     px_alto = round(alto * PX_CARTA_ALTO / DISENO_ALTO)
     svg_parts = [
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {ancho} {alto}" width="{px_ancho}" height="{px_alto}">',
-        _fondo_pergamino(ancho, alto),
-        _marco(ancho, alto)
+        _contenido_svg(tipo, entrada, ancho, alto),
+        "</svg>",
     ]
-
-    # Dispatcher de familia de renderizado
-    match tipo.familia:
-        case "stats":
-            svg_parts.append(_render_stats(tipo, entrada, ancho, alto))
-        case "descripcion":
-            svg_parts.append(_render_descripcion(tipo, entrada, ancho, alto))
-        case _:
-            # Fallback por si hay una familia no reconocida
-            error_msg = f"Familia de carta desconocida: {tipo.familia}"
-            svg_parts.append(f'<text x="50" y="50" fill="red">{error_msg}</text>')
-
-    svg_parts.append(_footer(ancho, alto))
-    svg_parts.append("</svg>")
-
     return "\n".join(svg_parts)
+
+
+def _reverso_data_uri(tipo: TipoCarta, ancho: int, alto: int) -> str | None:
+    """Foto del reverso como data URI, recortada y reescalada a la rejilla.
+
+    Hace un recorte "cover" para llenar exactamente el panel de la carta
+    (proporción 63 × 88) y la reescala a la resolución de diseño, para que el
+    SVG incrustado sea ligero.
+    """
+    import base64
+    import io
+    from PIL import Image, ImageOps
+
+    ruta = tipo.reverso()
+    if not ruta.exists():
+        return None
+    with Image.open(ruta) as im:
+        im = ImageOps.exif_transpose(im).convert("RGB")
+        im = ImageOps.fit(im, (ancho, alto), Image.LANCZOS)
+        buf = io.BytesIO()
+        im.save(buf, format="JPEG", quality=85)
+    b64 = base64.b64encode(buf.getvalue()).decode("ascii")
+    return f"data:image/jpeg;base64,{b64}"
+
+
+def _contenido_verso(tipo: TipoCarta, ancho: int, alto: int) -> str:
+    """Interior del SVG del reverso: foto real como fondo + capa vectorial."""
+    foto = _reverso_data_uri(tipo, ancho, alto)
+    if foto:
+        fondo = (f'<image x="0" y="0" width="{ancho}" height="{alto}" '
+                 f'href="{foto}" preserveAspectRatio="xMidYMid slice" />')
+    else:
+        fondo = _fondo_pergamino(ancho, alto)
+    banner = (f'<path d="M {ancho / 2 - 140} 40 H {ancho / 2 + 140} '
+              f'L {ancho / 2 + 120} 75 L {ancho / 2 + 140} 110 '
+              f'H {ancho / 2 - 140} L {ancho / 2 - 120} 75 Z" '
+              f'fill="{COLOR_BANNER}" fill-opacity="0.92" stroke="{COLOR_BORDE}" stroke-width="1.5" />')
+    titulo = (f'<text x="{ancho / 2}" y="82" font-family="{FONT_FAMILY_SERIF}" '
+              f'font-size="34" font-weight="bold" fill="{COLOR_TEXTO_PRINCIPAL}" text-anchor="middle">HeroQuest</text>')
+    pie = (f'<text x="{ancho / 2}" y="{alto - 60}" font-family="{FONT_FAMILY_SERIF}" '
+           f'font-size="14" fill="{COLOR_TEXTO_PRINCIPAL}" text-anchor="middle" '
+           f'font-variant="small-caps">Carta de juego</text>')
+    return "\n".join([
+        fondo,
+        f'<rect x="12" y="12" width="{ancho - 24}" height="{alto - 24}" fill="none" '
+        f'stroke="{COLOR_BORDE}" stroke-width="3" />',
+        f'<rect x="20" y="20" width="{ancho - 40}" height="{alto - 40}" fill="none" '
+        f'stroke="{COLOR_BORDE}" stroke-width="1" />',
+        banner,
+        titulo,
+        pie,
+    ])
+
+
+def render_verso_svg(tipo: TipoCarta, ancho: int = DISENO_ANCHO, alto: int = DISENO_ALTO) -> str:
+    """Devuelve el SVG (str) del reverso de la carta."""
+    px_ancho = round(ancho * PX_CARTA_ANCHO / DISENO_ANCHO)
+    px_alto = round(alto * PX_CARTA_ALTO / DISENO_ALTO)
+    return "\n".join([
+        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {ancho} {alto}" width="{px_ancho}" height="{px_alto}">',
+        _contenido_verso(tipo, ancho, alto),
+        "</svg>",
+    ])
+
+
+def render_svg_doble(tipo: TipoCarta, entrada: dict, ancho: int = DISENO_ANCHO, alto: int = DISENO_ALTO) -> str:
+    """SVG de la hoja plegable: anverso | reverso lado a lado (126 × 88 mm).
+
+    Se dobla por la línea vertical central para obtener la carta completa con
+    el anverso por un lado y el reverso por el otro. Como la hoja se imprime a
+    una sola cara y se pliega "por fuera", el panel del reverso va espejado
+    horizontalmente: al doblar queda con la orientación correcta.
+    """
+    ancho_doble = ancho * 2
+    frente = f'<g transform="translate(0,0)">{_contenido_svg(tipo, entrada, ancho, alto)}</g>'
+    verso = f'<g transform="translate({ancho_doble},0) scale(-1,1)">{_contenido_verso(tipo, ancho, alto)}</g>'
+    pliegue = "\n".join([
+        f'<line x1="{ancho}" y1="0" x2="{ancho}" y2="{alto}" stroke="{COLOR_BORDE}" '
+        f'stroke-width="1.5" stroke-dasharray="8 6" />',
+        f'<text x="{ancho}" y="{alto - 12}" font-family="{FONT_FAMILY_SERIF}" font-size="11" '
+        f'fill="{COLOR_BORDE}" text-anchor="middle">— pliegue —</text>',
+    ])
+    px_ancho = round(ancho_doble * PX_CARTA_ANCHO / DISENO_ANCHO)
+    px_alto = round(alto * PX_CARTA_ALTO / DISENO_ALTO)
+    return "\n".join([
+        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {ancho_doble} {alto}" width="{px_ancho}" height="{px_alto}">',
+        frente,
+        verso,
+        pliegue,
+        "</svg>",
+    ])
 
 
 # ============================================================================
@@ -223,19 +324,12 @@ def render_svg(tipo: TipoCarta, entrada: dict, ancho: int = DISENO_ANCHO, alto: 
 # El SVG es la única fuente de verdad del diseño de la carta; el PNG se obtiene
 # rasterizándolo a la resolución física real de la carta (63 × 88 mm a 300 DPI).
 
-def render_png(tipo: TipoCarta, entrada: dict, ancho: int = DISENO_ANCHO, alto: int = DISENO_ALTO) -> Image.Image:
-    """Devuelve una imagen Pillow del anverso de la carta rasterizando su SVG.
-
-    El SVG se dibuja en la rejilla de diseño y se rasteriza al tamaño físico de
-    la carta (63 × 88 mm, 744 × 1039 px a 300 DPI) con resvg (resvg_py).
-    """
+def _rasterizar(svg: str, px_ancho: int, px_alto: int) -> Image.Image:
+    """Rasteriza un SVG a PNG con resvg y lo devuelve como imagen Pillow."""
     import io
     from PIL import Image
     import resvg_py
 
-    svg = render_svg(tipo, entrada, ancho, alto)
-    px_ancho = round(ancho * PX_CARTA_ANCHO / DISENO_ANCHO)
-    px_alto = round(alto * PX_CARTA_ALTO / DISENO_ALTO)
     datos = resvg_py.svg_to_bytes(
         svg_string=svg,
         width=px_ancho,
@@ -243,6 +337,34 @@ def render_png(tipo: TipoCarta, entrada: dict, ancho: int = DISENO_ANCHO, alto: 
         background="#ffffff",
     )
     return Image.open(io.BytesIO(datos)).convert("RGB")
+
+
+def render_png(tipo: TipoCarta, entrada: dict, ancho: int = DISENO_ANCHO, alto: int = DISENO_ALTO) -> Image.Image:
+    """Devuelve una imagen Pillow del anverso de la carta rasterizando su SVG.
+
+    El SVG se dibuja en la rejilla de diseño y se rasteriza al tamaño físico de
+    la carta (63 × 88 mm, 744 × 1039 px a 300 DPI) con resvg (resvg_py).
+    """
+    svg = render_svg(tipo, entrada, ancho, alto)
+    px_ancho = round(ancho * PX_CARTA_ANCHO / DISENO_ANCHO)
+    px_alto = round(alto * PX_CARTA_ALTO / DISENO_ALTO)
+    return _rasterizar(svg, px_ancho, px_alto)
+
+
+def render_png_verso(tipo: TipoCarta, ancho: int = DISENO_ANCHO, alto: int = DISENO_ALTO) -> Image.Image:
+    """Devuelve una imagen Pillow del reverso de la carta (744 × 1039 px)."""
+    svg = render_verso_svg(tipo, ancho, alto)
+    px_ancho = round(ancho * PX_CARTA_ANCHO / DISENO_ANCHO)
+    px_alto = round(alto * PX_CARTA_ALTO / DISENO_ALTO)
+    return _rasterizar(svg, px_ancho, px_alto)
+
+
+def render_png_doble(tipo: TipoCarta, entrada: dict, ancho: int = DISENO_ANCHO, alto: int = DISENO_ALTO) -> Image.Image:
+    """Devuelve la hoja plegable (anverso | reverso) a 126 × 88 mm (1488 × 1039 px)."""
+    svg = render_svg_doble(tipo, entrada, ancho, alto)
+    px_ancho = round(ancho * 2 * PX_CARTA_ANCHO / DISENO_ANCHO)
+    px_alto = round(alto * PX_CARTA_ALTO / DISENO_ALTO)
+    return _rasterizar(svg, px_ancho, px_alto)
 
 
 if __name__ == "__main__":
@@ -321,5 +443,16 @@ if __name__ == "__main__":
         assert img.size == (PX_CARTA_ANCHO, PX_CARTA_ALTO), img.size
     except Exception as e:
         print(f"ERROR al rasterizar PNG: {e}")
+
+    # 5. Reverso y hoja plegable (anverso | reverso)
+    try:
+        svg_verso = render_verso_svg(tipo_arma)
+        print(f"OK Reverso SVG, longitud: {len(svg_verso)}")
+        assert svg_verso.startswith('<svg') and svg_verso.strip().endswith('</svg>')
+        img_doble = render_png_doble(tipo_arma, entrada_arma)
+        print(f"OK Hoja plegable PNG: {img_doble.size}")
+        assert img_doble.size == (PX_CARTA_DOBLE_ANCHO, PX_CARTA_ALTO), img_doble.size
+    except Exception as e:
+        print(f"ERROR al generar reverso/hoja plegable: {e}")
 
     print("--- Smoke test finalizado ---")
