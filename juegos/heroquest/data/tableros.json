@@ -14,8 +14,7 @@
             "ancho": 4,
             "alto": 3
           }
-        ],
-        "color": "#960"
+        ]
       },
       {
         "numero": 2,
@@ -26,8 +25,7 @@
             "ancho": 4,
             "alto": 3
           }
-        ],
-        "color": "#c33"
+        ]
       },
       {
         "numero": 3,
@@ -38,8 +36,7 @@
             "ancho": 3,
             "alto": 5
           }
-        ],
-        "color": "#6cc"
+        ]
       },
       {
         "numero": 4,
@@ -50,8 +47,7 @@
             "ancho": 3,
             "alto": 5
           }
-        ],
-        "color": "#c66"
+        ]
       },
       {
         "numero": 5,
@@ -62,8 +58,7 @@
             "ancho": 4,
             "alto": 4
           }
-        ],
-        "color": "#ccf"
+        ]
       },
       {
         "numero": 6,
@@ -74,8 +69,7 @@
             "ancho": 4,
             "alto": 4
           }
-        ],
-        "color": "#fc9"
+        ]
       },
       {
         "numero": 7,
@@ -86,8 +80,7 @@
             "ancho": 4,
             "alto": 5
           }
-        ],
-        "color": "#699"
+        ]
       },
       {
         "numero": 8,
@@ -98,8 +91,7 @@
             "ancho": 4,
             "alto": 5
           }
-        ],
-        "color": "#9c0"
+        ]
       },
       {
         "numero": 9,
@@ -110,8 +102,7 @@
             "ancho": 4,
             "alto": 4
           }
-        ],
-        "color": "#c93"
+        ]
       },
       {
         "numero": 10,
@@ -122,8 +113,7 @@
             "ancho": 4,
             "alto": 4
           }
-        ],
-        "color": "#cc0"
+        ]
       },
       {
         "numero": 11,
@@ -134,8 +124,7 @@
             "ancho": 6,
             "alto": 5
           }
-        ],
-        "color": "#666"
+        ]
       },
       {
         "numero": 12,
@@ -146,8 +135,7 @@
             "ancho": 4,
             "alto": 4
           }
-        ],
-        "color": "#fc0"
+        ]
       },
       {
         "numero": 13,
@@ -158,8 +146,7 @@
             "ancho": 2,
             "alto": 3
           }
-        ],
-        "color": "#6cf"
+        ]
       },
       {
         "numero": 14,
@@ -170,8 +157,7 @@
             "ancho": 2,
             "alto": 3
           }
-        ],
-        "color": "#9cc"
+        ]
       },
       {
         "numero": 15,
@@ -188,8 +174,7 @@
             "ancho": 3,
             "alto": 1
           }
-        ],
-        "color": "#99c"
+        ]
       },
       {
         "numero": 16,
@@ -200,8 +185,7 @@
             "ancho": 4,
             "alto": 4
           }
-        ],
-        "color": "#c90"
+        ]
       },
       {
         "numero": 17,
@@ -212,8 +196,7 @@
             "ancho": 4,
             "alto": 5
           }
-        ],
-        "color": "#c36"
+        ]
       },
       {
         "numero": 18,
@@ -224,8 +207,7 @@
             "ancho": 3,
             "alto": 5
           }
-        ],
-        "color": "#c96"
+        ]
       },
       {
         "numero": 19,
@@ -236,8 +218,7 @@
             "ancho": 4,
             "alto": 5
           }
-        ],
-        "color": "#c69"
+        ]
       },
       {
         "numero": 20,
@@ -248,8 +229,7 @@
             "ancho": 4,
             "alto": 4
           }
-        ],
-        "color": "#669"
+        ]
       },
       {
         "numero": 21,
@@ -260,8 +240,7 @@
             "ancho": 3,
             "alto": 4
           }
-        ],
-        "color": "#c60"
+        ]
       },
       {
         "numero": 22,
@@ -272,18 +251,227 @@
             "ancho": 4,
             "alto": 4
           }
-        ],
-        "color": "#6c6"
+        ]
       }
     ],
-    "nota": "Generado desde heroquest_board_original.svg (fuente vectorial). Las casillas no cubiertas por una sala son pasillo."
+    "nota": "Cuadrícula derivada del SVG de Wikipedia (Heroquest_board.svg, CC BY-SA 4.0 / GFDL). Las casillas no cubiertas por una sala se consideran pasillo."
   },
   {
     "id": "cara-b",
-    "nombre": "Cara B (pendiente de foto)",
-    "columnas": 0,
-    "filas": 0,
-    "salas": [],
-    "nota": "Pendiente: enviar foto del reverso del tablero para modelar sus salas en la cuadrícula."
+    "nombre": "Cara B",
+    "columnas": 26,
+    "filas": 19,
+    "salas": [
+      {
+        "numero": 1,
+        "rects": [
+          {
+            "x": 2,
+            "y": 1,
+            "ancho": 4,
+            "alto": 3
+          }
+        ]
+      },
+      {
+        "numero": 2,
+        "rects": [
+          {
+            "x": 1,
+            "y": 5,
+            "ancho": 5,
+            "alto": 3
+          }
+        ]
+      },
+      {
+        "numero": 3,
+        "rects": [
+          {
+            "x": 2,
+            "y": 9,
+            "ancho": 4,
+            "alto": 3
+          }
+        ]
+      },
+      {
+        "numero": 4,
+        "rects": [
+          {
+            "x": 1,
+            "y": 13,
+            "ancho": 5,
+            "alto": 3
+          }
+        ]
+      },
+      {
+        "numero": 5,
+        "rects": [
+          {
+            "x": 2,
+            "y": 17,
+            "ancho": 4,
+            "alto": 3
+          }
+        ]
+      },
+      {
+        "numero": 6,
+        "rects": [
+          {
+            "x": 7,
+            "y": 2,
+            "ancho": 3,
+            "alto": 4
+          }
+        ]
+      },
+      {
+        "numero": 7,
+        "rects": [
+          {
+            "x": 7,
+            "y": 7,
+            "ancho": 3,
+            "alto": 3
+          }
+        ]
+      },
+      {
+        "numero": 8,
+        "rects": [
+          {
+            "x": 7,
+            "y": 11,
+            "ancho": 3,
+            "alto": 3
+          }
+        ]
+      },
+      {
+        "numero": 9,
+        "rects": [
+          {
+            "x": 7,
+            "y": 15,
+            "ancho": 3,
+            "alto": 4
+          }
+        ]
+      },
+      {
+        "numero": 10,
+        "rects": [
+          {
+            "x": 11,
+            "y": 2,
+            "ancho": 4,
+            "alto": 5
+          }
+        ]
+      },
+      {
+        "numero": 11,
+        "rects": [
+          {
+            "x": 11,
+            "y": 8,
+            "ancho": 4,
+            "alto": 5
+          }
+        ]
+      },
+      {
+        "numero": 12,
+        "rects": [
+          {
+            "x": 11,
+            "y": 14,
+            "ancho": 4,
+            "alto": 5
+          }
+        ]
+      },
+      {
+        "numero": 13,
+        "rects": [
+          {
+            "x": 16,
+            "y": 1,
+            "ancho": 4,
+            "alto": 4
+          }
+        ]
+      },
+      {
+        "numero": 14,
+        "rects": [
+          {
+            "x": 16,
+            "y": 6,
+            "ancho": 3,
+            "alto": 3
+          }
+        ]
+      },
+      {
+        "numero": 15,
+        "rects": [
+          {
+            "x": 16,
+            "y": 12,
+            "ancho": 3,
+            "alto": 3
+          }
+        ]
+      },
+      {
+        "numero": 16,
+        "rects": [
+          {
+            "x": 16,
+            "y": 16,
+            "ancho": 4,
+            "alto": 4
+          }
+        ]
+      },
+      {
+        "numero": 17,
+        "rects": [
+          {
+            "x": 21,
+            "y": 2,
+            "ancho": 5,
+            "alto": 4
+          }
+        ]
+      },
+      {
+        "numero": 18,
+        "rects": [
+          {
+            "x": 20,
+            "y": 6,
+            "ancho": 7,
+            "alto": 9
+          }
+        ]
+      },
+      {
+        "numero": 19,
+        "rects": [
+          {
+            "x": 21,
+            "y": 15,
+            "ancho": 5,
+            "alto": 4
+          }
+        ]
+      }
+    ],
+    "nota": "Reverso del tablero. Salas derivadas de la foto del dorso y encajadas a la rejilla de 26x19 casillas de 10px."
   }
 ]
