@@ -172,21 +172,14 @@ def _marcas_corte(draw: ImageDraw.ImageDraw, x: int, y: int, w: int, h: int) -> 
         draw.line([(px, py - MARCA), (px, py)], fill=COLOR_MARCA, width=2)
 
 
-def _render_pieza(tipo: tipos_carta.TipoCarta, entrada: dict) -> Image.Image:
-    """Imagen 1488×1039 de la pieza plegable (anverso | reverso)."""
-    fondo = _fondo_verso_de(tipo)
-    return render_carta.render_png_doble(tipo, entrada, fondo_verso=fondo)
+def _render_pieza(tipo: tipos_carta.TipoCarta, entrada: dict,
+                  fondo: str | None = None) -> Image.Image:
+    """Imagen 1488×1039 de la pieza plegable (anverso | reverso).
 
-
-def _fondo_verso_de(tipo: tipos_carta.TipoCarta) -> str | None:
-    """Elige el fondo temático de reverso por categoría, si existe.
-
-    equipo/tesoro/enemigo/heroe/magia -> <categoria>_back.png en arte_fondos/.
-    Si no hay fondo temático, devuelve None (usa el reverso estándar del tipo).
+    Si `fondo` es None, `render_carta` usa el fondo temático de la categoría por
+    defecto. Con `fondo` se fuerza esa imagen de `sources/arte_fondos/`.
     """
-    categoria = render_carta._categoria_verso(tipo)  # 'equipo', 'enemigo', ...
-    candidato = render_carta.FONDOS_DIR / f"{categoria}_back.png"
-    return candidato.name if candidato.exists() else None
+    return render_carta.render_png_doble(tipo, entrada, fondo_verso=fondo)
 
 
 def _nueva_pagina() -> tuple[Image.Image, ImageDraw.ImageDraw]:
@@ -194,7 +187,8 @@ def _nueva_pagina() -> tuple[Image.Image, ImageDraw.ImageDraw]:
     return pagina, ImageDraw.Draw(pagina)
 
 
-def componer(cartas: list[tuple[tipos_carta.TipoCarta, dict]]) -> list[Image.Image]:
+def componer(cartas: list[tuple[tipos_carta.TipoCarta, dict]],
+             fondo: str | None = None) -> list[Image.Image]:
     cols, filas, util_ancho, util_alto = _piezas_por_pagina()
     por_pagina = cols * filas
     # Centrar la rejilla en la zona útil.
@@ -213,7 +207,7 @@ def componer(cartas: list[tuple[tipos_carta.TipoCarta, dict]]) -> list[Image.Ima
         col, fila = pos % cols, pos // cols
         x = off_x + col * (PIEZA_ANCHO + SEP)
         y = off_y + fila * (PIEZA_ALTO + SEP)
-        pieza = _render_pieza(tipo, entrada)
+        pieza = _render_pieza(tipo, entrada, fondo)
         if pieza.size != (PIEZA_ANCHO, PIEZA_ALTO):
             pieza = pieza.resize((PIEZA_ANCHO, PIEZA_ALTO), Image.LANCZOS)
         pagina.paste(pieza, (x, y))
@@ -226,8 +220,9 @@ def componer(cartas: list[tuple[tipos_carta.TipoCarta, dict]]) -> list[Image.Ima
     return paginas
 
 
-def generar_pdf(cartas: list[tuple[tipos_carta.TipoCarta, dict]], salida: Path) -> None:
-    paginas = componer(cartas)
+def generar_pdf(cartas: list[tuple[tipos_carta.TipoCarta, dict]], salida: Path,
+                fondo: str | None = None) -> None:
+    paginas = componer(cartas, fondo)
     if not paginas:
         raise SystemExit("No hay cartas válidas que imprimir.")
     salida.parent.mkdir(parents=True, exist_ok=True)
@@ -263,7 +258,17 @@ def main() -> None:
                    help="Una carta (repetible). Ej: --carta \"arma:Daga\"")
     g.add_argument("--todo", action="store_true", help="Todo el mazo del juego")
     p.add_argument("--salida", default=None, help="Ruta del PDF (por defecto en cartas/)")
+    p.add_argument("--fondo", default=None, metavar="FICHERO.png",
+                   help="Fuerza un mismo fondo de reverso para todas las cartas "
+                        "(fichero de sources/arte_fondos/). Por defecto, cada carta "
+                        "usa el fondo temático de su categoría.")
     args = p.parse_args()
+
+    if args.fondo:
+        ruta_fondo = render_carta.FONDOS_DIR / args.fondo
+        if not ruta_fondo.exists():
+            print(f"Error: no existe el fondo '{args.fondo}' en {render_carta.FONDOS_DIR}")
+            sys.exit(1)
 
     if args.todo:
         specs = _todo_el_mazo()
@@ -281,7 +286,7 @@ def main() -> None:
         sys.exit(1)
 
     salida = Path(args.salida) if args.salida else CARTAS_DIR / nombre_defecto
-    generar_pdf(cartas, salida)
+    generar_pdf(cartas, salida, args.fondo)
 
 
 if __name__ == "__main__":

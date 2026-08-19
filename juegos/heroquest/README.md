@@ -278,6 +278,13 @@ fuente de verdad**, rasterizado a PNG con `resvg`), en formato 1000×1400
 abajo** para que el banner y la leyenda que pinta la carta encima se lean bien.
 Los SVG fuente quedan en `sources/arte_fondos_svg/`.
 
+**Reverso por defecto según la categoría.** Al generar una carta completa, el
+reverso usa **automáticamente** el fondo temático de su categoría (`equipo`,
+`tesoro`, `enemigo`, `heroe`, `magia`) si existe en `sources/arte_fondos/`; si no,
+cae a la foto estándar del tipo (`sources/reversos/`). Para **forzar otro fondo**,
+pasa `--fondo_verso <fichero>.png` a `carta_item.py` (o `--fondo` a
+`imprimir_cartas.py`).
+
 ```bash
 uv run juegos/heroquest/scripts/generar_fondos.py               # regenera los 5
 uv run juegos/heroquest/scripts/generar_fondos.py --solo magia  # solo uno
@@ -307,7 +314,8 @@ línea de pliegue** central y metes la carta (ya con sus dos caras) en un protec
 - **3 piezas por hoja A4**, con marcas de corte en las esquinas y marca de pliegue.
 - El **reverso** de cada carta usa automáticamente el fondo temático de su
   categoría (`equipo`/`tesoro`/`enemigo`/`heroe`/`magia`) si existe en
-  `sources/arte_fondos/`.
+  `sources/arte_fondos/`. Con `--fondo <fichero>.png` fuerzas el mismo fondo para
+  todas las cartas del PDF.
 - Usa Pillow para el PDF (sin dependencias nuevas de peso); el YAML necesita
   `pyyaml` (ya en `pyproject.toml`).
 

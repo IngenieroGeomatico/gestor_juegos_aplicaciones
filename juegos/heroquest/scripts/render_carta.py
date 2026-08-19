@@ -341,14 +341,22 @@ def _imagen_data_uri(ruta: Path, ancho: int, alto: int) -> str:
 def _ruta_reverso(tipo: TipoCarta, fondo_verso: str | None = None) -> Path:
     """Ruta de la imagen de fondo del reverso.
 
-    Si `fondo_verso` es un nombre de fichero se busca en `sources/arte_fondos/`;
-    si no, se usa el reverso estándar del tipo (`tipo.reverso()`).
+    Prioridad:
+    1. `fondo_verso` explícito → ese fichero de `sources/arte_fondos/` (override).
+    2. Por defecto: el fondo temático de la categoría de la carta
+       (`sources/arte_fondos/<categoria>_back.png`, p. ej. `enemigo_back.png`),
+       si existe.
+    3. Si no hay fondo temático: el reverso estándar del tipo (`tipo.reverso()`,
+       la foto de la carta real en `sources/reversos/`).
     """
     if fondo_verso:
         ruta = FONDOS_DIR / fondo_verso
         if not ruta.exists():
             raise FileNotFoundError(f"No existe el fondo de reverso: {ruta}")
         return ruta
+    tematico = FONDOS_DIR / f"{_categoria_verso(tipo)}_back.png"
+    if tematico.exists():
+        return tematico
     return tipo.reverso()
 
 
