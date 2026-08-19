@@ -81,6 +81,12 @@ Los scripts de utilidad viven en `juegos/heroquest/scripts/`:
 - `preparar_reversos.py` — recorta/endereza las fotos `*_back.jpg` de `sources/`
   hacia `sources/reversos/`
 - `render_carta.py` — dibuja el anverso de una carta (SVG y PNG) según su familia
+- `generar_arte.py` — genera el **arte del anverso** de las cartas (espada,
+  hacha, poción, etc.) como SVG vectorial detallado y lo rasteriza a PNG con
+  `resvg`. Los SVG (fuente de verdad, editables) van a `sources/arte_svg/`; los
+  PNG finales a `sources/arte/` con el nombre que espera `render_carta`
+  (el `slug` de la carta, p. ej. `Báculo_del_mago.png`). Usa `--solo "<nombre>"`
+  para uno, `--svg-solo` para no rasterizar
 - `tipos_carta/` — paquete con un módulo por tipo de carta (campos, stats,
   validación, arte, reverso) y un registro común (`registro.py`)
 - `data_store.py` — funciones compartidas (cargar, guardar, añadir, existe,
@@ -104,6 +110,14 @@ Los scripts de utilidad viven en `juegos/heroquest/scripts/`:
 - Para **digitalizar o corregir un tablero**, parte de su SVG y usa
   `tablero_svg.py` (fuente de verdad reproducible). Si cambian las coordenadas de
   las salas, revalida las misiones y reubica monstruos/tesoros que queden fuera.
+- Para **crear o mejorar el arte de una carta**, edita/añade su función de dibujo
+  en `generar_arte.py` (SVG vectorial: degradados para el metal/oro/gemas, un
+  reflejo de lustre y una sombra suave dan volumen) y regenera con
+  `uv run juegos/heroquest/scripts/generar_arte.py --solo "<nombre>"`. Reutiliza
+  las piezas comunes (`_hoja`, `_guarda_recta`, `_empunadura`, `_pomo`, `_gema`)
+  para mantener un estilo coherente. **Itera mirando el PNG**: genéralo, ábrelo,
+  corrige proporciones/geometría y repite. Respeta el nombre de fichero (el `slug`
+  de la carta) para que `render_carta` lo localice por convención.
 - Tras modificar ficheros JSON, valida que sigan siendo JSON correcto.
 
 ## Recursos externos

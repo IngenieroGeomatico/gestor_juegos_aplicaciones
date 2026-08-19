@@ -154,6 +154,10 @@ uv run juegos/heroquest/scripts/mision_html.py --mision "El Refugio del Guardiá
 # Preparar los reversos de las cartas a partir de las fotos de sources/
 uv run juegos/heroquest/scripts/preparar_reversos.py
 
+# (Re)generar el arte del anverso de las cartas (SVG vectorial -> PNG)
+uv run juegos/heroquest/scripts/generar_arte.py                 # todo
+uv run juegos/heroquest/scripts/generar_arte.py --solo "Daga"   # solo una
+
 # Eliminar una entrada por nombre
 uv run juegos/heroquest/scripts/eliminar.py --tipo monstruos --nombre "Basilisco"
 ```
@@ -186,6 +190,38 @@ para otra ubicación.
 `preparar_reversos.py` recorta y endereza las fotos `*_back.jpg` de `sources/`
 (las cartas reales por su cara trasera) y deja los reversos limpios en
 `sources/reversos/` (ignorado por git), que `carta_item.py` usa como cara trasera.
+
+### El arte del anverso (`scripts/generar_arte.py` y `sources/arte/`)
+
+La ilustración que aparece dentro de cada carta (la espada, el hacha, la poción…)
+se guarda como PNG en `sources/arte/` y `render_carta.py` la localiza **por
+convención de nombre**: busca `sources/arte/<slug(nombre)>.png` (p. ej.
+`Espada_corta.png`, `Báculo_del_mago.png`). Una entrada también puede declarar su
+propio fichero con el campo `"arte": "otro_nombre.png"`.
+
+Ese arte se genera de forma **reproducible y editable** con `generar_arte.py`,
+siguiendo la misma filosofía que los tableros (**SVG = fuente de verdad**):
+
+- Cada objeto se dibuja como un **SVG vectorial** de 700×500 sobre el fondo
+  degradado morado característico. El volumen (metal biselado, oro, cuero, gemas)
+  se consigue con **degradados** (`<linearGradient>`/`<radialGradient>`), un
+  reflejo de lustre semitransparente y una **sombra suave** (`feDropShadow`).
+- El SVG se **rasteriza a PNG con `resvg`** (`resvg_py`, la misma librería que usa
+  `render_carta.py`), así que no hay dependencias ni pasos manuales.
+- Los SVG fuente se conservan en `sources/arte_svg/` (versionables y editables);
+  los PNG finales van a `sources/arte/` con el nombre que espera `render_carta`.
+
+```bash
+uv run juegos/heroquest/scripts/generar_arte.py                  # regenera los 11
+uv run juegos/heroquest/scripts/generar_arte.py --solo "Escudo"  # solo uno
+uv run juegos/heroquest/scripts/generar_arte.py --svg-solo       # SVG sin PNG
+```
+
+Para **añadir o mejorar** un arte, escribe/edita su función de dibujo en
+`generar_arte.py` reutilizando las piezas comunes (`_hoja`, `_guarda_recta`,
+`_empunadura`, `_pomo`, `_gema`, `_engaste`, …) para mantener un estilo coherente,
+y regenéralo. El flujo recomendado es **iterar mirando el PNG**: genéralo, ábrelo,
+corrige proporciones/geometría y repite hasta que quede bien.
 
 ### Arquitectura de las cartas (`scripts/tipos_carta/`)
 
