@@ -76,12 +76,17 @@ Los scripts de utilidad viven en `juegos/heroquest/scripts/`:
 - `preparar_reversos.py` — recorta/endereza las fotos `*_back.jpg` de `sources/`
   hacia `sources/reversos/`
 - `render_carta.py` — dibuja el anverso de una carta (SVG y PNG) según su familia
-- `generar_arte.py` — genera el **arte del anverso** de las cartas (espada,
+- `generar_arte.py` — genera el **arte del anverso** de armas/objetos (espada,
   hacha, poción, etc.) como SVG vectorial detallado y lo rasteriza a PNG con
   `resvg`. Los SVG (fuente de verdad, editables) van a `sources/arte_svg/`; los
   PNG finales a `sources/arte/` con el nombre que espera `render_carta`
   (el `slug` de la carta, p. ej. `Báculo_del_mago.png`). Usa `--solo "<nombre>"`
   para uno, `--svg-solo` para no rasterizar
+- `generar_retratos.py` — genera los **retratos de anverso de héroes y monstruos**
+  (Bárbaro, Enano, Elfo, Mago; Trasgo, Orco, Fimir, Guerrero del Caos, Gárgola)
+  como bustos SVG rasterizados a PNG en `sources/arte/` (mismo `slug` y carpeta
+  que `generar_arte.py`). Sustituye el arte genérico por un retrato propio de cada
+  personaje. Usa `--solo "<nombre>"` para uno, `--svg-solo` para no rasterizar
 - `generar_fondos.py` — genera los **fondos de reverso** por categoría (equipo,
   tesoro, enemigo, heroe, magia) como escenas ambientales SVG rasterizadas a PNG
   (1000×1400) en `sources/arte_fondos/` (SVG fuente en `sources/arte_fondos_svg/`).
@@ -107,14 +112,20 @@ Los scripts de utilidad viven en `juegos/heroquest/scripts/`:
   lo especifica (y qué tablero usar si no está claro), o propón una y llévala a
   cabo con datos coherentes. Toda misión debe referenciar un tablero modelado y
   sus coordenadas deben ser válidas (compruébalo con `tablero.py validar`).
-- Para **crear o mejorar el arte de una carta**, edita/añade su función de dibujo
-  en `generar_arte.py` (SVG vectorial: degradados para el metal/oro/gemas, un
-  reflejo de lustre y una sombra suave dan volumen) y regenera con
-  `uv run juegos/heroquest/scripts/generar_arte.py --solo "<nombre>"`. Reutiliza
+- Para **crear o mejorar el arte de una carta** (armas/objetos), edita/añade su
+  función de dibujo en `generar_arte.py` (SVG vectorial: degradados para el
+  metal/oro/gemas, un reflejo de lustre y una sombra suave dan volumen) y regenera
+  con `uv run juegos/heroquest/scripts/generar_arte.py --solo "<nombre>"`. Reutiliza
   las piezas comunes (`_hoja`, `_guarda_recta`, `_empunadura`, `_pomo`, `_gema`)
   para mantener un estilo coherente. **Itera mirando el PNG**: genéralo, ábrelo,
   corrige proporciones/geometría y repite. Respeta el nombre de fichero (el `slug`
   de la carta) para que `render_carta` lo localice por convención.
+- Para **el retrato de un héroe o monstruo**, edita/añade su función de busto en
+  `generar_retratos.py` (reutiliza `_cabeza`, `_ojos`, `_cejas`, `_hombros`,
+  `_cuello`, `_nariz` y añade rasgos distintivos) y regenera con
+  `uv run juegos/heroquest/scripts/generar_retratos.py --solo "<nombre>"`. Van a la
+  misma carpeta `sources/arte/` con el `slug` del nombre, así que la carta los usa
+  automáticamente. Itera mirando el PNG.
 - Para **crear o mejorar un fondo de reverso**, edita su función de escena en
   `generar_fondos.py` (reutiliza `_muro`, `_luz`, `_antorcha`, `_bandas`,
   `_vineta`, `_espada`) y regenera con

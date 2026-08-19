@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="700" height="500" viewBox="0 0 700 500">
+  <defs>
+    <radialGradient id="fondo" cx="50%" cy="52%" r="65%">
+      <stop offset="0%" stop-color="#3a3350"/>
+      <stop offset="55%" stop-color="#211d33"/>
+      <stop offset="100%" stop-color="#14111f"/>
+    </radialGradient>
+    <radialGradient id="halo" cx="50%" cy="45%" r="52%">
+      <stop offset="0%" stop-color="#ffdca8" stop-opacity="0.30"/>
+      <stop offset="55%" stop-color="#e8b878" stop-opacity="0.10"/>
+      <stop offset="100%" stop-color="#e8b878" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="piel" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#e8b083"/>
+      <stop offset="55%" stop-color="#c88a5c"/>
+      <stop offset="100%" stop-color="#8f5c38"/>
+    </linearGradient>
+    <linearGradient id="piel-palida" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f2ddc4"/>
+      <stop offset="55%" stop-color="#dcc0a2"/>
+      <stop offset="100%" stop-color="#b0906e"/>
+    </linearGradient>
+    <linearGradient id="piel-verde" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#9cc16a"/>
+      <stop offset="55%" stop-color="#6f9a41"/>
+      <stop offset="100%" stop-color="#3f6122"/>
+    </linearGradient>
+    <linearGradient id="piel-verde-osc" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#6f8f4a"/>
+      <stop offset="55%" stop-color="#4a6b2c"/>
+      <stop offset="100%" stop-color="#293f18"/>
+    </linearGradient>
+    <linearGradient id="piedra" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#9aa2ac"/>
+      <stop offset="55%" stop-color="#6d757f"/>
+      <stop offset="100%" stop-color="#42484f"/>
+    </linearGradient>
+    <linearGradient id="pelo" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#7a4a1e"/>
+      <stop offset="100%" stop-color="#3f2610"/>
+    </linearGradient>
+    <linearGradient id="pelo-blanco" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#c3c8d0"/>
+    </linearGradient>
+    <linearGradient id="pelo-rojo" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#c9642a"/>
+      <stop offset="100%" stop-color="#7a3312"/>
+    </linearGradient>
+    <linearGradient id="cuero" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#7a4f28"/>
+      <stop offset="100%" stop-color="#3a2410"/>
+    </linearGradient>
+    <linearGradient id="acero" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#7f889b"/>
+      <stop offset="50%" stop-color="#eef2f7"/>
+      <stop offset="100%" stop-color="#646c7d"/>
+    </linearGradient>
+    <linearGradient id="acero-osc" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#2a2e36"/>
+      <stop offset="50%" stop-color="#565d68"/>
+      <stop offset="100%" stop-color="#1c2026"/>
+    </linearGradient>
+    <linearGradient id="tela-azul" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3a5bbf"/>
+      <stop offset="100%" stop-color="#1f2f6a"/>
+    </linearGradient>
+    <linearGradient id="tela-verde" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3f7a4a"/>
+      <stop offset="100%" stop-color="#204028"/>
+    </linearGradient>
+    <linearGradient id="tela-roja" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#a5342f"/>
+      <stop offset="100%" stop-color="#5c1613"/>
+    </linearGradient>
+    <radialGradient id="oro" cx="40%" cy="32%" r="72%">
+      <stop offset="0%" stop-color="#ffe9ad"/>
+      <stop offset="55%" stop-color="#c99a3f"/>
+      <stop offset="100%" stop-color="#6f4e18"/>
+    </radialGradient>
+    <radialGradient id="gema-azul" cx="40%" cy="30%" r="75%">
+      <stop offset="0%" stop-color="#d8ecff"/>
+      <stop offset="45%" stop-color="#5b8be0"/>
+      <stop offset="100%" stop-color="#1f3f8a"/>
+    </radialGradient>
+    <filter id="sombra" x="-60%" y="-60%" width="220%" height="220%">
+      <feDropShadow dx="0" dy="6" stdDeviation="7" flood-color="#000000" flood-opacity="0.45"/>
+    </filter>
+  </defs>
+<rect width="700" height="500" fill="url(#fondo)"/><ellipse cx="350" cy="230" rx="240" ry="210" fill="url(#halo)"/><g filter="url(#sombra)" transform="translate(350 0)"><path d="M -150 500 C -150 384 -96 330 -30 322 L 30 322 C 96 330 150 384 150 500 Z" fill="url(#tela-verde)" stroke="#204028" stroke-width="3"/><path d="M -150 500 C -150 400 -120 350 -70 336 L -70 500 Z" fill="url(#tela-verde)" stroke="#183020" stroke-width="2"/><circle cx="-58" cy="352" r="12" fill="url(#oro)" stroke="#5c4413" stroke-width="1.5"/><rect x="-30" y="292" width="60" height="60" rx="14" fill="url(#piel-palida)" stroke="#a8886a" stroke-width="2"/><path d="M -72 190 C -72 118 72 118 72 190 C 72 250 43 298 0 304 C -43 298 -72 250 -72 190 Z" fill="url(#piel-palida)" stroke="#a8886a" stroke-width="3"/><path d="M 72 190 C 72 250 43 298 0 304 C 29 288 42 250 43 196 Z" fill="#000000" opacity="0.14"/><path d="M -72 190 C -104 176 -112 150 -108 132 C -94 150 -80 168 -66 176 Z" fill="url(#piel-palida)" stroke="#a8886a" stroke-width="2.5"/><path d="M 72 190 C 104 176 112 150 108 132 C 94 150 80 168 66 176 Z" fill="url(#piel-palida)" stroke="#a8886a" stroke-width="2.5"/><path d="M -80 210 C -96 150 -92 96 -60 70 C -34 48 34 48 60 70 C 92 96 96 150 80 210 L 66 210 C 74 150 66 118 54 108 C 40 120 -40 120 -54 108 C -66 118 -74 150 -66 210 Z" fill="#e8cf72" stroke="#b89a3a" stroke-width="2.5" stroke-linejoin="round"/><g stroke="#c9ab48" stroke-width="3" opacity="0.5" fill="none" stroke-linecap="round"><path d="M -70 110 C -78 150 -80 180 -78 206"/><path d="M 70 110 C 78 150 80 180 78 206"/></g><path d="M -68 132 C -30 118 30 118 68 132" fill="none" stroke="url(#oro)" stroke-width="6" stroke-linecap="round"/><path d="M 0 122 l 10 14 l -10 8 l -10 -8 Z" fill="url(#gema-azul)" stroke="#1f3f8a" stroke-width="1.5"/><path d="M -50 178 L -18 176" stroke="#b89a3a" stroke-width="6" stroke-linecap="round"/><path d="M 18 176 L 50 178" stroke="#b89a3a" stroke-width="6" stroke-linecap="round"/><ellipse cx="-30" cy="194" rx="9" ry="7.0" fill="#2f6b4a"/><ellipse cx="30" cy="194" rx="9" ry="7.0" fill="#2f6b4a"/><circle cx="-27" cy="191" r="2.4" fill="#ffffff" opacity="0.85"/><circle cx="33" cy="191" r="2.4" fill="#ffffff" opacity="0.85"/><path d="M 0 198 L -7 228 L 7 228 Z" fill="#c8a888" opacity="0.6"/><path d="M -14 248 C -4 252 4 252 14 248" fill="none" stroke="#a86a5c" stroke-width="3" stroke-linecap="round"/></g></svg>
