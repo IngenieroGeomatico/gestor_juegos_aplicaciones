@@ -33,9 +33,9 @@ Situación de los datos y scripts:
 | Héroes | `juegos/heroquest/data/personajes.json` | nombre, clase, ataque, defensa, cuerpo, mente, movimiento, descripcion |
 | Armas y equipo | `juegos/heroquest/data/armas.json` | nombre, tipo (Arma cuerpo a cuerpo / Arma a distancia / Armadura / Poción), ataque, defensa, coste, descripcion |
 | Monstruos | `juegos/heroquest/data/monstruos.json` | nombre, ataque, defensa, cuerpo, mente, movimiento, descripcion |
-| Hechizos | `juegos/heroquest/data/hechizos.json` | nombre, escuela (Mago / Hechicero), coste_mente, descripcion |
+| Hechizos | `juegos/heroquest/data/hechizos.json` | nombre, escuela elemental (Agua / Aire / Fuego / Tierra / Terror), coste_mente, descripcion |
 | Misiones | `juegos/heroquest/data/misiones.json` | nombre, tablero, nivel, introduccion, objetivo, recompensa, entrada_heroes[], puertas[], salas[] |
-| Tableros | `juegos/heroquest/data/tableros.json` | id, nombre, columnas, filas, salas[] (rects en coordenadas globales de la cuadrícula) |
+| Tableros | `juegos/heroquest/data/tableros.json` | id, nombre, columnas, filas, salas[] (numero, rects en coordenadas globales de la cuadrícula, color). Se genera desde el SVG del tablero con `tablero_svg.py` |
 | Modelos 3D | `juegos/heroquest/data/impresion3d.json` | recurso de referencia (no editable): plataformas, categorías y buscadores/tags de archivos 3D gratuitos (héroes, monstruos, mobiliario, tablero, dados) |
 | Modelos 3D WH40K | `juegos/heroquest/data/impresion3d_warhammer40k.json` | recurso de referencia (no editable): mismo esquema que `impresion3d.json` pero para Warhammer 40K por facciones (marines del caos, demonios del caos, tiránidos, eldars, taus, orkos, necrones, marines espaciales proxy y terreno de tablero) |
 
@@ -61,6 +61,11 @@ Los scripts de utilidad viven en `juegos/heroquest/scripts/`:
   Sustituye a los antiguos `nueva_arma.py`, `nuevo_monstruo.py` y `nuevo_personaje.py`
 - `nueva_mision.py` — añade una misión montable en tablero
 - `eliminar.py` — borrar una entrada por nombre
+- `tablero_svg.py` — genera `tableros.json` desde el **SVG** de un tablero
+  (`--svg <ruta> --id <tablero>`). Es la forma recomendada de digitalizar/corregir
+  un tablero: parsea salas (`<rect>` y `<path>` en L), las numera de forma canónica
+  (orden de lectura), guarda su color y deja el resto como pasillo. La alternativa
+  para fotos es `tablero_calibrar.py` + `.rooms.txt` + `tablero_construir.py`
 - `tablero.py` — `ver` imprime un tablero; `validar` comprueba todas las misiones
   contra sus tableros (API pública: `punto_valido`, `sala_pertenece`)
 - `mapa.py` — genera una imagen PNG/SVG del tablero y/o de una misión montada
@@ -92,8 +97,14 @@ Los scripts de utilidad viven en `juegos/heroquest/scripts/`:
 - `generar_fondos.py` — genera los **fondos de reverso** por categoría (equipo,
   tesoro, enemigo, heroe, magia) como escenas ambientales SVG rasterizadas a PNG
   (1000×1400) en `sources/arte_fondos/` (SVG fuente en `sources/arte_fondos_svg/`).
-  Se usan con `carta_item.py --carta_completa --fondo_verso <fichero>.png`.
-  Reserva bandas oscuras arriba/abajo para el banner y la leyenda de la carta
+  La magia se desglosa por **escuelas elementales** (`magia_agua`, `magia_aire`,
+  `magia_fuego`, `magia_tierra`, `magia_terror`), que comparten el santuario
+  arcano con paleta, orbe y motivos propios. El reverso de cada hechizo elige su
+  fondo según el campo `escuela`. Se usan con
+  `carta_item.py --carta_completa --fondo_verso <fichero>.png`.
+  Reserva bandas oscuras arriba/abajo para el banner y la leyenda de la carta.
+  Algunas escenas incrustan **paths de iconos libres** (Material Design Icons /
+  SVG Repo, Apache 2.0) con su atribución en el propio script.
 - `imprimir_cartas.py` — genera un **PDF A4** para imprimir cartas como hojas
   plegables (anverso|reverso lado a lado, para doblar y meter en protector), a
   tamaño real 63×88 mm con marcas de corte, 3 por hoja. Entrada por `--todo`,
@@ -119,6 +130,9 @@ Los scripts de utilidad viven en `juegos/heroquest/scripts/`:
   lo especifica (y qué tablero usar si no está claro), o propón una y llévala a
   cabo con datos coherentes. Toda misión debe referenciar un tablero modelado y
   sus coordenadas deben ser válidas (compruébalo con `tablero.py validar`).
+- Para **digitalizar o corregir un tablero**, parte de su SVG y usa
+  `tablero_svg.py` (fuente de verdad reproducible). Si cambian las coordenadas de
+  las salas, revalida las misiones y reubica monstruos/tesoros que queden fuera.
 - Para **crear o mejorar el arte de una carta** (armas/objetos), edita/añade su
   función de dibujo en `generar_arte.py` (SVG vectorial: degradados para el
   metal/oro/gemas, un reflejo de lustre y una sombra suave dan volumen) y regenera
@@ -135,10 +149,15 @@ Los scripts de utilidad viven en `juegos/heroquest/scripts/`:
   automáticamente. Itera mirando el PNG.
 - Para **crear o mejorar un fondo de reverso**, edita su función de escena en
   `generar_fondos.py` (reutiliza `_muro`, `_luz`, `_antorcha`, `_bandas`,
-  `_vineta`, `_espada`) y regenera con
-  `uv run juegos/heroquest/scripts/generar_fondos.py --solo <categoria>`. Mantén
-  despejadas las bandas superior e inferior (banner "HeroQuest" y leyenda) e itera
-  mirando el reverso compuesto (`carta_item.py --carta_completa --fondo_verso ...`).
+  `_vineta`, `_espada`, `_circulo_runa`, `_runas`, `_pedestal`, `_orbe` o
+  `_santuario_elemental` para las escuelas de magia) y regenera con
+  `uv run juegos/heroquest/scripts/generar_fondos.py --solo <categoria>` (las
+  escuelas de magia son `magia_agua`, `magia_aire`, `magia_fuego`, `magia_tierra`,
+  `magia_terror`). Mantén despejadas las bandas superior e inferior (banner
+  "HeroQuest" y leyenda) e itera mirando el reverso compuesto
+  (`carta_item.py --carta_completa --fondo_verso ...`). Si quieres usar glifos de
+  librerías libres (Material Design Icons/SVG Repo, freesvg.org, Magnific),
+  incrusta su `path` en la escena con su atribución en un comentario del script.
 - Tras modificar ficheros JSON, valida que sigan siendo JSON correcto.
 
 ## Recursos externos

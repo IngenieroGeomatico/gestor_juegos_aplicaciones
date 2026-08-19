@@ -270,7 +270,19 @@ leyenda inferior. Hay un fondo por categoría en `sources/arte_fondos/`:
 | `tesoro_back.png` | tesoro | cámara del tesoro: cofre con oro, monedas y gemas |
 | `enemigo_back.png` | monstruos | mazmorra: reja, cadenas y calavera de ojos rojos |
 | `heroe_back.png` | héroes | salón heroico: escudo heráldico y estandartes |
-| `magia_back.png` | hechizos | santuario arcano: orbe, círculo rúnico y velas |
+| `magia_back.png` | magia (genérico) | santuario arcano: orbe, círculo rúnico y velas |
+| `magia_agua_back.png` | hechizos de **Agua** | santuario acuático: charco reflectante, ondas y el rayo de agua |
+| `magia_aire_back.png` | hechizos de **Aire** | santuario eólico: remolinos de viento y plumas |
+| `magia_fuego_back.png` | hechizos de **Fuego** | santuario ígneo: brasero y llamas desatadas |
+| `magia_tierra_back.png` | hechizos de **Tierra** | santuario telúrico: raíces colgantes, grietas y musgo |
+| `magia_terror_back.png` | hechizos de **Terror** | santuario desecrado: niebla, ojos rojos y cuervos |
+
+Las escenas de las distintas escuelas de magia comparten el esqueleto del
+santuario arcano (círculo rúnico, pedestal, orbe y velas) pero cambian la paleta,
+el orbe y los motivos de cada elemento. El reverso de cada hechizo elige
+**automáticamente** el fondo de su escuela a partir del campo `escuela` de la
+carta (`Bola de fuego` → `magia_fuego_back.png`, `Dardo de caos` →
+`magia_terror_back.png`, ...).
 
 Se generan con `generar_fondos.py`, misma filosofía que el anverso (**SVG =
 fuente de verdad**, rasterizado a PNG con `resvg`), en formato 1000×1400
@@ -286,10 +298,18 @@ pasa `--fondo_verso <fichero>.png` a `carta_item.py` (o `--fondo` a
 `imprimir_cartas.py`).
 
 ```bash
-uv run juegos/heroquest/scripts/generar_fondos.py               # regenera los 5
+uv run juegos/heroquest/scripts/generar_fondos.py               # regenera todos
 uv run juegos/heroquest/scripts/generar_fondos.py --solo magia  # solo uno
 uv run juegos/heroquest/scripts/generar_fondos.py --svg-solo    # SVG sin PNG
 ```
+
+> **Glifos de librerías libres.** Algunas escenas incrustan **paths de iconos de
+> librerías libres** (p. ej. el rayo de agua de *Material Design Icons*, Apache
+> 2.0, vía [SVG Repo](https://www.svgrepo.com/); también se pueden usar
+> [freesvg.org](https://freesvg.org/) o la sección de SVGs gratuitos de
+> [Magnific](https://www.magnific.com/free-photos-vectors/free-svg)). El path se
+> incrusta directamente en el SVG que genera el script (con su color original y
+> su atribución), así la escena sigue siendo reproducible y autocontenida.
 
 Para usar un fondo en el reverso de una carta, pásalo con `--fondo_verso` (busca
 en `sources/arte_fondos/`) junto a `--carta_completa`:
