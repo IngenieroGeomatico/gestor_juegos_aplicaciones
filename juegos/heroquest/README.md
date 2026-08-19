@@ -158,6 +158,10 @@ uv run juegos/heroquest/scripts/preparar_reversos.py
 uv run juegos/heroquest/scripts/generar_arte.py                 # todo
 uv run juegos/heroquest/scripts/generar_arte.py --solo "Daga"   # solo una
 
+# (Re)generar los fondos de reverso por categoría (SVG vectorial -> PNG)
+uv run juegos/heroquest/scripts/generar_fondos.py               # todos
+uv run juegos/heroquest/scripts/generar_fondos.py --solo tesoro # solo uno
+
 # Eliminar una entrada por nombre
 uv run juegos/heroquest/scripts/eliminar.py --tipo monstruos --nombre "Basilisco"
 ```
@@ -222,6 +226,44 @@ Para **añadir o mejorar** un arte, escribe/edita su función de dibujo en
 `_empunadura`, `_pomo`, `_gema`, `_engaste`, …) para mantener un estilo coherente,
 y regenéralo. El flujo recomendado es **iterar mirando el PNG**: genéralo, ábrelo,
 corrige proporciones/geometría y repite hasta que quede bien.
+
+### El fondo del reverso (`scripts/generar_fondos.py` y `sources/arte_fondos/`)
+
+El reverso de cada carta lleva de fondo una **escena ambiental temática** según
+su categoría, y encima la carta dibuja su marco, el banner "HeroQuest" y la
+leyenda inferior. Hay un fondo por categoría en `sources/arte_fondos/`:
+
+| Fichero | Categoría | Escena |
+|---------|-----------|--------|
+| `equipo_back.png` | equipo (armas/armaduras/pociones) | armería: panoplia de armas, escudo, antorchas |
+| `tesoro_back.png` | tesoro | cámara del tesoro: cofre con oro, monedas y gemas |
+| `enemigo_back.png` | monstruos | mazmorra: reja, cadenas y calavera de ojos rojos |
+| `heroe_back.png` | héroes | salón heroico: escudo heráldico y estandartes |
+| `magia_back.png` | hechizos | santuario arcano: orbe, círculo rúnico y velas |
+
+Se generan con `generar_fondos.py`, misma filosofía que el anverso (**SVG =
+fuente de verdad**, rasterizado a PNG con `resvg`), en formato 1000×1400
+(proporción 63×88 de la carta). Cada escena reserva **bandas oscuras arriba y
+abajo** para que el banner y la leyenda que pinta la carta encima se lean bien.
+Los SVG fuente quedan en `sources/arte_fondos_svg/`.
+
+```bash
+uv run juegos/heroquest/scripts/generar_fondos.py               # regenera los 5
+uv run juegos/heroquest/scripts/generar_fondos.py --solo magia  # solo uno
+uv run juegos/heroquest/scripts/generar_fondos.py --svg-solo    # SVG sin PNG
+```
+
+Para usar un fondo en el reverso de una carta, pásalo con `--fondo_verso` (busca
+en `sources/arte_fondos/`) junto a `--carta_completa`:
+
+```bash
+uv run juegos/heroquest/scripts/carta_item.py --tipo hechizo --nombre "Bola de fuego" \
+  --carta_completa --fondo_verso magia_back.png --formato png
+```
+
+Para **añadir o mejorar** un fondo, edita su función de escena en
+`generar_fondos.py` reutilizando las piezas comunes (`_muro`, `_luz`, `_antorcha`,
+`_bandas`, `_vineta`, `_espada`) y regenéralo, iterando mirando el PNG.
 
 ### Arquitectura de las cartas (`scripts/tipos_carta/`)
 

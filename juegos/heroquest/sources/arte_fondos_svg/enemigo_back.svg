@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1400" viewBox="0 0 1000 1400">
+  <defs>
+    <linearGradient id="piedra" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#161a20"/>
+      <stop offset="50%" stop-color="#20262e"/>
+      <stop offset="100%" stop-color="#0e1116"/>
+    </linearGradient>
+    <radialGradient id="luz" cx="50%" cy="52%" r="55%">
+      <stop offset="0%" stop-color="#8fd0ff" stop-opacity="0.45"/>
+      <stop offset="45%" stop-color="#8fd0ff" stop-opacity="0.16"/>
+      <stop offset="100%" stop-color="#8fd0ff" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="vineta" cx="50%" cy="50%" r="72%">
+      <stop offset="55%" stop-color="#000000" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.72"/>
+    </radialGradient>
+    <linearGradient id="madera" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#4a2f16"/>
+      <stop offset="50%" stop-color="#7a4f28"/>
+      <stop offset="100%" stop-color="#3a2410"/>
+    </linearGradient>
+    <linearGradient id="acero" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#5a626f"/>
+      <stop offset="45%" stop-color="#aab2c0"/>
+      <stop offset="55%" stop-color="#c8cfdb"/>
+      <stop offset="100%" stop-color="#454b57"/>
+    </linearGradient>
+    <radialGradient id="llama" cx="50%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#fff3c0"/>
+      <stop offset="40%" stop-color="#ffb03a"/>
+      <stop offset="100%" stop-color="#e0521a" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="oro" cx="40%" cy="32%" r="72%">
+      <stop offset="0%" stop-color="#ffe9ad"/>
+      <stop offset="55%" stop-color="#c99a3f"/>
+      <stop offset="100%" stop-color="#6f4e18"/>
+    </radialGradient>
+    <radialGradient id="gema" cx="40%" cy="32%" r="75%">
+      <stop offset="0%" stop-color="#d8ecff"/>
+      <stop offset="45%" stop-color="#5b8be0"/>
+      <stop offset="100%" stop-color="#1f3f8a"/>
+    </radialGradient>
+    <linearGradient id="banda" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#000000" stop-opacity="0.7"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+<rect width="1000" height="1400" fill="url(#piedra)"/><g stroke="#0a0d12" stroke-width="4" opacity="0.55"><line x1="0" y1="300" x2="1000" y2="300"/><line x1="0" y1="560" x2="1000" y2="560"/><line x1="0" y1="820" x2="1000" y2="820"/><line x1="0" y1="1080" x2="1000" y2="1080"/><line x1="250" y1="300" x2="250" y2="560"/><line x1="620" y1="300" x2="620" y2="560"/><line x1="130" y1="560" x2="130" y2="820"/><line x1="500" y1="560" x2="500" y2="820"/><line x1="820" y1="560" x2="820" y2="820"/><line x1="360" y1="820" x2="360" y2="1080"/><line x1="700" y1="820" x2="700" y2="1080"/></g><g stroke="#5a4128" stroke-width="2" opacity="0.22"><line x1="60" y1="380" x2="200" y2="378"/><line x1="700" y1="420" x2="880" y2="424"/><line x1="120" y1="640" x2="300" y2="642"/><line x1="560" y1="700" x2="760" y2="698"/><line x1="300" y1="940" x2="520" y2="944"/><line x1="640" y1="1000" x2="860" y2="998"/></g><ellipse cx="500" cy="720" rx="520" ry="560" fill="url(#luz)"/><g stroke="#20262e" stroke-width="14" opacity="0.7"><line x1="260" y1="360" x2="260" y2="1000"/><line x1="350" y1="360" x2="350" y2="1000"/><line x1="440" y1="360" x2="440" y2="1000"/><line x1="530" y1="360" x2="530" y2="1000"/><line x1="620" y1="360" x2="620" y2="1000"/><line x1="710" y1="360" x2="710" y2="1000"/><line x1="240" y1="440" x2="760" y2="440"/><line x1="240" y1="900" x2="760" y2="900"/></g><g stroke="#3a434e" stroke-width="4" opacity="0.5"><line x1="256" y1="360" x2="256" y2="1000"/><line x1="346" y1="360" x2="346" y2="1000"/><line x1="436" y1="360" x2="436" y2="1000"/><line x1="526" y1="360" x2="526" y2="1000"/><line x1="616" y1="360" x2="616" y2="1000"/><line x1="706" y1="360" x2="706" y2="1000"/></g><g transform="translate(500 690)"><path d="M -100 -40 C -104 -150 -60 -178 0 -178 C 60 -178 104 -150 100 -40 C 96 6 78 24 58 40 C 54 58 48 74 40 92 L 24 100 L 12 122 L 0 104 L -12 122 L -24 100 L -40 92 C -48 74 -54 58 -58 40 C -78 24 -96 6 -100 -40 Z" fill="#cfc7b6" stroke="#6f685a" stroke-width="4" stroke-linejoin="round"/><path d="M 0 -178 C 60 -178 104 -150 100 -40 C 96 6 78 24 58 40 C 40 30 30 -60 20 -170 Z" fill="#a59c8a" opacity="0.5"/><path d="M 0 -170 L -6 -120 L 4 -80" fill="none" stroke="#8a8272" stroke-width="2.5" opacity="0.6"/><path d="M -78 -70 C -60 -84 -30 -80 -22 -54 C -26 -20 -54 -8 -74 -22 C -86 -40 -86 -58 -78 -70 Z" fill="#080a0e"/><path d="M 78 -70 C 60 -84 30 -80 22 -54 C 26 -20 54 -8 74 -22 C 86 -40 86 -58 78 -70 Z" fill="#080a0e"/><circle cx="-50" cy="-46" r="11" fill="#ff2a20"/><circle cx="50" cy="-46" r="11" fill="#ff2a20"/><circle cx="-50" cy="-46" r="22" fill="#ff2a20" opacity="0.28"/><circle cx="50" cy="-46" r="22" fill="#ff2a20" opacity="0.28"/><path d="M 0 -20 L -18 26 L 0 14 L 18 26 Z" fill="#080a0e"/><path d="M -58 -8 C -40 6 -20 10 0 10 C 20 10 40 6 58 -8" fill="none" stroke="#8a8272" stroke-width="2" opacity="0.5"/><g fill="#cfc7b6" stroke="#6f685a" stroke-width="1.5"><rect x="-42" y="60" width="15" height="30" rx="3"/><rect x="-24" y="62" width="15" height="34" rx="3"/><rect x="-6" y="62" width="12" height="36" rx="3"/><rect x="9" y="62" width="15" height="34" rx="3"/><rect x="27" y="60" width="15" height="30" rx="3"/></g><g stroke="#080a0e" stroke-width="2" opacity="0.7"><line x1="-27" y1="60" x2="-27" y2="90"/><line x1="-9" y1="62" x2="-9" y2="96"/><line x1="9" y1="62" x2="9" y2="96"/><line x1="27" y1="60" x2="27" y2="90"/></g></g><g transform="translate(200 360)" stroke="#3a434e" stroke-width="8" fill="none" opacity="0.6"><ellipse cx="0" cy="40" rx="12" ry="22"/><ellipse cx="0" cy="86" rx="12" ry="22"/><ellipse cx="0" cy="132" rx="12" ry="22"/><ellipse cx="0" cy="178" rx="12" ry="22"/><ellipse cx="0" cy="224" rx="12" ry="22"/><ellipse cx="0" cy="270" rx="12" ry="22"/></g><g transform="translate(800 360)" stroke="#3a434e" stroke-width="8" fill="none" opacity="0.6"><ellipse cx="0" cy="40" rx="12" ry="22"/><ellipse cx="0" cy="86" rx="12" ry="22"/><ellipse cx="0" cy="132" rx="12" ry="22"/><ellipse cx="0" cy="178" rx="12" ry="22"/><ellipse cx="0" cy="224" rx="12" ry="22"/><ellipse cx="0" cy="270" rx="12" ry="22"/></g><rect x="0" y="0" width="1000" height="330" fill="url(#banda)"/><rect x="0" y="0" width="1000" height="330" fill="url(#banda)" transform="translate(0 1400) scale(1 -1)"/><rect width="1000" height="1400" fill="url(#vineta)"/></svg>

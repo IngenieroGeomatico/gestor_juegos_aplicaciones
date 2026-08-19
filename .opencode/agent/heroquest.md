@@ -87,6 +87,11 @@ Los scripts de utilidad viven en `juegos/heroquest/scripts/`:
   PNG finales a `sources/arte/` con el nombre que espera `render_carta`
   (el `slug` de la carta, p. ej. `Báculo_del_mago.png`). Usa `--solo "<nombre>"`
   para uno, `--svg-solo` para no rasterizar
+- `generar_fondos.py` — genera los **fondos de reverso** por categoría (equipo,
+  tesoro, enemigo, heroe, magia) como escenas ambientales SVG rasterizadas a PNG
+  (1000×1400) en `sources/arte_fondos/` (SVG fuente en `sources/arte_fondos_svg/`).
+  Se usan con `carta_item.py --carta_completa --fondo_verso <fichero>.png`.
+  Reserva bandas oscuras arriba/abajo para el banner y la leyenda de la carta
 - `tipos_carta/` — paquete con un módulo por tipo de carta (campos, stats,
   validación, arte, reverso) y un registro común (`registro.py`)
 - `data_store.py` — funciones compartidas (cargar, guardar, añadir, existe,
@@ -118,6 +123,12 @@ Los scripts de utilidad viven en `juegos/heroquest/scripts/`:
   para mantener un estilo coherente. **Itera mirando el PNG**: genéralo, ábrelo,
   corrige proporciones/geometría y repite. Respeta el nombre de fichero (el `slug`
   de la carta) para que `render_carta` lo localice por convención.
+- Para **crear o mejorar un fondo de reverso**, edita su función de escena en
+  `generar_fondos.py` (reutiliza `_muro`, `_luz`, `_antorcha`, `_bandas`,
+  `_vineta`, `_espada`) y regenera con
+  `uv run juegos/heroquest/scripts/generar_fondos.py --solo <categoria>`. Mantén
+  despejadas las bandas superior e inferior (banner "HeroQuest" y leyenda) e itera
+  mirando el reverso compuesto (`carta_item.py --carta_completa --fondo_verso ...`).
 - Tras modificar ficheros JSON, valida que sigan siendo JSON correcto.
 
 ## Recursos externos
