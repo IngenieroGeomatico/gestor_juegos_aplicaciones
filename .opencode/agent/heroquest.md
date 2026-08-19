@@ -81,12 +81,14 @@ Los scripts de utilidad viven en `juegos/heroquest/scripts/`:
 - `preparar_reversos.py` — recorta/endereza las fotos `*_back.jpg` de `sources/`
   hacia `sources/reversos/`
 - `render_carta.py` — dibuja el anverso de una carta (SVG y PNG) según su familia
-- `generar_arte.py` — genera el **arte del anverso** de armas/objetos (espada,
-  hacha, poción, etc.) como SVG vectorial detallado y lo rasteriza a PNG con
-  `resvg`. Los SVG (fuente de verdad, editables) van a `sources/arte_svg/`; los
-  PNG finales a `sources/arte/` con el nombre que espera `render_carta`
-  (el `slug` de la carta, p. ej. `Báculo_del_mago.png`). Usa `--solo "<nombre>"`
-  para uno, `--svg-solo` para no rasterizar
+- `generar_arte.py` — genera el **arte del anverso** de armas/objetos y **hechizos**
+  (espada, hacha, poción; bola de fuego, curar heridas, dardo de caos) como SVG
+  vectorial detallado y lo rasteriza a PNG con `resvg`. Los SVG (fuente de verdad,
+  editables) van a `sources/arte_svg/`; los PNG finales a `sources/arte/` con el
+  nombre que espera `render_carta` (el `slug` de la carta, p. ej.
+  `Báculo_del_mago.png`). Usa `--solo "<nombre>"` para uno, `--svg-solo` para no rasterizar
+- `arte_comun.py` — utilidades compartidas por los tres generadores de arte
+  (`slug` y `rasterizar` con resvg)
 - `generar_retratos.py` — genera los **retratos de anverso de héroes y monstruos**
   (Bárbaro, Enano, Elfo, Mago; Trasgo, Orco, Fimir, Guerrero del Caos, Gárgola)
   como bustos SVG rasterizados a PNG en `sources/arte/` (mismo `slug` y carpeta

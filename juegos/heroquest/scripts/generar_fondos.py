@@ -24,6 +24,8 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
+from arte_comun import rasterizar as _rasterizar_png
+
 FONDOS_DIR = Path(__file__).resolve().parent.parent / "sources" / "arte_fondos"
 FONDOS_SVG_DIR = Path(__file__).resolve().parent.parent / "sources" / "arte_fondos_svg"
 
@@ -393,12 +395,7 @@ ESCENAS = {
 
 
 def _rasterizar(svg: str, ruta_png: Path) -> None:
-    import resvg_py
-
-    datos = resvg_py.svg_to_bytes(svg_string=svg, width=ANCHO, height=ALTO)
-    if not isinstance(datos, (bytes, bytearray)):
-        datos = bytes(datos)
-    ruta_png.write_bytes(datos)
+    _rasterizar_png(svg, ruta_png, ANCHO, ALTO)
 
 
 def generar(solo: str | None, svg_solo: bool) -> None:

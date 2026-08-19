@@ -235,6 +235,10 @@ Para **añadir o mejorar** un arte, escribe/edita su función de dibujo en
 y regenéralo. El flujo recomendado es **iterar mirando el PNG**: genéralo, ábrelo,
 corrige proporciones/geometría y repite hasta que quede bien.
 
+`generar_arte.py` cubre las armas/objetos **y los hechizos** (Bola de fuego,
+Curar heridas, Dardo de caos), cada uno con su icono mágico propio (esfera de
+llamas, cruz de vida radiante, proyectil de caos).
+
 Los **héroes y monstruos** tienen su propio arte: un **retrato de busto** por
 personaje (Bárbaro, Enano, Elfo, Mago; Trasgo, Orco, Fimir, Guerrero del Caos,
 Gárgola), generado con `generar_retratos.py`. Van también a `sources/arte/` con
@@ -244,6 +248,9 @@ las piezas de dibujo comunes (`_cabeza`, `_ojos`, `_cejas`, `_hombros`, `_cuello
 `_nariz`), y cada personaje añade sus rasgos distintivos (melena, orejas
 puntiagudas, sombrero de mago, ojo único del Fimir, cuernos del Caos, alas de
 piedra de la Gárgola).
+
+> `generar_arte.py`, `generar_retratos.py` y `generar_fondos.py` comparten
+> utilidades comunes en `scripts/arte_comun.py` (`slug` y `rasterizar` con resvg).
 
 ```bash
 uv run juegos/heroquest/scripts/generar_retratos.py             # los 9
