@@ -1,0 +1,27 @@
+# Ejemplo de mazo para imprimir con imprimir_cartas.py
+#
+#   uv run juegos/heroquest/scripts/imprimir_cartas.py --lista juegos/heroquest/mazo_ejemplo.yml
+#
+# Cada entrada es "tipo: Nombre". Tipos válidos: personaje, monstruo, arma,
+# armadura, pocion, hechizo. El campo "cantidad" (opcional) imprime varias copias.
+cartas:
+  # Héroes
+  - personaje: Bárbaro
+  - personaje: Enano
+  - personaje: Elfo
+  - personaje: Mago
+
+  # Equipo inicial
+  - arma: Espada corta
+  - arma: Daga
+  - armadura: Escudo
+
+  # Enemigos habituales (varias copias)
+  - monstruo: Orco
+    cantidad: 3
+  - monstruo: Trasgo
+    cantidad: 3
+
+  # Hechizos
+  - hechizo: Bola de fuego
+  - hechizo: Curar heridas

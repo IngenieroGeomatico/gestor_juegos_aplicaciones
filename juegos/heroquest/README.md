@@ -166,6 +166,10 @@ uv run juegos/heroquest/scripts/generar_retratos.py --solo Orco # solo uno
 uv run juegos/heroquest/scripts/generar_fondos.py               # todos
 uv run juegos/heroquest/scripts/generar_fondos.py --solo tesoro # solo uno
 
+# Imprimir cartas: PDF A4 con hojas plegables (anverso|reverso) para recortar
+uv run juegos/heroquest/scripts/imprimir_cartas.py --todo
+uv run juegos/heroquest/scripts/imprimir_cartas.py --lista juegos/heroquest/mazo_ejemplo.yml
+
 # Eliminar una entrada por nombre
 uv run juegos/heroquest/scripts/eliminar.py --tipo monstruos --nombre "Basilisco"
 ```
@@ -284,6 +288,48 @@ uv run juegos/heroquest/scripts/carta_item.py --tipo hechizo --nombre "Bola de f
 Para **añadir o mejorar** un fondo, edita su función de escena en
 `generar_fondos.py` reutilizando las piezas comunes (`_muro`, `_luz`, `_antorcha`,
 `_bandas`, `_vineta`, `_espada`) y regenéralo, iterando mirando el PNG.
+
+### Imprimir cartas en PDF (`scripts/imprimir_cartas.py`)
+
+Genera un **PDF A4** con las cartas listas para imprimir en casa. Cada carta se
+maqueta como **hoja plegable**: anverso y reverso lado a lado en la misma cara del
+papel. Imprimes a una sola cara, recortas por las marcas de corte, **doblas por la
+línea de pliegue** central y metes la carta (ya con sus dos caras) en un protector.
+
+- Tamaño **real** 63 × 88 mm por cara (126 × 88 mm la pieza plegable), a 300 DPI.
+- **3 piezas por hoja A4**, con marcas de corte en las esquinas y marca de pliegue.
+- El **reverso** de cada carta usa automáticamente el fondo temático de su
+  categoría (`equipo`/`tesoro`/`enemigo`/`heroe`/`magia`) si existe en
+  `sources/arte_fondos/`.
+- Usa Pillow para el PDF (sin dependencias nuevas de peso); el YAML necesita
+  `pyyaml` (ya en `pyproject.toml`).
+
+Tres formas de indicar qué cartas imprimir:
+
+```bash
+# 1) Todo el mazo del juego
+uv run juegos/heroquest/scripts/imprimir_cartas.py --todo --salida mazo.pdf
+
+# 2) Un listado en YAML (con cantidades opcionales)
+uv run juegos/heroquest/scripts/imprimir_cartas.py --lista juegos/heroquest/mazo_ejemplo.yml
+
+# 3) Cartas sueltas por la línea de comandos (repetible)
+uv run juegos/heroquest/scripts/imprimir_cartas.py --carta "arma:Espada corta" --carta "monstruo:Orco"
+```
+
+Formato del YAML (ver [mazo_ejemplo.yml](mazo_ejemplo.yml)):
+
+```yaml
+cartas:
+  - personaje: Bárbaro
+  - arma: Espada corta
+  - monstruo: Orco
+    cantidad: 3        # nº de copias (opcional, por defecto 1)
+  - hechizo: Bola de fuego
+```
+
+Los PDF se guardan en `juegos/heroquest/cartas/` (ignorado por git); usa
+`--salida <ruta>` para otra ubicación.
 
 ### Arquitectura de las cartas (`scripts/tipos_carta/`)
 
