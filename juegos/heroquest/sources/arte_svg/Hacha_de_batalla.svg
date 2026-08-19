@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="700" height="500" viewBox="0 0 700 500">
+  <defs>
+    <radialGradient id="fondo" cx="50%" cy="55%" r="65%">
+      <stop offset="0%" stop-color="#3a3350"/>
+      <stop offset="55%" stop-color="#211d33"/>
+      <stop offset="100%" stop-color="#14111f"/>
+    </radialGradient>
+    <radialGradient id="halo" cx="50%" cy="48%" r="52%">
+      <stop offset="0%" stop-color="#ffdca8" stop-opacity="0.34"/>
+      <stop offset="45%" stop-color="#e8b878" stop-opacity="0.11"/>
+      <stop offset="100%" stop-color="#e8b878" stop-opacity="0"/>
+    </radialGradient>
+
+    <linearGradient id="acero" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"  stop-color="#7f889b"/>
+      <stop offset="28%" stop-color="#d4dae4"/>
+      <stop offset="50%" stop-color="#ffffff"/>
+      <stop offset="60%" stop-color="#c3cbd8"/>
+      <stop offset="100%" stop-color="#646c7d"/>
+    </linearGradient>
+    <linearGradient id="acero-h" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"  stop-color="#7f889b"/>
+      <stop offset="28%" stop-color="#d4dae4"/>
+      <stop offset="50%" stop-color="#ffffff"/>
+      <stop offset="60%" stop-color="#c3cbd8"/>
+      <stop offset="100%" stop-color="#646c7d"/>
+    </linearGradient>
+    <linearGradient id="acero-lustre" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95"/>
+      <stop offset="35%" stop-color="#ffffff" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+
+    <linearGradient id="oro" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"  stop-color="#f6d98a"/>
+      <stop offset="45%" stop-color="#c99a3f"/>
+      <stop offset="100%" stop-color="#7d5a1e"/>
+    </linearGradient>
+    <radialGradient id="oro-pomo" cx="38%" cy="32%" r="72%">
+      <stop offset="0%"  stop-color="#ffe9ad"/>
+      <stop offset="55%" stop-color="#c99a3f"/>
+      <stop offset="100%" stop-color="#6f4e18"/>
+    </radialGradient>
+
+    <linearGradient id="cuero" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"  stop-color="#5c3a1e"/>
+      <stop offset="50%" stop-color="#8a5a2f"/>
+      <stop offset="100%" stop-color="#42280f"/>
+    </linearGradient>
+
+    <linearGradient id="madera" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"  stop-color="#5a3a1c"/>
+      <stop offset="45%" stop-color="#9a6b3a"/>
+      <stop offset="55%" stop-color="#84592e"/>
+      <stop offset="100%" stop-color="#3f2711"/>
+    </linearGradient>
+
+    <radialGradient id="gema-azul" cx="38%" cy="30%" r="75%">
+      <stop offset="0%" stop-color="#cfe4ff"/>
+      <stop offset="40%" stop-color="#5b8be0"/>
+      <stop offset="100%" stop-color="#1f3f8a"/>
+    </radialGradient>
+    <radialGradient id="gema-roja" cx="38%" cy="30%" r="75%">
+      <stop offset="0%" stop-color="#ffd0cf"/>
+      <stop offset="40%" stop-color="#e0555b"/>
+      <stop offset="100%" stop-color="#8a1f2a"/>
+    </radialGradient>
+    <radialGradient id="gema-verde" cx="38%" cy="30%" r="75%">
+      <stop offset="0%" stop-color="#d4ffdf"/>
+      <stop offset="40%" stop-color="#4fbf7a"/>
+      <stop offset="100%" stop-color="#1a6b3a"/>
+    </radialGradient>
+    <radialGradient id="pocion-roja" cx="42%" cy="30%" r="80%">
+      <stop offset="0%" stop-color="#ff9a8f"/>
+      <stop offset="45%" stop-color="#e23b46"/>
+      <stop offset="100%" stop-color="#8f1420"/>
+    </radialGradient>
+    <linearGradient id="vidrio" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.55"/>
+      <stop offset="30%" stop-color="#cfe0e6" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#7d9aa6" stop-opacity="0.30"/>
+    </linearGradient>
+
+    <filter id="sombra" x="-60%" y="-60%" width="220%" height="220%">
+      <feDropShadow dx="0" dy="6" stdDeviation="7" flood-color="#000000" flood-opacity="0.45"/>
+    </filter>
+  </defs>
+<rect width="700" height="500" fill="url(#fondo)"/><ellipse cx="350" cy="185" rx="255" ry="180" fill="url(#halo)"/><g filter="url(#sombra)"><g transform="translate(350 0)"><rect x="-11" y="80" width="22" height="350" rx="10" fill="url(#madera)" stroke="#2e1a09" stroke-width="2"/><rect x="-6" y="86" width="4" height="338" rx="2" fill="#c69a5f" opacity="0.4"/><rect x="-14" y="418" width="28" height="16" rx="6" fill="url(#oro)" stroke="#5c4413" stroke-width="2"/><path d="M -6 118 L -46 104 L -128 120 L -150 176 L -128 232 L -46 248 L -6 234 Z" fill="url(#acero-h)" stroke="#454b5b" stroke-width="2.5" stroke-linejoin="round"/><path d="M 6 118 L 46 104 L 128 120 L 150 176 L 128 232 L 46 248 L 6 234 Z" fill="url(#acero-h)" stroke="#454b5b" stroke-width="2.5" stroke-linejoin="round"/><path d="M -128 120 L -150 176 L -128 232" fill="none" stroke="#ffffff" stroke-width="4" opacity="0.55" stroke-linecap="round"/><path d="M 128 120 L 150 176 L 128 232" fill="none" stroke="#ffffff" stroke-width="4" opacity="0.55" stroke-linecap="round"/><path d="M -6 128 L -44 116 L -44 236 L -6 224 Z" fill="#5b6376" opacity="0.4"/><path d="M 6 128 L 44 116 L 44 236 L 6 224 Z" fill="#8fa0b5" opacity="0.35"/><rect x="-16" y="112" width="32" height="128" rx="8" fill="url(#acero-h)" stroke="#454b5b" stroke-width="2.5"/><rect x="-11" y="118" width="6" height="116" rx="3" fill="#ffffff" opacity="0.4"/><rect x="-18" y="120" width="36" height="8" rx="4" fill="url(#oro)" stroke="#5c4413" stroke-width="1.5"/><rect x="-18" y="224" width="36" height="8" rx="4" fill="url(#oro)" stroke="#5c4413" stroke-width="1.5"/><circle cx="0" cy="92" r="13" fill="url(#oro-pomo)" stroke="#5c4413" stroke-width="2.5"/><circle cx="-4.2" cy="87.8" r="3.6" fill="#fff2cf" opacity="0.75"/></g></g></svg>
