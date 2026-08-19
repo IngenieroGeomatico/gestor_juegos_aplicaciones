@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="700" height="500" viewBox="0 0 700 500">
+  <defs>
+    <radialGradient id="fondo" cx="50%" cy="52%" r="65%">
+      <stop offset="0%" stop-color="#3a3350"/>
+      <stop offset="55%" stop-color="#211d33"/>
+      <stop offset="100%" stop-color="#14111f"/>
+    </radialGradient>
+    <radialGradient id="halo" cx="50%" cy="45%" r="52%">
+      <stop offset="0%" stop-color="#ffdca8" stop-opacity="0.30"/>
+      <stop offset="55%" stop-color="#e8b878" stop-opacity="0.10"/>
+      <stop offset="100%" stop-color="#e8b878" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="piel" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#e8b083"/>
+      <stop offset="55%" stop-color="#c88a5c"/>
+      <stop offset="100%" stop-color="#8f5c38"/>
+    </linearGradient>
+    <linearGradient id="piel-palida" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f2ddc4"/>
+      <stop offset="55%" stop-color="#dcc0a2"/>
+      <stop offset="100%" stop-color="#b0906e"/>
+    </linearGradient>
+    <linearGradient id="piel-verde" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#9cc16a"/>
+      <stop offset="55%" stop-color="#6f9a41"/>
+      <stop offset="100%" stop-color="#3f6122"/>
+    </linearGradient>
+    <linearGradient id="piel-verde-osc" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#6f8f4a"/>
+      <stop offset="55%" stop-color="#4a6b2c"/>
+      <stop offset="100%" stop-color="#293f18"/>
+    </linearGradient>
+    <linearGradient id="piedra" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#9aa2ac"/>
+      <stop offset="55%" stop-color="#6d757f"/>
+      <stop offset="100%" stop-color="#42484f"/>
+    </linearGradient>
+    <linearGradient id="pelo" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#7a4a1e"/>
+      <stop offset="100%" stop-color="#3f2610"/>
+    </linearGradient>
+    <linearGradient id="pelo-blanco" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#c3c8d0"/>
+    </linearGradient>
+    <linearGradient id="pelo-rojo" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#c9642a"/>
+      <stop offset="100%" stop-color="#7a3312"/>
+    </linearGradient>
+    <linearGradient id="cuero" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#7a4f28"/>
+      <stop offset="100%" stop-color="#3a2410"/>
+    </linearGradient>
+    <linearGradient id="acero" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#7f889b"/>
+      <stop offset="50%" stop-color="#eef2f7"/>
+      <stop offset="100%" stop-color="#646c7d"/>
+    </linearGradient>
+    <linearGradient id="acero-osc" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#2a2e36"/>
+      <stop offset="50%" stop-color="#565d68"/>
+      <stop offset="100%" stop-color="#1c2026"/>
+    </linearGradient>
+    <linearGradient id="tela-azul" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3a5bbf"/>
+      <stop offset="100%" stop-color="#1f2f6a"/>
+    </linearGradient>
+    <linearGradient id="tela-verde" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3f7a4a"/>
+      <stop offset="100%" stop-color="#204028"/>
+    </linearGradient>
+    <linearGradient id="tela-roja" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#a5342f"/>
+      <stop offset="100%" stop-color="#5c1613"/>
+    </linearGradient>
+    <radialGradient id="oro" cx="40%" cy="32%" r="72%">
+      <stop offset="0%" stop-color="#ffe9ad"/>
+      <stop offset="55%" stop-color="#c99a3f"/>
+      <stop offset="100%" stop-color="#6f4e18"/>
+    </radialGradient>
+    <radialGradient id="gema-azul" cx="40%" cy="30%" r="75%">
+      <stop offset="0%" stop-color="#d8ecff"/>
+      <stop offset="45%" stop-color="#5b8be0"/>
+      <stop offset="100%" stop-color="#1f3f8a"/>
+    </radialGradient>
+    <filter id="sombra" x="-60%" y="-60%" width="220%" height="220%">
+      <feDropShadow dx="0" dy="6" stdDeviation="7" flood-color="#000000" flood-opacity="0.45"/>
+    </filter>
+  </defs>
+<rect width="700" height="500" fill="url(#fondo)"/><ellipse cx="350" cy="230" rx="240" ry="210" fill="url(#halo)"/><g filter="url(#sombra)" transform="translate(350 0)"><path d="M -150 500 C -150 384 -96 330 -30 322 L 30 322 C 96 330 150 384 150 500 Z" fill="url(#tela-azul)" stroke="#1a2550" stroke-width="3"/><g fill="url(#oro)" opacity="0.85"><polygon points="-96,430 -90,446 -74,446 -87,456 -82,472 -96,462 -110,472 -105,456 -118,446 -102,446"/><polygon points="96,450 101,463 114,463 104,471 108,484 96,476 84,484 88,471 78,463 91,463"/></g><rect x="-30" y="292" width="60" height="60" rx="14" fill="url(#piel-palida)" stroke="#a8886a" stroke-width="2"/><path d="M -70 190 C -70 150 70 150 70 190 C 70 250 42 294 0 300 C -42 294 -70 250 -70 190 Z" fill="url(#piel-palida)" stroke="#a8886a" stroke-width="3"/><path d="M 70 190 C 70 250 42 294 0 300 C 28 284 41 250 42 196 Z" fill="#000000" opacity="0.14"/><path d="M -60 220 C -80 340 -30 470 0 470 C 30 470 80 340 60 220 C 42 262 -42 262 -60 220 Z" fill="url(#pelo-blanco)" stroke="#b7bcc6" stroke-width="2.5"/><g stroke="#c3c8d0" stroke-width="3" opacity="0.6" fill="none" stroke-linecap="round"><path d="M -24 300 C -28 360 -24 420 -14 456"/><path d="M 24 300 C 28 360 24 420 14 456"/><path d="M 0 300 L 0 466"/></g><path d="M -30 236 C -16 248 -4 248 0 244 C 4 248 16 248 30 236" fill="none" stroke="#e8ecf2" stroke-width="7" stroke-linecap="round"/><path d="M -50 190 L -18 188" stroke="#d8dce4" stroke-width="6" stroke-linecap="round"/><path d="M 18 188 L 50 190" stroke="#d8dce4" stroke-width="6" stroke-linecap="round"/><ellipse cx="-28" cy="204" rx="8" ry="6.2" fill="#2a2a2a"/><ellipse cx="28" cy="204" rx="8" ry="6.2" fill="#2a2a2a"/><circle cx="-25" cy="201" r="2.4" fill="#ffffff" opacity="0.85"/><circle cx="31" cy="201" r="2.4" fill="#ffffff" opacity="0.85"/><path d="M 0 208 L -8 236 L 8 236 Z" fill="#c8a888" opacity="0.6"/><path d="M -92 156 C -70 150 70 150 92 156 C 84 130 40 120 0 -20 C -40 120 -84 130 -92 156 Z" fill="url(#tela-azul)" stroke="#141d3c" stroke-width="3" stroke-linejoin="round"/><path d="M -100 158 C -40 172 40 172 100 158 C 40 148 -40 148 -100 158 Z" fill="url(#tela-azul)" stroke="#141d3c" stroke-width="2"/><path d="M -74 128 C -30 138 30 138 66 122" fill="none" stroke="url(#oro)" stroke-width="7"/><polygon points="0,44 9,68 34,68 14,84 22,110 0,94 -22,110 -14,84 -34,68 -9,68" fill="url(#oro)"/><path d="M 0 -20 C 20 6 40 20 58 18 C 44 34 22 34 6 22 Z" fill="url(#tela-azul)" stroke="#141d3c" stroke-width="2.5"/></g></svg>

@@ -154,9 +154,13 @@ uv run juegos/heroquest/scripts/mision_html.py --mision "El Refugio del Guardiá
 # Preparar los reversos de las cartas a partir de las fotos de sources/
 uv run juegos/heroquest/scripts/preparar_reversos.py
 
-# (Re)generar el arte del anverso de las cartas (SVG vectorial -> PNG)
+# (Re)generar el arte del anverso de armas/objetos (SVG vectorial -> PNG)
 uv run juegos/heroquest/scripts/generar_arte.py                 # todo
 uv run juegos/heroquest/scripts/generar_arte.py --solo "Daga"   # solo una
+
+# (Re)generar los retratos de héroes y monstruos (SVG vectorial -> PNG)
+uv run juegos/heroquest/scripts/generar_retratos.py             # todos
+uv run juegos/heroquest/scripts/generar_retratos.py --solo Orco # solo uno
 
 # (Re)generar los fondos de reverso por categoría (SVG vectorial -> PNG)
 uv run juegos/heroquest/scripts/generar_fondos.py               # todos
@@ -226,6 +230,22 @@ Para **añadir o mejorar** un arte, escribe/edita su función de dibujo en
 `_empunadura`, `_pomo`, `_gema`, `_engaste`, …) para mantener un estilo coherente,
 y regenéralo. El flujo recomendado es **iterar mirando el PNG**: genéralo, ábrelo,
 corrige proporciones/geometría y repite hasta que quede bien.
+
+Los **héroes y monstruos** tienen su propio arte: un **retrato de busto** por
+personaje (Bárbaro, Enano, Elfo, Mago; Trasgo, Orco, Fimir, Guerrero del Caos,
+Gárgola), generado con `generar_retratos.py`. Van también a `sources/arte/` con
+el `slug` del nombre (`Bárbaro.png`, `Guerrero_del_Caos.png`, …), así que
+`render_carta` los usa por la misma convención. Comparten `sources/arte_svg/` y
+las piezas de dibujo comunes (`_cabeza`, `_ojos`, `_cejas`, `_hombros`, `_cuello`,
+`_nariz`), y cada personaje añade sus rasgos distintivos (melena, orejas
+puntiagudas, sombrero de mago, ojo único del Fimir, cuernos del Caos, alas de
+piedra de la Gárgola).
+
+```bash
+uv run juegos/heroquest/scripts/generar_retratos.py             # los 9
+uv run juegos/heroquest/scripts/generar_retratos.py --solo Mago # solo uno
+uv run juegos/heroquest/scripts/generar_retratos.py --svg-solo  # SVG sin PNG
+```
 
 ### El fondo del reverso (`scripts/generar_fondos.py` y `sources/arte_fondos/`)
 

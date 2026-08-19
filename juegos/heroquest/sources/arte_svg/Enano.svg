@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="700" height="500" viewBox="0 0 700 500">
+  <defs>
+    <radialGradient id="fondo" cx="50%" cy="52%" r="65%">
+      <stop offset="0%" stop-color="#3a3350"/>
+      <stop offset="55%" stop-color="#211d33"/>
+      <stop offset="100%" stop-color="#14111f"/>
+    </radialGradient>
+    <radialGradient id="halo" cx="50%" cy="45%" r="52%">
+      <stop offset="0%" stop-color="#ffdca8" stop-opacity="0.30"/>
+      <stop offset="55%" stop-color="#e8b878" stop-opacity="0.10"/>
+      <stop offset="100%" stop-color="#e8b878" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="piel" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#e8b083"/>
+      <stop offset="55%" stop-color="#c88a5c"/>
+      <stop offset="100%" stop-color="#8f5c38"/>
+    </linearGradient>
+    <linearGradient id="piel-palida" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f2ddc4"/>
+      <stop offset="55%" stop-color="#dcc0a2"/>
+      <stop offset="100%" stop-color="#b0906e"/>
+    </linearGradient>
+    <linearGradient id="piel-verde" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#9cc16a"/>
+      <stop offset="55%" stop-color="#6f9a41"/>
+      <stop offset="100%" stop-color="#3f6122"/>
+    </linearGradient>
+    <linearGradient id="piel-verde-osc" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#6f8f4a"/>
+      <stop offset="55%" stop-color="#4a6b2c"/>
+      <stop offset="100%" stop-color="#293f18"/>
+    </linearGradient>
+    <linearGradient id="piedra" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#9aa2ac"/>
+      <stop offset="55%" stop-color="#6d757f"/>
+      <stop offset="100%" stop-color="#42484f"/>
+    </linearGradient>
+    <linearGradient id="pelo" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#7a4a1e"/>
+      <stop offset="100%" stop-color="#3f2610"/>
+    </linearGradient>
+    <linearGradient id="pelo-blanco" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#c3c8d0"/>
+    </linearGradient>
+    <linearGradient id="pelo-rojo" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#c9642a"/>
+      <stop offset="100%" stop-color="#7a3312"/>
+    </linearGradient>
+    <linearGradient id="cuero" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#7a4f28"/>
+      <stop offset="100%" stop-color="#3a2410"/>
+    </linearGradient>
+    <linearGradient id="acero" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#7f889b"/>
+      <stop offset="50%" stop-color="#eef2f7"/>
+      <stop offset="100%" stop-color="#646c7d"/>
+    </linearGradient>
+    <linearGradient id="acero-osc" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#2a2e36"/>
+      <stop offset="50%" stop-color="#565d68"/>
+      <stop offset="100%" stop-color="#1c2026"/>
+    </linearGradient>
+    <linearGradient id="tela-azul" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3a5bbf"/>
+      <stop offset="100%" stop-color="#1f2f6a"/>
+    </linearGradient>
+    <linearGradient id="tela-verde" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3f7a4a"/>
+      <stop offset="100%" stop-color="#204028"/>
+    </linearGradient>
+    <linearGradient id="tela-roja" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#a5342f"/>
+      <stop offset="100%" stop-color="#5c1613"/>
+    </linearGradient>
+    <radialGradient id="oro" cx="40%" cy="32%" r="72%">
+      <stop offset="0%" stop-color="#ffe9ad"/>
+      <stop offset="55%" stop-color="#c99a3f"/>
+      <stop offset="100%" stop-color="#6f4e18"/>
+    </radialGradient>
+    <radialGradient id="gema-azul" cx="40%" cy="30%" r="75%">
+      <stop offset="0%" stop-color="#d8ecff"/>
+      <stop offset="45%" stop-color="#5b8be0"/>
+      <stop offset="100%" stop-color="#1f3f8a"/>
+    </radialGradient>
+    <filter id="sombra" x="-60%" y="-60%" width="220%" height="220%">
+      <feDropShadow dx="0" dy="6" stdDeviation="7" flood-color="#000000" flood-opacity="0.45"/>
+    </filter>
+  </defs>
+<rect width="700" height="500" fill="url(#fondo)"/><ellipse cx="350" cy="230" rx="240" ry="210" fill="url(#halo)"/><g filter="url(#sombra)" transform="translate(350 0)"><path d="M -150 500 C -150 384 -96 330 -30 322 L 30 322 C 96 330 150 384 150 500 Z" fill="url(#tela-verde)" stroke="#204028" stroke-width="3"/><path d="M -150 366 C -170 336 -140 314 -104 320 C -84 336 -86 366 -104 380 Z" fill="url(#acero)" stroke="#2c313b" stroke-width="3"/><path d="M 150 366 C 170 336 140 314 104 320 C 84 336 86 366 104 380 Z" fill="url(#acero)" stroke="#2c313b" stroke-width="3"/><rect x="-30" y="292" width="60" height="60" rx="14" fill="url(#piel)" stroke="#5c3a20" stroke-width="2"/><path d="M -82 190 C -82 120 82 120 82 190 C 82 250 49 294 0 300 C -49 294 -82 250 -82 190 Z" fill="url(#piel)" stroke="#5c3a20" stroke-width="3"/><path d="M 82 190 C 82 250 49 294 0 300 C 33 284 48 250 49 196 Z" fill="#000000" opacity="0.14"/><path d="M -70 210 C -84 300 -40 400 0 400 C 40 400 84 300 70 210 C 50 250 -50 250 -70 210 Z" fill="url(#pelo-rojo)" stroke="#5a2410" stroke-width="2.5"/><g stroke="#7a3312" stroke-width="4" opacity="0.6" fill="none" stroke-linecap="round"><path d="M -30 300 C -34 330 -32 360 -28 384"/><path d="M 30 300 C 34 330 32 360 28 384"/><path d="M 0 300 L 0 396"/></g><rect x="-38" y="372" width="20" height="10" rx="4" fill="url(#oro)" stroke="#5c4413" stroke-width="1.5"/><rect x="18" y="372" width="20" height="10" rx="4" fill="url(#oro)" stroke="#5c4413" stroke-width="1.5"/><path d="M -84 176 C -84 108 84 108 84 176 L 60 176 C 60 150 -60 150 -60 176 Z" fill="url(#acero)" stroke="#2c313b" stroke-width="3"/><rect x="-84" y="168" width="168" height="18" rx="6" fill="url(#acero-osc)" stroke="#1c2026" stroke-width="2"/><path d="M -84 172 C -120 160 -128 130 -120 112 C -108 132 -96 150 -76 162 Z" fill="#e8e2d0" stroke="#8a8272" stroke-width="2"/><path d="M 84 172 C 120 160 128 130 120 112 C 108 132 96 150 76 162 Z" fill="#e8e2d0" stroke="#8a8272" stroke-width="2"/><circle cx="0" cy="177" r="8" fill="url(#oro)" stroke="#5c4413" stroke-width="1.5"/><path d="M -52 194 L -16 202" stroke="#7a3312" stroke-width="8" stroke-linecap="round"/><path d="M 16 202 L 52 194" stroke="#7a3312" stroke-width="8" stroke-linecap="round"/><ellipse cx="-32" cy="214" rx="9" ry="7.0" fill="#2a2a2a"/><ellipse cx="32" cy="214" rx="9" ry="7.0" fill="#2a2a2a"/><circle cx="-29" cy="211" r="2.4" fill="#ffffff" opacity="0.85"/><circle cx="35" cy="211" r="2.4" fill="#ffffff" opacity="0.85"/><path d="M 0 222 L -10 246 L 10 246 Z" fill="#a06a44" opacity="0.6"/></g></svg>
