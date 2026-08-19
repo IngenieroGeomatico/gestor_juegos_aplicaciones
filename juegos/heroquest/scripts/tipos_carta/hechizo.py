@@ -12,7 +12,7 @@ class Hechizo(TipoCarta):
     def campos(self) -> list[Campo]:
         return [
             Campo("nombre", "Nombre del hechizo"),
-            Campo("escuela", "Escuela (Mago o Hechicero)"),
+            Campo("escuela", "Escuela elemental (Agua, Aire, Fuego, Tierra, Terror)"),
             Campo("coste_mente", "Coste en puntos de mente", tipo=int),
             Campo("descripcion", "Descripción del efecto", requerido=False, default=""),
         ]
@@ -22,6 +22,14 @@ class Hechizo(TipoCarta):
 
     def subtitulo(self, entrada: dict) -> str:
         return f"Hechizo de {entrada.get('escuela', '')}"
+
+    def familia_fondo(self, entrada: dict | None = None) -> str | None:
+        """Fondo de reverso por escuela elemental: 'Fuego' -> 'magia_fuego'."""
+        if entrada:
+            escuela = str(entrada.get("escuela", "")).strip().lower()
+            if escuela:
+                return f"magia_{escuela}"
+        return "magia"
 
 
 HECHIZO = Hechizo(

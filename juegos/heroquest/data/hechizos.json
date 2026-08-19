@@ -1,19 +1,19 @@
 [
   {
     "nombre": "Bola de fuego",
-    "escuela": "Mago",
+    "escuela": "Fuego",
     "coste_mente": 2,
     "descripcion": "Lanza una bola de fuego que causa un punto de daño a un monstruo adyacente."
   },
   {
     "nombre": "Curar heridas",
-    "escuela": "Mago",
+    "escuela": "Tierra",
     "coste_mente": 1,
     "descripcion": "Devuelve un punto de cuerpo a un héroe hasta que recupere su máximo."
   },
   {
     "nombre": "Dardo de caos",
-    "escuela": "Hechicero",
+    "escuela": "Terror",
     "coste_mente": 1,
     "descripcion": "Proyectil corrupto que causa un punto de daño a un monstruo en línea de visión."
   }

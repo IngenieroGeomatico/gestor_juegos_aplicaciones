@@ -91,6 +91,14 @@ class TipoCarta:
         limpio = REVERSOS_DIR / f"{Path(self.reverso_img).stem}.png"
         return limpio if limpio.exists() else SOURCES_DIR / self.reverso_img
 
+    def familia_fondo(self, entrada: dict | None = None) -> str | None:
+        """Categoría del fondo temático del reverso según la entrada.
+
+        Devuelve el prefijo del fichero en `sources/arte_fondos/` (`<prefijo>_back.png`).
+        None significa "sin especificidad": se usa la categoría genérica del tipo.
+        """
+        return None
+
     def valor_campo(self, args: dict, campo: Campo) -> object | None:
         """Valor de un campo: usa el default declarado si el arg viene vacío."""
         valor = args.get(campo.nombre)

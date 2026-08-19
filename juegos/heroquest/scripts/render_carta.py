@@ -338,14 +338,32 @@ def _imagen_data_uri(ruta: Path, ancho: int, alto: int) -> str:
     return f"data:image/jpeg;base64,{base64.b64encode(buf.getvalue()).decode('ascii')}"
 
 
-def _ruta_reverso(tipo: TipoCarta, fondo_verso: str | None = None) -> Path:
+def _categorias_verso(tipo: TipoCarta, entrada: dict | None = None) -> list[str]:
+    """Candidatas de fondo temático del reverso, de más específica a más genérica.
+
+    Primero la categoría específica de la entrada (p. ej. un hechizo de fuego
+    devuelve `magia_fuego`), después la categoría del tipo (`magia`).
+    """
+    categorias: list[str] = []
+    especifica = tipo.familia_fondo(entrada)
+    if especifica:
+        categorias.append(especifica)
+    base = _categoria_verso(tipo)
+    if base not in categorias:
+        categorias.append(base)
+    return categorias
+
+
+def _ruta_reverso(tipo: TipoCarta, fondo_verso: str | None = None,
+                  entrada: dict | None = None) -> Path:
     """Ruta de la imagen de fondo del reverso.
 
     Prioridad:
     1. `fondo_verso` explícito → ese fichero de `sources/arte_fondos/` (override).
     2. Por defecto: el fondo temático de la categoría de la carta
        (`sources/arte_fondos/<categoria>_back.png`, p. ej. `enemigo_back.png`),
-       si existe.
+       primero la específica de la entrada (p. ej. `magia_fuego_back.png` para
+       un hechizo de fuego) y luego la genérica del tipo, si existen.
     3. Si no hay fondo temático: el reverso estándar del tipo (`tipo.reverso()`,
        la foto de la carta real en `sources/reversos/`).
     """
@@ -354,14 +372,16 @@ def _ruta_reverso(tipo: TipoCarta, fondo_verso: str | None = None) -> Path:
         if not ruta.exists():
             raise FileNotFoundError(f"No existe el fondo de reverso: {ruta}")
         return ruta
-    tematico = FONDOS_DIR / f"{_categoria_verso(tipo)}_back.png"
-    if tematico.exists():
-        return tematico
+    for categoria in _categorias_verso(tipo, entrada):
+        tematico = FONDOS_DIR / f"{categoria}_back.png"
+        if tematico.exists():
+            return tematico
     return tipo.reverso()
 
 
 def _reverso_data_uri(tipo: TipoCarta, ancho: int, alto: int,
-                      fondo_verso: str | None = None) -> str | None:
+                      fondo_verso: str | None = None,
+                      entrada: dict | None = None) -> str | None:
     """Foto del reverso como data URI, recortada y reescalada a la rejilla.
 
     Hace un recorte "cover" para llenar exactamente el panel de la carta
@@ -369,7 +389,7 @@ def _reverso_data_uri(tipo: TipoCarta, ancho: int, alto: int,
     SVG incrustado sea ligero. `fondo_verso` permite elegir un fondo de
     `sources/arte_fondos/` en lugar de la foto estándar del tipo.
     """
-    ruta = _ruta_reverso(tipo, fondo_verso)
+    ruta = _ruta_reverso(tipo, fondo_verso, entrada)
     if not ruta.exists():
         return None
     return _imagen_data_uri(ruta, ancho, alto)
@@ -384,16 +404,18 @@ def _categoria_verso(tipo: TipoCarta) -> str:
 
 
 def _contenido_verso(tipo: TipoCarta, ancho: int, alto: int, leyenda: str | None = LEYENDA_VERSO,
-                     fondo_verso: str | None = None) -> str:
+                     fondo_verso: str | None = None, entrada: dict | None = None) -> str:
     """Interior del SVG del reverso: imagen como fondo + capa vectorial.
 
     `leyenda` es la leyenda inferior; si es None se usa la categoría del tipo
     de carta ('equipo', 'enemigo', 'heroe', 'tesoro', ...). `fondo_verso`
     selecciona un fondo de `sources/arte_fondos/` en lugar de la foto estándar.
+    `entrada` permite elegir el fondo temático específico de esa carta (p. ej. la
+    escuela elemental de un hechizo).
     """
     if not leyenda:
         leyenda = _categoria_verso(tipo)
-    foto = _reverso_data_uri(tipo, ancho, alto, fondo_verso)
+    foto = _reverso_data_uri(tipo, ancho, alto, fondo_verso, entrada)
     if foto:
         fondo = (f'<image x="0" y="0" width="{ancho}" height="{alto}" '
                  f'href="{foto}" preserveAspectRatio="xMidYMid slice" />')
@@ -428,13 +450,14 @@ def _contenido_verso(tipo: TipoCarta, ancho: int, alto: int, leyenda: str | None
 
 
 def render_verso_svg(tipo: TipoCarta, ancho: int = DISENO_ANCHO, alto: int = DISENO_ALTO,
-                     leyenda: str | None = LEYENDA_VERSO, fondo_verso: str | None = None) -> str:
+                     leyenda: str | None = LEYENDA_VERSO, fondo_verso: str | None = None,
+                     entrada: dict | None = None) -> str:
     """Devuelve el SVG (str) del reverso de la carta."""
     px_ancho = round(ancho * PX_CARTA_ANCHO / DISENO_ANCHO)
     px_alto = round(alto * PX_CARTA_ALTO / DISENO_ALTO)
     return "\n".join([
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {ancho} {alto}" width="{px_ancho}" height="{px_alto}">',
-        _contenido_verso(tipo, ancho, alto, leyenda, fondo_verso),
+        _contenido_verso(tipo, ancho, alto, leyenda, fondo_verso, entrada),
         "</svg>",
     ])
 
@@ -449,7 +472,8 @@ def render_svg_doble(tipo: TipoCarta, entrada: dict, ancho: int = DISENO_ANCHO, 
     """
     ancho_doble = ancho * 2
     frente = f'<g transform="translate(0,0)">{_contenido_svg(tipo, entrada, ancho, alto)}</g>'
-    verso = f'<g transform="translate({ancho},0)">{_contenido_verso(tipo, ancho, alto, leyenda, fondo_verso)}</g>'
+    verso = (f'<g transform="translate({ancho},0)">'
+             f'{_contenido_verso(tipo, ancho, alto, leyenda, fondo_verso, entrada)}</g>')
     pliegue = "\n".join([
         f'<line x1="{ancho}" y1="0" x2="{ancho}" y2="{alto}" stroke="{COLOR_BORDE}" '
         f'stroke-width="1.5" stroke-dasharray="8 6" />',
