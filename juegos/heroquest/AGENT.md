@@ -92,6 +92,11 @@ Los scripts de utilidad viven en `juegos/heroquest/scripts/`:
   (1000×1400) en `sources/arte_fondos/` (SVG fuente en `sources/arte_fondos_svg/`).
   Se usan con `carta_item.py --carta_completa --fondo_verso <fichero>.png`.
   Reserva bandas oscuras arriba/abajo para el banner y la leyenda de la carta
+- `imprimir_cartas.py` — genera un **PDF A4** para imprimir cartas como hojas
+  plegables (anverso|reverso lado a lado, para doblar y meter en protector), a
+  tamaño real 63×88 mm con marcas de corte, 3 por hoja. Entrada por `--todo`,
+  `--lista <mazo.yml>` o `--carta "tipo:Nombre"` (repetible). El reverso usa el
+  fondo temático de la categoría automáticamente. PDF en `cartas/`
 - `tipos_carta/` — paquete con un módulo por tipo de carta (campos, stats,
   validación, arte, reverso) y un registro común (`registro.py`)
 - `data_store.py` — funciones compartidas (cargar, guardar, añadir, existe,
