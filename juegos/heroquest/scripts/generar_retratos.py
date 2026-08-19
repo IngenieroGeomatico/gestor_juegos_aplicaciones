@@ -21,14 +21,13 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
+from arte_comun import rasterizar as _rasterizar_png
+from arte_comun import slug as _slug
+
 ARTE_DIR = Path(__file__).resolve().parent.parent / "sources" / "arte"
 ARTE_SVG_DIR = Path(__file__).resolve().parent.parent / "sources" / "arte_svg"
 
 ANCHO, ALTO = 700, 500
-
-
-def _slug(nombre: str) -> str:
-    return "".join(c if c.isalnum() else "_" for c in nombre).strip("_")
 
 
 # ---------------------------------------------------------------------------
@@ -490,12 +489,7 @@ OBJETOS = {
 
 
 def _rasterizar(svg: str, ruta_png: Path) -> None:
-    import resvg_py
-
-    datos = resvg_py.svg_to_bytes(svg_string=svg, width=ANCHO, height=ALTO)
-    if not isinstance(datos, (bytes, bytearray)):
-        datos = bytes(datos)
-    ruta_png.write_bytes(datos)
+    _rasterizar_png(svg, ruta_png, ANCHO, ALTO)
 
 
 def generar(solo: str | None, svg_solo: bool) -> None:

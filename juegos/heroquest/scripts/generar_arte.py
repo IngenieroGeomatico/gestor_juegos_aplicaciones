@@ -21,15 +21,13 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
+from arte_comun import rasterizar as _rasterizar_png
+from arte_comun import slug as _slug
+
 ARTE_DIR = Path(__file__).resolve().parent.parent / "sources" / "arte"
 ARTE_SVG_DIR = Path(__file__).resolve().parent.parent / "sources" / "arte_svg"
 
 ANCHO, ALTO = 700, 500
-
-
-def _slug(nombre: str) -> str:
-    """Mismo criterio que data_store.slug: alfanuméricos y '_' en el resto."""
-    return "".join(c if c.isalnum() else "_" for c in nombre).strip("_")
 
 
 # ---------------------------------------------------------------------------
@@ -118,6 +116,24 @@ DEFS = """
       <stop offset="30%" stop-color="#cfe0e6" stop-opacity="0.18"/>
       <stop offset="100%" stop-color="#7d9aa6" stop-opacity="0.30"/>
     </linearGradient>
+
+    <!-- Hechizos -->
+    <radialGradient id="fuego" cx="50%" cy="58%" r="60%">
+      <stop offset="0%" stop-color="#fff3c0"/>
+      <stop offset="35%" stop-color="#ffd23a"/>
+      <stop offset="70%" stop-color="#f06a1e"/>
+      <stop offset="100%" stop-color="#a01f10"/>
+    </radialGradient>
+    <radialGradient id="curacion" cx="50%" cy="45%" r="60%">
+      <stop offset="0%" stop-color="#eafff0"/>
+      <stop offset="45%" stop-color="#7fe6a2"/>
+      <stop offset="100%" stop-color="#2a9a5a"/>
+    </radialGradient>
+    <radialGradient id="caos" cx="45%" cy="35%" r="70%">
+      <stop offset="0%" stop-color="#e0b0ff"/>
+      <stop offset="45%" stop-color="#8a3fd0"/>
+      <stop offset="100%" stop-color="#3a1060"/>
+    </radialGradient>
 
     <filter id="sombra" x="-60%" y="-60%" width="220%" height="220%">
       <feDropShadow dx="0" dy="6" stdDeviation="7" flood-color="#000000" flood-opacity="0.45"/>
@@ -525,6 +541,80 @@ def espada_de_gemas() -> str:
     return _lienzo(g)
 
 
+def bola_de_fuego() -> str:
+    """Hechizo: esfera de fuego con llamas y chispas."""
+    g = '<g transform="translate(350 250)">'
+    # resplandor
+    g += '<circle cx="0" cy="0" r="150" fill="#f06a1e" opacity="0.18"/>'
+    # lenguas de fuego alrededor del núcleo
+    llamas = [
+        "M 0 -150 C 26 -96 24 -70 0 -60 C -24 -70 -26 -96 0 -150 Z",
+        "M 132 -70 C 96 -40 74 -30 60 -46 C 58 -70 84 -92 132 -70 Z",
+        "M 132 70 C 96 40 74 30 60 46 C 58 70 84 92 132 70 Z",
+        "M 0 150 C 26 96 24 70 0 60 C -24 70 -26 96 0 150 Z",
+        "M -132 70 C -96 40 -74 30 -60 46 C -58 70 -84 92 -132 70 Z",
+        "M -132 -70 C -96 -40 -74 -30 -60 -46 C -58 -70 -84 -92 -132 -70 Z",
+    ]
+    for d in llamas:
+        g += f'<path d="{d}" fill="url(#fuego)" opacity="0.85"/>'
+    # núcleo incandescente
+    g += '<circle cx="0" cy="0" r="72" fill="url(#fuego)" stroke="#a01f10" stroke-width="3"/>'
+    g += '<circle cx="-20" cy="-22" r="22" fill="#fff3c0" opacity="0.85"/>'
+    # chispas
+    g += ('<g fill="#ffd23a">'
+          '<circle cx="96" cy="-108" r="7"/><circle cx="-110" cy="86" r="6"/>'
+          '<circle cx="118" cy="96" r="5"/><circle cx="-92" cy="-96" r="5"/></g>')
+    g += "</g>"
+    return _lienzo(g)
+
+
+def curar_heridas() -> str:
+    """Hechizo: cruz de vida radiante sobre un halo verde."""
+    g = '<g transform="translate(350 250)">'
+    g += '<circle cx="0" cy="0" r="150" fill="#2a9a5a" opacity="0.18"/>'
+    # rayos de luz
+    g += '<g stroke="#bff2cf" stroke-width="7" stroke-linecap="round" opacity="0.7">'
+    import math
+    for i in range(12):
+        ang = math.radians(i * 30)
+        x1, y1 = 96 * math.cos(ang), 96 * math.sin(ang)
+        x2, y2 = 132 * math.cos(ang), 132 * math.sin(ang)
+        g += f'<line x1="{x1:.0f}" y1="{y1:.0f}" x2="{x2:.0f}" y2="{y2:.0f}"/>'
+    g += '</g>'
+    # disco central
+    g += '<circle cx="0" cy="0" r="86" fill="url(#curacion)" stroke="#1f7a44" stroke-width="3"/>'
+    g += '<circle cx="-24" cy="-26" r="20" fill="#eafff0" opacity="0.7"/>'
+    # cruz de curación
+    g += '<rect x="-16" y="-52" width="32" height="104" rx="8" fill="#ffffff" stroke="#1f7a44" stroke-width="2"/>'
+    g += '<rect x="-52" y="-16" width="104" height="32" rx="8" fill="#ffffff" stroke="#1f7a44" stroke-width="2"/>'
+    g += "</g>"
+    return _lienzo(g)
+
+
+def dardo_de_caos() -> str:
+    """Hechizo: proyectil oscuro de caos con estela de energía."""
+    g = '<g transform="translate(350 250)">'
+    g += '<ellipse cx="0" cy="0" rx="180" ry="90" fill="#8a3fd0" opacity="0.15"/>'
+    # estela (de izquierda a derecha)
+    g += ('<path d="M -180 0 C -120 -34 -60 -30 -10 -14 L -10 14 C -60 30 -120 34 -180 0 Z" '
+          'fill="url(#caos)" opacity="0.55"/>')
+    g += ('<g stroke="#c98fff" stroke-width="4" stroke-linecap="round" opacity="0.7" fill="none">'
+          '<path d="M -170 -24 C -120 -30 -80 -26 -40 -16"/>'
+          '<path d="M -170 24 C -120 30 -80 26 -40 16"/></g>')
+    # punta del dardo (proyectil)
+    g += ('<path d="M 130 0 L 40 -46 C 10 -30 10 30 40 46 Z" '
+          'fill="url(#caos)" stroke="#3a1060" stroke-width="3" stroke-linejoin="round"/>')
+    # núcleo brillante
+    g += '<circle cx="46" cy="0" r="26" fill="url(#caos)"/>'
+    g += '<circle cx="38" cy="-8" r="9" fill="#e0b0ff" opacity="0.85"/>'
+    # runa/chispa de caos en la punta
+    g += ('<g stroke="#e0b0ff" stroke-width="3" stroke-linecap="round" opacity="0.85">'
+          '<path d="M 120 -26 L 132 -14 M 132 -26 L 120 -14"/>'
+          '<path d="M 96 40 L 108 52 M 108 40 L 96 52"/></g>')
+    g += "</g>"
+    return _lienzo(g)
+
+
 OBJETOS = {
     "Espada corta": espada_corta,
     "Daga": daga,
@@ -537,16 +627,14 @@ OBJETOS = {
     "Escudo": escudo,
     "Poción de curación": pocion_de_curacion,
     "Espada de gemas": espada_de_gemas,
+    "Bola de fuego": bola_de_fuego,
+    "Curar heridas": curar_heridas,
+    "Dardo de caos": dardo_de_caos,
 }
 
 
 def _rasterizar(svg: str, ruta_png: Path) -> None:
-    import resvg_py
-
-    datos = resvg_py.svg_to_bytes(svg_string=svg, width=ANCHO, height=ALTO)
-    if not isinstance(datos, (bytes, bytearray)):
-        datos = bytes(datos)
-    ruta_png.write_bytes(datos)
+    _rasterizar_png(svg, ruta_png, ANCHO, ALTO)
 
 
 def generar(solo: str | None, svg_solo: bool) -> None:

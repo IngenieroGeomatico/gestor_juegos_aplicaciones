@@ -81,6 +81,24 @@
       <stop offset="100%" stop-color="#7d9aa6" stop-opacity="0.30"/>
     </linearGradient>
 
+    <!-- Hechizos -->
+    <radialGradient id="fuego" cx="50%" cy="58%" r="60%">
+      <stop offset="0%" stop-color="#fff3c0"/>
+      <stop offset="35%" stop-color="#ffd23a"/>
+      <stop offset="70%" stop-color="#f06a1e"/>
+      <stop offset="100%" stop-color="#a01f10"/>
+    </radialGradient>
+    <radialGradient id="curacion" cx="50%" cy="45%" r="60%">
+      <stop offset="0%" stop-color="#eafff0"/>
+      <stop offset="45%" stop-color="#7fe6a2"/>
+      <stop offset="100%" stop-color="#2a9a5a"/>
+    </radialGradient>
+    <radialGradient id="caos" cx="45%" cy="35%" r="70%">
+      <stop offset="0%" stop-color="#e0b0ff"/>
+      <stop offset="45%" stop-color="#8a3fd0"/>
+      <stop offset="100%" stop-color="#3a1060"/>
+    </radialGradient>
+
     <filter id="sombra" x="-60%" y="-60%" width="220%" height="220%">
       <feDropShadow dx="0" dy="6" stdDeviation="7" flood-color="#000000" flood-opacity="0.45"/>
     </filter>

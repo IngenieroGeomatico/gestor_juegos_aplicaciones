@@ -15,7 +15,7 @@
     "cuerpo": 1,
     "mente": 4,
     "movimiento": 2,
-    "descripcion": "Bruto de piel verduzca, mas resistente que el Trasgo."
+    "descripcion": "Bruto de piel verduzca, más resistente que el Trasgo."
   },
   {
     "nombre": "Fimir",
@@ -24,7 +24,7 @@
     "cuerpo": 2,
     "mente": 3,
     "movimiento": 3,
-    "descripcion": "Siniestro ser de un solo ojo que empuña una maza en su unico brazo."
+    "descripcion": "Siniestro ser de un solo ojo que empuña una maza en su único brazo."
   },
   {
     "nombre": "Guerrero del Caos",
@@ -33,7 +33,7 @@
     "cuerpo": 2,
     "mente": 5,
     "movimiento": 2,
-    "descripcion": "Campeon del Caos atrapado en una armadura negra. Muy peligroso."
+    "descripcion": "Campeón del Caos atrapado en una armadura negra. Muy peligroso."
   },
   {
     "nombre": "Gárgola",
