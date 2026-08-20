@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Plantilla del CUADRO DE ESTADISTICAS de héroes y monstruos (familia stats).
+
+  Es un cuadro fijo de 5 columnas (héroe y monstruo siempre tienen 5 stats:
+  ataque, defensa, cuerpo, mente y movimiento). Se dibuja SUPERPUESTO sobre el
+  arte, en la banda inferior de la carta, con celdas semitransparentes para que
+  se intuya el arte por detrás pero se lean bien los valores.
+
+  El SVG tiene su propio viewBox (0 0 420 60): el código lo carga, rellena los
+  marcadores y lo coloca dentro del ancla `id="ph-stats"` de `anverso_stats.svg`
+  (ajusta posición y escala a esa caja). Puedes editar aquí el aspecto de las
+  celdas (colores, opacidad, bordes, tipografías) en Inkscape.
+
+  Marcadores (los rellena render_carta.py):
+  - {{COLOR}}        color de acento del tipo de carta.
+  - {{LABEL1..5}}    etiqueta de cada stat (Ataque, Defensa, ...).
+  - {{VALOR1..5}}    valor numérico de cada stat.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 60" width="420" height="60">
+  <defs>
+    <!-- Relleno de celda semitransparente (deja ver el arte por detrás). -->
+    <linearGradient id="sc-celda" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fbf6ea" stop-opacity="0.90" />
+      <stop offset="100%" stop-color="#efe6d2" stop-opacity="0.88" />
+    </linearGradient>
+  </defs>
+
+  <!-- Fila de etiquetas (banda superior) y valores (banda inferior).
+       5 columnas de 84 de ancho. Fila etiqueta: 0..24. Fila valor: 24..60. -->
+
+  <!-- Columna 1 -->
+  <g>
+    <rect x="0" y="0" width="84" height="24" fill="url(#sc-celda)" stroke="#4d2c1b" stroke-width="1" />
+    <rect x="0" y="24" width="84" height="36" fill="url(#sc-celda)" stroke="#4d2c1b" stroke-width="1" />
+    <rect x="0" y="0" width="84" height="3" fill="{{COLOR}}" opacity="0.55" />
+    <text x="42" y="16" font-family="Georgia, 'Times New Roman', serif" font-size="12"
+          font-weight="bold" text-anchor="middle" fill="#3a2416" font-variant="small-caps">{{LABEL1}}</text>
+    <text x="42" y="52" font-family="Georgia, 'Times New Roman', serif" font-size="28"
+          font-weight="bold" text-anchor="middle" fill="#3a2416">{{VALOR1}}</text>
+  </g>
+
+  <!-- Columna 2 -->
+  <g>
+    <rect x="84" y="0" width="84" height="24" fill="url(#sc-celda)" stroke="#4d2c1b" stroke-width="1" />
+    <rect x="84" y="24" width="84" height="36" fill="url(#sc-celda)" stroke="#4d2c1b" stroke-width="1" />
+    <rect x="84" y="0" width="84" height="3" fill="{{COLOR}}" opacity="0.55" />
+    <text x="126" y="16" font-family="Georgia, 'Times New Roman', serif" font-size="12"
+          font-weight="bold" text-anchor="middle" fill="#3a2416" font-variant="small-caps">{{LABEL2}}</text>
+    <text x="126" y="52" font-family="Georgia, 'Times New Roman', serif" font-size="28"
+          font-weight="bold" text-anchor="middle" fill="#3a2416">{{VALOR2}}</text>
+  </g>
+
+  <!-- Columna 3 -->
+  <g>
+    <rect x="168" y="0" width="84" height="24" fill="url(#sc-celda)" stroke="#4d2c1b" stroke-width="1" />
+    <rect x="168" y="24" width="84" height="36" fill="url(#sc-celda)" stroke="#4d2c1b" stroke-width="1" />
+    <rect x="168" y="0" width="84" height="3" fill="{{COLOR}}" opacity="0.55" />
+    <text x="210" y="16" font-family="Georgia, 'Times New Roman', serif" font-size="12"
+          font-weight="bold" text-anchor="middle" fill="#3a2416" font-variant="small-caps">{{LABEL3}}</text>
+    <text x="210" y="52" font-family="Georgia, 'Times New Roman', serif" font-size="28"
+          font-weight="bold" text-anchor="middle" fill="#3a2416">{{VALOR3}}</text>
+  </g>
+
+  <!-- Columna 4 -->
+  <g>
+    <rect x="252" y="0" width="84" height="24" fill="url(#sc-celda)" stroke="#4d2c1b" stroke-width="1" />
+    <rect x="252" y="24" width="84" height="36" fill="url(#sc-celda)" stroke="#4d2c1b" stroke-width="1" />
+    <rect x="252" y="0" width="84" height="3" fill="{{COLOR}}" opacity="0.55" />
+    <text x="294" y="16" font-family="Georgia, 'Times New Roman', serif" font-size="12"
+          font-weight="bold" text-anchor="middle" fill="#3a2416" font-variant="small-caps">{{LABEL4}}</text>
+    <text x="294" y="52" font-family="Georgia, 'Times New Roman', serif" font-size="28"
+          font-weight="bold" text-anchor="middle" fill="#3a2416">{{VALOR4}}</text>
+  </g>
+
+  <!-- Columna 5 -->
+  <g>
+    <rect x="336" y="0" width="84" height="24" fill="url(#sc-celda)" stroke="#4d2c1b" stroke-width="1" />
+    <rect x="336" y="24" width="84" height="36" fill="url(#sc-celda)" stroke="#4d2c1b" stroke-width="1" />
+    <rect x="336" y="0" width="84" height="3" fill="{{COLOR}}" opacity="0.55" />
+    <text x="378" y="16" font-family="Georgia, 'Times New Roman', serif" font-size="12"
+          font-weight="bold" text-anchor="middle" fill="#3a2416" font-variant="small-caps">{{LABEL5}}</text>
+    <text x="378" y="52" font-family="Georgia, 'Times New Roman', serif" font-size="28"
+          font-weight="bold" text-anchor="middle" fill="#3a2416">{{VALOR5}}</text>
+  </g>
+</svg>

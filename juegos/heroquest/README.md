@@ -247,7 +247,11 @@ el `slug` del nombre (`Bárbaro.png`, `Guerrero_del_Caos.png`, …), así que
 las piezas de dibujo comunes (`_cabeza`, `_ojos`, `_cejas`, `_hombros`, `_cuello`,
 `_nariz`), y cada personaje añade sus rasgos distintivos (melena, orejas
 puntiagudas, sombrero de mago, ojo único del Fimir, cuernos del Caos, alas de
-piedra de la Gárgola).
+piedra de la Gárgola). El lienzo del retrato es **vertical (520×600)**, con una
+proporción cercana a la del área de arte de la plantilla `anverso_stats.svg`
+(que llega hasta el borde inferior de la carta), para que el busto se vea grande
+y completo (cabeza arriba, hombros abajo) sin que el recorte "cover" de la carta
+lo corte por los lados.
 
 > `generar_arte.py`, `generar_retratos.py` y `generar_fondos.py` comparten
 > utilidades comunes en `scripts/arte_comun.py` (`slug` y `rasterizar` con resvg).
@@ -376,6 +380,46 @@ son orquestadores que consumen esas definiciones desde un registro común
 nuevo es crear un módulo y registrarlo. `render_carta.py` dibuja el anverso en dos
 familias de maquetación: `stats` (personaje, monstruo) y `descripcion` (arma,
 armadura, poción, hechizo), tanto en SVG como en PNG.
+
+### Plantillas de carta (`sources/plantillas/` y `scripts/plantillas.py`)
+
+La **estructura completa de la carta** (marco, banners, leyendas "HeroQuest" y de
+categoría, tabla de estadísticas, footer) ya **no está hardcodeada en Python**:
+vive como ficheros **SVG plantilla editables** (en Inkscape, p. ej.) bajo
+`sources/plantillas/`. Igual que con los tableros y el arte, el **SVG es la fuente
+de verdad**; `render_carta.py` solo inyecta el contenido dinámico.
+
+Hay una plantilla **por familia**, para anverso y reverso:
+
+| Fichero | Cara | Familia | Contenido |
+|---------|------|---------|-----------|
+| `anverso_stats.svg` | anverso | stats (héroes, monstruos) | banner de nombre y **arte que llega hasta el borde inferior**, con el cuadro de estadísticas **superpuesto** sobre la parte baja del arte |
+| `anverso_descripcion.svg` | anverso | descripcion (armas, armaduras, pociones, hechizos) | título, arte enmarcado, subtítulo, descripción y línea de stats |
+| `verso_stats.svg` | reverso | stats | banner "HeroQuest", panel central para la **descripción** (el héroe la muestra aquí; el monstruo la deja vacía) y leyenda de categoría |
+| `verso_descripcion.svg` | reverso | descripcion | banner "HeroQuest" y leyenda de categoría (reverso genérico) |
+| `stats_cuadro.svg` | — | stats | **cuadro de estadísticas** de 5 columnas (héroe/monstruo) que se coloca dentro del ancla `ph-stats` de `anverso_stats.svg`; celdas semitransparentes que se ven sobre el arte. Marcadores `{{LABEL1..5}}`, `{{VALOR1..5}}`, `{{COLOR}}` |
+
+**Contrato de plantilla** (documentado en cada `.svg` y en `plantillas.py`):
+
+- **Marcadores de texto** `{{CLAVE}}` dentro de `<text>`/`<tspan>` o de atributos:
+  `{{NOMBRE}}`, `{{SUBTITULO}}`, `{{LEYENDA}}` y `{{COLOR}}` (color de acento del
+  tipo). Se sustituyen por su valor (los textos se escapan; `{{COLOR}}` va tal cual).
+- **Elementos "ancla"** con `id="ph-*"`: cajas `<rect>` invisibles cuya **geometría**
+  (`x`, `y`, `width`, `height`) lee el código para colocar encima el contenido
+  generado. El `<rect>` desaparece de la carta final:
+  - `id="ph-arte"` → área de arte (imagen del objeto/personaje; en la familia
+    stats llega hasta el borde inferior de la carta),
+  - `id="ph-stats"` → en la familia descripcion, la línea de estadísticas; en la
+    familia stats, la caja donde se coloca el cuadro `stats_cuadro.svg`
+    superpuesto sobre el arte,
+  - `id="ph-descripcion"` → bloque de texto de la descripción,
+  - `id="ph-fondo"` → imagen de fondo temática del reverso (`sources/arte_fondos/`).
+
+Puedes **mover o redimensionar** cualquier ancla en Inkscape y el contenido se
+recoloca solo. Los marcadores `{{...}}` e `id="ph-*"` sobreviven a un guardado de
+Inkscape. Tras editar una plantilla, comprueba el resultado regenerando una carta
+(`carta_item.py`) y mirando el PNG. El módulo `scripts/plantillas.py` es el loader
+(cachea las plantillas, lee las anclas y sustituye los marcadores).
 
 Cada script valida que el nombre no exista ya y muestra ayuda con `-h`. `nueva_mision.py`
 valida además que cada monstruo/tesoro caiga dentro de la sala indicada y dentro del tablero.

@@ -80,7 +80,21 @@ Los scripts de utilidad viven en `juegos/heroquest/scripts/`:
   `juegos/heroquest/cartas/`
 - `preparar_reversos.py` — recorta/endereza las fotos `*_back.jpg` de `sources/`
   hacia `sources/reversos/`
-- `render_carta.py` — dibuja el anverso de una carta (SVG y PNG) según su familia
+- `render_carta.py` — dibuja el anverso y el reverso de una carta (SVG y PNG)
+  según su familia, rellenando las **plantillas SVG** de `sources/plantillas/`
+- `plantillas.py` — loader de las plantillas SVG de la carta: carga (con caché),
+  lee las anclas `id="ph-*"` y sustituye los marcadores `{{...}}`. La estructura
+  de la carta (marco, banners, leyendas, tabla de stats) vive en
+  `sources/plantillas/` como SVG editables (Inkscape), no en Python. Hay una
+  plantilla por familia y cara: `anverso_stats.svg` (arte hasta el borde
+  inferior con el cuadro de stats superpuesto), `anverso_descripcion.svg`,
+  `verso_stats.svg` (descripción del héroe en el reverso; el monstruo la deja
+  vacía) y `verso_descripcion.svg`. Además `stats_cuadro.svg` es el cuadro de
+  estadísticas de 5 columnas (héroe/monstruo) que se coloca superpuesto en el
+  ancla `ph-stats` del anverso; edítalo para cambiar el aspecto de las celdas.
+  Marcadores: `{{NOMBRE}}`, `{{SUBTITULO}}`, `{{LEYENDA}}`, `{{COLOR}}`,
+  `{{LABEL1..5}}`, `{{VALOR1..5}}`; anclas `ph-arte`, `ph-stats`,
+  `ph-descripcion`, `ph-fondo`
 - `generar_arte.py` — genera el **arte del anverso** de armas/objetos y **hechizos**
   (espada, hacha, poción; bola de fuego, curar heridas, dardo de caos) como SVG
   vectorial detallado y lo rasteriza a PNG con `resvg`. Los SVG (fuente de verdad,

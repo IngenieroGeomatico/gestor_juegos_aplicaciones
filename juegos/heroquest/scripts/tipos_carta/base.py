@@ -66,6 +66,12 @@ class TipoCarta:
     color: str = "#5d4037"
     simbolo: str = "✦"
 
+    # Si la descripcion de la carta se muestra en el REVERSO en lugar del
+    # anverso. Lo usan los tipos de familia "stats" cuyo anverso reserva el
+    # espacio al arte (heroes): el heroe pone su descripcion en el reverso;
+    # el monstruo no tiene descripcion, asi que queda en False.
+    descripcion_en_reverso: bool = False
+
     def campos(self) -> list[Campo]:
         """Campos que definen la carta (para construir el CLI y validar)."""
         raise NotImplementedError
