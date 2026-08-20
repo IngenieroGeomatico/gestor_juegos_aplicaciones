@@ -34,9 +34,9 @@
     <rect x="0" y="0" width="84" height="24" fill="url(#sc-celda)" stroke="#4d2c1b" stroke-width="1" />
     <rect x="0" y="24" width="84" height="36" fill="url(#sc-celda)" stroke="#4d2c1b" stroke-width="1" />
     <rect x="0" y="0" width="84" height="3" fill="{{COLOR}}" opacity="0.55" />
-    <text x="42" y="16" font-family="Georgia, 'Times New Roman', serif" font-size="12"
+    <text x="42" y="16" font-family="'Albert Sans', Georgia, 'Times New Roman', serif" font-size="12"
           font-weight="bold" text-anchor="middle" fill="#3a2416" font-variant="small-caps">{{LABEL1}}</text>
-    <text x="42" y="52" font-family="Georgia, 'Times New Roman', serif" font-size="28"
+    <text x="42" y="52" font-family="'Albert Sans', Georgia, 'Times New Roman', serif" font-size="28"
           font-weight="bold" text-anchor="middle" fill="#3a2416">{{VALOR1}}</text>
   </g>
 
@@ -45,9 +45,9 @@
     <rect x="84" y="0" width="84" height="24" fill="url(#sc-celda)" stroke="#4d2c1b" stroke-width="1" />
     <rect x="84" y="24" width="84" height="36" fill="url(#sc-celda)" stroke="#4d2c1b" stroke-width="1" />
     <rect x="84" y="0" width="84" height="3" fill="{{COLOR}}" opacity="0.55" />
-    <text x="126" y="16" font-family="Georgia, 'Times New Roman', serif" font-size="12"
+    <text x="126" y="16" font-family="'Albert Sans', Georgia, 'Times New Roman', serif" font-size="12"
           font-weight="bold" text-anchor="middle" fill="#3a2416" font-variant="small-caps">{{LABEL2}}</text>
-    <text x="126" y="52" font-family="Georgia, 'Times New Roman', serif" font-size="28"
+    <text x="126" y="52" font-family="'Albert Sans', Georgia, 'Times New Roman', serif" font-size="28"
           font-weight="bold" text-anchor="middle" fill="#3a2416">{{VALOR2}}</text>
   </g>
 
@@ -56,9 +56,9 @@
     <rect x="168" y="0" width="84" height="24" fill="url(#sc-celda)" stroke="#4d2c1b" stroke-width="1" />
     <rect x="168" y="24" width="84" height="36" fill="url(#sc-celda)" stroke="#4d2c1b" stroke-width="1" />
     <rect x="168" y="0" width="84" height="3" fill="{{COLOR}}" opacity="0.55" />
-    <text x="210" y="16" font-family="Georgia, 'Times New Roman', serif" font-size="12"
+    <text x="210" y="16" font-family="'Albert Sans', Georgia, 'Times New Roman', serif" font-size="12"
           font-weight="bold" text-anchor="middle" fill="#3a2416" font-variant="small-caps">{{LABEL3}}</text>
-    <text x="210" y="52" font-family="Georgia, 'Times New Roman', serif" font-size="28"
+    <text x="210" y="52" font-family="'Albert Sans', Georgia, 'Times New Roman', serif" font-size="28"
           font-weight="bold" text-anchor="middle" fill="#3a2416">{{VALOR3}}</text>
   </g>
 
@@ -67,9 +67,9 @@
     <rect x="252" y="0" width="84" height="24" fill="url(#sc-celda)" stroke="#4d2c1b" stroke-width="1" />
     <rect x="252" y="24" width="84" height="36" fill="url(#sc-celda)" stroke="#4d2c1b" stroke-width="1" />
     <rect x="252" y="0" width="84" height="3" fill="{{COLOR}}" opacity="0.55" />
-    <text x="294" y="16" font-family="Georgia, 'Times New Roman', serif" font-size="12"
+    <text x="294" y="16" font-family="'Albert Sans', Georgia, 'Times New Roman', serif" font-size="12"
           font-weight="bold" text-anchor="middle" fill="#3a2416" font-variant="small-caps">{{LABEL4}}</text>
-    <text x="294" y="52" font-family="Georgia, 'Times New Roman', serif" font-size="28"
+    <text x="294" y="52" font-family="'Albert Sans', Georgia, 'Times New Roman', serif" font-size="28"
           font-weight="bold" text-anchor="middle" fill="#3a2416">{{VALOR4}}</text>
   </g>
 
@@ -78,9 +78,9 @@
     <rect x="336" y="0" width="84" height="24" fill="url(#sc-celda)" stroke="#4d2c1b" stroke-width="1" />
     <rect x="336" y="24" width="84" height="36" fill="url(#sc-celda)" stroke="#4d2c1b" stroke-width="1" />
     <rect x="336" y="0" width="84" height="3" fill="{{COLOR}}" opacity="0.55" />
-    <text x="378" y="16" font-family="Georgia, 'Times New Roman', serif" font-size="12"
+    <text x="378" y="16" font-family="'Albert Sans', Georgia, 'Times New Roman', serif" font-size="12"
           font-weight="bold" text-anchor="middle" fill="#3a2416" font-variant="small-caps">{{LABEL5}}</text>
-    <text x="378" y="52" font-family="Georgia, 'Times New Roman', serif" font-size="28"
+    <text x="378" y="52" font-family="'Albert Sans', Georgia, 'Times New Roman', serif" font-size="28"
           font-weight="bold" text-anchor="middle" fill="#3a2416">{{VALOR5}}</text>
   </g>
 </svg>

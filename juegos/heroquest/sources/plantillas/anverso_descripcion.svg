@@ -31,7 +31,7 @@
   <rect x="15" y="15" width="470" height="670" fill="none" stroke="#4d2c1b" stroke-width="4" />
 
   <!-- Titulo (nombre de la carta) -->
-  <text x="250" y="75" font-family="Georgia, 'Times New Roman', serif" font-size="34"
+  <text x="250" y="75" font-family="'Albert Sans', Georgia, 'Times New Roman', serif" font-size="34"
         font-weight="bold" fill="#3a2416" text-anchor="middle">{{NOMBRE}}</text>
   <rect x="170" y="88" width="160" height="3" fill="{{COLOR}}" opacity="0.6" />
 
@@ -39,7 +39,7 @@
   <rect id="ph-arte" x="80" y="105" width="340" height="220" fill="{{COLOR}}" opacity="0.15" />
 
   <!-- Subtitulo (tipo/escuela), en small-caps y con el color de acento -->
-  <text id="ph-subtitulo" x="250" y="355" font-family="Georgia, 'Times New Roman', serif"
+  <text id="ph-subtitulo" x="250" y="355" font-family="'Albert Sans', Georgia, 'Times New Roman', serif"
         font-size="15" text-anchor="middle" fill="{{COLOR}}"
         font-variant="small-caps" font-weight="bold">{{SUBTITULO}}</text>
 
@@ -51,6 +51,6 @@
   <rect id="ph-stats" x="60" y="608" width="380" height="24" fill="{{COLOR}}" opacity="0.10" />
 
   <!-- Pie de pagina -->
-  <text x="250" y="675" font-family="Georgia, 'Times New Roman', serif" font-size="12"
+  <text x="250" y="675" font-family="'Albert Sans', Georgia, 'Times New Roman', serif" font-size="12"
         fill="#4d2c1b" text-anchor="middle" font-variant="small-caps">HeroQuest · Ficha de juego</text>
 </svg>

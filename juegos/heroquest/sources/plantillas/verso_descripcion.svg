@@ -31,13 +31,13 @@
   <!-- Banner superior: "HeroQuest" -->
   <path d="M 110 40 H 390 L 370 75 L 390 110 H 110 L 130 75 Z"
         fill="#f4e9d2" fill-opacity="0.92" stroke="#4d2c1b" stroke-width="1.5" />
-  <text x="250" y="82" font-family="Georgia, 'Times New Roman', serif" font-size="34"
+  <text x="250" y="82" font-family="'Albert Sans', Georgia, 'Times New Roman', serif" font-size="34"
         font-weight="bold" fill="#3a2416" text-anchor="middle">HeroQuest</text>
 
   <!-- Banda inferior: leyenda (categoria de la carta) -->
   <path d="M 120 580 H 380 L 358 602 L 380 624 H 120 L 142 602 Z"
         fill="#f4e9d2" fill-opacity="0.92" stroke="#4d2c1b" stroke-width="1.5" />
-  <text x="250" y="606" font-family="Georgia, 'Times New Roman', serif" font-size="14"
+  <text x="250" y="606" font-family="'Albert Sans', Georgia, 'Times New Roman', serif" font-size="14"
         font-weight="bold" font-variant="small-caps" fill="#3a2416"
         text-anchor="middle">{{LEYENDA}}</text>
 </svg>
