@@ -24,7 +24,10 @@ if TYPE_CHECKING:
 # plantillas SVG de sources/plantillas/ (ver plantillas.py). Aquí solo quedan
 # los colores que usa el contenido dinámico que Python genera (arte, tabla de
 # stats, descripción), que se incrustan dentro de las anclas de la plantilla.
-FONT_FAMILY_SERIF = "Georgia, 'Times New Roman', serif"
+# Familia tipográfica de la carta. Albert Sans (libre, OFL-1.1, ver
+# sources/fuentes/) da el estilo humanista de las cartas HQ 2021; Georgia actúa
+# de reserva si no está instalada en el sistema que rasteriza el SVG.
+FONT_FAMILY_CARTA = "'Albert Sans', Georgia, 'Times New Roman', serif"
 COLOR_BORDE = "#4d2c1b"
 COLOR_TEXTO_PRINCIPAL = "#3a2416"
 COLOR_CELDA_STAT = "#fbf6ea"
@@ -192,7 +195,7 @@ def _frag_descripcion(
     for i, linea in enumerate(lineas):
         y = geom["y"] + tam_fuente + i * interlineado
         partes.append(
-            f'<text x="{x}" y="{y}" font-family="{FONT_FAMILY_SERIF}" font-size="{tam_fuente}"{estilo} '
+            f'<text x="{x}" y="{y}" font-family="{FONT_FAMILY_CARTA}" font-size="{tam_fuente}"{estilo} '
             f'text-anchor="{anchor}" fill="{COLOR_TEXTO_PRINCIPAL}">{_escape(linea)}</text>')
     return "".join(partes)
 
@@ -205,7 +208,7 @@ def _frag_stats_linea(tipo: TipoCarta, entrada: dict, geom: dict[str, float]) ->
     x = geom["x"] + geom["width"] / 2
     y = geom["y"] + geom["height"] / 2 + 6
     texto = " · ".join(f"{_escape(l)}: {_escape(v)}" for l, v in stats)
-    return (f'<text x="{x}" y="{y}" font-family="{FONT_FAMILY_SERIF}" font-size="16" '
+    return (f'<text x="{x}" y="{y}" font-family="{FONT_FAMILY_CARTA}" font-size="16" '
             f'font-weight="bold" text-anchor="middle" fill="{COLOR_TEXTO_PRINCIPAL}">{texto}</text>')
 
 
@@ -487,7 +490,7 @@ def render_svg_doble(tipo: TipoCarta, entrada: dict, ancho: int = DISENO_ANCHO, 
     pliegue = "\n".join([
         f'<line x1="{ancho}" y1="0" x2="{ancho}" y2="{alto}" stroke="{COLOR_BORDE}" '
         f'stroke-width="1.5" stroke-dasharray="8 6" />',
-        f'<text x="{ancho}" y="{alto - 12}" font-family="{FONT_FAMILY_SERIF}" font-size="11" '
+        f'<text x="{ancho}" y="{alto - 12}" font-family="{FONT_FAMILY_CARTA}" font-size="11" '
         f'fill="{COLOR_BORDE}" text-anchor="middle">— pliegue —</text>',
     ])
     px_ancho = round(ancho_doble * PX_CARTA_ANCHO / DISENO_ANCHO)

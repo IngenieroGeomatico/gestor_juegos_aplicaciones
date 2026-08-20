@@ -44,12 +44,12 @@
   <!-- Banner del titulo (nombre) sobre el arte -->
   <path d="M 30 40 H 470 L 460 75 L 470 110 H 30 L 40 75 Z"
         fill="url(#ps-grad-banner)" stroke="#4d2c1b" stroke-width="1.5" />
-  <text x="250" y="82" font-family="Georgia, 'Times New Roman', serif" font-size="32"
+  <text x="250" y="82" font-family="'Albert Sans', Georgia, 'Times New Roman', serif" font-size="32"
         font-weight="bold" fill="#3a2416" text-anchor="middle">{{NOMBRE}}</text>
   <rect x="150" y="112" width="200" height="3" fill="{{COLOR}}" opacity="0.6" />
 
   <!-- Subtitulo (clase/monstruo) bajo el banner -->
-  <text id="ph-subtitulo" x="250" y="134" font-family="Georgia, 'Times New Roman', serif"
+  <text id="ph-subtitulo" x="250" y="134" font-family="'Albert Sans', Georgia, 'Times New Roman', serif"
         font-size="15" text-anchor="middle" fill="#3a2416">{{SUBTITULO}}</text>
 
   <!-- ANCLA: banda inferior donde se coloca el cuadro de estadisticas

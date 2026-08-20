@@ -232,5 +232,10 @@ juegos/pokemon-champions/data/cache/
 # Imágenes de calibración de tableros de HeroQuest (artefactos de trabajo)
 juegos/heroquest/_cal/
 
+# Assets externos de HeroQuest descargados (muy grandes; origen/licencias en
+# sources/ATRIBUCIONES.md). Arte de cartas de Mark (Artwork) y testing-assets.
+juegos/heroquest/sources/Artwork/
+juegos/heroquest/sources/all-testing-assets/
+
 # Directorio de trabajo de OpenCode
 .omo/

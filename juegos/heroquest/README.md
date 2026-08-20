@@ -450,3 +450,11 @@ Esquema de las salas de una misión (`salas.json`):
 Para incorporar al `data/` una misión, aventura o expansión vista en la web, deja
 el material descargado en `juegos/heroquest/sources/` y conviértelo a JSON respetando
 el esquema (o pídeselo al agente `heroquest`).
+
+### Recursos externos en `sources/`
+
+Además de las fotos y el arte propio, `sources/` contiene librerías externas
+(arte de cartas generado con IA, fondos de carta estilo HQ 2021 y la fuente
+Albert Sans). El origen y la licencia de cada una están documentados en
+[sources/ATRIBUCIONES.md](sources/ATRIBUCIONES.md); consulta ese fichero antes de
+reutilizar cualquier archivo ajeno.
