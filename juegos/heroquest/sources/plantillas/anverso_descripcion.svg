@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Plantilla de ANVERSO para la familia "descripcion" (armas, armaduras,
+  pociones, hechizos). Editable en Inkscape.
+
+  Sistema de plantillas (ver scripts/plantillas.py):
+  - Marcadores de texto {{...}} dentro de <text>/<tspan> se sustituyen por su
+    valor (ya escapado). {{COLOR}} es el color de acento del tipo de carta.
+  - Elementos "ancla" con id="ph-*" son cajas invisibles cuya GEOMETRIA
+    (x,y,width,height) lee el codigo para colocar contenido generado encima:
+      * id="ph-arte"        -> area de arte (imagen del objeto o simbolo)
+      * id="ph-descripcion" -> bloque de texto de la descripcion (multilinea)
+      * id="ph-stats"        -> linea de estadisticas (coste, etc.)
+    Puedes mover/redimensionar estas cajas en Inkscape para recolocar el
+    contenido; su relleno de color aqui es solo una guia visual y no se dibuja
+    en la carta final (el codigo las elimina y dibuja el contenido real).
+-->
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     viewBox="0 0 500 700" width="500" height="700">
+  <defs>
+    <linearGradient id="pd-grad-pergamino" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#f3ecdd;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#eadfc8;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Fondo de pergamino -->
+  <rect width="500" height="700" fill="url(#pd-grad-pergamino)" />
+
+  <!-- Marco exterior -->
+  <rect x="15" y="15" width="470" height="670" fill="none" stroke="#4d2c1b" stroke-width="4" />
+
+  <!-- Titulo (nombre de la carta) -->
+  <text x="250" y="75" font-family="Georgia, 'Times New Roman', serif" font-size="34"
+        font-weight="bold" fill="#3a2416" text-anchor="middle">{{NOMBRE}}</text>
+  <rect x="170" y="88" width="160" height="3" fill="{{COLOR}}" opacity="0.6" />
+
+  <!-- ANCLA: area de arte (el codigo dibuja aqui el marco, degradado y la imagen) -->
+  <rect id="ph-arte" x="80" y="105" width="340" height="220" fill="{{COLOR}}" opacity="0.15" />
+
+  <!-- Subtitulo (tipo/escuela), en small-caps y con el color de acento -->
+  <text id="ph-subtitulo" x="250" y="355" font-family="Georgia, 'Times New Roman', serif"
+        font-size="15" text-anchor="middle" fill="{{COLOR}}"
+        font-variant="small-caps" font-weight="bold">{{SUBTITULO}}</text>
+
+  <!-- ANCLA: bloque de descripcion (el codigo genera las lineas envueltas
+       empezando en x=60, y=desc_y+20). La caja marca la zona de texto. -->
+  <rect id="ph-descripcion" x="60" y="375" width="380" height="230" fill="#000000" opacity="0.04" />
+
+  <!-- ANCLA: linea de estadisticas inferior (coste, etc.), centrada -->
+  <rect id="ph-stats" x="60" y="608" width="380" height="24" fill="{{COLOR}}" opacity="0.10" />
+
+  <!-- Pie de pagina -->
+  <text x="250" y="675" font-family="Georgia, 'Times New Roman', serif" font-size="12"
+        fill="#4d2c1b" text-anchor="middle" font-variant="small-caps">HeroQuest · Ficha de juego</text>
+</svg>

@@ -27,7 +27,16 @@ from arte_comun import slug as _slug
 ARTE_DIR = Path(__file__).resolve().parent.parent / "sources" / "arte"
 ARTE_SVG_DIR = Path(__file__).resolve().parent.parent / "sources" / "arte_svg"
 
-ANCHO, ALTO = 700, 500
+# Lienzo VERTICAL para encajar el área de arte a 4/5 de la plantilla
+# `anverso_stats.svg` (área interior ≈ 412×474, ratio ≈ 0.87). Usamos un lienzo
+# de la misma proporción (520×600, ratio ≈ 0.867) para que el recorte "cover"
+# de `render_carta` no recorte el busto. El busto se dibuja con las mismas
+# coordenadas de siempre (centrado en x=0, de y≈-20 a y≈500) y se recoloca con
+# un `translate` para quedar grande y con la cabeza arriba.
+ANCHO, ALTO = 520, 600
+# Centro horizontal del busto y desplazamiento vertical (cabeza arriba).
+CENTRO_X = ANCHO / 2
+DESPLAZA_Y = 44
 
 
 # ---------------------------------------------------------------------------
@@ -127,12 +136,16 @@ DEFS = """
 
 
 def _lienzo(cuerpo: str) -> str:
+    # El busto se dibuja centrado en x=0 (de ahí el translate a CENTRO_X) y con
+    # un desplazamiento vertical para que la cabeza quede arriba y los hombros
+    # lleguen casi al borde inferior (encuadre "busto grande").
+    halo_cy = DESPLAZA_Y + 210
     return (
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{ANCHO}" height="{ALTO}" '
         f'viewBox="0 0 {ANCHO} {ALTO}">{DEFS}'
         f'<rect width="{ANCHO}" height="{ALTO}" fill="url(#fondo)"/>'
-        f'<ellipse cx="350" cy="230" rx="240" ry="210" fill="url(#halo)"/>'
-        f'<g filter="url(#sombra)" transform="translate(350 0)">{cuerpo}</g>'
+        f'<ellipse cx="{CENTRO_X}" cy="{halo_cy}" rx="250" ry="240" fill="url(#halo)"/>'
+        f'<g filter="url(#sombra)" transform="translate({CENTRO_X} {DESPLAZA_Y})">{cuerpo}</g>'
         f'</svg>\n'
     )
 

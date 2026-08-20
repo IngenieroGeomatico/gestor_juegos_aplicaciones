@@ -13,18 +13,20 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 import data_store
+import plantillas
 
 if TYPE_CHECKING:
     # Evita la importación circular y permite el tipado
     from tipos_carta import TipoCarta
 
 # --- Constantes de Estilo ---
+# El "chrome" de la carta (fondo, marco, banners, leyendas) vive ahora en las
+# plantillas SVG de sources/plantillas/ (ver plantillas.py). Aquí solo quedan
+# los colores que usa el contenido dinámico que Python genera (arte, tabla de
+# stats, descripción), que se incrustan dentro de las anclas de la plantilla.
 FONT_FAMILY_SERIF = "Georgia, 'Times New Roman', serif"
 COLOR_BORDE = "#4d2c1b"
-COLOR_PERGAMINO_CLARO = "#f3ecdd"
-COLOR_PERGAMINO_OSCURO = "#eadfc8"
 COLOR_TEXTO_PRINCIPAL = "#3a2416"
-COLOR_BANNER = "#f4e9d2"
 COLOR_CELDA_STAT = "#fbf6ea"
 
 # --- Constantes de Tamaño de Carta ---
@@ -65,215 +67,213 @@ def _envolver_texto(texto: str, max_ancho: int) -> list[str]:
     """Envuelve un texto largo en múltiples líneas."""
     return textwrap.wrap(texto, width=max_ancho)
 
-def _fondo_pergamino(ancho: int, alto: int) -> str:
-    """Genera el fondo de pergamino con un gradiente."""
-    return f'''
-    <defs>
-        <linearGradient id="grad-pergamino" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" style="stop-color:{COLOR_PERGAMINO_CLARO};stop-opacity:1" />
-            <stop offset="100%" style="stop-color:{COLOR_PERGAMINO_OSCURO};stop-opacity:1" />
-        </linearGradient>
-    </defs>
-    <rect width="{ancho}" height="{alto}" fill="url(#grad-pergamino)" />
-    '''
-
-def _marco(ancho: int, alto: int) -> str:
-    """Genera el marco exterior de la carta."""
-    return f'<rect x="15" y="15" width="{ancho - 30}" height="{alto - 30}" fill="none" stroke="{COLOR_BORDE}" stroke-width="4" />'
-
-def _footer(ancho: int, alto: int) -> str:
-    """Genera el texto del pie de página."""
-    return f'<text x="{ancho / 2}" y="{alto - 25}" font-family="{FONT_FAMILY_SERIF}" font-size="12" fill="{COLOR_BORDE}" text-anchor="middle" font-variant="small-caps">HeroQuest · Ficha de juego</text>'
-
-def _render_stats(
+def _frag_arte(
     tipo: TipoCarta,
     entrada: dict,
-    ancho: int,
-    alto: int
+    geom: dict[str, float],
+    sufijo: str,
+    radio: int = 16,
+    franja: int = 18,
+    fallback_circulo: bool = True,
 ) -> str:
-    """Renderiza una carta con la plantilla de estadísticas (personajes, monstruos)."""
-    nombre = _escape(entrada.get("nombre", ""))
-    subtitulo = _escape(tipo.subtitulo(entrada))
-    descripcion = _escape(tipo.descripcion(entrada))
-    stats = tipo.stats(entrada)
+    """Genera el fragmento SVG del área de arte para el ancla `geom`.
+
+    Dibuja la sombra, el recuadro con degradado (de #24150d al color del tipo),
+    la franja de acento superior y, recortada, la imagen del arte (o un símbolo
+    de reserva). `sufijo` hace únicos los ids de defs para evitar colisiones al
+    componer varias cartas en un mismo SVG.
+    """
+    arte_x = geom["x"]
+    arte_y = geom["y"]
+    arte_ancho = geom["width"]
+    arte_alto = geom["height"]
     simbolo = _escape(tipo.simbolo)
 
-    # --- Banner del Título ---
-    banner_svg = f'''
-        <defs>
-            <linearGradient id="grad-banner" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#fbf4e3" />
-                <stop offset="100%" stop-color="#ecdcc0" />
-            </linearGradient>
-        </defs>
-        <g>
-            <path d="M 30 40 H {ancho - 30} L {ancho - 40} 75 L {ancho - 30} 110 H 30 L 40 75 Z" fill="url(#grad-banner)" stroke="{COLOR_BORDE}" stroke-width="1.5" />
-            <text x="{ancho / 2}" y="82" font-family="{FONT_FAMILY_SERIF}" font-size="32" font-weight="bold" fill="{COLOR_TEXTO_PRINCIPAL}" text-anchor="middle">{nombre}</text>
-            <rect x="150" y="112" width="{ancho - 300}" height="3" fill="{tipo.color}" opacity="0.6" />
-        </g>
-    '''
-
-    # --- Área de Arte ---
-    arte_x = 50
-    arte_y = 125
-    arte_alto = 280
-    arte_ancho = ancho - 100
-    radio = 16
     # Zona interior por debajo de la franja de acento.
     img_x = arte_x + 4
-    img_y = arte_y + 20
+    img_y = arte_y + franja + 2
     img_ancho = arte_ancho - 8
-    img_alto = arte_alto - 24
+    img_alto = arte_alto - (franja + 6)
+    cx = arte_x + arte_ancho / 2
+
     ruta_arte = _ruta_arte(tipo, entrada)
     if ruta_arte:
         interior = (f'<image x="{img_x}" y="{img_y}" width="{img_ancho}" height="{img_alto}" '
-                    f'href="{_imagen_data_uri(ruta_arte, img_ancho, img_alto)}" />')
-    else:
-        interior = (f'<circle cx="{ancho / 2}" cy="{arte_y + (arte_alto + 20) / 2}" '
+                    f'href="{_imagen_data_uri(ruta_arte, round(img_ancho), round(img_alto))}" />')
+    elif fallback_circulo:
+        cy = arte_y + (arte_alto + franja) / 2
+        interior = (f'<circle cx="{cx}" cy="{cy}" '
                     f'r="105" fill="{tipo.color}" fill-opacity="0.28" />'
-                    f'<text x="{ancho / 2}" y="{arte_y + (arte_alto + 20) / 2 + 55}" '
+                    f'<text x="{cx}" y="{cy + 55}" '
                     f'font-family="serif" font-size="150" fill="#ecd9a8" text-anchor="middle">{simbolo}</text>')
+    else:
+        interior = (f'<text x="{cx}" y="{arte_y + (arte_alto + franja) / 2 + 15}" '
+                    f'font-family="serif" font-size="150" fill="{tipo.color}" fill-opacity="0.85" '
+                    f'text-anchor="middle">{simbolo}</text>')
+
     # Degradado de profundidad sobre el interior.
-    interior += (f'<linearGradient id="grad-humo" x1="0" y1="0" x2="0" y2="1">'
+    interior += (f'<linearGradient id="grad-humo-{sufijo}" x1="0" y1="0" x2="0" y2="1">'
                  f'<stop offset="60%" stop-color="#000000" stop-opacity="0" />'
                  f'<stop offset="100%" stop-color="#000000" stop-opacity="0.35" /></linearGradient>'
-                 f'<rect x="{img_x}" y="{img_y}" width="{img_ancho}" height="{img_alto}" fill="url(#grad-humo)" />')
-    arte_svg = f'''
+                 f'<rect x="{img_x}" y="{img_y}" width="{img_ancho}" height="{img_alto}" fill="url(#grad-humo-{sufijo})" />')
+
+    return f'''
     <defs>
-        <linearGradient id="grad-arte-stats" x1="0" y1="0" x2="1" y2="1">
+        <linearGradient id="grad-arte-{sufijo}" x1="0" y1="0" x2="1" y2="1">
             <stop offset="0%" stop-color="#24150d" />
             <stop offset="100%" stop-color="{tipo.color}" />
         </linearGradient>
-        <clipPath id="clip-arte-stats"><rect x="{arte_x}" y="{arte_y}" width="{arte_ancho}" height="{arte_alto}" rx="{radio}" /></clipPath>
+        <clipPath id="clip-arte-{sufijo}"><rect x="{arte_x}" y="{arte_y}" width="{arte_ancho}" height="{arte_alto}" rx="{radio}" /></clipPath>
     </defs>
     <rect x="{arte_x + 6}" y="{arte_y + 7}" width="{arte_ancho}" height="{arte_alto}" rx="{radio}" fill="#000000" opacity="0.20" />
-    <rect x="{arte_x}" y="{arte_y}" width="{arte_ancho}" height="{arte_alto}" rx="{radio}" fill="url(#grad-arte-stats)" stroke="{COLOR_BORDE}" stroke-width="2.5" />
-    <rect x="{arte_x}" y="{arte_y}" width="{arte_ancho}" height="18" rx="9" fill="{tipo.color}" />
-    <g clip-path="url(#clip-arte-stats)">
+    <rect x="{arte_x}" y="{arte_y}" width="{arte_ancho}" height="{arte_alto}" rx="{radio}" fill="url(#grad-arte-{sufijo})" stroke="{COLOR_BORDE}" stroke-width="2.5" />
+    <rect x="{arte_x}" y="{arte_y}" width="{arte_ancho}" height="{franja}" rx="{franja / 2}" fill="{tipo.color}" />
+    <g clip-path="url(#clip-arte-{sufijo})">
         {interior}
     </g>
     '''
 
-    # --- Tabla de Estadísticas ---
-    stats_y = arte_y + arte_alto + 20
-    num_stats = len(stats)
-    ancho_col = (ancho - 100) / num_stats if num_stats > 0 else 0
-    tabla_svg = '<g transform="translate(50, ' + str(stats_y) + ')">'
-    for i, (label, value) in enumerate(stats):
-        x_col = i * ancho_col
-        # Celda y bordes
-        tabla_svg += f'<rect x="{x_col}" y="0" width="{ancho_col}" height="35" fill="{COLOR_CELDA_STAT}" stroke="{COLOR_BORDE}" stroke-width="1" />'
-        tabla_svg += f'<rect x="{x_col}" y="35" width="{ancho_col}" height="50" fill="{COLOR_CELDA_STAT}" stroke="{COLOR_BORDE}" stroke-width="1" />'
-        # Textos
-        tabla_svg += f'<text x="{x_col + ancho_col / 2}" y="22" font-family="{FONT_FAMILY_SERIF}" font-size="14" font-weight="bold" text-anchor="middle" fill="{COLOR_TEXTO_PRINCIPAL}" font-variant="small-caps">{_escape(label)}</text>'
-        tabla_svg += f'<text x="{x_col + ancho_col / 2}" y="72" font-family="{FONT_FAMILY_SERIF}" font-size="36" font-weight="bold" text-anchor="middle" fill="{COLOR_TEXTO_PRINCIPAL}">{_escape(value)}</text>'
-    tabla_svg += "</g>"
 
-    # --- Descripción y Subtítulo ---
-    desc_y = stats_y + 85 + 30
-    desc_svg = f'<text x="{ancho / 2}" y="{desc_y - 15}" font-family="{FONT_FAMILY_SERIF}" font-size="16" text-anchor="middle" fill="{COLOR_TEXTO_PRINCIPAL}">{subtitulo}</text>'
-    lineas_desc = _envolver_texto(descripcion, 45)
-    for i, linea in enumerate(lineas_desc):
-        desc_svg += f'<text x="{ancho / 2}" y="{desc_y + 10 + i * 20}" font-family="{FONT_FAMILY_SERIF}" font-style="italic" font-size="15" text-anchor="middle" fill="{COLOR_TEXTO_PRINCIPAL}">{_escape(linea)}</text>'
+# Tamaño de diseño de la plantilla stats_cuadro.svg (su viewBox).
+_STATS_CUADRO_ANCHO = 420
+_STATS_CUADRO_ALTO = 60
 
-    return banner_svg + arte_svg + tabla_svg + desc_svg
 
-def _render_descripcion(
-    tipo: TipoCarta,
-    entrada: dict,
-    ancho: int,
-    alto: int
-) -> str:
-    """Renderiza una carta con la plantilla de descripción (objetos, hechizos)."""
-    nombre = _escape(entrada.get("nombre", ""))
-    subtitulo = _escape(tipo.subtitulo(entrada))
-    descripcion = _escape(tipo.descripcion(entrada))
+def _frag_tabla_stats(tipo: TipoCarta, entrada: dict, geom: dict[str, float]) -> str:
+    """Coloca el cuadro de estadísticas (plantilla `stats_cuadro.svg`) en `geom`.
+
+    El cuadro es una plantilla editable de 5 columnas (héroe/monstruo siempre
+    tienen 5 stats). Se rellena con las etiquetas/valores y se posiciona dentro
+    del ancla `ph-stats`, escalándolo a esa caja para que quede superpuesto
+    sobre el arte.
+    """
     stats = tipo.stats(entrada)
-    simbolo = _escape(tipo.simbolo)
+    if not stats:
+        return ""
 
-    # --- Título ---
-    titulo_svg = (f'<text x="{ancho / 2}" y="75" font-family="{FONT_FAMILY_SERIF}" '
-                  f'font-size="34" font-weight="bold" fill="{COLOR_TEXTO_PRINCIPAL}" text-anchor="middle">{nombre}</text>'
-                  f'<rect x="170" y="88" width="{ancho - 340}" height="3" fill="{tipo.color}" opacity="0.6" />')
+    textos: dict[str, str] = {"COLOR": tipo.color}
+    # Rellena hasta 5 columnas; si sobran stats se ignoran, si faltan se vacían.
+    for i in range(1, 6):
+        if i <= len(stats):
+            label, value = stats[i - 1]
+        else:
+            label, value = "", ""
+        textos[f"LABEL{i}"] = label
+        textos[f"VALOR{i}"] = value
 
-    # --- Área de Arte ---
-    arte_x = 80
-    arte_y = 105
-    arte_alto = 220
-    arte_ancho = ancho - 160
-    radio = 16
-    img_x = arte_x + 4
-    img_y = arte_y + 18
-    img_ancho = arte_ancho - 8
-    img_alto = arte_alto - 22
-    ruta_arte = _ruta_arte(tipo, entrada)
-    if ruta_arte:
-        interior = (f'<image x="{img_x}" y="{img_y}" width="{img_ancho}" height="{img_alto}" '
-                    f'href="{_imagen_data_uri(ruta_arte, img_ancho, img_alto)}" />')
-    else:
-        interior = (f'<text x="{ancho / 2}" y="{arte_y + (arte_alto + 18) / 2 + 15}" '
-                    f'font-family="serif" font-size="150" fill="{tipo.color}" fill-opacity="0.85" '
-                    f'text-anchor="middle">{simbolo}</text>')
-    interior += (f'<linearGradient id="grad-humo-desc" x1="0" y1="0" x2="0" y2="1">'
-                 f'<stop offset="60%" stop-color="#000000" stop-opacity="0" />'
-                 f'<stop offset="100%" stop-color="#000000" stop-opacity="0.30" /></linearGradient>'
-                 f'<rect x="{img_x}" y="{img_y}" width="{img_ancho}" height="{img_alto}" fill="url(#grad-humo-desc)" />')
-    arte_svg = f'''
-        <defs>
-            <linearGradient id="grad-arte-desc" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stop-color="#24150d" />
-                <stop offset="100%" stop-color="{tipo.color}" />
-            </linearGradient>
-            <clipPath id="clip-arte-desc"><rect x="{arte_x}" y="{arte_y}" width="{arte_ancho}" height="{arte_alto}" rx="{radio}" /></clipPath>
-        </defs>
-        <g>
-            <rect x="{arte_x + 6}" y="{arte_y + 7}" width="{arte_ancho}" height="{arte_alto}" rx="{radio}" fill="#000000" opacity="0.20" />
-            <rect x="{arte_x}" y="{arte_y}" width="{arte_ancho}" height="{arte_alto}" rx="{radio}" fill="url(#grad-arte-desc)" stroke="{COLOR_BORDE}" stroke-width="2.5" />
-            <rect x="{arte_x}" y="{arte_y}" width="{arte_ancho}" height="16" rx="8" fill="{tipo.color}" />
-            <g clip-path="url(#clip-arte-desc)">
-                {interior}
-            </g>
-        </g>
-    '''
+    tpl = plantillas.cargar("stats_cuadro")
+    cuadro = plantillas.render(tpl, textos=textos)
 
-    # --- Subtítulo y Descripción ---
-    desc_y = arte_y + arte_alto + 45
-    desc_svg = f'<text x="{ancho / 2}" y="{desc_y - 15}" font-family="{FONT_FAMILY_SERIF}" font-size="15" text-anchor="middle" fill="{tipo.color}" font-variant="small-caps" font-weight="bold">{subtitulo}</text>'
-    lineas_desc = _envolver_texto(descripcion, 38)
-    for i, linea in enumerate(lineas_desc):
-        desc_svg += f'<text x="60" y="{desc_y + 20 + i * 22}" font-family="{FONT_FAMILY_SERIF}" font-size="18" fill="{COLOR_TEXTO_PRINCIPAL}">{_escape(linea)}</text>'
+    # El cuadro usa su propio viewBox (420×60); lo posicionamos y escalamos al
+    # ancla ph-stats.
+    escala_x = geom["width"] / _STATS_CUADRO_ANCHO
+    escala_y = geom["height"] / _STATS_CUADRO_ALTO
+    return (f'<g transform="translate({geom["x"]}, {geom["y"]}) '
+            f'scale({escala_x}, {escala_y})">{cuadro}</g>')
 
-    # --- Stats inferiores (Coste, etc.) ---
-    stats_y = alto - 80
-    stats_svg = '<g transform="translate(0, ' + str(stats_y) + ')">'
-    if stats:
-        # Renderizar como una línea de texto simple
-        stat_text = " · ".join([f"{_escape(l)}: {_escape(v)}" for l, v in stats])
-        stats_svg += f'<text x="{ancho / 2}" y="0" font-family="{FONT_FAMILY_SERIF}" font-size="16" font-weight="bold" text-anchor="middle" fill="{COLOR_TEXTO_PRINCIPAL}">{stat_text}</text>'
-    stats_svg += "</g>"
 
-    return titulo_svg + arte_svg + desc_svg + stats_svg
+def _frag_descripcion(
+    descripcion: str,
+    geom: dict[str, float],
+    ancho_wrap: int,
+    tam_fuente: int,
+    interlineado: int,
+    centrado: bool,
+    cursiva: bool = False,
+) -> str:
+    """Genera las líneas de texto de una descripción dentro del ancla `geom`."""
+    if not descripcion:
+        return ""
+    lineas = _envolver_texto(descripcion, ancho_wrap)
+    x = geom["x"] + (geom["width"] / 2 if centrado else 0)
+    anchor = "middle" if centrado else "start"
+    estilo = ' font-style="italic"' if cursiva else ""
+    partes = []
+    for i, linea in enumerate(lineas):
+        y = geom["y"] + tam_fuente + i * interlineado
+        partes.append(
+            f'<text x="{x}" y="{y}" font-family="{FONT_FAMILY_SERIF}" font-size="{tam_fuente}"{estilo} '
+            f'text-anchor="{anchor}" fill="{COLOR_TEXTO_PRINCIPAL}">{_escape(linea)}</text>')
+    return "".join(partes)
+
+
+def _frag_stats_linea(tipo: TipoCarta, entrada: dict, geom: dict[str, float]) -> str:
+    """Genera la línea única de estadísticas (Coste, etc.) para el ancla `geom`."""
+    stats = tipo.stats(entrada)
+    if not stats:
+        return ""
+    x = geom["x"] + geom["width"] / 2
+    y = geom["y"] + geom["height"] / 2 + 6
+    texto = " · ".join(f"{_escape(l)}: {_escape(v)}" for l, v in stats)
+    return (f'<text x="{x}" y="{y}" font-family="{FONT_FAMILY_SERIF}" font-size="16" '
+            f'font-weight="bold" text-anchor="middle" fill="{COLOR_TEXTO_PRINCIPAL}">{texto}</text>')
+
+
+def _render_stats(tipo: TipoCarta, entrada: dict, ancho: int, alto: int) -> str:
+    """Renderiza el anverso de la familia 'stats' (héroes, monstruos).
+
+    Usa la plantilla `anverso_stats.svg` para el chrome (marco, banner, banda de
+    stats) y rellena las anclas ph-arte (arte a 4/5) y ph-stats (tabla).
+    """
+    tpl = plantillas.cargar("anverso_stats")
+    geom_arte = plantillas.ancla(tpl, "ph-arte") or {"x": 40, "y": 120, "width": 420, "height": 500}
+    geom_stats = plantillas.ancla(tpl, "ph-stats") or {"x": 40, "y": 620, "width": 420, "height": 55}
+
+    arte = _frag_arte(tipo, entrada, geom_arte, sufijo="stats", franja=20)
+    tabla = _frag_tabla_stats(tipo, entrada, geom_stats)
+
+    return plantillas.render(
+        tpl,
+        textos={
+            "NOMBRE": entrada.get("nombre", ""),
+            "SUBTITULO": tipo.subtitulo(entrada),
+            "COLOR": tipo.color,
+        },
+        bloques={"ph-arte": arte, "ph-stats": tabla},
+    )
+
+
+def _render_descripcion(tipo: TipoCarta, entrada: dict, ancho: int, alto: int) -> str:
+    """Renderiza el anverso de la familia 'descripcion' (armas, hechizos...).
+
+    Usa la plantilla `anverso_descripcion.svg` para el chrome y rellena las
+    anclas ph-arte, ph-descripcion y ph-stats.
+    """
+    tpl = plantillas.cargar("anverso_descripcion")
+    geom_arte = plantillas.ancla(tpl, "ph-arte") or {"x": 80, "y": 105, "width": 340, "height": 220}
+    geom_desc = plantillas.ancla(tpl, "ph-descripcion") or {"x": 60, "y": 375, "width": 380, "height": 230}
+    geom_stats = plantillas.ancla(tpl, "ph-stats") or {"x": 60, "y": 608, "width": 380, "height": 24}
+
+    arte = _frag_arte(tipo, entrada, geom_arte, sufijo="desc", franja=16, fallback_circulo=False)
+    desc = _frag_descripcion(
+        tipo.descripcion(entrada), geom_desc,
+        ancho_wrap=38, tam_fuente=18, interlineado=22, centrado=False)
+    stats = _frag_stats_linea(tipo, entrada, geom_stats)
+
+    return plantillas.render(
+        tpl,
+        textos={
+            "NOMBRE": entrada.get("nombre", ""),
+            "SUBTITULO": tipo.subtitulo(entrada),
+            "COLOR": tipo.color,
+        },
+        bloques={"ph-arte": arte, "ph-descripcion": desc, "ph-stats": stats},
+    )
+
 
 def _contenido_svg(tipo: TipoCarta, entrada: dict, ancho: int, alto: int) -> str:
-    """Devuelve el interior del SVG del anverso (sin la etiqueta <svg> raíz)."""
-    svg_parts = [
-        _fondo_pergamino(ancho, alto),
-        _marco(ancho, alto)
-    ]
+    """Devuelve el interior del SVG del anverso (sin la etiqueta <svg> raíz).
 
-    # Dispatcher de familia de renderizado
+    Delega en la plantilla de la familia del tipo (`anverso_stats.svg` o
+    `anverso_descripcion.svg`).
+    """
     match tipo.familia:
         case "stats":
-            svg_parts.append(_render_stats(tipo, entrada, ancho, alto))
+            return _render_stats(tipo, entrada, ancho, alto)
         case "descripcion":
-            svg_parts.append(_render_descripcion(tipo, entrada, ancho, alto))
+            return _render_descripcion(tipo, entrada, ancho, alto)
         case _:
-            # Fallback por si hay una familia no reconocida
-            error_msg = f"Familia de carta desconocida: {tipo.familia}"
-            svg_parts.append(f'<text x="50" y="50" fill="red">{error_msg}</text>')
-
-    svg_parts.append(_footer(ancho, alto))
-    return "\n".join(svg_parts)
+            return f'<text x="50" y="50" fill="red">Familia de carta desconocida: {tipo.familia}</text>'
 
 def render_svg(tipo: TipoCarta, entrada: dict, ancho: int = DISENO_ANCHO, alto: int = DISENO_ALTO) -> str:
     """
@@ -405,54 +405,64 @@ def _categoria_verso(tipo: TipoCarta) -> str:
 
 def _contenido_verso(tipo: TipoCarta, ancho: int, alto: int, leyenda: str | None = LEYENDA_VERSO,
                      fondo_verso: str | None = None, entrada: dict | None = None) -> str:
-    """Interior del SVG del reverso: imagen como fondo + capa vectorial.
+    """Interior del SVG del reverso, usando la plantilla de la familia del tipo.
+
+    Familia 'descripcion' -> `verso_descripcion.svg` (banner + leyenda).
+    Familia 'stats'       -> `verso_stats.svg` (además, muestra la descripción
+    de la carta si `tipo.descripcion_en_reverso` es True y se pasa `entrada`;
+    p. ej. héroes. Los monstruos dejan esa zona vacía).
 
     `leyenda` es la leyenda inferior; si es None se usa la categoría del tipo
     de carta ('equipo', 'enemigo', 'heroe', 'tesoro', ...). `fondo_verso`
     selecciona un fondo de `sources/arte_fondos/` en lugar de la foto estándar.
-    `entrada` permite elegir el fondo temático específico de esa carta (p. ej. la
-    escuela elemental de un hechizo).
+    `entrada` son los datos de la carta: permiten elegir el fondo temático
+    específico de esa carta (p. ej. la escuela elemental de un hechizo) y
+    dibujar la descripción en el reverso de los héroes.
     """
     if not leyenda:
         leyenda = _categoria_verso(tipo)
-    foto = _reverso_data_uri(tipo, ancho, alto, fondo_verso, entrada)
+
+    nombre_tpl = "verso_stats" if tipo.familia == "stats" else "verso_descripcion"
+    tpl = plantillas.cargar(nombre_tpl)
+
+    # Fondo temático (imagen) que reemplaza el ancla ph-fondo.
+    geom_fondo = plantillas.ancla(tpl, "ph-fondo") or {"x": 0, "y": 0, "width": ancho, "height": alto}
+    foto = _reverso_data_uri(tipo, round(geom_fondo["width"]), round(geom_fondo["height"]), fondo_verso, entrada)
     if foto:
-        fondo = (f'<image x="0" y="0" width="{ancho}" height="{alto}" '
-                 f'href="{foto}" preserveAspectRatio="xMidYMid slice" />')
+        fondo_frag = (f'<image x="{geom_fondo["x"]}" y="{geom_fondo["y"]}" '
+                      f'width="{geom_fondo["width"]}" height="{geom_fondo["height"]}" '
+                      f'href="{foto}" preserveAspectRatio="xMidYMid slice" />')
     else:
-        fondo = _fondo_pergamino(ancho, alto)
-    banner = (f'<path d="M {ancho / 2 - 140} 40 H {ancho / 2 + 140} '
-              f'L {ancho / 2 + 120} 75 L {ancho / 2 + 140} 110 '
-              f'H {ancho / 2 - 140} L {ancho / 2 - 120} 75 Z" '
-              f'fill="{COLOR_BANNER}" fill-opacity="0.92" stroke="{COLOR_BORDE}" stroke-width="1.5" />')
-    titulo = (f'<text x="{ancho / 2}" y="82" font-family="{FONT_FAMILY_SERIF}" '
-              f'font-size="34" font-weight="bold" fill="{COLOR_TEXTO_PRINCIPAL}" text-anchor="middle">HeroQuest</text>')
-    # Leyenda inferior en una banda similar a la superior.
-    bajo_y = alto - 120
-    leyenda_banda = (f'<path d="M {ancho / 2 - 130} {bajo_y} H {ancho / 2 + 130} '
-                     f'L {ancho / 2 + 108} {bajo_y + 22} L {ancho / 2 + 130} {bajo_y + 44} '
-                     f'H {ancho / 2 - 130} L {ancho / 2 - 108} {bajo_y + 22} Z" '
-                     f'fill="{COLOR_BANNER}" fill-opacity="0.92" stroke="{COLOR_BORDE}" stroke-width="1.5" />')
-    leyenda_texto = (f'<text x="{ancho / 2}" y="{bajo_y + 26}" font-family="{FONT_FAMILY_SERIF}" '
-                     f'font-size="14" font-weight="bold" font-variant="small-caps" '
-                     f'fill="{COLOR_TEXTO_PRINCIPAL}" text-anchor="middle">{_escape(leyenda)}</text>')
-    return "\n".join([
-        fondo,
-        f'<rect x="12" y="12" width="{ancho - 24}" height="{alto - 24}" fill="none" '
-        f'stroke="{COLOR_BORDE}" stroke-width="3" />',
-        f'<rect x="20" y="20" width="{ancho - 40}" height="{alto - 40}" fill="none" '
-        f'stroke="{COLOR_BORDE}" stroke-width="1" />',
-        banner,
-        titulo,
-        leyenda_banda,
-        leyenda_texto,
-    ])
+        fondo_frag = ""  # queda el fondo de pergamino de respaldo de la plantilla
+
+    bloques: dict[str, str] = {"ph-fondo": fondo_frag}
+
+    # Descripción en el reverso (solo familia stats con descripcion_en_reverso).
+    if tipo.familia == "stats":
+        desc_frag = ""
+        if tipo.descripcion_en_reverso and entrada:
+            geom_desc = (plantillas.ancla(tpl, "ph-descripcion")
+                         or {"x": 75, "y": 255, "width": 350, "height": 250})
+            desc_frag = _frag_descripcion(
+                tipo.descripcion(entrada), geom_desc,
+                ancho_wrap=34, tam_fuente=18, interlineado=26, centrado=True, cursiva=True)
+        bloques["ph-descripcion"] = desc_frag
+
+    return plantillas.render(
+        tpl,
+        textos={"LEYENDA": leyenda, "COLOR": tipo.color},
+        bloques=bloques,
+    )
 
 
 def render_verso_svg(tipo: TipoCarta, ancho: int = DISENO_ANCHO, alto: int = DISENO_ALTO,
                      leyenda: str | None = LEYENDA_VERSO, fondo_verso: str | None = None,
                      entrada: dict | None = None) -> str:
-    """Devuelve el SVG (str) del reverso de la carta."""
+    """Devuelve el SVG (str) del reverso de la carta.
+
+    `entrada` (opcional) permite elegir el fondo temático de la carta (p. ej. la
+    escuela de un hechizo) y dibujar la descripción en el reverso de los héroes.
+    """
     px_ancho = round(ancho * PX_CARTA_ANCHO / DISENO_ANCHO)
     px_alto = round(alto * PX_CARTA_ALTO / DISENO_ALTO)
     return "\n".join([
@@ -526,9 +536,10 @@ def render_png(tipo: TipoCarta, entrada: dict, ancho: int = DISENO_ANCHO, alto: 
 
 
 def render_png_verso(tipo: TipoCarta, ancho: int = DISENO_ANCHO, alto: int = DISENO_ALTO,
-                     leyenda: str | None = LEYENDA_VERSO, fondo_verso: str | None = None) -> Image.Image:
+                     leyenda: str | None = LEYENDA_VERSO, fondo_verso: str | None = None,
+                     entrada: dict | None = None) -> Image.Image:
     """Devuelve una imagen Pillow del reverso de la carta (744 × 1039 px)."""
-    svg = render_verso_svg(tipo, ancho, alto, leyenda, fondo_verso)
+    svg = render_verso_svg(tipo, ancho, alto, leyenda, fondo_verso, entrada)
     px_ancho = round(ancho * PX_CARTA_ANCHO / DISENO_ANCHO)
     px_alto = round(alto * PX_CARTA_ALTO / DISENO_ALTO)
     return _rasterizar(svg, px_ancho, px_alto)

@@ -42,4 +42,5 @@ PERSONAJE = Personaje(
     reverso_img="heroe_back.jpg",
     color="#9c2b2b",
     simbolo="⚔",
+    descripcion_en_reverso=True,
 )
