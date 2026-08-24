@@ -421,7 +421,74 @@ Inkscape. Tras editar una plantilla, comprueba el resultado regenerando una cart
 (`carta_item.py`) y mirando el PNG. El módulo `scripts/plantillas.py` es el loader
 (cachea las plantillas, lee las anclas y sustituye los marcadores).
 
-Cada script valida que el nombre no exista ya y muestra ayuda con `-h`. `nueva_mision.py`
+## Creando cartas con el sistema
+
+El sistema genera las cartas de HeroQuest combinando plantillas SVG con datos JSON.
+El flujo completo es:
+
+### Tipos de carta y sus plantillas
+
+Hay 6 tipos de carta, cada uno con su familia de maquetación y marcadores SVG:
+
+| Tipo | Familia | Marcadores `ph-*` principales | Ejemplo de datos |
+|------|---------|-------------------------------|-----------------|
+| **personaje** | `stats` | `ph-nombre`, `ph-clase`, `ph-ataque`, `ph-defensa`, `ph-cuerpo`, `ph-mente`, `ph-movimiento`, `ph-descripcion` | `personajes.json` |
+| **monstruo** | `stats` | Igual que personaje | `monstruos.json` |
+| **arma** | `descripcion` | `ph-nombre`, `ph-tipo`, `ph-ataque`, `ph-defensa`, `ph-coste`, `ph-descripcion` | `armas.json` |
+| **armadura** | `descripcion` | Igual que arma | `armas.json` |
+| **poción** | `descripcion` | Igual que arma | `armas.json` |
+| **hechizo** | `descripcion` | `ph-nombre`, `ph-escuela`, `ph-coste_mente`, `ph-descripcion` | `hechizos.json` |
+
+### Plantillas SVG disponibles
+
+Las plantillas viven en `sources/plantillas/` y definen la estructura visual:
+
+| Fichero | Familia | Qué contiene |
+|---------|---------|--------------|
+| `anverso_stats.svg` | stats | Héroes y monstruos: banner, arte hasta el borde inferior, tabla de 5 stats |
+| `anverso_descripcion.svg` | descripcion | Armas, armaduras, pociones, hechizos: título, arte enmarcado, subtítulo, descripción, línea de stats |
+| `verso_stats.svg` | stats | Reverso para héroes: muestra descripción, leyenda de categoría |
+| `verso_descripcion.svg` | descripcion | Reverso para armas/pociones/hechizos: banner "HeroQuest" y leyenda |
+| `stats_cuadro.svg` | stats | Cuadro de 5 columnas que se posa sobre el área `ph-stats` |
+
+Cada plantilla usa:
+
+- **Marcadores `{{CLAVE}}`** dentro de `<text>`/`<tspan>`: `{{NOMBRE}}`, `{{SUBTITULO}}`, `{{LEYENDA}}`, `{{COLOR}}` (color hex de acento).
+- **Elementos `id="ph-*"`** (rectángulos invisibles): `ph-arte` (área de arte), `ph-stats` (tabla de stats), `ph-descripcion` (texto descriptivo), `ph-fondo` (fondo del reverso).
+
+El diseñador puede mover/redimensionar anclas en Inkscape y el contenido se recoloca solo.
+
+### Generando una carta
+
+Usa `carta_item.py` desde la raíz del repositorio con `uv run`:
+
+```bash
+# Anverso PNG de un personaje
+uv run juegos/heroquest/scripts/carta_item.py --tipo personaje --nombre "Bárbaro" --output barra.png
+
+# Anverso PNG de un hechizo con fondo de fuego
+uv run juegos/heroquest/scripts/carta_item.py --tipo hechizo --nombre "Bola de fuego" \
+  --fondo_verso magia_fuego_back.png --formato png
+
+# Hoja plegable PDF con varias cartas
+uv run juegos/heroquest/scripts/imprimir_cartas.py --lista juegos/heroquest/mazo_ejemplo.yml --salida mazo.pdf
+```
+
+### Añadiendo un nuevo tipo de carta
+
+1. Crea un módulo en `juegos/heroquest/scripts/tipos_carta/` heredando de `TipoCarta`
+   e implementando `campos()`, `stats()`, `subtitulo()`, y opcionalmente `familia_fondo()`.
+2. Regístralo en `scripts/tipos_carta/registro.py`.
+3. Crea/adapta las plantillas SVG en `sources/plantillas/` con los marcadores `{{NOMBRE}}`, `{{SUBTITULO}}`, etc. y los `id="ph-*"` apropiados.
+4. Añade datos de ejemplo en los ficheros JSON correspondientes en `data/`.
+
+### Recursos externos
+
+- `sources/arte_fondos_hq2021/` — 15 fondos PNG de carta (parchment, marcos, ribbons) de
+  [heroquest-card-creator](https://github.com/alexbernard/heroquest-card-creator).
+- `sources/arte/` — Arte del anverso (retratos, ilustraciones de armas).
+- `sources/reversos/` — Reversos de cartas ya recortados/enderezados.
+- `sources/ATRIBUCIONES.md` — Licencias y atribución de recursos externos.
 valida además que cada monstruo/tesoro caiga dentro de la sala indicada y dentro del tablero.
 
 Esquema de las salas de una misión (`salas.json`):

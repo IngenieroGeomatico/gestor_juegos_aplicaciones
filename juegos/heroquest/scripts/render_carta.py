@@ -7,6 +7,7 @@ tarjetas de juego, imitando el estilo de las cartas físicas originales.
 Utiliza un sistema de tipos de carta para determinar el diseño y el contenido.
 """
 from __future__ import annotations
+import re
 import xml.sax.saxutils
 import textwrap
 from pathlib import Path
@@ -215,10 +216,10 @@ def _frag_stats_linea(tipo: TipoCarta, entrada: dict, geom: dict[str, float]) ->
 def _render_stats(tipo: TipoCarta, entrada: dict, ancho: int, alto: int) -> str:
     """Renderiza el anverso de la familia 'stats' (héroes, monstruos).
 
-    Usa la plantilla `anverso_stats.svg` para el chrome (marco, banner, banda de
+    Usa la plantilla `hero-stats.svg` para el chrome (marco, banner, banda de
     stats) y rellena las anclas ph-arte (arte a 4/5) y ph-stats (tabla).
     """
-    tpl = plantillas.cargar("anverso_stats")
+    tpl = plantillas.cargar("hero-stats")
     geom_arte = plantillas.ancla(tpl, "ph-arte") or {"x": 40, "y": 120, "width": 420, "height": 500}
     geom_stats = plantillas.ancla(tpl, "ph-stats") or {"x": 40, "y": 620, "width": 420, "height": 55}
 
@@ -236,7 +237,156 @@ def _render_stats(tipo: TipoCarta, entrada: dict, ancho: int, alto: int) -> str:
     )
 
 
+def _render_hero_card(tipo: TipoCarta, entrada: dict, ancho: int = DISENO_ANCHO, alto: int = DISENO_ALTO) -> str:
+    """Renderiza la cara delantera de un héroe usando hero-card-up.svg como plantilla padre.
+
+    Apila las capas en el orden especificado:
+    1. Fondo (parchment.png) - se busca en sources/arte_fondos/ por defecto o se usa el de la categoría
+    2. Arte (ph-arte) - imagen del héroe
+    3. Stats (ph-stats) - tabla de 5 estadísticas
+    4. Ribbon (pg-ribbon) - banda con tipo de héroe
+    5. Icono (ph-icon) - ícono de clase
+
+    Cada capa es opcional: si no existe un elemento ph-* correspondiente, se omite.
+    """
+    tpl = plantillas.cargar("hero-card-up")
+
+    # Geometría de las anclas de la plantilla padre
+    geom_arte = plantillas.ancla(tpl, "ph-arte") or {"x": -46, "y": 28, "width": 227, "height": 279}
+    geom_stats = plantillas.ancla(tpl, "ph-stats") or {"x": -32, "y": 256, "width": 197, "height": 97}
+
+    # 1. Generar fragmento de arte
+    arte_fragment = None
+    if entrada.get("arte") or entrada.get("nombre"):
+        arte_fragment = _frag_arte(tipo, entrada, geom_arte, sufijo="hero", franja=20)
+
+    # 2. Generar fragmento de stats
+    stats_fragment = None
+    if True:  # Los héroes siempre tienen stats
+        stats = tipo.stats(entrada)
+        textos_stats: dict[str, str] = {"COLOR": tipo.color}
+        # Rellena hasta 5 columnas
+        for i in range(1, 6):
+            if i <= len(stats):
+                label, value = stats[i - 1]
+            else:
+                label, value = "", ""
+            textos_stats[f"LABEL{i}"] = label
+            textos_stats[f"VALOR{i}"] = value
+        tpl_stats = plantillas.cargar("stats_cuadro")
+        cuadro = plantillas.render(tpl_stats, textos=textos_stats)
+        escala_x = geom_stats["width"] / 420
+        escala_y = geom_stats["height"] / 60
+        stats_fragment = (f'<g transform="translate({geom_stats["x"]}, {geom_stats["y"]}) '
+                         f'scale({escala_x}, {escala_y})">{cuadro}</g>')
+
+    # 3. Generar fragmento de ribbon (tipo de héroe)
+    ribbon_fragment = None
+    subtitulo = tipo.subtitulo(entrada)
+    if subtitulo:
+        tpl_ribbon = plantillas.cargar("ribbon")
+        # Buscar ancla ph-ribbon o ph-titulo en la plantilla ribbon
+        geom_ribbon = plantillas.ancla(tpl_ribbon, "ph-ribbon") or \
+                      plantillas.ancla(tpl_ribbon, "ph-titulo") or \
+                      {"x": 0, "y": 0, "width": 300, "height": 40}
+        # Insertar el subtítulo en la plantilla
+        # El ribbon SVG usa marcadores o texto directo; insertamos el texto
+        ribbon_fragment = f'<text x="{geom_ribbon["x"] + 10}" y="{geom_ribbon["y"] + 20}" font-family="Albert Sans" font-size="14" fill="#3a2416">{__import__("xml").sax.saxutils.escape(subtitulo)}</text>'
+
+    # 4. Generar fragmento de icono (ph-icon)
+    icon_fragment = None
+    geom_icon = plantillas.ancla(tpl, "ph-icon") or {"x": 0, "y": 0, "width": 64, "height": 64}
+    # Buscar arte del icono - usar símbolo del tipo o arte declarado
+    simbolo = tipo.simbolo
+    if simbolo:
+        icon_fragment = (f'<text x="{geom_icon["x"] + geom_icon["width"] / 2}" y="{geom_icon["y"] + geom_icon["height"] / 2 + 15}" '
+                        f'font-family="serif" font-size="32" fill="{tipo.color}" text-anchor="middle">{__import__("xml").sax.saxutils.escape(simbolo)}</text>')
+
+    # Construir el SVG final sustituyendo las anclas
+    resultado = tpl
+
+    # Sustituir bloques (anclas ph-*)
+    bloques = {}
+    if arte_fragment:
+        bloques["ph-arte"] = arte_fragment
+    if stats_fragment:
+        bloques["ph-stats"] = stats_fragment
+    if ribbon_fragment:
+        bloques["ph-ribbon"] = ribbon_fragment
+    if icon_fragment:
+        bloques["ph-icon"] = icon_fragment
+
+    # Aplicar sustitución de bloques
+    for id_ancla, fragmento in bloques.items():
+        resultado = plantillas._eliminar_ancla(resultado, id_ancla, fragmento or "")
+
+    # Eliminar anclas no utilizadas
+    for id_ancla in re.findall(r'<rect\b[^>]*\bid="(ph-[\w-]+)"', resultado):
+        if id_ancla not in bloques:
+            resultado = plantillas._eliminar_ancla(resultado, id_ancla, "")
+
+    # Sustituir marcadores de texto si la plantilla los usa (aunque hero-card-up no los tiene)
+    # por si hay compatibilidad futura
+    textos = {
+        "NOMBRE": entrada.get("nombre", ""),
+        "SUBTITULO": tipo.subtitulo(entrada),
+        "COLOR": tipo.color,
+    }
+    resultado = _render_text_markers(resultado, textos)
+
+    # Devolver solo el interior del <svg>
+    # Buscar inicio y fin de svg
+    inicio = resultado.find("<svg")
+    if inicio == -1:
+        return resultado
+    apertura_fin = resultado.find(">", inicio)
+    cierre = resultado.rfind("</svg>")
+    if apertura_fin == -1 or cierre == -1:
+        return resultado
+    return resultado[apertura_fin + 1:cierre]
+
+
 def _render_descripcion(tipo: TipoCarta, entrada: dict, ancho: int, alto: int) -> str:
+    """Renderiza el anverso de la familia 'descripcion' (armas, hechizos...).
+
+    Usa la plantilla `anverso_descripcion.svg` para el chrome y rellena las
+    anclas ph-arte, ph-descripcion y ph-stats.
+    """
+    tpl = plantillas.cargar("anverso_descripcion")
+    geom_arte = plantillas.ancla(tpl, "ph-arte") or {"x": 80, "y": 105, "width": 340, "height": 220}
+    geom_desc = plantillas.ancla(tpl, "ph-descripcion") or {"x": 60, "y": 375, "width": 380, "height": 230}
+    geom_stats = plantillas.ancla(tpl, "ph-stats") or {"x": 60, "y": 608, "width": 380, "height": 24}
+
+    arte = _frag_arte(tipo, entrada, geom_arte, sufijo="desc", franja=16, fallback_circulo=False)
+    desc = _frag_descripcion(
+        tipo.descripcion(entrada), geom_desc,
+        ancho_wrap=38, tam_fuente=18, interlineado=22, centrado=False)
+    stats = _frag_stats_linea(tipo, entrada, geom_stats)
+
+    return plantillas.render(
+        tpl,
+        textos={
+            "NOMBRE": entrada.get("nombre", ""),
+            "SUBTITULO": tipo.subtitulo(entrada),
+            "COLOR": tipo.color,
+        },
+        bloques={"ph-arte": arte, "ph-descripcion": desc, "ph-stats": stats},
+    )
+
+
+def _render_text_markers(svg: str, textos: dict[str, str]) -> str:
+    """Sustituye marcadores {{CLAVE}} en el SVG."""
+    def _valor(clave: str) -> str:
+        valor = textos.get(clave, "")
+        return valor
+
+    def _sub(m: re.Match) -> str:
+        return _valor(m.group(1))
+
+    return re.sub(r"\{\{\s*([\w]+)\s*\}\}", _sub, svg)
+
+
+def _contenido_svg(tipo: TipoCarta, entrada: dict, ancho: int, alto: int) -> str:
     """Renderiza el anverso de la familia 'descripcion' (armas, hechizos...).
 
     Usa la plantilla `anverso_descripcion.svg` para el chrome y rellena las
@@ -268,15 +418,42 @@ def _contenido_svg(tipo: TipoCarta, entrada: dict, ancho: int, alto: int) -> str
     """Devuelve el interior del SVG del anverso (sin la etiqueta <svg> raíz).
 
     Delega en la plantilla de la familia del tipo (`anverso_stats.svg` o
-    `anverso_descripcion.svg`).
+    `anverso_descripcion.svg`), o usa la plantilla hero-card-up.svg para héroes.
     """
     match tipo.familia:
         case "stats":
+            # Si es un héroe, usar la plantilla hero-card-up.svg
+            if tipo.id == "personaje":
+                return _render_hero_card(tipo, entrada, ancho, alto)
+            # Para otros tipos stats (monstruos), usar la plantilla original
             return _render_stats(tipo, entrada, ancho, alto)
         case "descripcion":
             return _render_descripcion(tipo, entrada, ancho, alto)
         case _:
             return f'<text x="50" y="50" fill="red">Familia de carta desconocida: {tipo.familia}</text>'
+
+def _ensure_svg_namespaces(svg: str) -> str:
+    """Asegura que el SVG tenga los namespaces necesarios para que resvg lo acepte.
+    
+    Este función reemplaza el xmlns base por uno completo que incluye xlink,
+    inkscape y sodipodi, que son necesarios cuando el SVG contiene referencias
+    a data URIs o viene de plantillas Inkscape.
+    """
+    # Reemplazar cualquier xmlns existente por uno completo
+    svg = svg.replace(
+        'xmlns="http://www.w3.org/2000/svg"',
+        'xmlns="http://www.w3.org/2000/svg" '
+        'xmlns:xlink="http://www.w3.org/1999/xlink" '
+        'xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" '
+        'xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"'
+    )
+    # Eliminar duplicados del xmlns base (dejar solo el primero)
+    # Buscar y remover segundas ocurrencias de xmlns="..."
+    import re
+    svg = re.sub(r'xmlns="http://www\.w3\.org/2000/svg"[^>]*', 'xmlns="http://www.w3.org/2000/svg"', svg, count=1)
+    
+    return svg
+
 
 def render_svg(tipo: TipoCarta, entrada: dict, ancho: int = DISENO_ANCHO, alto: int = DISENO_ALTO) -> str:
     """
@@ -298,12 +475,33 @@ def render_svg(tipo: TipoCarta, entrada: dict, ancho: int = DISENO_ANCHO, alto: 
     # Escala del tamaño físico (px) respecto a la rejilla de diseño.
     px_ancho = round(ancho * PX_CARTA_ANCHO / DISENO_ANCHO)
     px_alto = round(alto * PX_CARTA_ALTO / DISENO_ALTO)
-    svg_parts = [
-        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {ancho} {alto}" width="{px_ancho}" height="{px_alto}">',
-        _contenido_svg(tipo, entrada, ancho, alto),
-        "</svg>",
-    ]
-    return "\n".join(svg_parts)
+    
+    # Generar contenido SVG interior
+    contenido = _contenido_svg(tipo, entrada, ancho, alto)
+    
+    # Verificar si el contenido necesita namespaces especiales (data URIs, etc.)
+    needs_xlink = "xlink:href" in contenido
+    needs_inkscape = "id=" in contenido  # Las plantillas Inkscape suelen tener ids
+    needs_sodipodi = "sodipodi:" in contenido
+    
+    # Construir la etiqueta <svg> inicial con los namespaces necesarios
+    svg_start = '<?xml version="1.0" encoding="UTF-8"?>'
+    svg_namespace = 'xmlns="http://www.w3.org/2000/svg"'
+    attrs = [svg_namespace, f'viewBox="0 0 {ancho} {alto}"', f'width="{px_ancho}"', f'height="{px_alto}']
+    
+    if needs_xlink:
+        svg_namespace += ' xmlns:xlink="http://www.w3.org/1999/xlink"'
+    if needs_inkscape:
+        svg_namespace += ' xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"'
+    if needs_sodipodi:
+        svg_namespace += ' xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"'
+    
+    # El SVG completo: declaración XML + etiqueta de apertura + contenido + cierre
+    svg = f'{svg_start}<svg {svg_namespace}>'
+    svg += contenido
+    svg += "</svg>"
+    
+    return svg
 
 
 def _ruta_arte(tipo: TipoCarta, entrada: dict) -> Path | None:
@@ -484,19 +682,39 @@ def render_svg_doble(tipo: TipoCarta, entrada: dict, ancho: int = DISENO_ANCHO, 
     con su orientación normal (las letras del reverso se ven bien).
     """
     ancho_doble = ancho * 2
-    frente = f'<g transform="translate(0,0)">{_contenido_svg(tipo, entrada, ancho, alto)}</g>'
-    verso = (f'<g transform="translate({ancho},0)">'
-             f'{_contenido_verso(tipo, ancho, alto, leyenda, fondo_verso, entrada)}</g>')
-    pliegue = "\n".join([
-        f'<line x1="{ancho}" y1="0" x2="{ancho}" y2="{alto}" stroke="{COLOR_BORDE}" '
-        f'stroke-width="1.5" stroke-dasharray="8 6" />',
-        f'<text x="{ancho}" y="{alto - 12}" font-family="{FONT_FAMILY_CARTA}" font-size="11" '
-        f'fill="{COLOR_BORDE}" text-anchor="middle">— pliegue —</text>',
-    ])
+    
+    # Generar contenidos
+    frente_contenido = _contenido_svg(tipo, entrada, ancho, alto)
+    verso_contenido = _contenido_verso(tipo, ancho, alto, leyenda, fondo_verso, entrada)
+    
+    # Verificar si los contenidos necesitan namespaces especiales
+    needs_xlink = "xlink:href" in frente_contenido or "xlink:href" in verso_contenido
+    needs_inkscape = "id=" in frente_contenido or "id=" in verso_contenido
+    needs_sodipodi = "sodipodi:" in frente_contenido or "sodipodi:" in verso_contenido
+    
+    # Construir namespaces
+    svg_namespace = 'xmlns="http://www.w3.org/2000/svg"'
+    if needs_xlink:
+        svg_namespace += ' xmlns:xlink="http://www.w3.org/1999/xlink"'
+    if needs_inkscape:
+        svg_namespace += ' xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"'
+    if needs_sodipodi:
+        svg_namespace += ' xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"'
+    
     px_ancho = round(ancho_doble * PX_CARTA_ANCHO / DISENO_ANCHO)
     px_alto = round(alto * PX_CARTA_ALTO / DISENO_ALTO)
+    
+    frente = '<g transform="translate(0,0)">' + frente_contenido + '</g>'
+    verso = '<g transform="translate(' + str(ancho) + ',0)">' + verso_contenido + '</g>'
+    pliegue = "\n".join([
+        '<line x1="' + str(ancho) + '" y1="0" x2="' + str(ancho) + '" y2="' + str(alto) + '" stroke="' + COLOR_BORDE + '" '
+        'stroke-width="1.5" stroke-dasharray="8 6" />',
+        '<text x="' + str(ancho) + '" y="' + str(alto - 12) + '" font-family="' + FONT_FAMILY_CARTA + '" font-size="11" '
+        'fill="' + COLOR_BORDE + '" text-anchor="middle">— pliegue —</text>',
+    ])
+    
     return "\n".join([
-        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {ancho_doble} {alto}" width="{px_ancho}" height="{px_alto}">',
+        '<svg ' + svg_namespace + ' viewBox="0 0 ' + str(ancho_doble) + ' ' + str(alto) + '" width="' + str(px_ancho) + '" height="' + str(px_alto) + '">',
         frente,
         verso,
         pliegue,

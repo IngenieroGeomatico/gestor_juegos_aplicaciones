@@ -1,43 +1,21 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--
-  Plantilla de REVERSO generica (familia "descripcion": armas, armaduras,
-  pociones, hechizos; tambien reverso por defecto). Editable en Inkscape.
-
-  Sistema de plantillas (ver scripts/plantillas.py):
-  - {{LEYENDA}} = categoria de la carta (equipo, tesoro, magia, ...).
-  - Ancla id="ph-fondo" = imagen de fondo tematica del reverso; el codigo la
-    sustituye por la imagen (sources/arte_fondos/) recortada "cover". Si no hay
-    imagen, se deja el fondo de pergamino que hay debajo.
--->
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-     viewBox="0 0 500 700" width="500" height="700">
-  <defs>
-    <linearGradient id="vd-grad-pergamino" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" style="stop-color:#f3ecdd;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#eadfc8;stop-opacity:1" />
-    </linearGradient>
-  </defs>
-
-  <!-- Fondo de pergamino de respaldo (si no hay imagen tematica) -->
-  <rect width="500" height="700" fill="url(#vd-grad-pergamino)" />
-
-  <!-- ANCLA: imagen de fondo tematica del reverso (cubre toda la carta) -->
-  <rect id="ph-fondo" x="0" y="0" width="500" height="700" fill="#000000" opacity="0.04" />
-
-  <!-- Doble marco -->
-  <rect x="12" y="12" width="476" height="676" fill="none" stroke="#4d2c1b" stroke-width="3" />
-  <rect x="20" y="20" width="460" height="660" fill="none" stroke="#4d2c1b" stroke-width="1" />
-
-  <!-- Banner superior: "HeroQuest" -->
-  <path d="M 110 40 H 390 L 370 75 L 390 110 H 110 L 130 75 Z"
-        fill="#f4e9d2" fill-opacity="0.92" stroke="#4d2c1b" stroke-width="1.5" />
-  <text x="250" y="82" font-family="'Albert Sans', Georgia, 'Times New Roman', serif" font-size="34"
-        font-weight="bold" fill="#3a2416" text-anchor="middle">HeroQuest</text>
-
-  <!-- Banda inferior: leyenda (categoria de la carta) -->
-  <path d="M 120 580 H 380 L 358 602 L 380 624 H 120 L 142 602 Z"
-        fill="#f4e9d2" fill-opacity="0.92" stroke="#4d2c1b" stroke-width="1.5" />
-  <text x="250" y="606" font-family="'Albert Sans', Georgia, 'Times New Roman', serif" font-size="14"
-        font-weight="bold" font-variant="small-caps" fill="#3a2416"
-        text-anchor="middle">{{LEYENDA}}</text>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   version="1.1"
+   width="750"
+   height="1050"
+   viewBox="0 0 750 1050"
+   xmlns="http://www.w3.org/2000/svg">
+  <defs />
+  <g>
+    <!-- Fondo -->
+    <rect id="ph-fondo" x="0" y="0" width="750" height="1050" fill="#f5deb3" />
+    <!-- Leyenda -->
+    <text x="50" y="1020" font-family="Albert Sans" font-size="14" fill="#3a2416" text-anchor="middle">HeroQuest</text>
+    <!-- Descripción en reverso -->
+    <text x="75" y="260" width="350" height="250" font-family="Albert Sans" font-size="11" fill="#3a2416" text-anchor="start">
+      {{DESCRIPCION}}
+    </text>
+    <!-- Símbolo -->
+    <text x="375" y="50" font-family="serif" font-size="40" fill="#5d4037" text-anchor="middle">⚔</text>
+  </g>
 </svg>
