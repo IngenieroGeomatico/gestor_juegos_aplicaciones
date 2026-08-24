@@ -7,7 +7,22 @@
     "cuerpo": 8,
     "mente": 2,
     "movimiento": 2,
-    "descripcion": "Guerrero forjado en las tierras salvajes. Especializado en el combate cuerpo a cuerpo."
+    "descripcion": "Guerrero forjado en las tierras salvajes. Especializado en el combate cuerpo a cuerpo.",
+    "plantillas": {
+      "cara": {
+        "plantilla padre": "sources/plantillas/hero-card-up.svg",
+        "plantilla_estadisticas": "sources/plantillas/hero-stats.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "arte_personaje": "sources/arte/bárbaro_1.png",
+        "arte_icono": "sources/arte_iconos/bárbaro_1.png",
+        "archivos_fondo": [
+          "sources/arte_fondos/parchment.png"
+        ]
+      },
+      "dorso": {
+        "plantilla padre": ""
+      }
+    }
   },
   {
     "nombre": "Enano",
