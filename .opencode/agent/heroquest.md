@@ -30,7 +30,7 @@ Situación de los datos y scripts:
 
 | Tipo | Fichero | Campos |
 |------|---------|--------|
-| Héroes | `juegos/heroquest/data/personajes.json` | nombre, clase, ataque, defensa, cuerpo, mente, movimiento, descripcion |
+| Héroes | `juegos/heroquest/data/personajes.json` | nombre, clase, ataque, defensa, cuerpo, mente, movimiento, arma_inicial, armadura_inicial, descripcion y `plantillas` (receta de carta: `cara` y `dorso`, ver más abajo) |
 | Armas y equipo | `juegos/heroquest/data/armas.json` | nombre, tipo (Arma cuerpo a cuerpo / Arma a distancia / Armadura / Poción), ataque, defensa, coste, descripcion |
 | Monstruos | `juegos/heroquest/data/monstruos.json` | nombre, ataque, defensa, cuerpo, mente, movimiento, descripcion |
 | Hechizos | `juegos/heroquest/data/hechizos.json` | nombre, escuela elemental (Agua / Aire / Fuego / Tierra / Terror), coste_mente, descripcion |
@@ -55,10 +55,10 @@ Consulta el tablero (salas numeradas, `.` = pasillo) con
 Los scripts de utilidad viven en `juegos/heroquest/scripts/`:
 
 - `listar.py` — ver el contenido actual
-- `nueva_carta.py` — añade una carta de cualquier tipo con `--tipo` (`personaje`,
-  `arma`, `armadura`, `pocion`, `monstruo`, `hechizo`). Es un orquestador: la
-  lógica de cada tipo (campos, validación) vive en el paquete `tipos_carta/`.
-  Sustituye a los antiguos `nueva_arma.py`, `nuevo_monstruo.py` y `nuevo_personaje.py`
+- `nueva_carta.py` — añade una entrada de datos de cualquier tipo con `--tipo`
+  (`personaje`, `arma`, `armadura`, `pocion`, `monstruo`, `hechizo`). Es un
+  orquestador: los campos y la validación de cada tipo viven en el módulo ligero
+  `tipos_carta_datos.py` (solo datos, sin render)
 - `nueva_mision.py` — añade una misión montable en tablero
 - `eliminar.py` — borrar una entrada por nombre
 - `tablero_svg.py` — genera `tableros.json` desde el **SVG** de un tablero
@@ -74,18 +74,25 @@ Los scripts de utilidad viven en `juegos/heroquest/scripts/`:
   autocontenido (mapa SVG embebido, cada sala con sus monstruos/tesoros y
   casillas de vida, y referencia de héroes/armas/hechizos), en
   `juegos/heroquest/mapas/`
-- `carta_item.py` — genera una carta individual de juego (arma, armadura,
-  poción, hechizo, personaje o monstruo). Orquestador que usa `render_carta.py`
-  (anverso en SVG y PNG) y los reversos de `sources/reversos/`, en
+- `carta_item.py` — genera la carta individual de un **héroe** (solo personajes)
+  con `--nombre "<héroe>"`. Usa el motor `render_personaje.py`. Elige la cara con
+  `--cara {anverso,dorso,ambas}` y el formato con `--formato png,svg`. Sale en
   `juegos/heroquest/cartas/`
+- `render_personaje.py` — **motor de render guiado por datos** de las cartas de
+  héroe (anverso y dorso), en SVG y PNG. La *receta* de la carta vive en el JSON
+  del personaje (clave `plantillas`, ver "Cartas de héroe"). Es el único motor de
+  cartas: `render_svg`/`render_png` (anverso) y `render_svg_verso`/
+  `render_png_verso` (dorso)
+- `plantillas.py` — loader de plantillas SVG: carga (con caché), lee las anclas
+  `id="ph-*"` (rectángulos invisibles cuya geometría se lee) y sustituye los
+  marcadores `{{...}}`
 - `preparar_reversos.py` — recorta/endereza las fotos `*_back.jpg` de `sources/`
   hacia `sources/reversos/`
-- `render_carta.py` — dibuja el anverso de una carta (SVG y PNG) según su familia
 - `generar_arte.py` — genera el **arte del anverso** de armas/objetos y **hechizos**
   (espada, hacha, poción; bola de fuego, curar heridas, dardo de caos) como SVG
   vectorial detallado y lo rasteriza a PNG con `resvg`. Los SVG (fuente de verdad,
   editables) van a `sources/arte_svg/`; los PNG finales a `sources/arte/` con el
-  nombre que espera `render_carta` (el `slug` de la carta, p. ej.
+  nombre de convención (el `slug` de la carta, p. ej.
   `Báculo_del_mago.png`). Usa `--solo "<nombre>"` para uno, `--svg-solo` para no rasterizar
 - `arte_comun.py` — utilidades compartidas por los tres generadores de arte
   (`slug` y `rasterizar` con resvg)
@@ -99,28 +106,71 @@ Los scripts de utilidad viven en `juegos/heroquest/scripts/`:
   (1000×1400) en `sources/arte_fondos/` (SVG fuente en `sources/arte_fondos_svg/`).
   La magia se desglosa por **escuelas elementales** (`magia_agua`, `magia_aire`,
   `magia_fuego`, `magia_tierra`, `magia_terror`), que comparten el santuario
-  arcano con paleta, orbe y motivos propios. El reverso de cada hechizo elige su
-  fondo según el campo `escuela`. Se usan con
-  `carta_item.py --carta_completa --fondo_verso <fichero>.png`.
+  arcano con paleta, orbe y motivos propios.
   Reserva bandas oscuras arriba/abajo para el banner y la leyenda de la carta.
   Algunas escenas incrustan **paths de iconos libres** (Material Design Icons /
   SVG Repo, Apache 2.0) con su atribución en el propio script.
-- `imprimir_cartas.py` — genera un **PDF A4** para imprimir cartas como hojas
-  plegables (anverso|reverso lado a lado, para doblar y meter en protector), a
-  tamaño real 63×88 mm con marcas de corte, 3 por hoja. Entrada por `--todo`,
-  `--lista <mazo.yml>` o `--carta "tipo:Nombre"` (repetible). El reverso usa el
-  fondo temático de la categoría automáticamente. PDF en `cartas/`
-- `tipos_carta/` — paquete con un módulo por tipo de carta (campos, stats,
-  validación, arte, reverso) y un registro común (`registro.py`)
+- `imprimir_cartas.py` — genera un **PDF A4** para imprimir cartas de **héroe** a
+  tamaño real 63×88 mm con cruces de corte. Dos disposiciones con `--disposicion`:
+  `junta` (anverso|dorso lado a lado en la misma hoja con pliegue central, para
+  doblar) o `separada` (anversos y dorsos en hojas distintas, con los dorsos
+  espejados para imprimir a doble cara; 3×3 = 9 cartas por hoja). Entrada por
+  `--todo`, `--lista <mazo.yml>` o `--carta "Nombre"` (repetible). PDF en `cartas/`
+- `tipos_carta_datos.py` — módulo ligero (solo datos) con los campos y la
+  validación de cada tipo, que consume `nueva_carta.py`
 - `data_store.py` — funciones compartidas (cargar, guardar, añadir, existe,
   eliminar, listar; helpers `slug` y `cargar_json`)
+
+## Cartas de héroe (motor guiado por datos)
+
+Las cartas de héroe las compone `render_personaje.py` a partir de una *receta*
+que vive en el propio JSON del personaje, bajo la clave `plantillas`:
+
+```json
+"plantillas": {
+  "cara": {
+    "plantilla_padre": "sources/plantillas/hero-card-up.svg",
+    "plantilla_estadisticas": "sources/plantillas/hero-stats.svg",
+    "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+    "arte_personaje": "sources/arte/bárbaro_1.png",
+    "arte_icono": "sources/arte_iconos/bárbaro_1.png",
+    "archivos_fondo": ["sources/arte_fondos/parchment.png"]
+  },
+  "dorso": {
+    "plantilla_padre": "sources/plantillas/hero-card-down.svg",
+    "plantilla_logo": "sources/plantillas/hero-back-just-logo.svg",
+    "archivos_fondo": [
+      "sources/arte_fondos/parchment_eye.png",
+      "sources/plantillas/hero-back-just-border.svg"
+    ]
+  }
+}
+```
+
+Reglas del motor:
+
+- **El SVG es la fuente de verdad.** Las plantillas de `sources/plantillas/` se
+  editan a mano (Inkscape). El motor solo inyecta contenido sobre sus anclas.
+- **Anclas** `id="ph-*"` (rectángulos invisibles): el código lee su geometría y
+  coloca ahí el contenido. Anverso: `ph-arte`, `ph-ribbon` (nombre), `ph-stats`
+  (cuadro de estadísticas), `ph-icon`. Dorso: `ph-heroquest` (logo) y `ph-texto`
+  (biografía: "Eres el {clase}." en negrita + la descripción debajo).
+- **`archivos_fondo`** es una lista en orden de renderizado: el primero va **más
+  abajo** y cada siguiente se superpone. Admite imágenes (PNG/JPG) y SVG (p. ej.
+  el borde), que se incrusta escalado a la carta.
+- **Solo se renderizan héroes.** Armas, armaduras, pociones, hechizos y monstruos
+  se gestionan como datos (`nueva_carta.py`, `listar.py`, `eliminar.py`) pero no
+  tienen motor de carta actualmente.
+
+Para dar carta a un héroe nuevo, añade su bloque `plantillas` (cara y dorso) en
+`personajes.json` y coloca sus assets (arte, iconos, fondos) en `sources/`.
 
 ## Cómo trabajar
 
 - Para crear una entrada nueva **dirígete a los scripts** (ejecutados con
-  `uv run juegos/heroquest/scripts/nueva_arma.py ...`). Si la tarea es más
-  compleja (editar una misión existente, rebalancear, añadir varias habitaciones),
-  edita directamente el JSON respetando el esquema.
+  `uv run juegos/heroquest/scripts/nueva_carta.py --tipo <tipo> ...`). Si la tarea
+  es más compleja (editar una misión existente, rebalancear, añadir varias
+  habitaciones), edita directamente el JSON respetando el esquema.
 - **El nombre es la clave única.** Antes de añadir, comprueba que no existe ya
   (`listar.py` o la función `existe`). Rechaza duplicados.
 - **Respeta el idioma.** Nombres y descripciones en español.
@@ -140,7 +190,7 @@ Los scripts de utilidad viven en `juegos/heroquest/scripts/`:
   las piezas comunes (`_hoja`, `_guarda_recta`, `_empunadura`, `_pomo`, `_gema`)
   para mantener un estilo coherente. **Itera mirando el PNG**: genéralo, ábrelo,
   corrige proporciones/geometría y repite. Respeta el nombre de fichero (el `slug`
-  de la carta) para que `render_carta` lo localice por convención.
+  de la carta) para que el motor lo localice por convención.
 - Para **el retrato de un héroe o monstruo**, edita/añade su función de busto en
   `generar_retratos.py` (reutiliza `_cabeza`, `_ojos`, `_cejas`, `_hombros`,
   `_cuello`, `_nariz` y añade rasgos distintivos) y regenera con
@@ -153,9 +203,8 @@ Los scripts de utilidad viven en `juegos/heroquest/scripts/`:
   `_santuario_elemental` para las escuelas de magia) y regenera con
   `uv run juegos/heroquest/scripts/generar_fondos.py --solo <categoria>` (las
   escuelas de magia son `magia_agua`, `magia_aire`, `magia_fuego`, `magia_tierra`,
-  `magia_terror`). Mantén despejadas las bandas superior e inferior (banner
-  "HeroQuest" y leyenda) e itera mirando el reverso compuesto
-  (`carta_item.py --carta_completa --fondo_verso ...`). Si quieres usar glifos de
+  `magia_terror`). Mantén despejadas las bandas superior e inferior e itera
+  mirando el PNG resultante. Si quieres usar glifos de
   librerías libres (Material Design Icons/SVG Repo, freesvg.org, Magnific),
   incrusta su `path` en la escena con su atribución en un comentario del script.
 - Tras modificar ficheros JSON, valida que sigan siendo JSON correcto.

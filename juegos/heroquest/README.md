@@ -166,9 +166,12 @@ uv run juegos/heroquest/scripts/generar_retratos.py --solo Orco # solo uno
 uv run juegos/heroquest/scripts/generar_fondos.py               # todos
 uv run juegos/heroquest/scripts/generar_fondos.py --solo tesoro # solo uno
 
-# Imprimir cartas: PDF A4 con hojas plegables (anverso|reverso) para recortar
+# Generar la carta de un héroe (anverso y/o dorso) en PNG/SVG
+uv run juegos/heroquest/scripts/carta_item.py --nombre "Bárbaro" --cara ambas --formato png
+
+# Imprimir cartas de héroe en PDF A4 (junta = pliegue; separada = doble cara, 9/hoja)
 uv run juegos/heroquest/scripts/imprimir_cartas.py --todo
-uv run juegos/heroquest/scripts/imprimir_cartas.py --lista juegos/heroquest/mazo_ejemplo.yml
+uv run juegos/heroquest/scripts/imprimir_cartas.py --lista juegos/heroquest/mazo_ejemplo.yml --disposicion separada
 
 # Eliminar una entrada por nombre
 uv run juegos/heroquest/scripts/eliminar.py --tipo monstruos --nombre "Basilisco"
@@ -185,31 +188,30 @@ navegador o tablet: datos de la misión, mapa en SVG, cada sala con sus monstruo
 héroes, armas y hechizos. Se guarda en `juegos/heroquest/mapas/` (ignorado por
 git); usa `--salida <ruta>` para otra ubicación.
 
-`carta_item.py` genera una carta individual con aspecto de carta de HeroQuest
-(pergamino, banner de título, ilustración simbólica, tabla de stats y descripción)
-para `--tipo arma`, `armadura`, `pocion`, `hechizo`, `personaje` o `monstruo`, p. ej.:
+`carta_item.py` genera la carta de un **héroe** (solo personajes) con aspecto de
+carta de HeroQuest, usando el motor `render_personaje.py`. Elige la cara con
+`--cara {anverso,dorso,ambas}` y el formato con `--formato png,svg`:
 
 ```bash
-uv run juegos/heroquest/scripts/carta_item.py --tipo arma --nombre "Espada corta"
-uv run juegos/heroquest/scripts/carta_item.py --tipo hechizo --nombre "Bola de fuego" --formato png
+uv run juegos/heroquest/scripts/carta_item.py --nombre "Bárbaro"
+uv run juegos/heroquest/scripts/carta_item.py --nombre "Bárbaro" --cara ambas --formato png,svg
 ```
 
-Genera un `.html` autocontenido (anverso en SVG + reverso de la carta como imagen)
-y/o un `.png` del anverso (dibujado con Pillow). Elige con `--formato html|png|ambos`.
 Se guarda en `juegos/heroquest/cartas/` (ignorado por git); usa `--salida <ruta>`
-para otra ubicación.
+para otra ubicación. La receta de la carta (plantillas y assets, para anverso y
+dorso) vive en el propio JSON del héroe (ver "Cartas de héroe" más abajo).
 
 `preparar_reversos.py` recorta y endereza las fotos `*_back.jpg` de `sources/`
 (las cartas reales por su cara trasera) y deja los reversos limpios en
-`sources/reversos/` (ignorado por git), que `carta_item.py` usa como cara trasera.
+`sources/reversos/` (ignorado por git).
 
 ### El arte del anverso (`scripts/generar_arte.py` y `sources/arte/`)
 
 La ilustración que aparece dentro de cada carta (la espada, el hacha, la poción…)
-se guarda como PNG en `sources/arte/` y `render_carta.py` la localiza **por
-convención de nombre**: busca `sources/arte/<slug(nombre)>.png` (p. ej.
-`Espada_corta.png`, `Báculo_del_mago.png`). Una entrada también puede declarar su
-propio fichero con el campo `"arte": "otro_nombre.png"`.
+se guarda como PNG en `sources/arte/` y el motor la localiza **por convención de
+nombre**: busca `sources/arte/<slug(nombre)>.png` (p. ej. `Espada_corta.png`,
+`Báculo_del_mago.png`). La receta del héroe también puede apuntar a un fichero
+concreto con `arte_personaje`.
 
 Ese arte se genera de forma **reproducible y editable** con `generar_arte.py`,
 siguiendo la misma filosofía que los tableros (**SVG = fuente de verdad**):
@@ -219,9 +221,9 @@ siguiendo la misma filosofía que los tableros (**SVG = fuente de verdad**):
   se consigue con **degradados** (`<linearGradient>`/`<radialGradient>`), un
   reflejo de lustre semitransparente y una **sombra suave** (`feDropShadow`).
 - El SVG se **rasteriza a PNG con `resvg`** (`resvg_py`, la misma librería que usa
-  `render_carta.py`), así que no hay dependencias ni pasos manuales.
+  el motor de render), así que no hay dependencias ni pasos manuales.
 - Los SVG fuente se conservan en `sources/arte_svg/` (versionables y editables);
-  los PNG finales van a `sources/arte/` con el nombre que espera `render_carta`.
+  los PNG finales van a `sources/arte/` con el nombre de convención.
 
 ```bash
 uv run juegos/heroquest/scripts/generar_arte.py                  # regenera los 11
@@ -242,16 +244,15 @@ llamas, cruz de vida radiante, proyectil de caos).
 Los **héroes y monstruos** tienen su propio arte: un **retrato de busto** por
 personaje (Bárbaro, Enano, Elfo, Mago; Trasgo, Orco, Fimir, Guerrero del Caos,
 Gárgola), generado con `generar_retratos.py`. Van también a `sources/arte/` con
-el `slug` del nombre (`Bárbaro.png`, `Guerrero_del_Caos.png`, …), así que
-`render_carta` los usa por la misma convención. Comparten `sources/arte_svg/` y
+el `slug` del nombre (`Bárbaro.png`, `Guerrero_del_Caos.png`, …), así que el
+motor los usa por la misma convención. Comparten `sources/arte_svg/` y
 las piezas de dibujo comunes (`_cabeza`, `_ojos`, `_cejas`, `_hombros`, `_cuello`,
 `_nariz`), y cada personaje añade sus rasgos distintivos (melena, orejas
 puntiagudas, sombrero de mago, ojo único del Fimir, cuernos del Caos, alas de
 piedra de la Gárgola). El lienzo del retrato es **vertical (520×600)**, con una
-proporción cercana a la del área de arte de la plantilla `anverso_stats.svg`
-(que llega hasta el borde inferior de la carta), para que el busto se vea grande
-y completo (cabeza arriba, hombros abajo) sin que el recorte "cover" de la carta
-lo corte por los lados.
+proporción cercana a la del área de arte de la carta del héroe, para que el busto
+se vea grande y completo (cabeza arriba, hombros abajo) sin que el recorte
+"cover" lo corte por los lados.
 
 > `generar_arte.py`, `generar_retratos.py` y `generar_fondos.py` comparten
 > utilidades comunes en `scripts/arte_comun.py` (`slug` y `rasterizar` con resvg).
@@ -294,12 +295,8 @@ fuente de verdad**, rasterizado a PNG con `resvg`), en formato 1000×1400
 abajo** para que el banner y la leyenda que pinta la carta encima se lean bien.
 Los SVG fuente quedan en `sources/arte_fondos_svg/`.
 
-**Reverso por defecto según la categoría.** Al generar una carta completa, el
-reverso usa **automáticamente** el fondo temático de su categoría (`equipo`,
-`tesoro`, `enemigo`, `heroe`, `magia`) si existe en `sources/arte_fondos/`; si no,
-cae a la foto estándar del tipo (`sources/reversos/`). Para **forzar otro fondo**,
-pasa `--fondo_verso <fichero>.png` a `carta_item.py` (o `--fondo` a
-`imprimir_cartas.py`).
+Estos fondos son la biblioteca de escenas ambientales del repo. En la carta de
+héroe, el fondo del dorso se elige en la receta del JSON (`plantillas.dorso.archivos_fondo`).
 
 ```bash
 uv run juegos/heroquest/scripts/generar_fondos.py               # regenera todos
@@ -315,45 +312,35 @@ uv run juegos/heroquest/scripts/generar_fondos.py --svg-solo    # SVG sin PNG
 > incrusta directamente en el SVG que genera el script (con su color original y
 > su atribución), así la escena sigue siendo reproducible y autocontenida.
 
-Para usar un fondo en el reverso de una carta, pásalo con `--fondo_verso` (busca
-en `sources/arte_fondos/`) junto a `--carta_completa`:
-
-```bash
-uv run juegos/heroquest/scripts/carta_item.py --tipo hechizo --nombre "Bola de fuego" \
-  --carta_completa --fondo_verso magia_back.png --formato png
-```
-
 Para **añadir o mejorar** un fondo, edita su función de escena en
 `generar_fondos.py` reutilizando las piezas comunes (`_muro`, `_luz`, `_antorcha`,
 `_bandas`, `_vineta`, `_espada`) y regenéralo, iterando mirando el PNG.
 
 ### Imprimir cartas en PDF (`scripts/imprimir_cartas.py`)
 
-Genera un **PDF A4** con las cartas listas para imprimir en casa. Cada carta se
-maqueta como **hoja plegable**: anverso y reverso lado a lado en la misma cara del
-papel. Imprimes a una sola cara, recortas por las marcas de corte, **doblas por la
-línea de pliegue** central y metes la carta (ya con sus dos caras) en un protector.
+Genera un **PDF A4** con las cartas de **héroe** listas para imprimir, a tamaño
+real 63 × 88 mm y 300 DPI, con **cruces negras de corte**. Dos disposiciones con
+`--disposicion`:
 
-- Tamaño **real** 63 × 88 mm por cara (126 × 88 mm la pieza plegable), a 300 DPI.
-- **3 piezas por hoja A4**, con marcas de corte en las esquinas y marca de pliegue.
-- El **reverso** de cada carta usa automáticamente el fondo temático de su
-  categoría (`equipo`/`tesoro`/`enemigo`/`heroe`/`magia`) si existe en
-  `sources/arte_fondos/`. Con `--fondo <fichero>.png` fuerzas el mismo fondo para
-  todas las cartas del PDF.
-- Usa Pillow para el PDF (sin dependencias nuevas de peso); el YAML necesita
-  `pyyaml` (ya en `pyproject.toml`).
+- **`junta`** (por defecto): anverso y dorso lado a lado en la **misma hoja** con
+  línea de pliegue central. Imprimes a una cara, recortas, doblas por el pliegue y
+  metes la carta (ya con sus dos caras) en un protector. 3 piezas por hoja.
+- **`separada`**: anversos y dorsos en **hojas distintas**, con los dorsos
+  espejados para imprimir a **doble cara** (cada dorso queda detrás de su
+  anverso). Caben **3×3 = 9 cartas por hoja**.
 
-Tres formas de indicar qué cartas imprimir:
+Solo se imprimen héroes (personajes con receta de plantillas). Tres formas de
+indicar qué cartas imprimir:
 
 ```bash
-# 1) Todo el mazo del juego
+# 1) Todos los héroes con carta
 uv run juegos/heroquest/scripts/imprimir_cartas.py --todo --salida mazo.pdf
 
 # 2) Un listado en YAML (con cantidades opcionales)
-uv run juegos/heroquest/scripts/imprimir_cartas.py --lista juegos/heroquest/mazo_ejemplo.yml
+uv run juegos/heroquest/scripts/imprimir_cartas.py --lista juegos/heroquest/mazo_ejemplo.yml --disposicion separada
 
-# 3) Cartas sueltas por la línea de comandos (repetible)
-uv run juegos/heroquest/scripts/imprimir_cartas.py --carta "arma:Espada corta" --carta "monstruo:Orco"
+# 3) Héroes sueltos por la línea de comandos (repetible)
+uv run juegos/heroquest/scripts/imprimir_cartas.py --carta "Bárbaro" --carta "Mago"
 ```
 
 Formato del YAML (ver [mazo_ejemplo.yml](mazo_ejemplo.yml)):
@@ -361,135 +348,68 @@ Formato del YAML (ver [mazo_ejemplo.yml](mazo_ejemplo.yml)):
 ```yaml
 cartas:
   - personaje: Bárbaro
-  - arma: Espada corta
-  - monstruo: Orco
-    cantidad: 3        # nº de copias (opcional, por defecto 1)
-  - hechizo: Bola de fuego
+  - personaje: Mago
+    cantidad: 2        # nº de copias (opcional, por defecto 1)
 ```
 
 Los PDF se guardan en `juegos/heroquest/cartas/` (ignorado por git); usa
 `--salida <ruta>` para otra ubicación.
 
-### Arquitectura de las cartas (`scripts/tipos_carta/`)
+## Cartas de héroe (motor guiado por datos)
 
-Cada tipo de carta vive en su propio módulo dentro del paquete `tipos_carta/` y
-declara su lógica: campos y estadísticas, validación, descripción, arte frontal y
-reverso. `nueva_carta.py` (creación) y `carta_item.py` (dibujo, vía `render_carta.py`)
-son orquestadores que consumen esas definiciones desde un registro común
-(`tipos_carta/registro.py`), sin conocer los detalles de cada tipo. Añadir un tipo
-nuevo es crear un módulo y registrarlo. `render_carta.py` dibuja el anverso en dos
-familias de maquetación: `stats` (personaje, monstruo) y `descripcion` (arma,
-armadura, poción, hechizo), tanto en SVG como en PNG.
+Las cartas de héroe las compone `render_personaje.py` a partir de una *receta*
+que vive en el propio JSON del personaje, bajo la clave `plantillas` (con dos
+caras, `cara` y `dorso`):
 
-### Plantillas de carta (`sources/plantillas/` y `scripts/plantillas.py`)
-
-La **estructura completa de la carta** (marco, banners, leyendas "HeroQuest" y de
-categoría, tabla de estadísticas, footer) ya **no está hardcodeada en Python**:
-vive como ficheros **SVG plantilla editables** (en Inkscape, p. ej.) bajo
-`sources/plantillas/`. Igual que con los tableros y el arte, el **SVG es la fuente
-de verdad**; `render_carta.py` solo inyecta el contenido dinámico.
-
-Hay una plantilla **por familia**, para anverso y reverso:
-
-| Fichero | Cara | Familia | Contenido |
-|---------|------|---------|-----------|
-| `anverso_stats.svg` | anverso | stats (héroes, monstruos) | banner de nombre y **arte que llega hasta el borde inferior**, con el cuadro de estadísticas **superpuesto** sobre la parte baja del arte |
-| `anverso_descripcion.svg` | anverso | descripcion (armas, armaduras, pociones, hechizos) | título, arte enmarcado, subtítulo, descripción y línea de stats |
-| `verso_stats.svg` | reverso | stats | banner "HeroQuest", panel central para la **descripción** (el héroe la muestra aquí; el monstruo la deja vacía) y leyenda de categoría |
-| `verso_descripcion.svg` | reverso | descripcion | banner "HeroQuest" y leyenda de categoría (reverso genérico) |
-| `stats_cuadro.svg` | — | stats | **cuadro de estadísticas** de 5 columnas (héroe/monstruo) que se coloca dentro del ancla `ph-stats` de `anverso_stats.svg`; celdas semitransparentes que se ven sobre el arte. Marcadores `{{LABEL1..5}}`, `{{VALOR1..5}}`, `{{COLOR}}` |
-
-**Contrato de plantilla** (documentado en cada `.svg` y en `plantillas.py`):
-
-- **Marcadores de texto** `{{CLAVE}}` dentro de `<text>`/`<tspan>` o de atributos:
-  `{{NOMBRE}}`, `{{SUBTITULO}}`, `{{LEYENDA}}` y `{{COLOR}}` (color de acento del
-  tipo). Se sustituyen por su valor (los textos se escapan; `{{COLOR}}` va tal cual).
-- **Elementos "ancla"** con `id="ph-*"`: cajas `<rect>` invisibles cuya **geometría**
-  (`x`, `y`, `width`, `height`) lee el código para colocar encima el contenido
-  generado. El `<rect>` desaparece de la carta final:
-  - `id="ph-arte"` → área de arte (imagen del objeto/personaje; en la familia
-    stats llega hasta el borde inferior de la carta),
-  - `id="ph-stats"` → en la familia descripcion, la línea de estadísticas; en la
-    familia stats, la caja donde se coloca el cuadro `stats_cuadro.svg`
-    superpuesto sobre el arte,
-  - `id="ph-descripcion"` → bloque de texto de la descripción,
-  - `id="ph-fondo"` → imagen de fondo temática del reverso (`sources/arte_fondos/`).
-
-Puedes **mover o redimensionar** cualquier ancla en Inkscape y el contenido se
-recoloca solo. Los marcadores `{{...}}` e `id="ph-*"` sobreviven a un guardado de
-Inkscape. Tras editar una plantilla, comprueba el resultado regenerando una carta
-(`carta_item.py`) y mirando el PNG. El módulo `scripts/plantillas.py` es el loader
-(cachea las plantillas, lee las anclas y sustituye los marcadores).
-
-## Creando cartas con el sistema
-
-El sistema genera las cartas de HeroQuest combinando plantillas SVG con datos JSON.
-El flujo completo es:
-
-### Tipos de carta y sus plantillas
-
-Hay 6 tipos de carta, cada uno con su familia de maquetación y marcadores SVG:
-
-| Tipo | Familia | Marcadores `ph-*` principales | Ejemplo de datos |
-|------|---------|-------------------------------|-----------------|
-| **personaje** | `stats` | `ph-nombre`, `ph-clase`, `ph-ataque`, `ph-defensa`, `ph-cuerpo`, `ph-mente`, `ph-movimiento`, `ph-descripcion` | `personajes.json` |
-| **monstruo** | `stats` | Igual que personaje | `monstruos.json` |
-| **arma** | `descripcion` | `ph-nombre`, `ph-tipo`, `ph-ataque`, `ph-defensa`, `ph-coste`, `ph-descripcion` | `armas.json` |
-| **armadura** | `descripcion` | Igual que arma | `armas.json` |
-| **poción** | `descripcion` | Igual que arma | `armas.json` |
-| **hechizo** | `descripcion` | `ph-nombre`, `ph-escuela`, `ph-coste_mente`, `ph-descripcion` | `hechizos.json` |
-
-### Plantillas SVG disponibles
-
-Las plantillas viven en `sources/plantillas/` y definen la estructura visual:
-
-| Fichero | Familia | Qué contiene |
-|---------|---------|--------------|
-| `anverso_stats.svg` | stats | Héroes y monstruos: banner, arte hasta el borde inferior, tabla de 5 stats |
-| `anverso_descripcion.svg` | descripcion | Armas, armaduras, pociones, hechizos: título, arte enmarcado, subtítulo, descripción, línea de stats |
-| `verso_stats.svg` | stats | Reverso para héroes: muestra descripción, leyenda de categoría |
-| `verso_descripcion.svg` | descripcion | Reverso para armas/pociones/hechizos: banner "HeroQuest" y leyenda |
-| `stats_cuadro.svg` | stats | Cuadro de 5 columnas que se posa sobre el área `ph-stats` |
-
-Cada plantilla usa:
-
-- **Marcadores `{{CLAVE}}`** dentro de `<text>`/`<tspan>`: `{{NOMBRE}}`, `{{SUBTITULO}}`, `{{LEYENDA}}`, `{{COLOR}}` (color hex de acento).
-- **Elementos `id="ph-*"`** (rectángulos invisibles): `ph-arte` (área de arte), `ph-stats` (tabla de stats), `ph-descripcion` (texto descriptivo), `ph-fondo` (fondo del reverso).
-
-El diseñador puede mover/redimensionar anclas en Inkscape y el contenido se recoloca solo.
-
-### Generando una carta
-
-Usa `carta_item.py` desde la raíz del repositorio con `uv run`:
-
-```bash
-# Anverso PNG de un personaje
-uv run juegos/heroquest/scripts/carta_item.py --tipo personaje --nombre "Bárbaro" --output barra.png
-
-# Anverso PNG de un hechizo con fondo de fuego
-uv run juegos/heroquest/scripts/carta_item.py --tipo hechizo --nombre "Bola de fuego" \
-  --fondo_verso magia_fuego_back.png --formato png
-
-# Hoja plegable PDF con varias cartas
-uv run juegos/heroquest/scripts/imprimir_cartas.py --lista juegos/heroquest/mazo_ejemplo.yml --salida mazo.pdf
+```json
+"plantillas": {
+  "cara": {
+    "plantilla_padre": "sources/plantillas/hero-card-up.svg",
+    "plantilla_estadisticas": "sources/plantillas/hero-stats.svg",
+    "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+    "arte_personaje": "sources/arte/bárbaro_1.png",
+    "arte_icono": "sources/arte_iconos/bárbaro_1.png",
+    "archivos_fondo": ["sources/arte_fondos/parchment.png"]
+  },
+  "dorso": {
+    "plantilla_padre": "sources/plantillas/hero-card-down.svg",
+    "plantilla_logo": "sources/plantillas/hero-back-just-logo.svg",
+    "archivos_fondo": [
+      "sources/arte_fondos/parchment_eye.png",
+      "sources/plantillas/hero-back-just-border.svg"
+    ]
+  }
+}
 ```
 
-### Añadiendo un nuevo tipo de carta
+**El SVG es la fuente de verdad.** Las plantillas de `sources/plantillas/` se
+editan a mano (Inkscape); el motor solo inyecta contenido sobre sus **anclas**
+`id="ph-*"` (rectángulos invisibles cuya geometría se lee):
 
-1. Crea un módulo en `juegos/heroquest/scripts/tipos_carta/` heredando de `TipoCarta`
-   e implementando `campos()`, `stats()`, `subtitulo()`, y opcionalmente `familia_fondo()`.
-2. Regístralo en `scripts/tipos_carta/registro.py`.
-3. Crea/adapta las plantillas SVG en `sources/plantillas/` con los marcadores `{{NOMBRE}}`, `{{SUBTITULO}}`, etc. y los `id="ph-*"` apropiados.
-4. Añade datos de ejemplo en los ficheros JSON correspondientes en `data/`.
+- **Anverso:** `ph-arte` (retrato), `ph-ribbon` (nombre), `ph-stats` (cuadro de
+  estadísticas), `ph-icon` (icono).
+- **Dorso:** `ph-heroquest` (logo) y `ph-texto` (biografía: "Eres el {clase}." en
+  negrita + la descripción debajo).
+- **`archivos_fondo`** es una lista en orden de renderizado: el primero va **más
+  abajo** y cada siguiente se superpone. Admite imágenes (PNG/JPG) y SVG (p. ej.
+  el borde), que se incrusta escalado a la carta.
 
-### Recursos externos
+El módulo `scripts/plantillas.py` es el loader (cachea las plantillas, lee las
+anclas y sustituye los marcadores `{{...}}`).
 
-- `sources/arte_fondos_hq2021/` — 15 fondos PNG de carta (parchment, marcos, ribbons) de
-  [heroquest-card-creator](https://github.com/alexbernard/heroquest-card-creator).
-- `sources/arte/` — Arte del anverso (retratos, ilustraciones de armas).
-- `sources/reversos/` — Reversos de cartas ya recortados/enderezados.
-- `sources/ATRIBUCIONES.md` — Licencias y atribución de recursos externos.
-valida además que cada monstruo/tesoro caiga dentro de la sala indicada y dentro del tablero.
+> **Solo se renderizan héroes.** Armas, armaduras, pociones, hechizos y monstruos
+> se gestionan como datos (`nueva_carta.py`, `listar.py`, `eliminar.py`) pero no
+> tienen motor de carta actualmente.
+
+### Dar carta a un héroe nuevo
+
+1. Añade el héroe a `personajes.json` (o con `nueva_carta.py --tipo personaje`).
+2. Añade su bloque `plantillas` con las recetas de `cara` y `dorso`.
+3. Coloca sus assets en `sources/` (arte del retrato, icono y fondos).
+4. Genera y revisa: `carta_item.py --nombre "<héroe>" --cara ambas`.
+
+Esquema de las salas de una misión (`salas.json`), usado por `nueva_mision.py`
+(valida además que cada monstruo/tesoro caiga dentro de la sala y del tablero):
 
 Esquema de las salas de una misión (`salas.json`):
 
@@ -522,6 +442,6 @@ el esquema (o pídeselo al agente `heroquest`).
 
 Además de las fotos y el arte propio, `sources/` contiene librerías externas
 (arte de cartas generado con IA, fondos de carta estilo HQ 2021 y la fuente
-Albert Sans). El origen y la licencia de cada una están documentados en
-[sources/ATRIBUCIONES.md](sources/ATRIBUCIONES.md); consulta ese fichero antes de
-reutilizar cualquier archivo ajeno.
+Amarna, tipografía libre de las cartas). El origen y la licencia de cada una están
+documentados en [sources/ATRIBUCIONES.md](sources/ATRIBUCIONES.md); consulta ese
+fichero antes de reutilizar cualquier archivo ajeno.
