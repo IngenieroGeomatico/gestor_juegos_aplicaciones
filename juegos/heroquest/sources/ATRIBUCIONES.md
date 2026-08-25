@@ -34,19 +34,28 @@ Carpeta `arte_fondos_hq2021/`.
   de las cartas de HeroQuest 2021 (pergamino, marcos con lino, reversos con el
   "ojo"), a 750×1050 px (misma proporción que la carta 63×88 mm).
 
-## Fuente Albert Sans
+## Fuente Amarna (tipografía de las cartas)
 
-Carpeta `fuentes/`.
+Carpeta `fuentes/` (`Amarna-Regular.ttf`, `Amarna-Bold.ttf`, `Amarna-OFL.txt`).
 
-- **Origen:** Google Fonts, proyecto Albert Sans de Andreas Rasmussen / a.Foundry
-  (https://github.com/usted/Albert-Sans).
-- **Licencia:** **SIL Open Font License 1.1** (ver `fuentes/OFL.txt`). Copiada
-  desde el repositorio `google/fonts`.
-- **Por qué está aquí:** alternativa **libre** a la fuente comercial Carter Sans W04
-  (ITC/Monotype, no redistribuible) que usan las cartas de HeroQuest 2021. Albert
-  Sans es una geométrica humanista con rasgos similares; instalada en el sistema
-  (`~/.fonts`) para que resvg la encuentre al rasterizar SVG.
+- **Origen:** proyecto Amarna de Ian van Loon
+  (https://github.com/ijvanl/Amarna), instancias estáticas TTF Regular y Bold.
+- **Licencia:** **SIL Open Font License 1.1** (ver `fuentes/Amarna-OFL.txt`).
+- **Por qué está aquí:** alternativa **libre** a la fuente comercial Carter Sans
+  (ITC/Monotype, no redistribuible) que usan las cartas de HeroQuest 2021. Amarna
+  es una **glyphic humanist sans** inspirada en *Albertus* — el mismo antepasado
+  que influyó a Carter Sans —, con las serifas suaves ("flare") en las mayúsculas
+  que caracterizan a la original, así que casa mucho mejor que una sans geométrica.
+  Se embebe en el SVG como `@font-face` (data URI) para que resvg la use al
+  rasterizar; se usan instancias estáticas Regular/Bold porque resvg no interpola
+  fuentes variables.
 
-> **Nota sobre Carter Sans W04:** era la fuente de los textos de carta del editor
-> de Mark Forster, pero es **comercial** (ITC, "may not copy or distribute"). No
-> se incluye en este repositorio; se usa Albert Sans como sustituta.
+> **Nota sobre Carter Sans:** era la fuente de los textos de carta del editor de
+> Mark Forster, pero es **comercial** (ITC, "may not copy or distribute"). No se
+> incluye en este repositorio; se usa Amarna como sustituta libre.
+
+## Fuente Albert Sans (obsoleta)
+
+- Sustituta anterior (geométrica humanista, OFL-1.1). Se reemplazó por Amarna,
+  que se parece más a la Carter Sans original (serifas glyphic/flare). Los
+  ficheros `AlbertSans*.ttf` pueden conservarse como reserva o eliminarse.
