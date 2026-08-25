@@ -357,19 +357,6 @@ def _frag_stats(ruta: Path, geom: dict[str, float], entrada: dict) -> str:
     tam_titulo = TAM_FUENTE_TITULO_MONSTRUO if es_monstruo else TAM_FUENTE_TITULO
     tam_valor = TAM_FUENTE_VALOR_MONSTRUO if es_monstruo else TAM_FUENTE_VALOR
 
-    # Recopila geometrías de anclas de título para alinear.
-    geom_titulos = []
-    for id_ancla in anclas_titulo:
-        g = plantillas.ancla(svg, id_ancla)
-        if g:
-            geom_titulos.append(g)
-
-    # Centro y común para alinear todos los títulos (o el individual si no hay).
-    if geom_titulos:
-        cy_medio_titulos = sum(g["y"] + g["height"] / 2 for g in geom_titulos) / len(geom_titulos)
-    else:
-        cy_medio_titulos = None
-
     for id_ancla, etiqueta in anclas_titulo.items():
         g = plantillas.ancla(svg, id_ancla)
         if not g:
@@ -378,11 +365,7 @@ def _frag_stats(ruta: Path, geom: dict[str, float], entrada: dict) -> str:
         lineas = _lineas_etiqueta(etiqueta)
         interlineado = tam_titulo * 1.05
         alto_bloque = interlineado * (len(lineas) - 1)
-        # Usa el y común si está disponible; si no, calcula por ancla.
-        if cy_medio_titulos is not None:
-            y0 = cy_medio_titulos + tam_titulo / 3 - alto_bloque / 2
-        else:
-            y0 = g["y"] + g["height"] / 2 + tam_titulo / 3 - alto_bloque / 2
+        y0 = g["y"] + g["height"] / 2 + tam_titulo / 3 - alto_bloque / 2
         tspans = "".join(
             f'<tspan x="{cx}" '
             f'{"" if i == 0 else f"""dy="{interlineado}" """}>'
@@ -398,26 +381,13 @@ def _frag_stats(ruta: Path, geom: dict[str, float], entrada: dict) -> str:
         )
         svg = plantillas._eliminar_ancla(svg, id_ancla, texto)
 
-    # 3) Números de stat sobre las anclas ph-valor-*.
-    # Para alinear, se calcula un cy común si hay múltiples anclas.
-    geom_valores = []
-    for id_ancla in ANCLAS_VALOR:
-        g = plantillas.ancla(svg, id_ancla)
-        if g:
-            geom_valores.append(g)
-    cy_medio_valores = (
-        sum(g["y"] + g["height"] / 2 for g in geom_valores) / len(geom_valores)
-        if geom_valores else None
-    )
-
     for id_ancla, campo in ANCLAS_VALOR.items():
         g = plantillas.ancla(svg, id_ancla)
         if not g:
             continue
         valor = xml.sax.saxutils.escape(str(entrada.get(campo, "")))
         cx = g["x"] + g["width"] / 2
-        cy = (cy_medio_valores + tam_valor / 3 if cy_medio_valores is not None
-              else g["y"] + g["height"] / 2 + tam_valor / 3)
+        cy = g["y"] + g["height"] / 2 + tam_valor / 3
         texto = (
             f'<text x="{cx}" y="{cy}" font-family="{FONT_FAMILY}" '
             f'font-size="{tam_valor}" font-weight="bold" '
