@@ -1,17 +1,17 @@
-"""Genera la carta individual de un héroe/personaje de HeroQuest.
+"""Genera la carta individual de un héroe o monstruo de HeroQuest.
 
 El dibujo lo hace el motor guiado por datos `render_personaje.py`: la *receta*
 de la carta (plantillas y assets, para anverso y dorso) vive en el propio JSON
-del personaje, bajo la clave `plantillas`. Aquí solo se localiza la entrada, se
-pide el render de la cara solicitada y se escribe el fichero.
+de la entrada, bajo la clave `plantillas`. Aquí solo se localiza la entrada (en
+`personajes.json` y, si no está, en `monstruos.json`), se pide el render de la
+cara solicitada y se escribe el fichero.
 
-Solo se soporta el tipo `personaje` (héroes). Se puede generar el anverso, el
-dorso o ambas caras, en PNG y/o SVG.
+Se puede generar el anverso, el dorso o ambas caras, en PNG y/o SVG.
 
 Ejemplos:
     uv run juegos/heroquest/scripts/carta_item.py --nombre "Bárbaro"
     uv run juegos/heroquest/scripts/carta_item.py --nombre "Bárbaro" --cara dorso
-    uv run juegos/heroquest/scripts/carta_item.py --nombre "Bárbaro" --cara ambas --formato svg,png
+    uv run juegos/heroquest/scripts/carta_item.py --nombre "Trasgo" --cara ambas --formato svg,png
 """
 
 from __future__ import annotations
@@ -28,7 +28,7 @@ CARTAS_DIR = data_store.DATA_DIR.parent / "cartas"
 FORMATOS = ("png", "svg")
 CARAS = ("anverso", "dorso", "ambas")
 
-FICHERO_PERSONAJES = "personajes"
+FICHEROS_TIPO = ("personajes", "monstruos")
 
 
 def _formato_lista(valor: str) -> list[str]:
@@ -41,12 +41,17 @@ def _formato_lista(valor: str) -> list[str]:
     return formatos
 
 
-def _buscar(nombre: str) -> dict:
-    """Localiza la entrada del personaje por nombre en personajes.json."""
-    for entrada in data_store.cargar(FICHERO_PERSONAJES):
-        if entrada.get("nombre") == nombre:
-            return entrada
-    print(f"Error: no existe el héroe '{nombre}' en {FICHERO_PERSONAJES}.json")
+def _buscar(nombre: str) -> tuple[str, dict]:
+    """Localiza la entrada por nombre (personajes.json, luego monstruos.json).
+
+    Devuelve (fichero, entrada) para poder nombrar la salida
+    (carta_personaje__…/carta_monstruo__…).
+    """
+    for fichero in FICHEROS_TIPO:
+        for entrada in data_store.cargar(fichero):
+            if entrada.get("nombre") == nombre:
+                return fichero, entrada
+    print(f"Error: no existe '{nombre}' en personajes.json ni en monstruos.json")
     sys.exit(1)
 
 
@@ -66,9 +71,9 @@ def _escribir_cara(entrada: dict, sufijo: str, base: Path, formatos: list[str],
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Genera la carta de un héroe de HeroQuest (anverso/dorso) en PNG y/o SVG",
+        description="Genera la carta de un héroe o monstruo de HeroQuest (anverso/dorso) en PNG y/o SVG",
     )
-    parser.add_argument("--nombre", required=True, help="Nombre del héroe")
+    parser.add_argument("--nombre", required=True, help="Nombre del héroe o monstruo")
     parser.add_argument("--cara", choices=CARAS, default="anverso",
                         help="Cara a generar: anverso, dorso o ambas (predeterminado: anverso)")
     parser.add_argument("--salida", default=None,
@@ -77,9 +82,10 @@ def main() -> None:
                         help="Formato(s) a generar, separados por coma: png, svg (predeterminado: png)")
     args = parser.parse_args()
 
-    entrada = _buscar(args.nombre)
+    fichero, entrada = _buscar(args.nombre)
 
-    base = Path(args.salida) if args.salida else CARTAS_DIR / f"carta_personaje__{data_store.slug(args.nombre)}"
+    tipo_carta = fichero[:-1]  # "personajes" → "personaje", "monstruos" → "monstruo"
+    base = Path(args.salida) if args.salida else CARTAS_DIR / f"carta_{tipo_carta}__{data_store.slug(args.nombre)}"
     base.parent.mkdir(parents=True, exist_ok=True)
 
     # Con una sola cara y --salida, no se añade sufijo (respeta la ruta exacta);

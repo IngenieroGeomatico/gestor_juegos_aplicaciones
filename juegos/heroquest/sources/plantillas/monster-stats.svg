@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
@@ -25,8 +25,8 @@
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#505050"
      inkscape:zoom="1.2731897"
-     inkscape:cx="314.17155"
-     inkscape:cy="81.291889"
+     inkscape:cx="313.77885"
+     inkscape:cy="81.291892"
      inkscape:window-width="1366"
      inkscape:window-height="707"
      inkscape:window-x="0"
@@ -109,7 +109,7 @@
        opacity="0.3"
        style="opacity:0" />
     <rect
-       id="ph-dados-ataque-3"
+       id="ph-movimiento"
        x="52.90823"
        y="32.285427"
        width="80"
@@ -119,9 +119,10 @@
        stroke-width="1"
        opacity="0.3"
        inkscape:label="ph-movimiento"
-       style="opacity:0" />
+       style="opacity:0"
+       sodipodi:insensitive="true" />
     <rect
-       id="ph-valor-ataque-5"
+       id="ph-valor-movimiento"
        x="53.369335"
        y="102.18859"
        width="80"
@@ -131,7 +132,8 @@
        stroke-width="1"
        opacity="0.3"
        inkscape:label="ph-valor-movimiento"
-       style="opacity:0" />
+       style="opacity:0"
+       sodipodi:insensitive="true" />
     <rect
        id="ph-dados-defensa"
        x="301.96896"
@@ -156,7 +158,7 @@
        style="opacity:0" />
     <rect
        id="ph-corporales"
-       x="418.99786"
+       x="417.99786"
        y="38.736546"
        width="80"
        height="25"
@@ -167,7 +169,7 @@
        style="opacity:0" />
     <rect
        id="ph-valor-corporales"
-       x="415.53183"
+       x="414.53183"
        y="107.85429"
        width="80"
        height="25"
@@ -199,77 +201,5 @@
        opacity="0.3"
        style="opacity:0" />
     <!-- Techos de título separados -->
-    <text
-       x="196.1866"
-       y="45.133724"
-       font-family="Amarna"
-       font-size="14px"
-       font-weight="bold"
-       fill="#3a2416"
-       id="text1"><tspan
-         sodipodi:role="line"
-         id="tspan11"
-         x="196.1866"
-         y="45.133724">Dados de</tspan><tspan
-         sodipodi:role="line"
-         id="tspan12"
-         x="196.1866"
-         y="62.63372">ataque</tspan></text>
-    <text
-       x="310.85922"
-       y="46.647709"
-       font-family="Amarna"
-       font-size="14px"
-       font-weight="bold"
-       fill="#3a2416"
-       id="text2"><tspan
-         sodipodi:role="line"
-         id="tspan9"
-         x="310.85922"
-         y="46.647709">Dados de</tspan><tspan
-         sodipodi:role="line"
-         id="tspan10"
-         x="310.85922"
-         y="64.147705">defensa</tspan></text>
-    <text
-       x="421.60468"
-       y="45.805408"
-       font-family="Amarna"
-       font-size="14px"
-       font-weight="bold"
-       fill="#3a2416"
-       id="text3"><tspan
-         sodipodi:role="line"
-         id="tspan7"
-         x="421.60468"
-         y="45.805408">Puntos</tspan><tspan
-         sodipodi:role="line"
-         id="tspan8"
-         x="421.60468"
-         y="63.305412">corporales</tspan></text>
-    <text
-       x="537.84814"
-       y="46.533962"
-       font-family="Amarna"
-       font-size="14px"
-       font-weight="bold"
-       fill="#3a2416"
-       id="text4"><tspan
-         sodipodi:role="line"
-         id="tspan5"
-         x="537.84814"
-         y="46.533962">Puntos</tspan><tspan
-         sodipodi:role="line"
-         id="tspan6"
-         x="537.84814"
-         y="64.033958">mentales</tspan></text>
-    <text
-       x="21.82139"
-       y="55.116806"
-       font-family="Amarna"
-       font-size="14px"
-       font-weight="bold"
-       fill="#3a2416"
-       id="text5">Casillas de movimiento</text>
   </g>
 </svg>

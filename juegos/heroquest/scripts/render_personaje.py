@@ -94,6 +94,10 @@ COLOR_VALOR = "#3a2416"
 TAM_FUENTE_VALOR = 52
 # Estilo de las etiquetas de stat (Ataque/Defensa/...) sobre las anclas título.
 TAM_FUENTE_TITULO = 28
+# Tamaños reducidos para la plantilla de monstruo (monster-stats.svg), que tiene
+# las 5 columnas (con Movimiento) y necesita menos espacio por celda.
+TAM_FUENTE_VALOR_MONSTRUO = 48
+TAM_FUENTE_TITULO_MONSTRUO = 22
 # "Faux bold": resvg solo tiene la cara Bold (700); para engrosar más los textos
 # se les añade un contorno (stroke) del mismo color que el relleno. El ancho se
 # expresa en coords del viewBox de hero-stats (~638 de ancho), donde 0.6 da un
@@ -102,11 +106,14 @@ STROKE_TITULO = 0.6
 STROKE_VALOR = 0.9
 
 # Mapea cada ancla de VALOR de hero-stats.svg al campo del JSON del personaje.
+# monster-stats.svg añade la columna de movimiento (ph-valor-movimiento); al no
+# existir esa ancla en hero-stats.svg, el mapa puede convivir para ambas.
 ANCLAS_VALOR = {
     "ph-valor-ataque": "ataque",
     "ph-valor-defensa": "defensa",
     "ph-valor-corporales": "cuerpo",
     "ph-valor-mentales": "mente",
+    "ph-valor-movimiento": "movimiento",
 }
 
 # Mapea cada ancla de TÍTULO de hero-stats.svg a su etiqueta legible.
@@ -117,17 +124,33 @@ ANCLAS_TITULO = {
     "ph-mentales-titulo": "Mentales",
 }
 
+# Etiquetas extra de monster-stats.svg, que nombra sus anclas de título sin el
+# sufijo "-titulo" del hero-stats y añade la de movimiento. NO pueden convivir
+# en ANCLAS_TITULO: hero-stats.svg también trae un ancla ph-movimiento (que hoy
+# se limpia, con el texto real en el marcador {{MOVIMIENTO}}), y pintarla
+# cambiaría las cartas de héroe ya aprobadas. Se activan solo cuando la
+# plantilla de stats es de monstruo (tiene ancla de valor de movimiento).
+ANCLAS_TITULO_MONSTRUO = {
+    "ph-corporales": "Puntos Corporales",
+    "ph-mentales": "Puntos Mentales",
+    "ph-movimiento": "Casillas de Movimiento",
+}
+
 
 def _lineas_etiqueta(etiqueta: str) -> list[str]:
     """Parte una etiqueta de título en varias líneas para que quepa en su celda.
 
-    "Dados de Ataque"/"Dados de Defensa" se muestran en dos líneas:
-    "Dados" arriba y "de Ataque"/"de Defensa" abajo. Las etiquetas de una sola
-    palabra (Corporales, Mentales) se dejan en una línea.
+    Reglas de split:
+    - "X de Y" → ["X de", "Y"]  (Dados de Ataque → Dados de / Ataque)
+    - Dos palabras → [primera, segunda]  (Puntos Corporales → Puntos / Corporales)
+    - Una palabra → [etiqueta]  (sin salto)
     """
     palabras = etiqueta.split()
-    if len(palabras) >= 3 and palabras[0].lower() == "dados":
-        return [palabras[0], " ".join(palabras[1:])]
+    if len(palabras) >= 3 and " de " in etiqueta.lower():
+        idx = etiqueta.lower().index(" de ") + 4
+        return [etiqueta[:idx].rstrip(), etiqueta[idx:].lstrip()]
+    if len(palabras) == 2:
+        return list(palabras)
     return [etiqueta]
 
 
@@ -322,17 +345,44 @@ def _frag_stats(ruta: Path, geom: dict[str, float], entrada: dict) -> str:
 
     svg = re.sub(r"\{\{\s*(\w+)\s*\}\}", _sub_texto, svg)
 
-    # 2) Etiquetas de stat (Ataque/Defensa/Cuerpo/Mente) sobre sus anclas título.
-    for id_ancla, etiqueta in ANCLAS_TITULO.items():
+    # 2) Etiquetas de stat (Ataque/Defensa/...) sobre sus anclas título. Si la
+    # plantilla es de monstruo (lleva ancla de valor de movimiento), se suman
+    # sus etiquetas propias (ver ANCLAS_TITULO_MONSTRUO) y se usan tamaños
+    # reducidos para que quepan las 5 columnas. Para alinear los textos, se
+    # calcula un y común basado en el centro medio de todas las anclas.
+    es_monstruo = plantillas.ancla(svg, "ph-valor-movimiento") is not None
+    anclas_titulo = dict(ANCLAS_TITULO)
+    if es_monstruo:
+        anclas_titulo.update(ANCLAS_TITULO_MONSTRUO)
+    tam_titulo = TAM_FUENTE_TITULO_MONSTRUO if es_monstruo else TAM_FUENTE_TITULO
+    tam_valor = TAM_FUENTE_VALOR_MONSTRUO if es_monstruo else TAM_FUENTE_VALOR
+
+    # Recopila geometrías de anclas de título para alinear.
+    geom_titulos = []
+    for id_ancla in anclas_titulo:
+        g = plantillas.ancla(svg, id_ancla)
+        if g:
+            geom_titulos.append(g)
+
+    # Centro y común para alinear todos los títulos (o el individual si no hay).
+    if geom_titulos:
+        cy_medio_titulos = sum(g["y"] + g["height"] / 2 for g in geom_titulos) / len(geom_titulos)
+    else:
+        cy_medio_titulos = None
+
+    for id_ancla, etiqueta in anclas_titulo.items():
         g = plantillas.ancla(svg, id_ancla)
         if not g:
             continue
         cx = g["x"] + g["width"] / 2
         lineas = _lineas_etiqueta(etiqueta)
-        # Centra verticalmente el bloque de líneas dentro del ancla.
-        interlineado = TAM_FUENTE_TITULO * 1.05
+        interlineado = tam_titulo * 1.05
         alto_bloque = interlineado * (len(lineas) - 1)
-        y0 = g["y"] + g["height"] / 2 + TAM_FUENTE_TITULO / 3 - alto_bloque / 2
+        # Usa el y común si está disponible; si no, calcula por ancla.
+        if cy_medio_titulos is not None:
+            y0 = cy_medio_titulos + tam_titulo / 3 - alto_bloque / 2
+        else:
+            y0 = g["y"] + g["height"] / 2 + tam_titulo / 3 - alto_bloque / 2
         tspans = "".join(
             f'<tspan x="{cx}" '
             f'{"" if i == 0 else f"""dy="{interlineado}" """}>'
@@ -341,7 +391,7 @@ def _frag_stats(ruta: Path, geom: dict[str, float], entrada: dict) -> str:
         )
         texto = (
             f'<text x="{cx}" y="{y0}" font-family="{FONT_FAMILY}" '
-            f'font-size="{TAM_FUENTE_TITULO}" font-weight="bold" '
+            f'font-size="{tam_titulo}" font-weight="bold" '
             f'stroke="{COLOR_VALOR}" stroke-width="{STROKE_TITULO}" '
             f'paint-order="stroke" '
             f'text-anchor="middle" fill="{COLOR_VALOR}">{tspans}</text>'
@@ -349,16 +399,28 @@ def _frag_stats(ruta: Path, geom: dict[str, float], entrada: dict) -> str:
         svg = plantillas._eliminar_ancla(svg, id_ancla, texto)
 
     # 3) Números de stat sobre las anclas ph-valor-*.
+    # Para alinear, se calcula un cy común si hay múltiples anclas.
+    geom_valores = []
+    for id_ancla in ANCLAS_VALOR:
+        g = plantillas.ancla(svg, id_ancla)
+        if g:
+            geom_valores.append(g)
+    cy_medio_valores = (
+        sum(g["y"] + g["height"] / 2 for g in geom_valores) / len(geom_valores)
+        if geom_valores else None
+    )
+
     for id_ancla, campo in ANCLAS_VALOR.items():
         g = plantillas.ancla(svg, id_ancla)
         if not g:
             continue
         valor = xml.sax.saxutils.escape(str(entrada.get(campo, "")))
         cx = g["x"] + g["width"] / 2
-        cy = g["y"] + g["height"] / 2 + TAM_FUENTE_VALOR / 3
+        cy = (cy_medio_valores + tam_valor / 3 if cy_medio_valores is not None
+              else g["y"] + g["height"] / 2 + tam_valor / 3)
         texto = (
             f'<text x="{cx}" y="{cy}" font-family="{FONT_FAMILY}" '
-            f'font-size="{TAM_FUENTE_VALOR}" font-weight="bold" '
+            f'font-size="{tam_valor}" font-weight="bold" '
             f'stroke="{COLOR_VALOR}" stroke-width="{STROKE_VALOR}" '
             f'paint-order="stroke" '
             f'text-anchor="middle" fill="{COLOR_VALOR}">{valor}</text>'
