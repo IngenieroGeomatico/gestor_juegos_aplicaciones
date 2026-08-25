@@ -3,14 +3,16 @@
     "nombre": "Bárbaro",
     "clase": "Bárbaro",
     "ataque": 3,
-    "defensa": 3,
+    "defensa": 2,
     "cuerpo": 8,
     "mente": 2,
     "movimiento": 2,
+    "arma_inicial": "Espada Ancha",
+    "armadura_inicial": "Ninguna",
     "descripcion": "Guerrero forjado en las tierras salvajes. Especializado en el combate cuerpo a cuerpo.",
     "plantillas": {
       "cara": {
-        "plantilla padre": "sources/plantillas/hero-card-up.svg",
+        "plantilla_padre": "sources/plantillas/hero-card-up.svg",
         "plantilla_estadisticas": "sources/plantillas/hero-stats.svg",
         "plantilla_leyenda": "sources/plantillas/ribbon.svg",
         "arte_personaje": "sources/arte/bárbaro_1.png",
@@ -20,7 +22,12 @@
         ]
       },
       "dorso": {
-        "plantilla padre": ""
+        "plantilla_padre": "sources/plantillas/hero-card-down.svg",
+        "plantilla_logo": "sources/plantillas/hero-back-just-logo.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/parchment_eye.png",
+          "sources/plantillas/hero-back-just-border.svg"
+        ]
       }
     }
   },
