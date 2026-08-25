@@ -32,6 +32,38 @@
     }
   },
   {
+    "nombre": "Bárbara",
+    "clase": "Bárbaro",
+    "ataque": 3,
+    "defensa": 2,
+    "cuerpo": 8,
+    "mente": 2,
+    "movimiento": 2,
+    "arma_inicial": "Espada Ancha",
+    "armadura_inicial": "Ninguna",
+    "descripcion": "Guerrera forjada en las tierras salvajes. Especializada en el combate cuerpo a cuerpo.",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/hero-card-up.svg",
+        "plantilla_estadisticas": "sources/plantillas/hero-stats.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "arte_personaje": "sources/arte/bárbara_1.png",
+        "arte_icono": "sources/arte_iconos/bárbara_1.png",
+        "archivos_fondo": [
+          "sources/arte_fondos/parchment.png"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/hero-card-down.svg",
+        "plantilla_logo": "sources/plantillas/hero-back-just-logo.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/parchment_eye.png",
+          "sources/plantillas/hero-back-just-border.svg"
+        ]
+      }
+    }
+  },
+  {
     "nombre": "Enano",
     "clase": "Enano",
     "ataque": 3,
@@ -39,7 +71,61 @@
     "cuerpo": 7,
     "mente": 3,
     "movimiento": 2,
-    "descripcion": "Robusto minero de las montañas. Excelente defensa y resistencia."
+    "arma_inicial": "Espada Corta",
+    "armadura_inicial": "Ninguna",
+    "descripcion": "Robusto minero de las montañas. Excelente defensa y resistencia.",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/hero-card-up.svg",
+        "plantilla_estadisticas": "sources/plantillas/hero-stats.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "arte_personaje": "sources/arte/enano_1.png",
+        "arte_icono": "sources/arte_iconos/enano_1.png",
+        "archivos_fondo": [
+          "sources/arte_fondos/parchment.png"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/hero-card-down.svg",
+        "plantilla_logo": "sources/plantillas/hero-back-just-logo.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/parchment_eye.png",
+          "sources/plantillas/hero-back-just-border.svg"
+        ]
+      }
+    }
+  },
+  {
+    "nombre": "Enana",
+    "clase": "Enano",
+    "ataque": 3,
+    "defensa": 4,
+    "cuerpo": 7,
+    "mente": 3,
+    "movimiento": 2,
+    "arma_inicial": "Espada Corta",
+    "armadura_inicial": "Ninguna",
+    "descripcion": "Robusta minera de las montañas. Excelente defensa y resistencia.",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/hero-card-up.svg",
+        "plantilla_estadisticas": "sources/plantillas/hero-stats.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "arte_personaje": "sources/arte/enana_1.png",
+        "arte_icono": "sources/arte_iconos/enana_1.png",
+        "archivos_fondo": [
+          "sources/arte_fondos/parchment.png"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/hero-card-down.svg",
+        "plantilla_logo": "sources/plantillas/hero-back-just-logo.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/parchment_eye.png",
+          "sources/plantillas/hero-back-just-border.svg"
+        ]
+      }
+    }
   },
   {
     "nombre": "Elfo",
@@ -49,7 +135,61 @@
     "cuerpo": 6,
     "mente": 4,
     "movimiento": 2,
-    "descripcion": "Arquero ágil y con conocimientos arcanos. Equilibrado entre magia y flecha."
+    "arma_inicial": "Espada Ancha",
+    "armadura_inicial": "Ninguna",
+    "descripcion": "Arquero ágil y con conocimientos arcanos. Equilibrado entre magia y flecha.",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/hero-card-up.svg",
+        "plantilla_estadisticas": "sources/plantillas/hero-stats.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "arte_personaje": "sources/arte/elfo_1.png",
+        "arte_icono": "sources/arte_iconos/elfo_1.png",
+        "archivos_fondo": [
+          "sources/arte_fondos/parchment.png"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/hero-card-down.svg",
+        "plantilla_logo": "sources/plantillas/hero-back-just-logo.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/parchment_eye.png",
+          "sources/plantillas/hero-back-just-border.svg"
+        ]
+      }
+    }
+  },
+  {
+    "nombre": "Elfa",
+    "clase": "Elfo",
+    "ataque": 2,
+    "defensa": 3,
+    "cuerpo": 6,
+    "mente": 4,
+    "movimiento": 2,
+    "arma_inicial": "Espada Ancha",
+    "armadura_inicial": "Ninguna",
+    "descripcion": "Arquera ágil y con conocimientos arcanos. Equilibrada entre magia y flecha.",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/hero-card-up.svg",
+        "plantilla_estadisticas": "sources/plantillas/hero-stats.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "arte_personaje": "sources/arte/elfa_1.png",
+        "arte_icono": "sources/arte_iconos/elfa_1.png",
+        "archivos_fondo": [
+          "sources/arte_fondos/parchment.png"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/hero-card-down.svg",
+        "plantilla_logo": "sources/plantillas/hero-back-just-logo.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/parchment_eye.png",
+          "sources/plantillas/hero-back-just-border.svg"
+        ]
+      }
+    }
   },
   {
     "nombre": "Mago",
@@ -59,6 +199,60 @@
     "cuerpo": 4,
     "mente": 6,
     "movimiento": 2,
-    "descripcion": "Dominador de la magia arcana. Débil físicamente pero devastador con sus conjuros."
+    "arma_inicial": "Daga",
+    "armadura_inicial": "Ninguna",
+    "descripcion": "Dominador de la magia arcana. Débil físicamente pero devastador con sus conjuros.",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/hero-card-up.svg",
+        "plantilla_estadisticas": "sources/plantillas/hero-stats.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "arte_personaje": "sources/arte/mago_1.png",
+        "arte_icono": "sources/arte_iconos/mago_1.png",
+        "archivos_fondo": [
+          "sources/arte_fondos/parchment.png"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/hero-card-down.svg",
+        "plantilla_logo": "sources/plantillas/hero-back-just-logo.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/parchment_eye.png",
+          "sources/plantillas/hero-back-just-border.svg"
+        ]
+      }
+    }
+  },
+  {
+    "nombre": "Maga",
+    "clase": "Mago",
+    "ataque": 1,
+    "defensa": 2,
+    "cuerpo": 4,
+    "mente": 6,
+    "movimiento": 2,
+    "arma_inicial": "Daga",
+    "armadura_inicial": "Ninguna",
+    "descripcion": "Dominadora de la magia arcana. Débil físicamente pero devastadora con sus conjuros.",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/hero-card-up.svg",
+        "plantilla_estadisticas": "sources/plantillas/hero-stats.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "arte_personaje": "sources/arte/maga_1.png",
+        "arte_icono": "sources/arte_iconos/maga_1.png",
+        "archivos_fondo": [
+          "sources/arte_fondos/parchment.png"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/hero-card-down.svg",
+        "plantilla_logo": "sources/plantillas/hero-back-just-logo.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/parchment_eye.png",
+          "sources/plantillas/hero-back-just-border.svg"
+        ]
+      }
+    }
   }
 ]
