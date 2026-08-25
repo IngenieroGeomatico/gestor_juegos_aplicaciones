@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+﻿<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
@@ -202,8 +202,9 @@
     <text
        x="196.1866"
        y="45.133724"
-       font-family="'Albert Sans'"
+       font-family="Amarna"
        font-size="14px"
+       font-weight="bold"
        fill="#3a2416"
        id="text1"><tspan
          sodipodi:role="line"
@@ -217,8 +218,9 @@
     <text
        x="310.85922"
        y="46.647709"
-       font-family="'Albert Sans'"
+       font-family="Amarna"
        font-size="14px"
+       font-weight="bold"
        fill="#3a2416"
        id="text2"><tspan
          sodipodi:role="line"
@@ -232,8 +234,9 @@
     <text
        x="421.60468"
        y="45.805408"
-       font-family="'Albert Sans'"
+       font-family="Amarna"
        font-size="14px"
+       font-weight="bold"
        fill="#3a2416"
        id="text3"><tspan
          sodipodi:role="line"
@@ -247,8 +250,9 @@
     <text
        x="537.84814"
        y="46.533962"
-       font-family="'Albert Sans'"
+       font-family="Amarna"
        font-size="14px"
+       font-weight="bold"
        fill="#3a2416"
        id="text4"><tspan
          sodipodi:role="line"
@@ -262,8 +266,9 @@
     <text
        x="21.82139"
        y="55.116806"
-       font-family="'Albert Sans'"
+       font-family="Amarna"
        font-size="14px"
+       font-weight="bold"
        fill="#3a2416"
        id="text5">Casillas de movimiento</text>
   </g>

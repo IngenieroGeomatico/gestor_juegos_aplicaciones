@@ -8,7 +8,7 @@
    height="275.46002"
    viewBox="0 0 638.68304 275.46003"
    sodipodi:docname="hero-stats.svg"
-   inkscape:version="1.4.4 (dcaf3e7d9e, 2026-05-05)"
+   inkscape:version="1.4.4 (dcaf3e7, 2026-05-05)"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
@@ -24,13 +24,13 @@
      inkscape:pageopacity="0"
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#505050"
-     inkscape:zoom="0.86503817"
-     inkscape:cx="357.20967"
-     inkscape:cy="128.89605"
-     inkscape:window-width="1366"
-     inkscape:window-height="707"
-     inkscape:window-x="0"
-     inkscape:window-y="0"
+     inkscape:zoom="1.2233487"
+     inkscape:cx="331.46723"
+     inkscape:cy="132.01469"
+     inkscape:window-width="1920"
+     inkscape:window-height="1111"
+     inkscape:window-x="-9"
+     inkscape:window-y="695"
      inkscape:window-maximized="1"
      inkscape:current-layer="svg1" />
   <g
@@ -67,7 +67,7 @@
   <rect
      id="ph-dados-ataque"
      x="48.479126"
-     y="38.932316"
+     y="35.0"
      width="80"
      height="30"
      fill="none"
@@ -89,7 +89,7 @@
   <rect
      id="ph-dados-defensa"
      x="204.8555"
-     y="38.949715"
+     y="35.0"
      width="80"
      height="30"
      fill="none"
@@ -110,15 +110,18 @@
      style="opacity:0" />
   <text
      id="ph-puntos-iniciales"
-     x="394.99496"
-     y="35.63958"
-     font-family="'Albert Sans'"
-     font-size="14px"><tspan
-       id="tspan3">{{PUNTOS_INICIALES}}</tspan></text>
+     x="474.2764"
+     y="39.107635"
+     font-family="Amarna"
+     font-size="22px"
+     font-weight="bold"
+     text-anchor="middle"
+     fill="#3a2416"><tspan
+       id="tspan3">Puntos Iniciales</tspan></text>
   <rect
      id="ph-corporales-titulo"
      x="357.67789"
-     y="56.754559"
+     y="54.545486"
      width="80"
      height="20"
      fill="none"
@@ -164,7 +167,7 @@
      id="ph-stats"
      x="0.5"
      y="0.5"
-     width="637.68304"
+     width="637.68298"
      height="274.46002"
      fill="none"
      stroke="none"
@@ -173,50 +176,59 @@
   <!-- Líneas inferiores de título-valor -->
   <text
      id="ph-movimiento"
-     x="177.06084"
-     y="192.05728"
-     font-family="'Albert Sans'"
-     font-size="14px"><tspan
+     x="405.06085"
+     y="204.05728"
+     font-family="Amarna"
+     font-size="25px"
+     font-weight="bold"
+     fill="#000000"><tspan
        id="tspan5">{{MOVIMIENTO}}</tspan></text>
   <text
      id="ph-arma-inicial"
-     x="177.06084"
-     y="229.75113"
-     font-family="'Albert Sans'"
-     font-size="14px"><tspan
+     x="405.06085"
+     y="235.75113"
+     font-family="Amarna"
+     font-size="25px"
+     font-weight="bold"
+     fill="#000000"><tspan
        id="tspan6">{{ARMA_INICIAL}}</tspan></text>
   <text
      id="ph-armadura-inicial"
-     x="177.06084"
+     x="405.06085"
      y="267.51498"
-     font-family="'Albert Sans'"
-     font-size="14px"><tspan
+     font-family="Amarna"
+     font-size="25px"
+     font-weight="bold"
+     fill="#000000"><tspan
        id="tspan7">{{ARMADURA_INICIAL}}</tspan></text>
   <!-- Techos de título-valor separados por puntos -->
   <text
      x="17.495407"
-     y="192.87376"
-     font-family="'Albert Sans'"
-     font-size="14px"
-     fill="#3a2416"
-     id="text7">Movimiento........................</text>
+     y="204.87376"
+     font-family="Amarna"
+     font-size="25px"
+     font-weight="bold"
+     fill="#000000"
+     id="text7">Movimiento.....................................</text>
   <text
      x="18.559383"
-     y="230.7426"
-     font-family="'Albert Sans'"
-     font-size="14px"
-     fill="#3a2416"
-     id="text8">Arma inicial .......................</text>
+     y="236.7426"
+     font-family="Amarna"
+     font-size="25px"
+     font-weight="bold"
+     fill="#000000"
+     id="text8">Arma inicial ....................................</text>
   <text
      x="18.559383"
      y="268.50641"
-     font-family="'Albert Sans'"
-     font-size="14px"
-     fill="#3a2416"
-     id="text9">Armadura inicial...............</text>
+     font-family="Amarna"
+     font-size="25px"
+     font-weight="bold"
+     fill="#000000"
+     id="text9">Armadura inicial...............................</text>
   <text
      xml:space="preserve"
-     style="font-size:12px;font-family:'Albert Sans';-inkscape-font-specification:'Albert Sans, Normal';writing-mode:lr-tb;direction:ltr;opacity:0;fill:#000000;stroke:#000000;stroke-width:3.78;stroke-opacity:1"
+     style="font-size:12px;font-family:'Amarna';-inkscape-font-specification:'Albert Sans, Normal';writing-mode:lr-tb;direction:ltr;opacity:0;fill:#000000;stroke:#000000;stroke-width:3.78;stroke-opacity:1"
      x="187.27496"
      y="360.67773"
      id="text10"><tspan

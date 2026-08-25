@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+﻿<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
@@ -8,7 +8,7 @@
    height="144"
    viewBox="0 0 564 144"
    sodipodi:docname="ribbon.svg"
-   inkscape:version="1.4.4 (dcaf3e7d9e, 2026-05-05)"
+   inkscape:version="1.4.4 (dcaf3e7, 2026-05-05)"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
@@ -24,13 +24,13 @@
      inkscape:pageopacity="0"
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#505050"
-     inkscape:zoom="0.62052692"
-     inkscape:cx="191.7725"
-     inkscape:cy="152.28993"
-     inkscape:window-width="1366"
-     inkscape:window-height="707"
-     inkscape:window-x="0"
-     inkscape:window-y="0"
+     inkscape:zoom="4.9642154"
+     inkscape:cx="278.79532"
+     inkscape:cy="61.338999"
+     inkscape:window-width="1920"
+     inkscape:window-height="1111"
+     inkscape:window-x="-9"
+     inkscape:window-y="695"
      inkscape:window-maximized="1"
      inkscape:current-layer="layer1" />
   <g
@@ -72,14 +72,14 @@
     </g>
     <text
        id="ph-nombre"
-       x="281.99399"
-       y="52.118721"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:12px;font-family:'Albert Sans';-inkscape-font-specification:'Albert Sans, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;text-anchor:middle"><tspan
+       x="281.59109"
+       y="61.38504"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:12px;font-family:'Amarna';-inkscape-font-specification:'Albert Sans, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;text-anchor:middle"><tspan
          sodipodi:role="line"
          id="tspan1"
          inkscape:label="tspan1"
-         x="281.99399"
-         y="52.118721"
+         x="281.59109"
+         y="61.38504"
          style="display:inline">{{NOMBRE}}</tspan></text>
   </g>
 </svg>
