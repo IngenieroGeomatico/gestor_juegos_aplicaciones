@@ -4,8 +4,8 @@
 Reúne lo común a `generar_arte.py`, `generar_retratos.py` y `generar_fondos.py`:
 - `slug`: nombre de fichero seguro (mismo criterio que `data_store.slug`).
 - `rasterizar`: convierte un SVG (str) en un PNG con `resvg` (resvg_py), la misma
-  librería que usa `render_carta.py`. El SVG es la fuente de verdad; el PNG es
-  su rasterización.
+  librería que usa el motor de render `render_personaje.py`. El SVG es la fuente
+  de verdad; el PNG es su rasterización.
 """
 
 from __future__ import annotations

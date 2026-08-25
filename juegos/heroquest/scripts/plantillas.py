@@ -21,9 +21,9 @@ Contrato de plantilla (ver los comentarios de cada `.svg`):
   diseñador puede mover/redimensionar el ancla en Inkscape y el contenido se
   recoloca solo.
 
-El flujo tipico desde `render_carta.py`:
+El flujo tipico desde `render_personaje.py`:
 
-    tpl = plantillas.cargar("anverso_descripcion")
+    tpl = plantillas.cargar("hero-card-up")
     arte = plantillas.ancla(tpl, "ph-arte")          # {x,y,width,height}
     cuerpo = plantillas.render(
         tpl,
@@ -32,8 +32,8 @@ El flujo tipico desde `render_carta.py`:
     )   # -> contenido interior del <svg> (sin la etiqueta raiz)
 
 `render` devuelve el INTERIOR del SVG (todo lo que hay entre `<svg ...>` y
-`</svg>`), para que `render_carta.py` lo envuelva en el `<svg>` raiz con el
-tamaño fisico que corresponda y pueda componer anverso|reverso en una hoja.
+`</svg>`), para que `render_personaje.py` lo envuelva en el `<svg>` raiz con el
+tamaño fisico que corresponda.
 """
 
 from __future__ import annotations

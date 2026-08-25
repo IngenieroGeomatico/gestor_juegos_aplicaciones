@@ -3,7 +3,7 @@
 
 Cada categoría de carta (equipo, héroe, enemigo, tesoro, magia) tiene una escena
 ambiental temática que se dibuja como SVG vectorial y se rasteriza a PNG con
-`resvg` (la misma librería que `render_carta.py`). La **magia** se desglosa en sus
+`resvg` (la misma librería que el motor de render). La **magia** se desglosa en sus
 **escuelas elementales** (`magia_agua`, `magia_aire`, `magia_fuego`,
 `magia_tierra`, `magia_terror`), que comparten el esqueleto del santuario arcano
 pero con paleta, orbe y motivos propios de cada elemento.

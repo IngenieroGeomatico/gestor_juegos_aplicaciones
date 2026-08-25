@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-"""Integra arte externo en la carpeta de convención que usa `render_carta.py`.
+"""Integra arte externo en la carpeta de convención de arte de HeroQuest.
 
-`render_carta._ruta_arte` localiza el arte del anverso por convención de nombre
+El arte del anverso se localiza por convención de nombre
 (`sources/arte/<slug(nombre)>.png`). Este script reemplaza el retrato SVG
 generado por `generar_retratos.py` por el arte real descargado, siguiendo el
 mapa declarado en `ARTE`.

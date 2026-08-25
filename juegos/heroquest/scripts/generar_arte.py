@@ -3,11 +3,11 @@
 
 Cada objeto (espada, hacha, poción, ...) se dibuja como un SVG vectorial
 detallado sobre el fondo degradado morado característico y se rasteriza a PNG
-con resvg (la misma librería que usa `render_carta.py`).
+con resvg (la misma librería que usa el motor de render `render_personaje.py`).
 
 - Los SVG (fuente de verdad, editables) se guardan en `sources/arte_svg/`.
-- Los PNG finales se guardan en `sources/arte/` con el nombre que espera
-  `render_carta._ruta_arte` (el `slug` del nombre de la carta, p. ej.
+- Los PNG finales se guardan en `sources/arte/` con el nombre de convención
+  (el `slug` del nombre de la carta, p. ej.
   `Espada_corta.png`, `Báculo_del_mago.png`).
 
 Uso:

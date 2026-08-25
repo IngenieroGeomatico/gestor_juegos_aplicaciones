@@ -7,7 +7,7 @@ y se rasteriza a PNG con `resvg`. Reemplaza el arte genérico (espadas cruzadas
 para héroes, calavera para monstruos) por un retrato propio de cada personaje.
 
 - Los SVG (fuente de verdad, editables) van a `sources/arte_svg/`.
-- Los PNG finales van a `sources/arte/` con el nombre que espera `render_carta`
+- Los PNG finales van a `sources/arte/` con el nombre de convención
   (el `slug` del nombre, p. ej. `Bárbaro.png`, `Guerrero_del_Caos.png`).
 
 Uso:
@@ -28,9 +28,9 @@ ARTE_DIR = Path(__file__).resolve().parent.parent / "sources" / "arte"
 ARTE_SVG_DIR = Path(__file__).resolve().parent.parent / "sources" / "arte_svg"
 
 # Lienzo VERTICAL para encajar el área de arte a 4/5 de la plantilla
-# `anverso_stats.svg` (área interior ≈ 412×474, ratio ≈ 0.87). Usamos un lienzo
+# el área de arte de la plantilla (ratio ≈ 0.87). Usamos un lienzo
 # de la misma proporción (520×600, ratio ≈ 0.867) para que el recorte "cover"
-# de `render_carta` no recorte el busto. El busto se dibuja con las mismas
+# del motor de render no recorte el busto. El busto se dibuja con las mismas
 # coordenadas de siempre (centrado en x=0, de y≈-20 a y≈500) y se recoloca con
 # un `translate` para quedar grande y con la cabeza arriba.
 ANCHO, ALTO = 520, 600
