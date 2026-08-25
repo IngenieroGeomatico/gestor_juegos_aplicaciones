@@ -357,6 +357,14 @@ def _frag_stats(ruta: Path, geom: dict[str, float], entrada: dict) -> str:
     tam_titulo = TAM_FUENTE_TITULO_MONSTRUO if es_monstruo else TAM_FUENTE_TITULO
     tam_valor = TAM_FUENTE_VALOR_MONSTRUO if es_monstruo else TAM_FUENTE_VALOR
 
+    # Para monstruos, alinea todos los títulos a un y común (las 5 columnas
+    # tienen anclas a distintas alturas y necesitan alinearse entre sí).
+    cy_medio_titulos = None
+    if es_monstruo:
+        geom_titulos = [g for id_a in anclas_titulo if (g := plantillas.ancla(svg, id_a))]
+        if geom_titulos:
+            cy_medio_titulos = sum(g["y"] + g["height"] / 2 for g in geom_titulos) / len(geom_titulos)
+
     for id_ancla, etiqueta in anclas_titulo.items():
         g = plantillas.ancla(svg, id_ancla)
         if not g:
@@ -365,7 +373,10 @@ def _frag_stats(ruta: Path, geom: dict[str, float], entrada: dict) -> str:
         lineas = _lineas_etiqueta(etiqueta)
         interlineado = tam_titulo * 1.05
         alto_bloque = interlineado * (len(lineas) - 1)
-        y0 = g["y"] + g["height"] / 2 + tam_titulo / 3 - alto_bloque / 2
+        if cy_medio_titulos is not None:
+            y0 = cy_medio_titulos + tam_titulo / 3 - alto_bloque / 2
+        else:
+            y0 = g["y"] + g["height"] / 2 + tam_titulo / 3 - alto_bloque / 2
         tspans = "".join(
             f'<tspan x="{cx}" '
             f'{"" if i == 0 else f"""dy="{interlineado}" """}>'
@@ -381,13 +392,23 @@ def _frag_stats(ruta: Path, geom: dict[str, float], entrada: dict) -> str:
         )
         svg = plantillas._eliminar_ancla(svg, id_ancla, texto)
 
+    # Para monstruos, alinea los valores a un y común.
+    cy_medio_valores = None
+    if es_monstruo:
+        geom_valores = [g for id_a in ANCLAS_VALOR if (g := plantillas.ancla(svg, id_a))]
+        if geom_valores:
+            cy_medio_valores = sum(g["y"] + g["height"] / 2 for g in geom_valores) / len(geom_valores)
+
     for id_ancla, campo in ANCLAS_VALOR.items():
         g = plantillas.ancla(svg, id_ancla)
         if not g:
             continue
         valor = xml.sax.saxutils.escape(str(entrada.get(campo, "")))
         cx = g["x"] + g["width"] / 2
-        cy = g["y"] + g["height"] / 2 + tam_valor / 3
+        if cy_medio_valores is not None:
+            cy = cy_medio_valores + tam_valor / 3
+        else:
+            cy = g["y"] + g["height"] / 2 + tam_valor / 3
         texto = (
             f'<text x="{cx}" y="{cy}" font-family="{FONT_FAMILY}" '
             f'font-size="{tam_valor}" font-weight="bold" '
