@@ -1,47 +1,114 @@
 [
   {
     "nombre": "Trasgo",
+    "clase": "Trasgo",
     "ataque": 2,
     "defensa": 1,
     "cuerpo": 1,
-    "mente": 3,
-    "movimiento": 2,
-    "descripcion": "Criatura pequeña y huidiza, debil pero numerosa."
+    "mente": 1,
+    "movimiento": 10,
+    "descripcion": "Criatura pequeña y huidiza, debil pero numerosa.",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/monster-card-up.svg",
+        "plantilla_estadisticas": "sources/plantillas/monster-stats.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "arte_personaje": "sources/arte/Trasgo.png",
+        "arte_icono": "sources/arte_iconos/trasgo_1.png",
+        "archivos_fondo": [
+          "sources/arte_fondos/parchment.png"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/monster-card-down.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/monster-back.png"
+        ]
+      }
+    }
   },
   {
     "nombre": "Orco",
+    "clase": "Orco",
     "ataque": 2,
     "defensa": 2,
     "cuerpo": 1,
     "mente": 4,
     "movimiento": 2,
-    "descripcion": "Bruto de piel verduzca, más resistente que el Trasgo."
-  },
-  {
-    "nombre": "Fimir",
-    "ataque": 3,
-    "defensa": 3,
-    "cuerpo": 2,
-    "mente": 3,
-    "movimiento": 3,
-    "descripcion": "Siniestro ser de un solo ojo que empuña una maza en su único brazo."
+    "descripcion": "Bruto de piel verduzca, más resistente que el Trasgo.",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/monster-card-up.svg",
+        "plantilla_estadisticas": "sources/plantillas/monster-stats.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "arte_personaje": "sources/arte/Orco.png",
+        "arte_icono": "sources/arte_iconos/Orco_1.png",
+        "archivos_fondo": [
+          "sources/arte_fondos/parchment.png"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/monster-card-down.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/monster-back.png"
+        ]
+      }
+    }
   },
   {
     "nombre": "Guerrero del Caos",
+    "clase": "Guerrero del Caos",
     "ataque": 4,
     "defensa": 3,
     "cuerpo": 2,
     "mente": 5,
     "movimiento": 2,
-    "descripcion": "Campeón del Caos atrapado en una armadura negra. Muy peligroso."
+    "descripcion": "Campeón del Caos atrapado en una armadura negra. Muy peligroso.",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/monster-card-up.svg",
+        "plantilla_estadisticas": "sources/plantillas/monster-stats.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "arte_personaje": "sources/arte/Guerrero_del_Caos.png",
+        "arte_icono": "sources/arte_iconos/Guerrero_del_Caos_1.png",
+        "archivos_fondo": [
+          "sources/arte_fondos/parchment.png"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/monster-card-down.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/monster-back.png"
+        ]
+      }
+    }
   },
   {
     "nombre": "Gárgola",
+    "clase": "Gárgola",
     "ataque": 3,
     "defensa": 4,
     "cuerpo": 1,
     "mente": 3,
     "movimiento": 2,
-    "descripcion": "Estatua viviente de piedra, casi impenetrable a los golpes."
+    "descripcion": "Estatua viviente de piedra, casi impenetrable a los golpes.",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/monster-card-up.svg",
+        "plantilla_estadisticas": "sources/plantillas/monster-stats.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "arte_personaje": "sources/arte/Gárgola.png",
+        "arte_icono": "sources/arte_iconos/Gárgola_1.png",
+        "archivos_fondo": [
+          "sources/arte_fondos/parchment.png"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/monster-card-down.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/monster-back.png"
+        ]
+      }
+    }
   }
 ]
