@@ -2,9 +2,9 @@
 monstruo o hechizo).
 
 Este script es un orquestador: no conoce los campos de cada tipo de carta. Cada
-tipo declara su propia lógica en el paquete `tipos_carta/` (campos, validación,
-cómo se construye la entrada). Aquí solo se elige el tipo, se construye el CLI a
-partir de sus campos y se guarda.
+tipo declara sus datos en `tipos_carta_datos.py` (campos, validación, cómo se
+construye la entrada). Aquí solo se elige el tipo, se construye el CLI a partir
+de sus campos y se guarda.
 
 Ejemplos:
     uv run juegos/heroquest/scripts/nueva_carta.py --tipo hechizo --nombre "Bola de fuego" \\
@@ -18,7 +18,7 @@ import argparse
 import sys
 
 import data_store
-import tipos_carta
+import tipos_carta_datos
 
 
 def _construir_parser() -> argparse.ArgumentParser:
@@ -34,14 +34,14 @@ def _construir_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--tipo",
         required=True,
-        choices=list(tipos_carta.TIPOS),
+        choices=list(tipos_carta_datos.TIPOS),
         help="Tipo de carta a crear",
     )
 
     # Reunir todos los campos de todos los tipos, sin duplicar por nombre.
-    vistos: dict[str, tipos_carta.Campo] = {}
-    for tipo in tipos_carta.TIPOS.values():
-        for campo in tipo.campos():
+    vistos: dict[str, tipos_carta_datos.Campo] = {}
+    for tipo in tipos_carta_datos.TIPOS.values():
+        for campo in tipo.campos:
             vistos.setdefault(campo.nombre, campo)
 
     for campo in vistos.values():
@@ -56,7 +56,7 @@ def main() -> None:
     parser = _construir_parser()
     args = parser.parse_args()
 
-    tipo = tipos_carta.obtener(args.tipo)
+    tipo = tipos_carta_datos.obtener(args.tipo)
     if tipo is None:  # argparse ya lo restringe con choices; defensivo
         parser.error(f"Tipo '{args.tipo}' no válido")
 
