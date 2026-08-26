@@ -6,8 +6,8 @@
     "defensa": 1,
     "cuerpo": 1,
     "mente": 1,
-    "movimiento": 10,
-    "descripcion": "Criatura pequeña y huidiza, debil pero numerosa.",
+    "movimiento": 8,
+    "descripcion": "Criatura pequeña y huidiza, débil pero numerosa.",
     "plantillas": {
       "cara": {
         "plantilla_padre": "sources/plantillas/monster-card-up.svg",
@@ -33,9 +33,9 @@
     "ataque": 2,
     "defensa": 2,
     "cuerpo": 1,
-    "mente": 4,
+    "mente": 1,
     "movimiento": 2,
-    "descripcion": "Bruto de piel verduzca, más resistente que el Trasgo.",
+    "descripcion": "Bruto de piel verdusca, más resistente que el Trasgo.",
     "plantillas": {
       "cara": {
         "plantilla_padre": "sources/plantillas/monster-card-up.svg",
@@ -99,6 +99,174 @@
         "plantilla_leyenda": "sources/plantillas/ribbon.svg",
         "arte_personaje": "sources/arte/Gárgola.png",
         "arte_icono": "sources/arte_iconos/Gárgola_1.png",
+        "archivos_fondo": [
+          "sources/arte_fondos/parchment.png"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/monster-card-down.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/monster-back.png"
+        ]
+      }
+    }
+  },
+  {
+    "nombre": "Zombi",
+    "clase": "Zombi",
+    "ataque": 2,
+    "defensa": 2,
+    "cuerpo": 1,
+    "mente": 1,
+    "movimiento": 2,
+    "descripcion": "Cadáver reanimado que se arrastra lentamente. Débil pero persistente.",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/monster-card-up.svg",
+        "plantilla_estadisticas": "sources/plantillas/monster-stats.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "arte_personaje": "sources/arte/Zombi.png",
+        "arte_icono": "sources/arte_iconos/Zombi_2.png",
+        "archivos_fondo": [
+          "sources/arte_fondos/parchment.png"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/monster-card-down.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/monster-back.png"
+        ]
+      }
+    }
+  },
+  {
+    "nombre": "Esqueleto",
+    "clase": "Esqueleto",
+    "ataque": 3,
+    "defensa": 2,
+    "cuerpo": 1,
+    "mente": 1,
+    "movimiento": 4,
+    "descripcion": "Huesos reanimados por magia oscura. Rápido y letal con su espada oxidada.",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/monster-card-up.svg",
+        "plantilla_estadisticas": "sources/plantillas/monster-stats.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "arte_personaje": "sources/arte/Esqueleto.png",
+        "arte_icono": "sources/arte_iconos/Esqueleto_1.png",
+        "archivos_fondo": [
+          "sources/arte_fondos/parchment.png"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/monster-card-down.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/monster-back.png"
+        ]
+      }
+    }
+  },
+  {
+    "nombre": "Momia",
+    "clase": "Momia",
+    "ataque": 3,
+    "defensa": 3,
+    "cuerpo": 2,
+    "mente": 1,
+    "movimiento": 2,
+    "descripcion": "Envuelta en vendajes podridos, esta criatura es resistente y difícil de abatir.",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/monster-card-up.svg",
+        "plantilla_estadisticas": "sources/plantillas/monster-stats.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "arte_personaje": "sources/arte/Momia.png",
+        "arte_icono": "sources/arte_iconos/Momia_1.png",
+        "archivos_fondo": [
+          "sources/arte_fondos/parchment.png"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/monster-card-down.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/monster-back.png"
+        ]
+      }
+    }
+  },
+  {
+    "nombre": "Guerrero del Terror",
+    "clase": "Guerrero del Terror",
+    "ataque": 4,
+    "defensa": 3,
+    "cuerpo": 2,
+    "mente": 3,
+    "movimiento": 2,
+    "descripcion": "Élite del Caos envuelto en sombras. Más astuto que el Guerrero del Caos.",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/monster-card-up.svg",
+        "plantilla_estadisticas": "sources/plantillas/monster-stats.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "arte_personaje": "sources/arte/Guerrero_del_Terror.png",
+        "arte_icono": "sources/arte_iconos/Guerrero_del_Terror_1.png",
+        "archivos_fondo": [
+          "sources/arte_fondos/parchment.png"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/monster-card-down.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/monster-back.png"
+        ]
+      }
+    }
+  },
+  {
+    "nombre": "Abominación",
+    "clase": "Abominación",
+    "ataque": 3,
+    "defensa": 3,
+    "cuerpo": 3,
+    "mente": 1,
+    "movimiento": 2,
+    "descripcion": "Masa deformes de carne y garras. Enorme, difícil de matar pero lenta.",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/monster-card-up.svg",
+        "plantilla_estadisticas": "sources/plantillas/monster-stats.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "arte_personaje": "sources/arte/Abominación.png",
+        "arte_icono": "sources/arte_iconos/Abominación_1.png",
+        "archivos_fondo": [
+          "sources/arte_fondos/parchment.png"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/monster-card-down.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/monster-back.png"
+        ]
+      }
+    }
+  },
+  {
+    "nombre": "Fimir",
+    "clase": "Fimir",
+    "ataque": 3,
+    "defensa": 3,
+    "cuerpo": 2,
+    "mente": 2,
+    "movimiento": 2,
+    "descripcion": "Ser anfibio con garras afiladas. Inteligente y peligroso en combate.",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/monster-card-up.svg",
+        "plantilla_estadisticas": "sources/plantillas/monster-stats.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "arte_personaje": "sources/arte/Fimir.png",
+        "arte_icono": "sources/arte_iconos/Fimir_1.png",
         "archivos_fondo": [
           "sources/arte_fondos/parchment.png"
         ]
