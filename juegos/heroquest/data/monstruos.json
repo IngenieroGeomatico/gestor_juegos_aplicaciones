@@ -41,8 +41,8 @@
         "plantilla_padre": "sources/plantillas/monster-card-up.svg",
         "plantilla_estadisticas": "sources/plantillas/monster-stats.svg",
         "plantilla_leyenda": "sources/plantillas/ribbon.svg",
-        "arte_personaje": "sources/arte/Orco.png",
-        "arte_icono": "sources/arte_iconos/Orco_1.png",
+        "arte_personaje": "sources/arte/Orco_1.png",
+        "arte_icono": "sources/arte_iconos/Orco_2.png",
         "archivos_fondo": [
           "sources/arte_fondos/parchment.png"
         ]
@@ -69,8 +69,8 @@
         "plantilla_padre": "sources/plantillas/monster-card-up.svg",
         "plantilla_estadisticas": "sources/plantillas/monster-stats.svg",
         "plantilla_leyenda": "sources/plantillas/ribbon.svg",
-        "arte_personaje": "sources/arte/Guerrero_del_Caos.png",
-        "arte_icono": "sources/arte_iconos/Guerrero_del_Caos_1.png",
+        "arte_personaje": "sources/arte/Guerrero_del_Caos_1.png",
+        "arte_icono": "sources/arte_iconos/Guerrero_del_Caos_2.png",
         "archivos_fondo": [
           "sources/arte_fondos/parchment.png"
         ]
@@ -97,8 +97,8 @@
         "plantilla_padre": "sources/plantillas/monster-card-up.svg",
         "plantilla_estadisticas": "sources/plantillas/monster-stats.svg",
         "plantilla_leyenda": "sources/plantillas/ribbon.svg",
-        "arte_personaje": "sources/arte/Gárgola.png",
-        "arte_icono": "sources/arte_iconos/Gárgola_1.png",
+        "arte_personaje": "sources/arte/Gargola_1.png",
+        "arte_icono": "sources/arte_iconos/Gargola_2.png",
         "archivos_fondo": [
           "sources/arte_fondos/parchment.png"
         ]
@@ -125,8 +125,8 @@
         "plantilla_padre": "sources/plantillas/monster-card-up.svg",
         "plantilla_estadisticas": "sources/plantillas/monster-stats.svg",
         "plantilla_leyenda": "sources/plantillas/ribbon.svg",
-        "arte_personaje": "sources/arte/Zombi.png",
-        "arte_icono": "sources/arte_iconos/Zombi_2.png",
+        "arte_personaje": "sources/arte/Zombi_3.png",
+        "arte_icono": "sources/arte_iconos/Zombi_4.png",
         "archivos_fondo": [
           "sources/arte_fondos/parchment.png"
         ]
@@ -153,8 +153,8 @@
         "plantilla_padre": "sources/plantillas/monster-card-up.svg",
         "plantilla_estadisticas": "sources/plantillas/monster-stats.svg",
         "plantilla_leyenda": "sources/plantillas/ribbon.svg",
-        "arte_personaje": "sources/arte/Esqueleto.png",
-        "arte_icono": "sources/arte_iconos/Esqueleto_1.png",
+        "arte_personaje": "sources/arte/Esqueleto_2.png",
+        "arte_icono": "sources/arte_iconos/Esqueleto_2.png",
         "archivos_fondo": [
           "sources/arte_fondos/parchment.png"
         ]
@@ -181,8 +181,8 @@
         "plantilla_padre": "sources/plantillas/monster-card-up.svg",
         "plantilla_estadisticas": "sources/plantillas/monster-stats.svg",
         "plantilla_leyenda": "sources/plantillas/ribbon.svg",
-        "arte_personaje": "sources/arte/Momia.png",
-        "arte_icono": "sources/arte_iconos/Momia_1.png",
+        "arte_personaje": "sources/arte/Momia_1.png",
+        "arte_icono": "sources/arte_iconos/Momia_2.png",
         "archivos_fondo": [
           "sources/arte_fondos/parchment.png"
         ]
@@ -209,8 +209,8 @@
         "plantilla_padre": "sources/plantillas/monster-card-up.svg",
         "plantilla_estadisticas": "sources/plantillas/monster-stats.svg",
         "plantilla_leyenda": "sources/plantillas/ribbon.svg",
-        "arte_personaje": "sources/arte/Guerrero_del_Terror.png",
-        "arte_icono": "sources/arte_iconos/Guerrero_del_Terror_1.png",
+        "arte_personaje": "sources/arte/Guerrero_del_Terror_1.png",
+        "arte_icono": "sources/arte_iconos/Guerrero_del_Terror_2.png",
         "archivos_fondo": [
           "sources/arte_fondos/parchment.png"
         ]
@@ -237,8 +237,8 @@
         "plantilla_padre": "sources/plantillas/monster-card-up.svg",
         "plantilla_estadisticas": "sources/plantillas/monster-stats.svg",
         "plantilla_leyenda": "sources/plantillas/ribbon.svg",
-        "arte_personaje": "sources/arte/Abominación.png",
-        "arte_icono": "sources/arte_iconos/Abominación_1.png",
+        "arte_personaje": "sources/arte/Abominacion_1.png",
+        "arte_icono": "sources/arte_iconos/Abominacion_2.png",
         "archivos_fondo": [
           "sources/arte_fondos/parchment.png"
         ]
@@ -265,7 +265,7 @@
         "plantilla_padre": "sources/plantillas/monster-card-up.svg",
         "plantilla_estadisticas": "sources/plantillas/monster-stats.svg",
         "plantilla_leyenda": "sources/plantillas/ribbon.svg",
-        "arte_personaje": "sources/arte/Fimir.png",
+        "arte_personaje": "sources/arte/Fimir_1.png",
         "arte_icono": "sources/arte_iconos/Fimir_1.png",
         "archivos_fondo": [
           "sources/arte_fondos/parchment.png"
