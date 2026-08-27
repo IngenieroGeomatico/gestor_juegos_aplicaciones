@@ -3,18 +3,75 @@
     "nombre": "Bola de fuego",
     "escuela": "Fuego",
     "coste_mente": 2,
-    "descripcion": "Lanza una bola de fuego que causa un punto de daño a un monstruo adyacente."
+    "descripcion": "Lanza una bola de fuego que causa un punto de daño a un monstruo adyacente.",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/Bola_de_fuego.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Hechizo_de_fuego.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    }
   },
   {
     "nombre": "Curar heridas",
     "escuela": "Tierra",
     "coste_mente": 1,
-    "descripcion": "Devuelve un punto de cuerpo a un héroe hasta que recupere su máximo."
+    "descripcion": "Devuelve un punto de cuerpo a un héroe hasta que recupere su máximo.",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/Curar_heridas.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Hechizo_de_tierra.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    }
   },
   {
     "nombre": "Dardo de caos",
     "escuela": "Terror",
     "coste_mente": 1,
-    "descripcion": "Proyectil corrupto que causa un punto de daño a un monstruo en línea de visión."
+    "descripcion": "Proyectil corrupto que causa un punto de daño a un monstruo en línea de visión.",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/Dardo_de_caos.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Hechizo_de_terror.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    }
   }
 ]
