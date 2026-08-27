@@ -1,40 +1,34 @@
 """Descarga fuentes de HeroQuest para indexar en el RAG.
 
+Lee las fuentes desde data/fuentes.json y descarga los PDFs de Google Drive.
+
 Uso:
-    uv run descargar_fuentes.py                    # Descarga todo
-    uv run descargar_fuentes.py --solo reglas      # Solo manuales
-    uv run descargar_fuentes.py --solo misiones    # Solo aventuras
+    uv run descargar_fuentes.py                         # Descarga todo
+    uv run descargar_fuentes.py --prioridad alta         # Solo prioridad alta
+    uv run descargar_fuentes.py --categoria Reglas       # Solo reglas
+    uv run descargar_fuentes.py --expansion "Alquimia"   # Solo expansión Alquimia
+    uv run descargar_fuentes.py --nombre "manual"        # Buscar por nombre
 """
 
 from __future__ import annotations
 
 import argparse
+import json
 import subprocess
 from pathlib import Path
 
-# Directorio de destino
-DESTINO = Path(__file__).parent / "documentos"
+# Rutas
+_DATA_DIR = Path(__file__).resolve().parent.parent / "data"
+_DESTINO = Path(__file__).parent / "documentos"
 
-# Enlaces a PDFs de Google Drive
-FUENTES = {
-    "reglas": {
-        "manual_heroquest_2021": "18zlEFaKQNMMMDnEEbMVq0LUD4mwuUcJr",
-        "compendio_ahq": "1kohbUfbFFNFqtQCaSxrSxJpN4f3y6_AY",
-        "wizard_quest_1993": "1KOa02SqdO92Z3DFLhZe0XJKOPL-6vnR2",
-    },
-    "cartas": {
-        "cartas_juego_base": "1aPgtbgNzAlkejntAaV-W4vfMIiWJDypS",
-        "cartas_fanmade": "1C99ZdrnC0C96o2GiDZbSrD3XQ7Z78kG1",
-    },
-    "misiones": {
-        "libro_misiones_base": "10y6gKUobO_mSaSH0DzYIQ726xYTTaAPh",
-        "misiones_online": "1CV4OynLgL1st6WCwcqGXOxQ964nk17z-",
-    },
-    "expansiones": {
-        "alquimia_completo": "1gU9L7S3gPApbLuzaPWrLiGim6c189EAw",
-        "compania_tenebrosa": "1rb0v83LmhNlspp0rM5rmMzOedz4P6jaQ",
-    },
-}
+
+def _cargar_fuentes() -> list[dict]:
+    """Carga las fuentes desde fuentes.json."""
+    ruta = _DATA_DIR / "fuentes.json"
+    if not ruta.exists():
+        return []
+    with ruta.open(encoding="utf-8") as f:
+        return json.load(f)
 
 
 def _descargar_gdrive(file_id: str, destino: Path) -> bool:
@@ -56,43 +50,117 @@ def _descargar_gdrive(file_id: str, destino: Path) -> bool:
         return False
 
 
-def descargar_fuentes(categorias: list[str] | None = None) -> None:
-    """Descarga las fuentes solicitadas."""
-    cat_a_descargar = categorias or list(FUENTES.keys())
-    
-    for cat in cat_a_descargar:
-        if cat not in FUENTES:
-            print(f"Categoría desconocida: {cat}")
+def _slug(nombre: str) -> str:
+    """Convierte un nombre en slug seguro para ficheros."""
+    return "".join(c if c.isalnum() else "_" for c in nombre).strip("_")
+
+
+def descargar_fuentes(
+    prioridad: str | None = None,
+    categoria: str | None = None,
+    expansion: str | None = None,
+    nombre: str | None = None,
+) -> None:
+    """Descarga las fuentes filtradas."""
+    fuentes = _cargar_fuentes()
+    if not fuentes:
+        print("No se encontraron fuentes en data/fuentes.json")
+        return
+
+    # Aplicar filtros
+    if prioridad:
+        fuentes = [f for f in fuentes if f.get("prioridad") == prioridad]
+    if categoria:
+        fuentes = [f for f in fuentes if f.get("categoria") == categoria]
+    if expansion:
+        fuentes = [f for f in fuentes if f.get("expansion") == expansion]
+    if nombre:
+        nombre_lower = nombre.lower()
+        fuentes = [f for f in fuentes if nombre_lower in f.get("nombre", "").lower()]
+
+    # Filtrar solo las descargables (con file_id)
+    descargables = [f for f in fuentes if f.get("file_id")]
+
+    if not descargables:
+        print("No se encontraron fuentes descargables con los filtros aplicados.")
+        return
+
+    print(f"\n{'='*60}")
+    print(f"  Descargando {len(descargables)} fuentes")
+    print(f"{'='*60}\n")
+
+    for fuente in descargables:
+        nombre_fuente = fuente["nombre"]
+        file_id = fuente["file_id"]
+        expansion_fuente = fuente.get("expansion", "General")
+        slug_expansion = _slug(expansion_fuente)
+
+        # Crear directorio por expansión
+        dir_expansion = _DESTINO / slug_expansion
+        dir_expansion.mkdir(parents=True, exist_ok=True)
+
+        # Nombre del fichero
+        slug_nombre = _slug(nombre_fuente)
+        destino = dir_expansion / f"{slug_nombre}.pdf"
+
+        print(f"→ {nombre_fuente}")
+        print(f"  Expansión: {expansion_fuente}")
+        print(f"  Prioridad: {fuente.get('prioridad', 'N/A')}")
+
+        if destino.exists():
+            print(f"  Ya existe: {destino.name}")
             continue
-        
-        print(f"\n{'='*60}")
-        print(f"  {cat.upper()}")
-        print(f"{'='*60}")
-        
-        dir_cat = DESTINO / cat
-        dir_cat.mkdir(parents=True, exist_ok=True)
-        
-        for nombre, file_id in FUENTES[cat].items():
-            print(f"\n→ {nombre}")
-            destino = dir_cat / f"{nombre}.pdf"
-            
-            if destino.exists():
-                print(f"  Ya existe: {destino}")
-                continue
-            
-            _descargar_gdrive(file_id, destino)
+
+        _descargar_gdrive(file_id, destino)
+        print()
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Descarga fuentes de HeroQuest para RAG")
     parser.add_argument(
-        "--solo", choices=list(FUENTES.keys()),
-        help="Descargar solo una categoría")
+        "--prioridad", choices=["alta", "media", "baja"],
+        help="Filtrar por prioridad")
+    parser.add_argument(
+        "--categoria",
+        help="Filtrar por categoría (Reglas, Misiones, Cartas, etc.)")
+    parser.add_argument(
+        "--expansion",
+        help="Filtrar por expansión (Alquimia, Juego Base, etc.)")
+    parser.add_argument(
+        "--nombre",
+        help="Buscar por nombre (búsqueda parcial)")
+    parser.add_argument(
+        "--listar", action="store_true",
+        help="Listar fuentes disponibles sin descargar")
     args = parser.parse_args()
-    
-    cats = [args.solo] if args.solo else None
-    descargar_fuentes(cats)
+
+    if args.listar:
+        fuentes = _cargar_fuentes()
+        if args.prioridad:
+            fuentes = [f for f in fuentes if f.get("prioridad") == args.prioridad]
+        if args.categoria:
+            fuentes = [f for f in fuentes if f.get("categoria") == args.categoria]
+        if args.expansion:
+            fuentes = [f for f in fuentes if f.get("expansion") == args.expansion]
+        if args.nombre:
+            nombre_lower = args.nombre.lower()
+            fuentes = [f for f in fuentes if nombre_lower in f.get("nombre", "").lower()]
+
+        print(f"\nFuentes encontradas: {len(fuentes)}\n")
+        for f in fuentes:
+            pri = f.get("prioridad", "?")
+            cat = f.get("categoria", "?")
+            has_id = "✓" if f.get("file_id") else "✗"
+            print(f"  [{pri:5}] [{cat:12}] {has_id} {f['nombre']}")
+        return
+
+    descargar_fuentes(
+        prioridad=args.prioridad,
+        categoria=args.categoria,
+        expansion=args.expansion,
+        nombre=args.nombre,
+    )
     print("\n✅ Descarga completada")
 
 
