@@ -239,3 +239,4 @@ juegos/heroquest/sources/all-testing-assets/
 
 # Directorio de trabajo de OpenCode
 .omo/
+juegos/heroquest/rag/documentos/*.pdf
