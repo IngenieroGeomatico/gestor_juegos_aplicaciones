@@ -74,15 +74,19 @@ Los scripts de utilidad viven en `juegos/heroquest/scripts/`:
   autocontenido (mapa SVG embebido, cada sala con sus monstruos/tesoros y
   casillas de vida, y referencia de héroes/armas/hechizos), en
   `juegos/heroquest/mapas/`
-- `carta_item.py` — genera la carta individual de un **héroe** (solo personajes)
-  con `--nombre "<héroe>"`. Usa el motor `render_personaje.py`. Elige la cara con
+- `carta_item.py` — genera la carta individual de un **héroe, monstruo o item**.
+  Héroes y monstruos usan el motor `render_personaje.py` (hero-card /
+  monster-card); los items (armas, armaduras, pociones, hechizos) usan
+  `render_generico.py` (generic-card). Elige la cara con
   `--cara {anverso,dorso,ambas}` y el formato con `--formato png,svg`. Sale en
   `juegos/heroquest/cartas/`
 - `render_personaje.py` — **motor de render guiado por datos** de las cartas de
-  héroe (anverso y dorso), en SVG y PNG. La *receta* de la carta vive en el JSON
-  del personaje (clave `plantillas`, ver "Cartas de héroe"). Es el único motor de
-  cartas: `render_svg`/`render_png` (anverso) y `render_svg_verso`/
-  `render_png_verso` (dorso)
+  héroe y monstruo (anverso y dorso), en SVG y PNG. La *receta* de la carta vive
+  en el JSON (clave `plantillas`). `render_svg`/`render_png` (anverso) y
+  `render_svg_verso`/`render_png_verso` (dorso)
+- `render_generico.py` — **motor de render de las cartas genéricas** de items
+  (armas, armaduras, pociones y hechizos) con la plantilla generic-card, en SVG
+  y PNG. Misma filosofía guiada por datos (receta `plantillas` en el JSON)
 - `plantillas.py` — loader de las plantillas SVG: carga (con caché), lee las
   anclas `id="ph-*"` (rectángulos invisibles cuya geometría se lee para colocar
   contenido) y sustituye los marcadores de texto `{{...}}`. La estructura de la
@@ -123,10 +127,11 @@ Los scripts de utilidad viven en `juegos/heroquest/scripts/`:
 - `data_store.py` — funciones compartidas (cargar, guardar, añadir, existe,
   eliminar, listar; helpers `slug` y `cargar_json`)
 
-## Cartas de héroe (motor guiado por datos)
+## Cartas guiadas por plantillas (motor guiado por datos)
 
-Las cartas de héroe las compone `render_personaje.py` a partir de una *receta*
-que vive en el propio JSON del personaje, bajo la clave `plantillas`:
+Las cartas las compone el motor a partir de una *receta* que vive en el propio
+JSON de la entrada —héroe, monstruo o item— bajo la clave `plantillas` (con dos
+caras, `cara` y `dorso`). Ejemplo de un héroe:
 
 ```json
 "plantillas": {
@@ -153,6 +158,10 @@ Reglas del motor:
 
 - **El SVG es la fuente de verdad.** Las plantillas de `sources/plantillas/` se
   editan a mano (Inkscape). El motor solo inyecta contenido sobre sus anclas.
+- El motor admite tres familias de cartas, todas guiadas por la receta
+  `plantillas` del JSON: **héroes** (hero-card) y **monstruos** (monster-card),
+  con `render_personaje.py`; **items** —armas, armaduras, pociones y hechizos—
+  (generic-card), con `render_generico.py`.
 - **Anclas** `id="ph-*"` (rectángulos invisibles): el código lee su geometría y
   coloca ahí el contenido. Anverso: `ph-arte`, `ph-ribbon` (nombre), `ph-stats`
   (cuadro de estadísticas), `ph-icon`. Dorso: `ph-heroquest` (logo) y `ph-texto`
@@ -160,12 +169,9 @@ Reglas del motor:
 - **`archivos_fondo`** es una lista en orden de renderizado: el primero va **más
   abajo** y cada siguiente se superpone. Admite imágenes (PNG/JPG) y SVG (p. ej.
   el borde), que se incrusta escalado a la carta.
-- **Solo se renderizan héroes.** Armas, armaduras, pociones, hechizos y monstruos
-  se gestionan como datos (`nueva_carta.py`, `listar.py`, `eliminar.py`) pero no
-  tienen motor de carta actualmente.
 
-Para dar carta a un héroe nuevo, añade su bloque `plantillas` (cara y dorso) en
-`personajes.json` y coloca sus assets (arte, iconos, fondos) en `sources/`.
+Para dar carta a una entrada nueva, añádele su bloque `plantillas` (cara y
+dorso) en su JSON y coloca sus assets (arte, iconos, fondos) en `sources/`.
 
 ## Cómo trabajar
 

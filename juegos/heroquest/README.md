@@ -14,6 +14,9 @@ Ficheros JSON con el contenido del juego:
 - `tableros.json` — Los tableros del juego: "El Original" (generado desde el SVG
   de Wikipedia, CC BY-SA 4.0 / GFDL) y "Cara B" (pendiente de su SVG). Se genera
   de forma reproducible con `tablero_svg.py` (ver más abajo)
+- `fuentes.json` — Registro del material externo descargable (PDFs de reglas,
+  misiones, cartas y expansiones) para el RAG. Filtrable por categoría,
+  expansión y prioridad (ver [rag/README.md](rag/README.md))
 - `impresion3d.json` — Enlaces gratuitos a archivos 3D imprimibles para Hero Quest:
   plataformas de descarga, colecciones y modelos concretos (héroes, monstruos,
   mobiliario, puertas, tablero y dados), con su licencia cuando se conoce
@@ -22,6 +25,33 @@ Ficheros JSON con el contenido del juego:
   facciones: marines del caos, demonios del caos (incluido el Soul Grinder de
   Khorne), tiránidos, eldars/aeldari, t'au, orkos, necrones y marines espaciales
   proxy, además de terreno y plantillas de tablero
+
+### Herramientas IA para generar modelos 3D (STL)
+
+Además de los repositorios de modelos ya imprimidos de `impresion3d.json`, para
+**generar un modelo 3D desde cero** —a partir de una imagen o de un prompt— se
+pueden usar estas herramientas IA (recopiladas en la
+[issue #1](https://github.com/IngenieroGeomatico/gestor_juegos_aplicaciones/issues/1)):
+
+| Herramienta | Enlace | Qué hace |
+|-------------|--------|----------|
+| **Meshy AI** | https://meshy.ai | Modelos 3D desde texto o imágenes; exporta OBJ/FBX/GLB (convertibles a STL). Plan gratuito |
+| **Tripo AI** | https://www.tripo3d.ai | Generación rápida desde texto o imagen; útil para prototipos, figuras y objetos |
+| **MakerWorld MakerLab** | https://makerworld.com | Herramientas IA orientadas a impresión 3D; integración Bambu Lab. Gratuito |
+| **Spline AI** | https://spline.design | Escenas y objetos 3D mediante prompts; exporta formatos estándar |
+| **Luma AI** | https://lumalabs.ai | Modelos 3D desde imágenes y texto; opciones gratuitas con límites |
+| **Hunyuan3D** | https://github.com/Tencent/Hunyuan3D | Open source; desde imágenes o texto, ejecutable localmente |
+| **Stable Fast 3D** | https://github.com/Stability-AI/stable-fast-3d | Open source (Stability AI); generación rápida desde imágenes, local |
+| **OpenSCAD + LLM** | https://openscad.org | Código paramétrico OpenSCAD generado con IA; ideal para piezas funcionales/mecánicas |
+| **Fusion 360 (Generative Design)** | https://www.autodesk.com/products/fusion-360 | Ingeniería y piezas mecánicas; exportación directa a STL |
+| **Rodin Gen-1** | https://hyper3d.ai | Alta calidad desde imágenes y texto; gaming, miniaturas y activos 3D |
+| **Masterpiece X** | https://masterpiecex.com | Plataforma profesional de modelos 3D mediante IA |
+| **Kaedim** | https://www.kaedim3d.com | Conversión de conceptos 2D a 3D; producción y videojuegos |
+
+Recomendación por uso: **figuras, miniaturas y objetos decorativos** → Meshy AI,
+Tripo AI o Rodin; **piezas mecánicas y funcionales** → OpenSCAD + IA o Fusion 360;
+**soluciones open source/locales** → Hunyuan3D o Stable Fast 3D; **impresión 3D
+doméstica** → MakerWorld MakerLab.
 
 ### Los tableros y las misiones
 
@@ -113,6 +143,16 @@ Usa el agente **HeroQuest** de este repositorio para generar misiones, personaje
 armas o monstruos coherentes con el juego. La definición canónica del agente vive
 en `.opencode/agent/heroquest.md` (necesaria para opencode) y se conserva también
 una copia aquí como [AGENT.md](AGENT.md).
+
+El agente se apoya en:
+
+- **`skills/`** — conocimiento del juego: reglas, narrativa, balance de combate,
+  tienda y creación de misiones.
+- **`tools/`** — acceso programático a los datos (personajes, armas, monstruos,
+  hechizos, misiones, tableros y fuentes).
+- **`rag/`** — búsqueda sobre las reglas y el material oficial descargado
+  (ver [rag/README.md](rag/README.md)).
+
 También puedes usar los scripts directamente.
 
 ## Scripts (`scripts/`)
@@ -166,7 +206,7 @@ uv run juegos/heroquest/scripts/generar_retratos.py --solo Orco # solo uno
 uv run juegos/heroquest/scripts/generar_fondos.py               # todos
 uv run juegos/heroquest/scripts/generar_fondos.py --solo tesoro # solo uno
 
-# Generar la carta de un héroe (anverso y/o dorso) en PNG/SVG
+# Generar la carta de un héroe, monstruo o item (anverso y/o dorso) en PNG/SVG
 uv run juegos/heroquest/scripts/carta_item.py --nombre "Bárbaro" --cara ambas --formato png
 
 # Imprimir cartas de héroe en PDF A4 (junta = pliegue; separada = doble cara, 9/hoja)
@@ -188,18 +228,23 @@ navegador o tablet: datos de la misión, mapa en SVG, cada sala con sus monstruo
 héroes, armas y hechizos. Se guarda en `juegos/heroquest/mapas/` (ignorado por
 git); usa `--salida <ruta>` para otra ubicación.
 
-`carta_item.py` genera la carta de un **héroe** (solo personajes) con aspecto de
-carta de HeroQuest, usando el motor `render_personaje.py`. Elige la cara con
-`--cara {anverso,dorso,ambas}` y el formato con `--formato png,svg`:
+`carta_item.py` genera la carta de un **héroe, monstruo o item** con aspecto de
+carta de HeroQuest: los héroes y monstruos usan las plantillas hero-card /
+monster-card (motor `render_personaje.py`) y los items —armas, armaduras,
+pociones y hechizos— la plantilla generic-card (motor `render_generico.py`).
+Elige la cara con `--cara {anverso,dorso,ambas}` y el formato con
+`--formato png,svg`:
 
 ```bash
 uv run juegos/heroquest/scripts/carta_item.py --nombre "Bárbaro"
-uv run juegos/heroquest/scripts/carta_item.py --nombre "Bárbaro" --cara ambas --formato png,svg
+uv run juegos/heroquest/scripts/carta_item.py --nombre "Trasgo" --cara ambas --formato png,svg
+uv run juegos/heroquest/scripts/carta_item.py --nombre "Bola de fuego"
 ```
 
 Se guarda en `juegos/heroquest/cartas/` (ignorado por git); usa `--salida <ruta>`
 para otra ubicación. La receta de la carta (plantillas y assets, para anverso y
-dorso) vive en el propio JSON del héroe (ver "Cartas de héroe" más abajo).
+dorso) vive en el propio JSON de la entrada (ver "Cartas por plantillas" más
+abajo).
 
 `preparar_reversos.py` recorta y endereza las fotos `*_back.jpg` de `sources/`
 (las cartas reales por su cara trasera) y deja los reversos limpios en
@@ -355,11 +400,11 @@ cartas:
 Los PDF se guardan en `juegos/heroquest/cartas/` (ignorado por git); usa
 `--salida <ruta>` para otra ubicación.
 
-## Cartas de héroe (motor guiado por datos)
+## Cartas por plantillas (motor guiado por datos)
 
-Las cartas de héroe las compone `render_personaje.py` a partir de una *receta*
-que vive en el propio JSON del personaje, bajo la clave `plantillas` (con dos
-caras, `cara` y `dorso`):
+Las cartas las compone el motor a partir de una *receta* que vive en el propio
+JSON de la entrada —héroe, monstruo o item— bajo la clave `plantillas` (con dos
+caras, `cara` y `dorso`). Ejemplo de un héroe:
 
 ```json
 "plantillas": {
@@ -382,9 +427,18 @@ caras, `cara` y `dorso`):
 }
 ```
 
+El motor admite tres familias, todas guiadas por estas plantillas de
+`sources/plantillas/`:
+
+- **Héroes** (hero-card, motor `render_personaje.py`)
+- **Monstruos** (monster-card, también `render_personaje.py`)
+- **Items** —armas, armaduras, pociones y hechizos— (generic-card, motor
+  `render_generico.py`)
+
 **El SVG es la fuente de verdad.** Las plantillas de `sources/plantillas/` se
 editan a mano (Inkscape); el motor solo inyecta contenido sobre sus **anclas**
-`id="ph-*"` (rectángulos invisibles cuya geometría se lee):
+`id="ph-*"` (rectángulos invisibles cuya geometría se lee). En las cartas de
+héroe, por ejemplo:
 
 - **Anverso:** `ph-arte` (retrato), `ph-ribbon` (nombre), `ph-stats` (cuadro de
   estadísticas), `ph-icon` (icono).
@@ -397,16 +451,17 @@ editan a mano (Inkscape); el motor solo inyecta contenido sobre sus **anclas**
 El módulo `scripts/plantillas.py` es el loader (cachea las plantillas, lee las
 anclas y sustituye los marcadores `{{...}}`).
 
-> **Solo se renderizan héroes.** Armas, armaduras, pociones, hechizos y monstruos
-> se gestionan como datos (`nueva_carta.py`, `listar.py`, `eliminar.py`) pero no
-> tienen motor de carta actualmente.
+> Cualquier entrada nueva de `personajes.json`, `monstruos.json`, `armas.json` o
+> `hechizos.json` necesita su bloque `plantillas` para poder renderizar su carta;
+> sin él se gestiona como dato (`nueva_carta.py`, `listar.py`, `eliminar.py`)
+> pero no tiene carta.
 
-### Dar carta a un héroe nuevo
+### Dar carta a una entrada nueva
 
-1. Añade el héroe a `personajes.json` (o con `nueva_carta.py --tipo personaje`).
+1. Añade la entrada a su JSON (o con `nueva_carta.py --tipo <tipo>`).
 2. Añade su bloque `plantillas` con las recetas de `cara` y `dorso`.
 3. Coloca sus assets en `sources/` (arte del retrato, icono y fondos).
-4. Genera y revisa: `carta_item.py --nombre "<héroe>" --cara ambas`.
+4. Genera y revisa: `carta_item.py --nombre "<nombre>" --cara ambas`.
 
 Esquema de las salas de una misión (`salas.json`), usado por `nueva_mision.py`
 (valida además que cada monstruo/tesoro caiga dentro de la sala y del tablero):

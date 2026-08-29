@@ -10,6 +10,10 @@ juegos/<juego>/
 └── README.md      # documentación del juego y sus scripts
 ```
 
+Además, cada juego puede añadir carpetas propias: `sources/` (assets, SVG,
+fuentes), `tools/` y `skills/` (apoyo del agente), `rag/` (búsqueda sobre
+documentos), etc. Ver `heroquest/` como ejemplo completo.
+
 Suele acompañarse de un agente de opencode en `.opencode/agent/<juego>.md`
 especializado en generar y gestionar el contenido de ese juego.
 

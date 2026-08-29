@@ -8,7 +8,7 @@ Python y, normalmente, un agente de opencode especializado.
 
 ```
 ├── juegos/               # juegos de mesa, videojuegos, ...
-│   └── heroquest/        # datos, scripts y README del juego
+│   └── heroquest/        # datos, scripts, assets y README del juego
 ├── aplicaciones/         # para futuras aplicaciones (pagos, etc.)
 ├── .opencode/
 │   └── agent/            # agentes IA por juego/aplicación
@@ -28,7 +28,7 @@ uv run <script>   # ejecuta cualquier script dentro del entorno
 
 | Nombre | Tipo | Contenido | Agente |
 |--------|------|-----------|--------|
-| HeroQuest | Juego de mesa | héroes, armas, monstruos, misiones, tableros | `heroquest` |
+| HeroQuest | Juego de mesa | héroes, armas, monstruos, misiones, tableros, modelos 3D | `heroquest` |
 | Pokémon Champions | Combate competitivo | pokedex, movimientos, equipos, sets | `pokemon-champions` |
 
 Cómo trabajar con **HeroQuest**: ver [juegos/heroquest/README.md](juegos/heroquest/README.md).
@@ -41,17 +41,19 @@ reglas del juego y los datos del repositorio, y generan contenido coherente
 con el sistema. Los scripts de Python realizan las tareas concretas
 (añadir/borrar/listar contenido en los JSON).
 
+El agente de HeroQuest, además, se apoya en `skills/` (reglas, balance,
+narrativa), `tools/` (acceso a datos) y un sistema **RAG** de búsqueda sobre
+el material oficial en `rag/` (ver [juegos/heroquest/README.md](juegos/heroquest/README.md)).
+
 ## Creación de cartas de HeroQuest
 
-Las **cartas de héroe** se generan con un motor guiado por datos
-(`render_personaje.py`): la *receta* de cada carta (plantillas SVG y assets, para
-anverso y dorso) vive en el propio JSON del personaje. El **SVG es la fuente de
-verdad**; el motor solo inyecta contenido sobre las anclas `id="ph-*"` de las
-plantillas de `juegos/heroquest/sources/plantillas/`.
-
-> Actualmente solo se renderizan **héroes**. Armas, armaduras, pociones, hechizos
-> y monstruos se gestionan como datos (`nueva_carta.py`, `listar.py`,
-> `eliminar.py`) pero no tienen motor de carta.
+Las **cartas** se generan con un motor guiado por datos: `render_personaje.py`
+compone las cartas de **héroes y monstruos**, y `render_generico.py` las de
+**items** (armas, armaduras, pociones y hechizos). La *receta* de cada carta
+(plantillas SVG y assets, para anverso y dorso) vive en el propio JSON de la
+entrada, bajo `plantillas`. El **SVG es la fuente de verdad**; el motor solo
+inyecta contenido sobre las anclas `id="ph-*"` de las plantillas de
+`juegos/heroquest/sources/plantillas/`.
 
 ### Receta de la carta (en `personajes.json`)
 

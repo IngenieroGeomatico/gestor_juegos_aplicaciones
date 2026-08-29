@@ -240,3 +240,6 @@ juegos/heroquest/sources/all-testing-assets/
 # Directorio de trabajo de OpenCode
 .omo/
 juegos/heroquest/rag/documentos/*.pdf
+
+# Base de datos y vectorizador del RAG ligero (se generan con indexar_lite.py)
+juegos/heroquest/rag/chroma_db_lite/
