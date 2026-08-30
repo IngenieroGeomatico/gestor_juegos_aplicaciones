@@ -81,7 +81,7 @@ def sala_pertenece(tablero: dict, sala: dict) -> list[str]:
     sala_data = next((s for s in tablero["salas"] if s["numero"] == numero), None)
     if sala_data is None:
         return [f"sala {numero}: no existe en el tablero"]
-    for obstaculo in ("monstruos", "tesoros"):
+    for obstaculo in ("monstruos", "tesoros", "trampas", "marcadores"):
         for item in sala.get(obstaculo, []):
             nombre = item.get("nombre", "?")
             contexto = f"sala {numero}.{obstaculo} '{nombre}'"
@@ -106,6 +106,8 @@ def validar_misiones() -> int:
             errores += punto_valido(tablero, t, f"misión '{mision['nombre']}' entrada_heroes")
         for p in mision.get("puertas", []):
             errores += punto_valido(tablero, p, f"misión '{mision['nombre']}' puerta")
+        for p in mision.get("puertas_secretas", []):
+            errores += punto_valido(tablero, p, f"misión '{mision['nombre']}' puerta secreta")
         for sala in mision.get("salas", []):
             errores += sala_pertenece(tablero, sala)
 

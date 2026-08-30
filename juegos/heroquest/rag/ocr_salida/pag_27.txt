@@ -1,0 +1,76 @@
+Misión 8
+
+Los Tesoros DEL Rey FORGRIO
+
+De todos los artefactos que le han llevado a Mentor últimamente, el
+Cuerno de los Forjados parece ser el único que no le genera bastante
+entusiasmo como para sostenerlo entre sus delgados dedos. Se limita
+a observar con severidad el instrumento curvo de color blanco hueso,
+sin acercarse demasiado.
+
+“Este cuerno es un arma poderosa. Protegedlo con la vida y no
+intentéis usarlo antes de que yo os lo indique. Cuando sea el
+momento de actuar, lo sabréis”. Comienza a caminar de un lado a
+
+otro por la pequeña biblioteca. “Se acerca la contienda final, puedo
+sentirlo. Debéis estar preparados. Visitad las Minas del Rey Forgrin;
+allí, según se dice, están ocultos sus legendarios Tesoros. El Loretome
+solo ha arrojado una pista sobre su ubicación: "Quienes lo buscan,
+perecen. Quienes saben lo que hacen, lo descubren".
+
+Marchad ya y resolved el acertijo que hay en las inmediaciones de la
+Habitación, pero no bajéis la guardia. Seguramente habrá enemigos
+siniestros merodeando por todos lados”.
+
+db PU E AN
+
+Zargon, al comienzo de tu turno: coloca un Guerrero del Terror en la escalera (si
+stá revelada), a menos que ya haya uno situado. Coloca una Abominación en la
+reja de la mazmorra (si está revelada), a menos que ya haya una situada. Estos
+- Monstruos se mueven y llevan a cabo su acción de manera normal en ese turno.
+
+A. Cuando se muestre la escalera, lee en voz alta lo siguiente: “Escucháis voces
+- que vienen de arriba y un entrechocar metálico que no puede provenir sino de
+armaduras. ¡Un grupo de Guerreros se aproxima a la mina!”.
+
+Esta es una Habitación. Los Héroes se pueden mover por las casillas sin
+ocupar de reja de la mazmorra de manera ilimitada. Cuando alguno de los
+
+Héroes entre por primera vez en la Habitación, lee en voz alta lo siguiente:
+
+“Ves un par de ojos que brillan en la oscuridad; luego, una Gárgola surge
+
+trepando por la reja acompañada por el espantoso chirrido de la piedra contra
+el metal”. Coloca una Gárgola en cualquiera de las cuatro casillas de la reja de
+la mazmorra. El primer jugador en buscar Tesoros encuentra 600 Monedas
+de Oro y una Poción de Curación en el Cofre del Tesoro.
+
+- Cuando el primer Héroe busque Trampas, lee en voz alta lo siguiente:
+“Descubres un símbolo del Terror tallado en un tronco. Si lo arrojas en la
+
+un Héroe busca Tesoros y el símbolo no ha sido destruido, lee en voz alta lo
+
+siguiente: “Se produce un repentino silencio cuando las llamas que crepitan en Y.
+
+la chimenea se extinguen y os dejan a oscuras. Un resplandor llama vuestra
+atención: un símbolo del Terror tallado en un tronco de la pila de madera.
+Brilla cada vez con más intensidad hasta que ya no podéis soportar mirarlo. Al
+apartar la mirada, la Habitación queda envuelta en llamas”. Se ha conjurado
+una Tormenta de Fuego en la Habitación. Si el símbolo fue destruido cuando
+alguno de los Héroes buscaba Tesoros, deben robar dos cartas del Tesoro y
+devolver una al mazo de Tesoros.
+
+El primer jugador en buscar Tesoros encuentra un libro inusual. “Un libro te
+
+llama la atención; se trata de un tomo grande titulado “Enciclopedia de Galik”,
+Cuando intentas sacarlo del estante, oyes un clic”. Se ha abierto una Puerta
+Secreta en mitad de la biblioteca. Los Héroes se pueden mover desde una
+casilla sombreada de una Habitación a la casilla sombreada opuesta en la
+Habitación de al lado. Esto consume una casilla de su tirada de Movimiento.
+No hay línea de visión de una Habitación a la otra.
+
+El primer jugador que busque Tesoros encuentra una Ballesta, una Coraza y el
+artefacto Espada Larga de la Fortuna.
+
+sta Misión: Abominación
+

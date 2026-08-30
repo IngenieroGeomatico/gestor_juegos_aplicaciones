@@ -1,0 +1,85 @@
+Misión 7
+
+La TUMBA DEL
+
+Mentor juguetea con el Anillo de Retorno, y la luz de las
+velas ilumina las dos gemas que refulgen como si emanara
+de ellas, desbordante, una magia ignota. “Ha llegado la
+hora”, murmura el guardián del Loretome; “debemos pedir
+ayuda al Rey del Fuego. Viajad hasta la Tumba de Forgrin
+y usan el Anillo para invocar su espíritu”. Coloca el anillo
+en el escritorio y os lo acerca con un dedo; luego, abre el
+
+Rey DEL Fuego
+
+Loretome y localiza un fragmento. “Ah, aquí está. Cuando
+halléis el lugar donde descansa el rey, debéis pronunciar la
+siguiente salmodia:
+
+"Oh, poderoso Rey del Fuego.
+Nos sometemos a tu voluntad.
+Vuelve a forjarnos con la más brillante llama
+
+bajo tu sello”.
+de csm
+
+La mecánica descrita del Anillo de Retorno no se puede usar, ya que los Héroes
+deben utilizar el anillo para invocar el espíritu del Rey Forgrin.
+
+A
+
+El primer Héroe en buscar Tesoros roba dos cartas del mazo de Tesoros y
+devuelve una al mazo.
+
+El primer Héroe en buscar Tesoros encuentra una Poción de Curación.
+
+Cuando se abra la Puerta de esta Habitación, lee en voz alta lo siguiente: “Un
+cálido resplandor ilumina la tumba del Rey Forgrin. Cuatro esqueletos enanos
+protegen a su rey. Junto a la tumba se encuentra la imponente estatua del Rey
+Gárgola que exterminó Forgrin en su último y grandioso combate. El espíritu del
+Rey os saluda: “Sed bienvenidos. Hace mucho que os espero. Dadme el anillo y
+pelearé junto a vosotros”. Os sonríe con una amabilidad que coincide con la de su
+gesto.
+
+Silos Héroes acceden: “El espíritu coge el anillo y dice: '¡Muchas gracias,
+estúpidos!'. Se da la vuelta y sale corriendo por una Puerta Secreta,
+
+“transformándose a cada Zancada. ¡Es una Mano de Bruja, una leal sirviente de
+
+p
+
+Kessandria!”. Si los Héroes le han entregado el Anillo, retira el Espíritu del Rey
+Forgrin y coloca la ficha de la Puerta Secreta.
+
+Silos Héroes dicen que no: “El espíritu del Rey Forgrin frunce el ceño y dice:
+'¡Entonces, os lo quitaré!'. La figura muta a su verdadera esencia: una Mano de
+uja, una leal sirviente de Kessandria. Chasquea los dedos y la ja y los
+
+squeletos cobran vida”.
+
+Mano de Bruja
+MOVIMIENTO | ATAQUE | DEFENSA | CUERPO
+
+8 4 dados 4 dados 4
+
+La Mano de Bruja conoce el Hechizo de Terror Relámpago.
+
+El primer Héroe en buscar Tesoros encuentra 200 Monedas de Oro, un Hacha de
+Batalla y la Armadura de Borin.
+
+Los Esqueletos que de este lugar son estatuas de muertos vivientes enanos.
+Coloca la Mano de Bruja en la casilla marcada con una X si los Héroes le entregan |
+el anillo. Una vez derrotada la Mano de Bruja, los Héroes recuperan el Anillo de
+Retorno, Si los Héroes buscan Puertas Secretas, mueve la silla a una casilla sin
+ocupar de la Habitación. a
+
+Cuando alguno de los Héroes entre en esta Habitación, lee en voz alta lo
+siguiente: “La Habitación está extremadamente fría. Os acercáis a la tumba y
+colocáis el anillo sobre ella, recitando las palabras que os ha indicado Mentor.
+Aparece el espíritu del Rey Forgrin. 'Si algún día necesitáis ayuda, Héroes, hacedlo
+sonar para que acuda la caballería". El espíritu se esfuma y aparece un cuerno
+desgastado sobre la tumba”. Es el Cuerno de los Forjados. Cuando los Héroes lo
+toman, se abre la Puerta Secreta que da acceso al pasillo.
+
+Monstr O brante delésta Misión: Abominación
+

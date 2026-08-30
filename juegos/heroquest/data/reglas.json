@@ -1,0 +1,179 @@
+{
+  "version": "1.0",
+  "fuente_de_verdad": "V2 de HeroQuest.es (remake de la comunidad, licencia CC BY-NC-SA)",
+  "nota": "Reglas canónicas del juego, agrupadas por categorías y mecánicas. Edita libremente este fichero para ampliar o ajustar las mecánicas; el agente lo consulta como fuente de referencia.",
+  "categorias": {
+    "componentes_y_preparacion": {
+      "descripcion": "Componentes, roles y puesta en marcha de la partida.",
+      "mecanicas": {
+        "jugadores": {
+          "descripcion": "Un jugador controla al Malvado Brujo (Zargon/Morcar) y sus fuerzas del mal; los demás controlan a los héroes ('personajes').",
+          "valores": {
+            "jugadores_min": 2,
+            "jugadores_max": 5
+          }
+        },
+        "heroes_base": {
+          "descripcion": "Héroes básicos del juego. El Mago y el Elfo son 'mágicos' y pueden lanzar hechizos.",
+          "valores": {
+            "barbaro": "A3 D3 Cu8 Me2",
+            "enano": "A3 D4 Cu7 Me3",
+            "elfo": "A2 D3 Cu6 Me4",
+            "mago": "A1 D2 Cu4 Me6"
+          },
+          "detalle": "A = ataque, D = defensa, Cu = cuerpo, Me = mente."
+        },
+        "clasificacion_cartas": {
+          "descripcion": "Al comenzar, el Malvado Brujo clasifica las cartas: Tesoros, Monstruos, Equipo de Batalla, Tesoros de Reto, Artefactos, Pociones Mágicas, Hechizos y Pergaminos.",
+          "valores": {}
+        }
+      }
+    },
+    "turnos_y_movimiento": {
+      "descripcion": "Orden de turno, movimiento y acciones disponibles.",
+      "mecanicas": {
+        "orden_de_juego": {
+          "descripcion": "El juego comienza por el jugador a la izquierda del Malvado Brujo y sigue en el sentido de las agujas del reloj. Se recomienda que empiecen los héroes no mágicos y luego los mágicos.",
+          "valores": {}
+        },
+        "acciones_por_turno": {
+          "descripcion": "Durante su turno, un personaje puede moverse y realizar una acción, o a la inversa.",
+          "valores": {}
+        },
+        "movimiento": {
+          "descripcion": "El movimiento se mide en casillas, limitado por el valor de movimiento y el equipo (algunas armaduras ralentizan).",
+          "valores": {}
+        }
+      }
+    },
+    "combate": {
+      "descripcion": "Sistema de ataque y defensa con dados de combate.",
+      "mecanicas": {
+        "dados_de_combate": {
+          "descripcion": "Los dados de combate muestran calaveras (daño) y escudos (defensa). Los héroes buscan escudos blancos; los monstruos, escudos negros.",
+          "valores": {}
+        },
+        "ataque": {
+          "descripcion": "Para atacar se está normalmente en una de las cuatro casillas adyacentes. Se lanzan tantos dados de combate como indique el arma o la carta. Cada calavera que no se anule inflige un punto de daño de Cuerpo.",
+          "valores": {}
+        },
+        "defensa": {
+          "descripcion": "El defensor lanza sus dados de defensa; cada escudo del tipo adecuado cancela una calavera. Al llegar el Cuerpo a cero, la criatura muere.",
+          "valores": {}
+        },
+        "combate_sin_armas": {
+          "descripcion": "Sin arma se lucha con los puños lanzando un dado de combate; el acierto depende de la naturaleza del personaje.",
+          "valores": {
+            "barbaro": "cualquier calavera (50%)",
+            "elfo": "calavera blanca (33%)",
+            "mago": "calavera negra (16%)"
+          }
+        },
+        "muerte_del_heroe": {
+          "descripcion": "Cuando un héroe pierde todo su Cuerpo, se coloca su ficha de cadáver. El equipo puede recuperarse si otro héroe en línea de visión se coloca sobre ella (o tirando un dado si no hay nadie).",
+          "valores": {}
+        },
+        "aturdimiento": {
+          "descripcion": "Las calaveras negras aturden (no infligen daño de Cuerpo): hacen que la criatura pierda su siguiente turno. El defensor neutraliza primero las calaveras blancas y luego las negras.",
+          "valores": {}
+        }
+      }
+    },
+    "magia": {
+      "descripcion": "Lanzamiento de hechizos, coste de mente y consecuencias.",
+      "mecanicas": {
+        "tipos_de_personajes": {
+          "descripcion": "Solo los personajes mágicos lanzan hechizos (Mago y Elfo en el grupo base). Los no mágicos pueden lanzar algunos a través de pergaminos o artefactos.",
+          "valores": {}
+        },
+        "escuelas_elementales": {
+          "descripcion": "Los hechizos se clasifican en grupos elementales: Agua, Tierra, Fuego y Aire (y Terror). Un grupo de hechizos se compone de tres hechizos.",
+          "valores": {
+            "escuelas": [
+              "Agua",
+              "Tierra",
+              "Fuego",
+              "Aire",
+              "Terror"
+            ],
+            "hechizos_por_grupo": 3
+          }
+        },
+        "eleccion_de_hechizos": {
+          "descripcion": "Al principio del reto, el Mago puede llevar tres grupos de hechizos y el Elfo uno. Primero elige el Mago, luego el Elfo, y el Mago termina con los grupos restantes.",
+          "valores": {
+            "grupos_mago": 3,
+            "grupos_elfo": 1
+          }
+        },
+        "coste_de_mente": {
+          "descripcion": "Lanzar un hechizo cuesta Puntos de Mente (campo 'coste_mente' de cada hechizo). Una vez lanzado, la carta del hechizo se descarta y se retira del juego.",
+          "valores": {}
+        },
+        "estado_de_shock": {
+          "descripcion": "Cuando el Cuerpo o la Mente del héroe llega a cero, cae en estado de shock: solo puede moverse la mitad (redondeando hacia arriba), atacar con un máximo de un dado y defenderse con dos. Recuperar al menos un punto de Mente lo vuelve a la normalidad.",
+          "valores": {
+            "movimiento_mitad": true,
+            "dado_ataque_max": 1,
+            "dados_defensa_max": 2
+          }
+        },
+        "muerte_psiquica_del_monstruo": {
+          "descripcion": "Si la Mente de un monstruo llega a cero, el monstruo muere.",
+          "valores": {}
+        },
+        "linea_de_vision": {
+          "descripcion": "Los hechizos se lanzan sobre criaturas visibles. Las miniaturas en la misma habitación siempre son visibles; en pasadizos o habitaciones distintas se requiere una línea recta sin obstáculos (paredes, puertas cerradas u otras miniaturas).",
+          "valores": {}
+        }
+      }
+    },
+    "trampas": {
+      "descripcion": "Detección, activación y desactivación de trampas (pozos, rocas caídas, etc.).",
+      "mecanicas": {
+        "activacion": {
+          "descripcion": "Las trampas se activan al entrar en determinadas casillas o al accionar objetos. Aplican daño, desplazamiento y/o tiradas de dados según la trampa.",
+          "valores": {}
+        },
+        "saltar_una_trampa": {
+          "descripcion": "Saltar una trampa es igual que saltar un pozo: debe haber al menos una casilla libre después. Se lanza un dado de combate; si sale una calavera, se cae sobre la trampa activándola.",
+          "valores": {}
+        },
+        "desactivar_con_kit": {
+          "descripcion": "El Enano desactiva trampas con su kit de herramientas; los demás héroes lo intentan sin kit con una tirada (fallo -> activación).",
+          "valores": {}
+        }
+      }
+    },
+    "tesoros_y_tienda": {
+      "descripcion": "Incentivo económico, compra de equipo y tesoros de reto.",
+      "mecanicas": {
+        "monedas_de_oro": {
+          "descripcion": "Los héroes ganan monedas de oro como recompensa y las gastan en la tienda entre misiones.",
+          "valores": {}
+        },
+        "equipo_de_batalla": {
+          "descripcion": "Armas y armaduras con ataque, defensa y coste. Al comprar un arma, sus dados de ataque sustituyen a los propios del personaje (no se acumulan).",
+          "valores": {}
+        },
+        "tesoros_de_reto": {
+          "descripcion": "Objetos de valor que aparecen en las misiones y se reparten entre los héroes.",
+          "valores": {}
+        }
+      }
+    },
+    "misiones": {
+      "descripcion": "Estructura de un reto y preparación del tablero.",
+      "mecanicas": {
+        "partes_del_reto": {
+          "descripcion": "Cada reto tiene tres partes: el texto del pergamino (lo lee el Malvado Brujo), el mapa del reto (cómo se monta el tablero) y las notas finales (situaciones únicas).",
+          "valores": {}
+        },
+        "preparacion_del_tablero": {
+          "descripcion": "Solo la habitación de la escalera está montada al principio; el resto se coloca conforme los héroes avanzan por el tablero.",
+          "valores": {}
+        }
+      }
+    }
+  }
+}

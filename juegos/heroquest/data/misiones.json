@@ -117,5 +117,175 @@
         ]
       }
     ]
+  },
+  {
+    "nombre": "La Fortaleza Fronteriza de In-Gulden",
+    "tablero": "original",
+    "nivel": 1,
+    "introduccion": "Sir Ragnar ha enviado a sus exploradores a la asolada fortaleza fronteriza de In-Gulden y no ha vuelto a saber de ellos. Los Héroes deben viajar allí, descubrir qué les ha pasado y traer la respuesta antes de que sea demasiado tarde.",
+    "objetivo": "Penetrar en la fortaleza de In-Gulden, inspeccionar a los exploradores caídos y descubrir el destino que ha corrido la guarnición a manos del Capitán del Terror Sha-Del.",
+    "recompensa": "300 Monedas de Oro y la nota que revela que la Reina Kessandria avanza hacia Tuel-Vor en busca de Qwindrak.",
+    "notas": "Sir Ragnar entrega al grupo dos Pociones de Curación al comenzar. Al abrir las Puertas marcadas suena un cuerno y los refuerzos de Goblins y Orcos invaden los pasillos.",
+    "entrada_heroes": [
+      {
+        "x": 3,
+        "y": 18
+      },
+      {
+        "x": 4,
+        "y": 18
+      }
+    ],
+    "puertas": [
+      {
+        "x": 10,
+        "y": 10
+      },
+      {
+        "x": 17,
+        "y": 12
+      },
+      {
+        "x": 19,
+        "y": 18
+      }
+    ],
+    "puertas_secretas": [
+      {
+        "x": 21,
+        "y": 18,
+        "descripcion": "Salida trasera de la fortaleza"
+      }
+    ],
+    "salas": [
+      {
+        "numero": 20,
+        "nombre": "La Puerta Bramadora",
+        "descripcion": "Las puertas de la fortaleza cuelgan de goznes retorcidos. Entre los cascotes yace un explorador emboscado, el primero de los que Sir Ragnar envió y nunca regresaron.",
+        "notas": "Inspeccionar a los exploradores caídos: un Héroe puede usar una acción sobre un explorador adyacente y tirar un Dado Rojo para encontrar 15 Monedas de Oro (o una cantidad menor). Algunos esconden en un bolsillo una nota apenas legible: 'Decía que lo traicionaron y busca el Huevo Nocturno. Eso es todo lo que puedes descifrar'. Tras investigar a un explorador, retira la ficha del tablero.",
+        "monstruos": [
+          {
+            "nombre": "Trasgo",
+            "x": 2,
+            "y": 17
+          },
+          {
+            "nombre": "Trasgo",
+            "x": 4,
+            "y": 17
+          }
+        ],
+        "tesoros": [
+          {
+            "nombre": "Poción de curación",
+            "x": 5,
+            "y": 15
+          }
+        ],
+        "trampas": [],
+        "marcadores": [
+          {
+            "nombre": "Explorador caído (ficha de Calavera)",
+            "x": 3,
+            "y": 16,
+            "descripcion": "Los exploradores caídos se representan con fichas de Calavera. No afectan al movimiento de los Héroes. Equivalen a los guardias emboscados de la salida."
+          }
+        ]
+      },
+      {
+        "numero": 11,
+        "nombre": "El Gran Salón Derrumbado",
+        "descripcion": "Un antiguo salón de armas cuyas columnas se han venido abajo. Se oyen gritos de guerra que retumban por los pasillos.",
+        "notas": "De los Guardianes: cuando se abra una de las Puertas marcadas, lee: 'El escalofriante sonido de un cuerno penetra el aire. Sentís la tensión cuando todas las Puertas de las ruinas se abren de golpe y los pasillos se inundan con los gritos de guerra de los Goblins y los Orcos'. Abre todas las Puertas marcadas y coloca los Monstruos.",
+        "monstruos": [
+          {
+            "nombre": "Orco",
+            "x": 11,
+            "y": 9
+          },
+          {
+            "nombre": "Orco",
+            "x": 15,
+            "y": 11
+          },
+          {
+            "nombre": "Trasgo",
+            "x": 13,
+            "y": 9
+          },
+          {
+            "nombre": "Trasgo",
+            "x": 14,
+            "y": 11
+          }
+        ],
+        "tesoros": [
+          {
+            "nombre": "Báculo Mágico",
+            "x": 16,
+            "y": 9
+          }
+        ],
+        "trampas": [
+          {
+            "nombre": "El derrumbe",
+            "x": 14,
+            "y": 10,
+            "descripcion": "Cuando el último Héroe pase por la casilla marcada, lee: 'Se escucha un estruendo ensordecedor cuando el techo de repente se derrumba y bloquea la salida'. Coloca una ficha de bloqueo doble y retira la ficha de la escalera de la salida original."
+          }
+        ],
+        "marcadores": []
+      },
+      {
+        "numero": 15,
+        "nombre": "La Cámara del Tesoro",
+        "descripcion": "Un arcón forrado de óxido reposa bajo una grieta por la que se filtra la luz. El botín de los saqueadores sigue intacto.",
+        "notas": "El primer jugador que busque Tesoros encuentra 200 Monedas de Oro y un Báculo Mágico.",
+        "monstruos": [],
+        "tesoros": [
+          {
+            "nombre": "Monedas de oro (200)",
+            "x": 19,
+            "y": 12
+          },
+          {
+            "nombre": "Báculo Mágico",
+            "x": 20,
+            "y": 12
+          }
+        ],
+        "trampas": [],
+        "marcadores": []
+      },
+      {
+        "numero": 21,
+        "nombre": "El Trono Emplazado de Sha-Del",
+        "descripcion": "Ante un trono de piedra negra se yergue un guerrero de élite capaz de infundir miedo hasta en los más osados. Lleva la marca de la Reina Bruja: una Calavera pálida en su armadura.",
+        "notas": "El Capitán del Terror Sha-Del lleva la marca de la Reina Bruja. El primer jugador que busque Tesoros encuentra 300 Monedas de Oro y una nota andrajosa con manchas de sangre: 'Los guerreros de la Reina Kessandria avanzan hacia Tuel-Vor en busca de Qwindrak. Tienen espías en todas partes. Estamos en grave peligro por nuestro anillo. No sé cuánto tiempo nos queda'. Con esta información concluye la Misión.",
+        "monstruos": [
+          {
+            "nombre": "Guerrero del Terror",
+            "x": 20,
+            "y": 16
+          }
+        ],
+        "tesoros": [
+          {
+            "nombre": "Monedas de oro (300)",
+            "x": 19,
+            "y": 17
+          }
+        ],
+        "trampas": [],
+        "marcadores": [
+          {
+            "nombre": "Nota manchada de sangre de Sha-Del",
+            "x": 21,
+            "y": 17,
+            "descripcion": "La nota que revela el avance de la Reina Kessandria hacia Tuel-Vor en busca de Qwindrak."
+          }
+        ]
+      }
+    ]
   }
 ]

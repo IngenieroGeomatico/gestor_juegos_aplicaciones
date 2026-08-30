@@ -7,12 +7,15 @@ Las salas se pasan desde un fichero JSON cuya raíz es una lista con el esquema:
         "numero": 1,
         "nombre": "La Antesala",
         "descripcion": "...",
+        "notas": "Notas de Zargon para esta sala (mecánicas especiales).",
         "monstruos": [{ "nombre": "Trasgo", "x": 1, "y": 2 }],
         "tesoros": [{ "nombre": "Poción de curación", "x": 3, "y": 1 }]
       }
     ]
 
 Coordenadas globales de la cuadrícula (columna 1-26, fila 1-19 del tablero "original").
+Las salas admiten un campo opcional "notas" (instrucciones de Zargon). La misión
+admite también "--notas" a nivel global.
 """
 
 from __future__ import annotations
@@ -53,7 +56,15 @@ def _leer_habitaciones(ruta: str | None) -> list[dict]:
     return habitaciones
 
 
-def _validar(tablero_id: str, entrada: list[dict], puertas: list[dict], salas: list[dict]) -> None:
+def _punto_puerta_secreta(texto: str) -> dict:
+    coords, sep, descripcion = texto.partition(";")
+    punto = _punto(coords, "puerta secreta")
+    if sep and descripcion.strip():
+        punto["descripcion"] = descripcion.strip()
+    return punto
+
+
+def _validar(tablero_id: str, entrada: list[dict], puertas: list[dict], puertas_secretas: list[dict], salas: list[dict]) -> None:
     t = tablero.cargar_tablero(tablero_id)
     if not t["salas"]:
         print(f"Error: el tablero '{tablero_id}' aún no está modelado ({t['nota']})")
@@ -63,6 +74,8 @@ def _validar(tablero_id: str, entrada: list[dict], puertas: list[dict], salas: l
         errores += tablero.punto_valido(t, p, "entrada_heroes")
     for p in puertas:
         errores += tablero.punto_valido(t, p, "puerta")
+    for p in puertas_secretas:
+        errores += tablero.punto_valido(t, p, "puerta secreta")
     for sala in salas:
         errores += tablero.sala_pertenece(t, sala)
     if errores:
@@ -79,18 +92,22 @@ def main() -> None:
     parser.add_argument("--introduccion", default="", help="Texto de introducción")
     parser.add_argument("--objetivo", required=True, help="Objetivo de la misión")
     parser.add_argument("--recompensa", default="", help="Recompensa al completarla")
+    parser.add_argument("--notas", default="", help="Notas de Zargon a nivel de misión")
     parser.add_argument("--entrada", action="append", default=[], metavar="X,Y",
                         help="Casilla de entrada de los héroes (repetible)")
     parser.add_argument("--puerta", action="append", default=[], metavar="X,Y",
                         help="Casilla de puerta (repetible)")
+    parser.add_argument("--puerta-secreta", action="append", default=[], metavar="X,Y;descripcion",
+                        help="Casilla de puerta secreta; descripción opcional (repetible)")
     parser.add_argument("--habitaciones", default=None,
                         help="Ruta a un JSON con la lista de salas de la misión")
 
     args = parser.parse_args()
     entrada = [_punto(c, "entrada") for c in args.entrada]
     puertas = [_punto(c, "puerta") for c in args.puerta]
+    puertas_secretas = [_punto_puerta_secreta(c) for c in args.puerta_secreta]
     salas = _leer_habitaciones(args.habitaciones)
-    _validar(args.tablero, entrada, puertas, salas)
+    _validar(args.tablero, entrada, puertas, puertas_secretas, salas)
 
     mision = {
         "nombre": args.nombre,
@@ -99,8 +116,10 @@ def main() -> None:
         "introduccion": args.introduccion,
         "objetivo": args.objetivo,
         "recompensa": args.recompensa,
+        "notas": args.notas,
         "entrada_heroes": entrada,
         "puertas": puertas,
+        "puertas_secretas": puertas_secretas,
         "salas": salas,
     }
     try:

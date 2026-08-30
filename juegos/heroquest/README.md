@@ -10,13 +10,20 @@ Ficheros JSON con el contenido del juego:
 - `armas.json` — Armas, armaduras y pociones (ataque, defensa, coste)
 - `monstruos.json` — Enemigos (ataque, defensa, cuerpo, mente, movimiento)
 - `hechizos.json` — Conjuros y cartas de magia (nombre, escuela, coste_mente, descripcion)
+- `reglas.json` — **Normas canónicas del juego** agrupadas por categorías y
+  mecánicas editables (combate, magia, trampas, turnos, tesoros, misiones...).
+  Es editable: amplía o ajusta mecánicas libremente y el agente lo consulta como
+  referencia de reglas (junto a la V2 de HQ.es)
 - `misiones.json` — Misiones montables en tablero (con coordenadas en la cuadrícula)
 - `tableros.json` — Los tableros del juego: "El Original" (generado desde el SVG
   de Wikipedia, CC BY-SA 4.0 / GFDL) y "Cara B" (pendiente de su SVG). Se genera
   de forma reproducible con `tablero_svg.py` (ver más abajo)
 - `fuentes.json` — Registro del material externo descargable (PDFs de reglas,
   misiones, cartas y expansiones) para el RAG. Filtrable por categoría,
-  expansión y prioridad (ver [rag/README.md](rag/README.md))
+  expansión y prioridad (ver [rag/README.md](rag/README.md)). Aquí se marca la
+  **fuente de verdad** de las reglas: la **V2 de HeroQuest.es** (sistema de la
+  comunidad, `expansion: "Remake HQ.es"`). El manual oficial de Hasbro 2021 se
+  conserva como fuente **secundaria** de consulta
 - `impresion3d.json` — Enlaces gratuitos a archivos 3D imprimibles para Hero Quest:
   plataformas de descarga, colecciones y modelos concretos (héroes, monstruos,
   mobiliario, puertas, tablero y dados), con su licencia cuando se conoce
@@ -152,6 +159,11 @@ El agente se apoya en:
   hechizos, misiones, tableros y fuentes).
 - **`rag/`** — búsqueda sobre las reglas y el material oficial descargado
   (ver [rag/README.md](rag/README.md)).
+
+> **Fuente de verdad de las reglas.** El agente genera contenido coherente con
+> el sistema de la **V2 de HeroQuest.es** (remake de la comunidad, licencia
+> CC BY-NC-SA). Ante cualquier conflicto de reglas, prima la V2 sobre el manual
+> oficial de Hasbro 2021, que se usa solo como referencia/consulta.
 
 También puedes usar los scripts directamente.
 

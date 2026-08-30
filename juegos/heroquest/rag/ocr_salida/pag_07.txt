@@ -1,0 +1,81 @@
+Los Hechizos que afectan los Puntos Mentales de un objetivo (por ejemplo,
+Dormir) no se pueden lanzar sobre Monstruos que no tengan Puntos
+Mentales (por ejemplo, los Zombis).
+
+Movimiento sin amenazas
+
+10 hay Monstruos activos en el tablero, los Héroes pueden moverse
+sin impedimentos. En vez de tirar los dados de Movimiento, se considera
+ue cada Dado Rojo es un 4.
+
+- Por ejemplo, si el Héroe usa dos dados para moverse, puede
+elegir moverse 8 casillas en vez de tirar los dados. Si el
+movimiento de un Héroe se reduce a un dado, puede elegir
+moverse 4 casillas en vez de tirar el dado.
+
+Intercambio de Objetos
+
+Un Héroe puede entregar una poción, un artefacto, un arma o
+cualquier otro Objeto o Equipo a otro Héroe adyacente si ninguno de
+
+los dos está adyacente a un Monstruo. Los jugadores también pueden
+ntercambiar Objetos libremente entre Misiones.
+
+Tablero de 2 caras
+
+- El tablero tiene dos caras. Mira la disposición del Mapa de la Misión
+| para saber qué lado usar para cada Misión.
+
+Hogar de sanación
+
+Cuando un Héroe saca una carta de Tesoro en una
+¡Habitación con una chimenea, puede usarla para
+curarse un Punto Corporal.
+
+Imacenamiento astuto
+
+El primer Héroe que saque una carta de Tesoro en
+na Habitación con una alacena roba dos cartas de
+soro en su lugar. Compensa las cartas en el orden
+que se sacaron.
+
+á Qui
+
+drak el Bruj
+
+Cada vez que los Héroes se encuentran con Qwindrak, el brujo adopta
+
+la forma de una o más criaturas diferentes llamadas Sincroformas.
+Mientras está en una Sincroforma, Qwindrak utiliza las estadísticas de
+
+la criatura. Siempre puede lanzar los Hechizos que tiene disponibles,
+independientemente de su forma. Cuando los Héroes derroten su criatura
+de Sincroforma, retira la miniatura del tablero. Se terminan todos los
+Hechizos activos en Qwindrak. Revisa las Notas de la Misión para saber
+qué ocurre a continuación. Qwindrak puede transformarse en una nueva
+Sincroforma, mostrar su verdadera apariencia de brujo o escapar. Si se
+transforma, coloca una miniatura nueva en una o más casillas ocupadas por
+la Sincroforma anterior.
+
+Forma de Dragón: Qwindrak todavía tiene que dominar su Forma de
+Dragón. En cada Misión, revisa las Notas de la Misión para conocer cuántas
+fichas de Calavera colocar debajo de su miniatura. Estas fichas indican
+cuántos Puntos Corporales le faltan al Dragón.
+
+Vuelo Dracónico: el Dragón puede usar una parte de su Movimiento,
+realizar una Acción y luego terminar su Movimiento. Las poderosas alas
+del Dragón le permiten moverse por las casillas ocupadas por Héroes y
+Monstruos, pero no puede finalizar el Movimiento en una casilla ocupada.
+
+Consejos para Zargon
+
+Recomendamos que leas las Notas de la Misión y estudies el mapa antes
+de empezar una Misión. Lee Un mensaje de Mentor en la página 8 antes
+de pasar a la Misión 1, La Fortaleza Fronteriza de In-Gulden. Cuando
+veas “” en las Notas de la Misión, lee en voz alta el texto entre comillas a
+los jugadores. Recuerda que eres el controlador del juego en este viaje, que
+estos son tus dominios y que puedes controlarlo como desees. Adaptar y
+modificar las Misiones para que sean el desafío más divertido posible para
+
+tus Héroes.
+

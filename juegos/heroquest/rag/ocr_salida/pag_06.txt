@@ -1,0 +1,85 @@
+Bendiciones, maldiciones y Tesoros
+
+Hay diferentes efectos que se pueden otorgar a los Héroes a medida que
+completan las Misiones. Si un Héroe recibe uno, dile que lo marque en
+
+su Hoja de Personaje.
+
+- Bendición del Oráculo
+Usa esta habilidad para adivinar el futuro.
+
+Pídele a Zargon que despliegue una Habitación detrás de una Puerta
+cerrada adyacente.
+
+(0)
+
+Después de tu tirada de Ataque, Defensa o Movimiento, puedes volver a
+tirar TODOS los dados. Debes conservar el segundo resultado.
+
+Después de usar esta habilidad, desaparece.
+Maldición del Oráculo
+
+Coloca la ficha de Zargon en tu Hoja de Personaje. Una vez por Misión,
+
+- Zargon puede robarte la ficha y obligarte a volver a tirar todos los dados
+
+de una tirada. Luego, Zargon decidirá si usar la tirada nueva o mantener la
+anterior. Reemplaza la ficha de Zargon en tu Hoja de Personaje al comienzo
+de cada Misión.
+
+- Esta maldición se puede eliminar si donas 800 Monedas de Oro a
+organizaciones caritativas que ofrecen cuidados a ciudadanos heridos del
+reino; puedes hacer esto entre las Misiones, cuando visitas la armería.
+
+Pergamino para Destruir Simbolos
+
+Usa este pergamino en cualquier momento para destruir un símbolo
+mágico descubierto, sin usar una acción. Este pergamino no tiene efecto
+sobre los símbolos mágicos alterados por un saqueo.
+
+Después de usar este pergamino, desaparece.
+Cuerno de los Forjados
+
+- Usa una acción para hacer sonar el Cuerno. Cada Héroe coloca un
+Esqueleto en cualquier casilla de la misma Habitación o pasillo.
+
+Cada Héroe controla su propio Esqueleto, y los Esqueletos se mueve
+después del Héroe que los controla. Los Esqueletos de Forjado hacen
+una tirada con su Escudo Blanco para defenderse de los golpes. Al a
+de la Misión, regresan a su lugar de descanso. |
+
+Esqueleto de Forjado
+MOVIMIENTO ATAQUE DEFENSA CUERPO | MENTE
+8 2. dados 2 dados 1 0
+
+Después de usar el Cuerno, se convierte en polvo y desaparece.
+
+Desarrollo de
+las Misiones
+
+y
+
+Comienzo y final de las Misiones Entrada
+Los Héroes no siempre empiezan y terminan las Misiones en
+
+la Escalera de Caracol. Zargon, mira las flechas del Mapa de >
+la Misión para saber dónde comienzan y terminan la Misión
+
+los Héroes. Al comienzo de una Misión, los Héroes se colocan Salida
+
+frente a la Puerta y le piden a Zargon que la abra.
+Monstruos grandes
+
+Si un Monstruo ocupa 2 casillas, puede atacar a cualquier criatura que se
+encuentre en las 10 casillas circundantes.
+
+Hechizos de Terror
+
+Los Monstruos de este Pack de Misión pueden lanzar Hechizos contra los
+Héroes. Los Monstruos pueden lanzar cada uno de los Hechizos que conocen
+una vez por Misión, sin importar si otro Monstruo ha lanzado el mismo
+Hechizo. Algunos Monstruos tienen Hechizos que pueden ser usados "a
+voluntad". En esos casos, los Hechizos indicados siempre se pueden lanzar
+llevando a cabo una acción. Los efectos de cada Hechizo se explican con
+detalle en su correspondiente carta de Hechizo.
+

@@ -1,7 +1,7 @@
 [
   {
     "id": "original",
-    "nombre": "El Original",
+    "nombre": "Cara A · In-Gulden / la fortaleza",
     "columnas": 26,
     "filas": 19,
     "salas": [
@@ -258,7 +258,7 @@
   },
   {
     "id": "cara-b",
-    "nombre": "Cara B",
+    "nombre": "Cara B · Tuel-Vor / las minas",
     "columnas": 26,
     "filas": 19,
     "salas": [

@@ -91,6 +91,24 @@ def _ficha_tesoro(t: dict | None, nombre: str) -> str:
     return f'<span class="tesoro">{html.escape(nombre)}{extras}</span>'
 
 
+def _lista_puntos(puntos: list[dict]) -> str:
+    if not puntos:
+        return "—"
+    return ", ".join(f'({p.get("x","?")},{p.get("y","?")})' for p in puntos)
+
+
+def _lista_puntos_secretas(puntos: list[dict]) -> str:
+    if not puntos:
+        return "—"
+    partes = []
+    for p in puntos:
+        base = f'({p.get("x","?")},{p.get("y","?")})'
+        if p.get("descripcion"):
+            base += f': {html.escape(p["descripcion"])}'
+        partes.append(base)
+    return "; ".join(partes)
+
+
 def _tabla_referencia(registros: list[dict], columnas: tuple[str, ...]) -> str:
     filas = []
     for r in registros:
@@ -170,10 +188,30 @@ def _render(mision: dict, t: dict) -> str:
         monstruos = sala.get("monstruos", [])
         tesoros = sala.get("tesoros", [])
         mons = "".join(
-            f'<div class="col">{_ficha_monstruo(_stats_monstruo(m["nombre"]), m["nombre"])}</div>'
+            f'<div class="col">{_ficha_monstruo(_stats_monstruo(m["nombre"]), m["nombre"])}'
+            f'<div class="pos">en {m.get("x", "?")},{m.get("y", "?")}</div></div>'
             for m in monstruos
         )
-        tes = "".join(f'<li>{_ficha_tesoro(_stat_tesoro(x["nombre"]), x["nombre"])}</li>' for x in tesoros)
+        tes = "".join(
+            f'<li>{_ficha_tesoro(_stat_tesoro(x["nombre"]), x["nombre"])}'
+            f'<span class="pos"> · {x.get("x","?")},{x.get("y","?")}</span></li>'
+            for x in tesoros
+        )
+        trampas = "".join(
+            f'<li><b>{html.escape(tr["nombre"])}</b> ({tr.get("x","?")},{tr.get("y","?")}). '
+            f'{html.escape(tr.get("descripcion", ""))}</li>'
+            for tr in sala.get("trampas", [])
+        )
+        marcadores = "".join(
+            f'<li><b>{html.escape(ma["nombre"])}</b> ({ma.get("x","?")},{ma.get("y","?")}). '
+            f'{html.escape(ma.get("descripcion", ""))}</li>'
+            for ma in sala.get("marcadores", [])
+        )
+        extras = ""
+        if trampas:
+            extras += f'<div class="subtipo">Trampas</div><ul class="tesoros">{trampas}</ul>'
+        if marcadores:
+            extras += f'<div class="subtipo">Fichas / marcadores</div><ul class="tesoros">{marcadores}</ul>'
         salas_html.append(f"""
         <section class="sala">
           <header class="salacab">
@@ -183,6 +221,8 @@ def _render(mision: dict, t: dict) -> str:
           <p class="saladesc">{html.escape(sala.get("descripcion", ""))}</p>
           <div class="grid">{mons}</div>
           <ul class="tesoros">{tes}</ul>
+          {extras}
+          {f'<div class="notas">{html.escape(sala["notas"])}</div>' if sala.get("notas") else ""}
         </section>""")
 
     return f"""<!DOCTYPE html>
@@ -241,6 +281,10 @@ def _render(mision: dict, t: dict) -> str:
   th {{ background:#efe3c8; }}
   details summary {{ cursor:pointer; font-size:.88rem; color:var(--bronce); }}
   .monotenue {{ color:#999; font-style:italic; }}
+  .notas {{ margin-top:.8em; border-top:1px dashed var(--borde); padding-top:.6em; }}
+  .notas::before {{ content:"Notas de Zargon: "; font-weight:bold; color:var(--rojo); font-size:.85rem; text-transform:uppercase; letter-spacing:.4px; }}
+  .pos {{ color:#8a6d3b; font-size:.82rem; }}
+  .subtipo {{ margin-top:.6em; font-weight:bold; color:var(--bronce); font-size:.85rem; text-transform:uppercase; letter-spacing:.4px; }}
   @media print {{
     body {{ background:#fff; }}
     .portada, .sala, .panel, .mapa-wrap {{ box-shadow:none; }}
@@ -260,6 +304,23 @@ def _render(mision: dict, t: dict) -> str:
     <div class="dato"><h2>Introducción</h2><p>{html.escape(mision.get("introduccion", ""))}</p></div>
     <div class="dato"><h2>Objetivo</h2><p>{html.escape(mision.get("objetivo", ""))}</p></div>
     <div class="dato"><h2>Recompensa</h2><p>{html.escape(mision.get("recompensa", ""))}</p></div>
+  </div>
+
+  {f'<div class="panel"><h3>Notas del máster</h3><p>{html.escape(mision["notas"])}</p></div>' if mision.get("notas") else ""}
+
+  <div class="datos">
+    <div class="dato">
+      <h2>Entrada de héroes</h2>
+      <p>{_lista_puntos(mision.get("entrada_heroes", []))}</p>
+    </div>
+    <div class="dato">
+      <h2>Puertas</h2>
+      <p>{_lista_puntos(mision.get("puertas", []))}</p>
+    </div>
+    <div class="dato">
+      <h2>Puertas secretas</h2>
+      <p>{_lista_puntos_secretas(mision.get("puertas_secretas", []))}</p>
+    </div>
   </div>
 
   <div class="mapa-wrap">
