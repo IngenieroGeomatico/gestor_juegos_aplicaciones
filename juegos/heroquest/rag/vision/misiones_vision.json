@@ -1,0 +1,80 @@
+{
+  "esquema": "mision_mapa_v2",
+  "nota": "Ground-truth de mapas de El Despertar. Por cada misión guarda las DETECCIONES (automáticas de vision por computadora) y el GROUND-TRUTH (posiciones validadas manualmente contra el mapa del libro). La alineación px->casilla está validada sobre el mapa a 200 DPI. Las misiones siguientes se montan partiendo de estas validaciones.",
+  "pdf": "https://drive.google.com/uc?id=10y6gKUobO_mSaSH0DzYIQ726xYTTaAPh",
+  "dpi": 200,
+  "tablero": "original",
+  "M1": {
+    "nombre": "La Fortaleza Fronteriza de In-Gulden",
+    "pagina_pdf": 10,
+    "esquinas_tablero_px": {
+      "si": [166, 54],
+      "sd": [1544, 54],
+      "ii": [166, 1128],
+      "id": [1544, 1128]
+    },
+    "transformacion_px_a_casilla": {
+      "col_esq": "0.0188684*x - 3.13207547",
+      "fila_esq": "0.0176909*y - 0.955307263"
+    },
+    "detecciones": {
+      "letras": [
+        {"letra": "A", "casillas": [[13, 4], [14, 4]]},
+        {"letra": "B", "casillas": [[7, 17]]},
+        {"letra": "C", "casillas": [[8, 10], [21, 10]]},
+        {"letra": "D", "casillas": [[17, 16]]}
+      ],
+      "exploradores_caidos": [
+        [3, 2], [15, 3], [12, 4], [8, 9], [16, 15], [12, 17]
+      ]
+    },
+    "ground_truth": {
+      "validador": "manual (usuario sobre mapa a 200 DPI)",
+      "letras": {
+        "A": {"casillas": [[13, 4], [14, 4]], "estado": "validado"},
+        "B": {"casillas": [[7, 17]], "estado": "validado"},
+        "C": {"casillas": [[8, 10], [21, 10]], "estado": "validado"},
+        "D": {"casillas": [[17, 16]], "estado": "validado"}
+      },
+      "entrada": {
+        "rect_casillas": [[13, 1], [14, 3]],
+        "estado": "validado"
+      },
+      "salida": {
+        "rect_casillas": [[20, 15], [21, 17]],
+        "estado": "validado"
+      },
+      "exploradores_caidos": {
+        "casillas": [[15, 3], [12, 4], [8, 9], [16, 15], [12, 17]],
+        "nota": "3,2 eliminada: zona roca sólida fuera del mapa",
+        "estado": "validado"
+      },
+      "derrumbe_letras_A": {
+        "casillas": [[13, 4], [14, 4]],
+        "nota": "corredor, bloquea salida. Confirma posición sobre trampa montada (14,10)",
+        "estado": "validado"
+      },
+      "puertas_cuerno_letras_C": {
+        "casillas": [[8, 10], [21, 10]],
+        "nota": "puertas del cuerno. Confirma posición sobre puertas montadas",
+        "estado": "validado"
+      },
+      "monstruos": {
+        "goblin": [[17, 7], [16, 4], [9, 8], [20, 6], [12, 5], [8, 12], [10, 7], [17, 4]],
+        "orco": [[19, 9], [11, 4], [7, 9], [20, 11], [9, 11], [19, 12], [15, 14], [18, 14], [15, 15]],
+        "zombie": [[9, 14], [8, 16], [6, 16]],
+        "abominacion": [[12, 16], [11, 17]],
+        "final": [[17, 15]],
+        "nota": "23 monstruos en total. Goblins/Orcos del cuerno (puertas C), suicidas según icono. Tipo confirmado por usuario sobre monstruos_detectados.png",
+        "estado": "validado"
+      },
+      "monstruos_catalogados_total": 23,
+      "salon_ShaDel_letra_D": {
+        "casillas": [[17, 16]],
+        "nota": "letra D marca sala de Sha-Del",
+        "estado": "validado"
+      }
+    },
+    "pendiente_de_validar": []
+  }
+}
