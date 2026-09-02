@@ -290,6 +290,34 @@
      "descripcion": "Armas y armaduras con ataque, defensa y coste. Al comprar un arma, sus dados de ataque sustituyen a los propios del personaje (no se acumulan).",
      "valores": {}
     },
+    "recuperacion_puntos": {
+     "descripcion": "Los Puntos de Cuerpo y Mente se pueden recuperar de varias formas durante y entre misiones.",
+     "valores": {
+      "cuerpo": {
+       "pocion_curacion": "La Poción de Curación recupera tantos PC como indique el dado rojo lanzado (1-4). Se toma como efecto de la carta (no consume acción).",
+       "hogar_de_sanacion": "En habitaciones con chimenea, cada búsqueda de tesoro recupera 1 PC adicional.",
+       "hechizo_curar_heridas": "El hechizo 'Curar heridas' (Escuela de Tierra) devuelve 1 PC al héroe objetivo.",
+       "entre_misiones": "Al comenzar un nuevo reto, ambos puntos se restauran a sus valores originales de ficha."
+      },
+      "mente": {
+       "entre_misiones": "Los PM se restauran completamente al comenzar un nuevo reto.",
+       "no_recuperacion_media_mision": "No existe ningún mecanismo para recuperar PM durante una misión. Los hechizos se descartan tras usarse y no devuelven PM gastados."
+      }
+     },
+     "detalle": "La recuperación de Cuerpo es limitada durante la misión: solo pociones, chimeneas y hechizos de curación. La Mente es un recurso finito que solo se repone entre misiones, lo que obliga al Mago y al Elfo a gestionar sus lanzamientos con cuidado."
+    },
+    "muebles_con_equipo": {
+     "descripcion": "Algunos muebles especiales pueden contener equipo en lugar de (o además de) cartas de Tesoro. Al buscar en estos muebles, se encuentra un objeto concreto de la tienda en lugar de robar carta del mazo.",
+     "valores": {
+      "mesa_de_armas": "Buscando tesoro en una mesa de armas, se encuentra 1 arma cuerpo a cuerpo de la tienda (Daga, Espada corta o Hacha de batalla, al azar).",
+      "armeria": "Buscando tesoro en una armería, se encuentra 1 armadura o escudo de la tienda (Yelmo, Escudo o Armadura de placas, al azar).",
+      "estanteria": "Buscando tesoro en una estantería, se encuentra 1 Pergamino Mágico o 1 poción (Poción de Curación, Fuerza o Defensa, al azar).",
+      "restriccion": "Solo la primera búsqueda en el mueble da equipo; las siguientes roban carta de Tesoro normal."
+     },
+     "detalle": "Estos muebles representan lugares de almacenamiento de equipo dentro de la mazmorra. La primera búsqueda da un objeto útil de la tienda (tirada al azar entre las opciones), pero las búsquedas siguientes solo dan cartas de Tesoro estándar. El equipo encontrado se añade al inventario del héroe sujeto al límite de 10 objetos.",
+     "nota": "Regla de casa: los muebles con equipo son una alternativa a las cartas de Tesoro para incentivar la exploración de salas con mobiliario temático.",
+     "norma_propia": true
+    },
     "tesoros_de_reto": {
      "descripcion": "Objetos de valor que aparecen en las misiones y se reparten entre los héroes.",
      "valores": {}
