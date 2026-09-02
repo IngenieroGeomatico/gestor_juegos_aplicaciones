@@ -111,14 +111,30 @@ def sala_pertenece(tablero: dict, sala: dict) -> list[str]:
     sala_data = next((s for s in tablero["salas"] if s["numero"] == numero), None)
     if sala_data is None:
         return [f"sala {numero}: no existe en el tablero"]
-    for obstaculo in ("monstruos", "tesoros", "trampas", "marcadores"):
+    for obstaculo in ("monstruos", "tesoros", "trampas", "marcadores", "muebles"):
         for item in sala.get(obstaculo, []):
             nombre = item.get("nombre", "?")
             contexto = f"sala {numero}.{obstaculo} '{nombre}'"
+            if obstaculo == "muebles":
+                errores += _mueble_valido(tablero, sala_data, item, contexto)
+                continue
             errores += punto_valido(tablero, item, contexto)
             x, y = item.get("x"), item.get("y")
             if isinstance(x, int) and isinstance(y, int) and not _punto_en_sala(sala_data, x, y):
                 errores.append(f"{contexto}: ({x},{y}) no cae dentro de la sala {numero}")
+    return errores
+
+
+def _mueble_valido(tablero: dict, sala_data: dict, mueble: dict, contexto: str) -> list[str]:
+    """Valida un mueble {desde: [x1,y1], hasta: [x2,y2]} dentro de la sala."""
+    errores: list[str] = []
+    desde, hasta = mueble.get("desde"), mueble.get("hasta")
+    if not (isinstance(desde, list) and len(desde) == 2 and isinstance(hasta, list) and len(hasta) == 2):
+        return [f"{contexto}: 'desde'/'hasta' deben ser pares [x,y] en {mueble}"]
+    for etiqueta, pt in (("desde", desde), ("hasta", hasta)):
+        errores += punto_valido(tablero, {"x": pt[0], "y": pt[1]}, f"{contexto} {etiqueta}")
+        if not _punto_en_sala(sala_data, pt[0], pt[1]):
+            errores.append(f"{contexto} {etiqueta}: ({pt[0]},{pt[1]}) no cae dentro de la sala")
     return errores
 
 

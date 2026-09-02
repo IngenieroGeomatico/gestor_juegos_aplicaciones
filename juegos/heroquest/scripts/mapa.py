@@ -14,6 +14,9 @@ import argparse
 import sys
 from pathlib import Path
 
+import base64
+import io
+
 from PIL import Image, ImageDraw, ImageFont
 
 import data_store
@@ -21,6 +24,17 @@ import tablero
 
 DATA_DIR = tablero.DATA_DIR
 MAPAS_DIR = DATA_DIR.parent / "mapas"
+
+# Iconos de muebles: glifo (o imagen) por tipo
+MUEBLE_GLIFO = {
+    "Mesa": "M",
+    "Alacena": "A",
+    "Chimenea": "C",
+    "Tumba": "T",
+    "Cofre": "C",
+    "Banco de Alquimista": "B",
+}
+COLOR_TESORO = "#f6c700"  # borde amarillo para contenedor con tesoro del Reto
 
 FUENTE_TTF = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
 PALETA = [
@@ -53,6 +67,48 @@ def _color_celda(numero: int | None) -> str:
     if numero is None:
         return COLOR_PASILLO
     return PALETA[(numero - 1) % len(PALETA)]
+
+
+def _icono_monstruo(nombre: str) -> str | None:
+    """Devuelve la ruta absoluta al icono/retrato de un monstruo (plantillas.cara.arte_icono),
+    o None si no hay registro o no se puede resolver."""
+    for m in data_store.cargar("monstruos"):
+        if m["nombre"] == nombre:
+            ruta = m.get("plantillas", {}).get("cara", {}).get("arte_icono")
+            if ruta:
+                cand = (DATA_DIR.parent / ruta).resolve()
+                if cand.exists():
+                    return str(cand)
+            return None
+    return None
+
+
+def _icono_data_uri(ruta: str) -> str:
+    """Convierte una imagen PNG en un data URI base64 para incrustar en SVG."""
+    with open(ruta, "rb") as f:
+        b64 = base64.b64encode(f.read()).decode("ascii")
+    return f"data:image/png;base64,{b64}"
+
+
+def _icono_data_uri_peq(ruta: str, tamano: int) -> str:
+    """Igual que _icono_data_uri pero reduciendo la imagen a un cuadrado pequeño
+    (tamaño de celda) y comprimiéndola, para no inflar el SVG embebido."""
+    im = _imagen_escala(ruta, tamano)
+    buf = io.BytesIO()
+    im.save(buf, format="PNG", optimize=True)
+    b64 = base64.b64encode(buf.getvalue()).decode("ascii")
+    return f"data:image/png;base64,{b64}"
+
+
+def _imagen_escala(ruta: str, tamano: int) -> Image.Image:
+    """Carga una imagen y la ajusta a un cuadrado de 'tamano' px con fondo transparente."""
+    im = Image.open(ruta).convert("RGBA")
+    im.thumbnail((tamano, tamano), Image.LANCZOS)
+    lienzo = Image.new("RGBA", (tamano, tamano), (0, 0, 0, 0))
+    x = (tamano - im.width) // 2
+    y = (tamano - im.height) // 2
+    lienzo.paste(im, (x, y), im)
+    return lienzo
 
 
 def _cargar_mision(nombre: str | None) -> dict | None:
@@ -96,6 +152,15 @@ def _puntos_mision(mision: dict) -> list[tuple[str, dict]]:
     return puntos
 
 
+def _muebles_mision(mision: dict) -> list[tuple[int, dict]]:
+    """Devuelve los muebles de una misión: (numero_sala, mueble) en coordenadas de cuadrícula."""
+    resultado: list[tuple[int, dict]] = []
+    for sala in mision.get("salas", []):
+        for mu in sala.get("muebles", []):
+            resultado.append((sala["numero"], mu))
+    return resultado
+
+
 def _render_png(t: dict, mision: dict | None, w: int, h: int, titulo: int, margen: int, celda: int, leyenda: int, ruta: Path) -> Path:
     img = Image.new("RGB", (w, h), "#f7f3ea")
     d = ImageDraw.Draw(img)
@@ -109,22 +174,60 @@ def _render_png(t: dict, mision: dict | None, w: int, h: int, titulo: int, marge
             d.rectangle([px, py, px + celda, py + celda], fill=_color_celda(num), outline="#000")
             if num is not None:
                 d.text((px + celda / 2, py + celda / 2), str(num), fill="#333", font=_fuente(int(celda * 0.5)), anchor="mm")
-    _marcadores_png(d, mision, ox, oy, celda)
+    _muebles_png(img, mision, ox, oy, celda)
+    _marcadores_png(img, mision, ox, oy, celda)
     _leyenda_png(d, mision, w, h, leyenda)
     ruta.parent.mkdir(parents=True, exist_ok=True)
     img.save(ruta)
     return ruta
 
 
-def _marcadores_png(d: ImageDraw.ImageDraw, mision: dict | None, ox: int, oy: int, celda: int) -> None:
+def _muebles_png(img: Image.Image, mision: dict | None, ox: int, oy: int, celda: int) -> None:
     if not mision:
         return
+    d = ImageDraw.Draw(img)
+    for num_sala, mu in _muebles_mision(mision):
+        x1, y1 = mu["desde"]
+        x2, y2 = mu["hasta"]
+        px = ox + (x1 - 1) * celda
+        py = oy + (y1 - 1) * celda
+        pwx = (x2 - x1 + 1) * celda
+        ph = (y2 - y1 + 1) * celda
+        # Cuerpo del mueble (tono madera, semi)
+        d.rounded_rectangle([px, py, px + pwx, py + ph], radius=5,
+                            fill=(180, 140, 90, 255), outline=(90, 60, 30))
+        # Borde amarillo si contiene tesoro del Reto
+        if mu.get("tesoro"):
+            d.rectangle([px, py, px + pwx, py + ph], outline=COLOR_TESORO, width=max(3, celda // 8))
+        glifo = MUEBLE_GLIFO.get(mu.get("tipo", ""), "?")
+        d.text((px + pwx / 2, py + ph / 2), glifo, fill=(60, 35, 10),
+               font=_fuente(int(min(pwx, ph) * 0.7)), anchor="mm")
+
+
+def _marcadores_png(img: Image.Image, mision: dict | None, ox: int, oy: int, celda: int) -> None:
+    if not mision:
+        return
+    d = ImageDraw.Draw(img)
     r = int(celda * 0.36)
     for tipo, punto in _puntos_mision(mision):
         gx, gy = _centro(punto)
         cx, cy = ox + (gx - 0.5) * celda, oy + (gy - 0.5) * celda
         letra, color = MARCADORES[tipo]
-        if tipo == "tesoro":
+        if tipo == "monstruo":
+            icono = _icono_monstruo(punto.get("nombre", ""))
+            if icono:
+                tam = int(celda * 0.82)
+                im = _imagen_escala(icono, tam)
+                img.paste(im, (int(cx - tam / 2), int(cy - tam / 2)), im)
+                if punto.get("tesoro"):
+                    d.rectangle([cx - tam / 2 - 2, cy - tam / 2 - 2,
+                                 cx + tam / 2 + 2, cy + tam / 2 + 2],
+                                outline=COLOR_TESORO, width=max(3, celda // 8))
+                continue
+            d.ellipse([cx - r, cy - r, cx + r, cy + r], fill=color, outline="#000")
+            d.text((cx, cy), _inicial(punto, tipo), fill="#fff",
+                   font=_fuente(int(r * 1.2)), anchor="mm")
+        elif tipo == "tesoro":
             d.polygon([(cx, cy - r), (cx + r, cy), (cx, cy + r), (cx - r, cy)], fill=color, outline="#000")
             d.text((cx, cy), _inicial(punto, tipo), fill="#000", font=_fuente(int(r)), anchor="mm")
         elif tipo in ("puerta", "puerta_secreta"):
@@ -164,12 +267,42 @@ def _leyenda_png(d: ImageDraw.ImageDraw, mision: dict | None, w: int, h: int, le
     y = h - leyenda + 18
     nombres = {"entrada": "Entrada", "puerta": "Puerta", "puerta_secreta": "Puerta secret.",
                "monstruo": "Monstruo", "tesoro": "Tesoro", "trampa": "Trampa", "marcador": "Ficha"}
+    # Fila 1: marcadores
     x = 20
     for tipo, (letra, color) in MARCADORES.items():
         d.rectangle([x, y - 16, x + 16, y], fill=color, outline="#000")
         d.text((x + 8, y - 8), letra, fill="#fff", font=_fuente(11), anchor="mm")
         d.text((x + 24, y - 8), nombres[tipo], fill="#000", font=_fuente(13), anchor="lm")
-        x += 24 + 110
+        x += 24 + 108
+    # Fila 2: mueble + tesoro del reto
+    y2 = y + 22
+    d.rounded_rectangle([20, y2 - 16, 36, y2], radius=3, fill="#b48c5a", outline=(90, 60, 30))
+    d.text((44, y2 - 8), "Mueble", fill="#000", font=_fuente(13), anchor="lm")
+    x = 44 + 90
+    d.rectangle([x, y2 - 16, x + 16, y2], outline=COLOR_TESORO, width=3)
+    d.text((x + 24, y2 - 8), "Tesoro del Reto", fill="#000", font=_fuente(13), anchor="lm")
+
+
+def _leyenda_svg(partes: list[str], mision: dict | None, w: int, h: int, leyenda: int) -> None:
+    if not mision:
+        return
+    y = h - leyenda + 18
+    nombres = {"entrada": "Entrada", "puerta": "Puerta", "puerta_secreta": "Puerta secret.",
+               "monstruo": "Monstruo", "tesoro": "Tesoro", "trampa": "Trampa", "marcador": "Ficha"}
+    # Fila 1: marcadores
+    x = 20
+    for tipo, (letra, color) in MARCADORES.items():
+        partes.append(f'<rect x="{x}" y="{y-16}" width="16" height="16" fill="{color}" stroke="#000"/>')
+        partes.append(f'<text x="{x+8}" y="{y-8}" font-family="sans-serif" font-size="11" text-anchor="middle" fill="#fff" font-weight="bold">{letra}</text>')
+        partes.append(f'<text x="{x+24}" y="{y-8}" font-family="sans-serif" font-size="13" fill="#000">{nombres[tipo]}</text>')
+        x += 24 + 108
+    # Fila 2: mueble + tesoro del reto
+    y2 = y + 22
+    partes.append(f'<rect x="20" y="{y2-16}" width="16" height="16" rx="3" fill="#b48c5a" stroke="#5a3c1e"/>')
+    partes.append(f'<text x="44" y="{y2-8}" font-family="sans-serif" font-size="13" fill="#000">Mueble</text>')
+    x = 44 + 90
+    partes.append(f'<rect x="{x}" y="{y2-16}" width="16" height="16" fill="none" stroke="{COLOR_TESORO}" stroke-width="3"/>')
+    partes.append(f'<text x="{x+24}" y="{y2-8}" font-family="sans-serif" font-size="13" fill="#000">Tesoro del Reto</text>')
 
 
 def _render_svg(t: dict, mision: dict | None, w: int, h: int, titulo: int, margen: int, celda: int, leyenda: int) -> str:
@@ -184,10 +317,40 @@ def _render_svg(t: dict, mision: dict | None, w: int, h: int, titulo: int, marge
             partes.append(f'<rect x="{px}" y="{py}" width="{celda}" height="{celda}" fill="{_color_celda(num)}" stroke="#000" stroke-width="0.8"/>')
             if num is not None:
                 partes.append(f'<text x="{px+celda/2}" y="{py+celda/2+6}" font-family="sans-serif" font-size="{int(celda*0.55)}" text-anchor="middle" fill="#333">{num}</text>')
+    _muebles_svg(partes, mision, ox, oy, celda)
     _marcadores_svg(partes, mision, ox, oy, celda)
     _leyenda_svg(partes, mision, w, h, leyenda)
     partes.append("</svg>")
     return "\n".join(partes)
+
+
+def _muebles_svg(partes: list[str], mision: dict | None, ox: int, oy: int, celda: int) -> None:
+    if not mision:
+        return
+    for num_sala, mu in _muebles_mision(mision):
+        x1, y1 = mu["desde"]
+        x2, y2 = mu["hasta"]
+        px = ox + (x1 - 1) * celda
+        py = oy + (y1 - 1) * celda
+        pwx = (x2 - x1 + 1) * celda
+        ph = (y2 - y1 + 1) * celda
+        partes.append(
+            f'<rect x="{px}" y="{py}" width="{pwx}" height="{ph}" rx="5" '
+            f'fill="#b48c5a" stroke="#5a3c1e" stroke-width="1.5"/>'
+        )
+        if mu.get("tesoro"):
+            t = max(4, celda // 6)
+            partes.append(
+                f'<rect x="{px - t}" y="{py - t}" width="{pwx + 2 * t}" height="{ph + 2 * t}" rx="7" '
+                f'fill="none" stroke="{COLOR_TESORO}" stroke-width="{t}"/>'
+            )
+        glifo = MUEBLE_GLIFO.get(mu.get("tipo", ""), "?")
+        cxm, cym = px + pwx / 2, py + ph / 2
+        tam_txt = int(min(pwx, ph) * 0.6)
+        partes.append(
+            f'<text x="{cxm}" y="{cym + tam_txt / 3}" font-family="sans-serif" font-size="{tam_txt}" '
+            f'font-weight="bold" text-anchor="middle" fill="#3c230a">{glifo}</text>'
+        )
 
 
 def _marcadores_svg(partes: list[str], mision: dict | None, ox: int, oy: int, celda: int) -> None:
@@ -198,7 +361,26 @@ def _marcadores_svg(partes: list[str], mision: dict | None, ox: int, oy: int, ce
         gx, gy = _centro(punto)
         cx, cy = ox + (gx - 0.5) * celda, oy + (gy - 0.5) * celda
         letra, color = MARCADORES[tipo]
-        if tipo == "tesoro":
+        if tipo == "monstruo":
+            icono = _icono_monstruo(punto.get("nombre", ""))
+            if icono:
+                tam = int(celda * 0.82)
+                uri = _icono_data_uri_peq(icono, int(tam * 3))
+                x0, y0 = cx - tam / 2, cy - tam / 2
+                partes.append(
+                    f'<image x="{x0}" y="{y0}" width="{tam}" height="{tam}" href="{uri}" '
+                    f'preserveAspectRatio="xMidYMid meet"/>'
+                )
+                if punto.get("tesoro"):
+                    t = max(4, celda // 6)
+                    partes.append(
+                        f'<rect x="{x0 - t}" y="{y0 - t}" width="{tam + 2 * t}" height="{tam + 2 * t}" '
+                        f'rx="4" fill="none" stroke="{COLOR_TESORO}" stroke-width="{t}"/>'
+                    )
+                continue
+            partes.append(f'<circle cx="{cx}" cy="{cy}" r="{r}" fill="{color}" stroke="#000"/>')
+            partes.append(f'<text x="{cx}" y="{cy+4}" font-family="sans-serif" font-size="{int(r*0.9)}" text-anchor="middle" fill="#fff" font-weight="bold">{_inicial(punto, tipo)}</text>')
+        elif tipo == "tesoro":
             partes.append(f'<polygon points="{cx},{cy-r} {cx+r},{cy} {cx},{cy+r} {cx-r},{cy}" fill="{color}" stroke="#000"/>')
             partes.append(f'<text x="{cx}" y="{cy+4}" font-family="sans-serif" font-size="{int(r*0.9)}" text-anchor="middle" fill="#000" font-weight="bold">{_inicial(punto, tipo)}</text>')
         elif tipo in ("puerta", "puerta_secreta"):
@@ -216,20 +398,6 @@ def _marcadores_svg(partes: list[str], mision: dict | None, ox: int, oy: int, ce
             partes.append(f'<circle cx="{cx}" cy="{cy}" r="{r}" fill="{color}" stroke="#000"/>')
             texto = letra if tipo == "entrada" else _inicial(punto, tipo)
             partes.append(f'<text x="{cx}" y="{cy+4}" font-family="sans-serif" font-size="{int(r*0.9)}" text-anchor="middle" fill="#fff" font-weight="bold">{texto}</text>')
-
-
-def _leyenda_svg(partes: list[str], mision: dict | None, w: int, h: int, leyenda: int) -> None:
-    if not mision:
-        return
-    y = h - leyenda + 18
-    nombres = {"entrada": "Entrada", "puerta": "Puerta", "puerta_secreta": "Puerta secret.",
-               "monstruo": "Monstruo", "tesoro": "Tesoro", "trampa": "Trampa", "marcador": "Ficha"}
-    x = 20
-    for tipo, (letra, color) in MARCADORES.items():
-        partes.append(f'<rect x="{x}" y="{y-16}" width="16" height="16" fill="{color}" stroke="#000"/>')
-        partes.append(f'<text x="{x+8}" y="{y-8}" font-family="sans-serif" font-size="11" text-anchor="middle" fill="#fff" font-weight="bold">{letra}</text>')
-        partes.append(f'<text x="{x+24}" y="{y-8}" font-family="sans-serif" font-size="13" fill="#000">{nombres[tipo]}</text>')
-        x += 24 + 110
 
 
 def main() -> None:

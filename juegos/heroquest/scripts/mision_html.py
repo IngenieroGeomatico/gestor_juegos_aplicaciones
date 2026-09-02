@@ -60,21 +60,43 @@ def _casillas_vida(cuerpo: int) -> str:
                     for i in range(max(cuerpo, 1)))
 
 
-def _ficha_monstruo(m: dict | None, nombre: str) -> str:
+def _ficha_monstruo(m: dict | None, nombre: str, tesoro: str | None = None) -> str:
     if not m:
         return (
             f'<div class="card monstruo"><div class="mtitulo">{html.escape(nombre)}</div>'
             f'<div class="monotenue">Sin stats registradas</div></div>'
         )
+    reto = ""
+    if tesoro:
+        reto = (f'<div class="reto"><b>Tesoro del Reto</b><span class="heck">🔍 buscado</span>'
+                f'<span>{html.escape(tesoro)}</span></div>')
     return f"""
-    <div class="card monstruo">
+    <div class="card monstruo{' conreto' if tesoro else ''}">
       <div class="mtitulo">{html.escape(m["nombre"])}
         <span class="stats">A{m["ataque"]} D{m["defensa"]} Cu{m["cuerpo"]} Me{m["mente"]} Mov{m["movimiento"]}</span>
       </div>
+      {reto}
       <details open>
         <summary>Vida</summary>
         <div class="vidas">{_casillas_vida(m["cuerpo"])}</div>
       </details>
+    </div>"""
+
+
+def _ficha_mueble(mu: dict) -> str:
+    """Tarjeta de un mueble: checkbox 'buscado' y borde amarillo si tiene tesoro del Reto."""
+    caja = '<input type="checkbox" class="chequeo" aria-label="Tesoro buscado">'
+    reto = ""
+    if mu.get("tesoro"):
+        reto = f'<div class="reto"><span>{html.escape(mu["tesoro"])}</span></div>'
+    return f"""
+    <div class="card mueble{' conreto' if mu.get('tesoro') else ''}">
+      <div class="mtitulo">
+        <span class="icono-mueble">{html.escape(mu.get('tipo', 'Mueble'))}</span>
+        <span class="nombre-mueble">{html.escape(mu['nombre'])}</span>
+        <label class="check">{caja} buscado</label>
+      </div>
+      {reto}
     </div>"""
 
 
@@ -97,6 +119,14 @@ def _formato_punto(p: dict) -> str:
         de, a = p["de"], p["a"]
         return f"({de[0]},{de[1]})–({a[0]},{a[1]})"
     return f'({p.get("x","?")},{p.get("y","?")})'
+
+
+def _formato_mueble(mu: dict) -> str:
+    """Representación del rectángulo de un mueble: (desde)-(hasta)."""
+    d, h2 = mu.get("desde", []), mu.get("hasta", [])
+    if len(d) == 2 and len(h2) == 2:
+        return f"({d[0]},{d[1]})–({h2[0]},{h2[1]})"
+    return "—"
 
 
 def _lista_puntos(puntos: list[dict]) -> str:
@@ -186,6 +216,23 @@ def _referencia() -> str:
     return "\n".join(secciones)
 
 
+def _panel_voz_alta(mision: dict) -> str:
+    """Panel con las instrucciones de Zargon para leer en voz alta (bloque 'instrucciones_voz_alta')."""
+    insts = mision.get("instrucciones_voz_alta", [])
+    if not insts:
+        return ""
+    items = "".join(
+        f'<li><div class="vocabada-momento">{html.escape(i.get("momento", ""))}</div>'
+        f'<div class="vocabada-texto">{html.escape(i.get("texto", ""))}</div></li>'
+        for i in insts
+    )
+    return f"""
+    <section class="panel vozalta">
+      <h3>Lectura en voz alta <span class="zg">(para Zargon)</span></h3>
+      <ol class="vocabada">{items}</ol>
+    </section>"""
+
+
 def _render(mision: dict, t: dict) -> str:
     titulo = html.escape(mision["nombre"])
     tablero_data = data_store.cargar_json("tableros")
@@ -196,7 +243,7 @@ def _render(mision: dict, t: dict) -> str:
         monstruos = sala.get("monstruos", [])
         tesoros = sala.get("tesoros", [])
         mons = "".join(
-            f'<div class="col">{_ficha_monstruo(_stats_monstruo(m["nombre"]), m["nombre"])}'
+            f'<div class="col">{_ficha_monstruo(_stats_monstruo(m["nombre"]), m["nombre"], m.get("tesoro"))}'
             f'<div class="pos">en {m.get("x", "?")},{m.get("y", "?")}</div></div>'
             for m in monstruos
         )
@@ -204,6 +251,11 @@ def _render(mision: dict, t: dict) -> str:
             f'<li>{_ficha_tesoro(_stat_tesoro(x["nombre"]), x["nombre"])}'
             f'<span class="pos"> · {x.get("x","?")},{x.get("y","?")}</span></li>'
             for x in tesoros
+        )
+        muebles = "".join(
+            f'<div class="col">{_ficha_mueble(mu)}'
+            f'<div class="pos">{_formato_mueble(mu)}</div></div>'
+            for mu in sala.get("muebles", [])
         )
         trampas = "".join(
             f'<li><b>{html.escape(tr["nombre"])}</b> ({tr.get("x","?")},{tr.get("y","?")}). '
@@ -216,6 +268,8 @@ def _render(mision: dict, t: dict) -> str:
             for ma in sala.get("marcadores", [])
         )
         extras = ""
+        if muebles:
+            extras += f'<div class="subtipo">Muebles</div><div class="grid">{muebles}</div>'
         if trampas:
             extras += f'<div class="subtipo">Trampas</div><ul class="tesoros">{trampas}</ul>'
         if marcadores:
@@ -327,6 +381,20 @@ def _render(mision: dict, t: dict) -> str:
   .notas::before {{ content:"Notas de Zargon: "; font-weight:bold; color:var(--rojo); font-size:.85rem; text-transform:uppercase; letter-spacing:.4px; }}
   .pos {{ color:#8a6d3b; font-size:.82rem; }}
   .subtipo {{ margin-top:.6em; font-weight:bold; color:var(--bronce); font-size:.85rem; text-transform:uppercase; letter-spacing:.4px; }}
+  .grid {{ display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:10px; }}
+  .mueble .mtitulo {{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }}
+  .icono-mueble {{ background:#b48c5a; color:#fff; border-radius:6px; padding:2px 7px; font-size:.75rem; font-weight:bold; }}
+  .check {{ margin-left:auto; font-size:.85rem; color:#555; display:flex; align-items:center; gap:4px; }}
+  .check input {{ accent-color:var(--verde); width:16px; height:16px; cursor:pointer; }}
+  .card.conreto {{ border:3px solid #f6c700; }}
+  .reto {{ margin-top:6px; border-top:1px dashed var(--borde); padding-top:6px; font-size:.88rem; }}
+  .reto b {{ display:block; color:#9c6b00; font-size:.8rem; text-transform:uppercase; letter-spacing:.4px; }}
+  .vozalta h3 {{ display:flex; gap:8px; align-items:baseline; }}
+  .vozalta .zg {{ font-size:.7rem; color:#7a5230; font-weight:normal; letter-spacing:.3px; }}
+  .vocabada {{ margin:0; padding-left:1.3em; display:grid; gap:12px; }}
+  .vocabada li {{ margin:0; }}
+  .vocabada-momento {{ font-weight:bold; color:var(--rojo); font-size:.87rem; }}
+  .vocabada-texto {{ font-style:italic; color:#3c2f1f; }}
   @media print {{
     body {{ background:#fff; }}
     .portada, .sala, .panel, .mapa-wrap {{ box-shadow:none; }}
@@ -349,6 +417,8 @@ def _render(mision: dict, t: dict) -> str:
   </div>
 
   {f'<div class="panel"><h3>Notas del máster</h3><p>{html.escape(mision["notas"])}</p></div>' if mision.get("notas") else ""}
+
+  {_panel_voz_alta(mision)}
 
   <div class="datos">
     <div class="dato">

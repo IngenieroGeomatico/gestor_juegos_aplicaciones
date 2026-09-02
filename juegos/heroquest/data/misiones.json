@@ -299,9 +299,24 @@
             "nombre": "Explorador caído (ficha de Calavera)",
             "x": 12,
             "y": 4,
-            "descripcion": "Un Héroe puede inspeccionar al explorador (acción) y tirar un Dado Rojo para hallar 15 Monedas de Oro (o menos). Tras inspeccionarlo, retira la ficha."
+            "descripcion": "Un Héroe adyacente puede usar una acción para inspeccionar a un explorador caído. Tira un Dado Rojo: 1-2 no encuentra nada; 3-4 encuentra 15 Monedas de Oro; 5-6 encuentra 40 Monedas de Oro. Tras inspeccionarlo, retira la ficha del tablero."
           }
-        ]
+        ],
+        "muebles": [
+          {
+            "nombre": "Mesa de castigo",
+            "tipo": "Mesa",
+            "desde": [
+              10,
+              2
+            ],
+            "hasta": [
+              12,
+              3
+            ]
+          }
+        ],
+        "notas": "El primer jugador que busque Tesoros en esta sala encuentra el tesoro del Reto; el resto roban del mazo de Tesoros."
       },
       {
         "numero": 4,
@@ -333,9 +348,24 @@
             "nombre": "Explorador caído (ficha de Calavera)",
             "x": 15,
             "y": 3,
-            "descripcion": "Un Héroe puede inspeccionar al explorador (acción) y tirar un Dado Rojo para hallar 15 Monedas de Oro (o menos). Tras inspeccionarlo, retira la ficha."
+            "descripcion": "Un Héroe adyacente puede usar una acción para inspeccionar a un explorador caído. Tira un Dado Rojo: 1-2 no encuentra nada; 3-4 encuentra 15 Monedas de Oro; 5-6 encuentra 40 Monedas de Oro. Tras inspeccionarlo, retira la ficha del tablero."
           }
-        ]
+        ],
+        "muebles": [
+          {
+            "nombre": "Alacena de la armería",
+            "tipo": "Alacena",
+            "desde": [
+              15,
+              2
+            ],
+            "hasta": [
+              17,
+              2
+            ]
+          }
+        ],
+        "notas": "Alacena (regla de casa): el primer Héroe que saque una carta de Tesoro en una habitación con alacena roba dos cartas de Tesoro en su lugar."
       },
       {
         "numero": 8,
@@ -367,9 +397,24 @@
             "nombre": "Explorador caído (ficha de Calavera)",
             "x": 8,
             "y": 9,
-            "descripcion": "Un Héroe puede inspeccionar al explorador (acción) y tirar un Dado Rojo para hallar 15 Monedas de Oro (o menos). Tras inspeccionarlo, retira la ficha."
+            "descripcion": "Un Héroe adyacente puede usar una acción para inspeccionar a un explorador caído. Tira un Dado Rojo: 1-2 no encuentra nada; 3-4 encuentra 15 Monedas de Oro; 5-6 encuentra 40 Monedas de Oro. Tras inspeccionarlo, retira la ficha del tablero."
           }
-        ]
+        ],
+        "muebles": [
+          {
+            "nombre": "Gran chimenea",
+            "tipo": "Chimenea",
+            "desde": [
+              6,
+              6
+            ],
+            "hasta": [
+              6,
+              8
+            ]
+          }
+        ],
+        "notas": "Chimenea (regla oficial): cuando un Héroe saca una carta de Tesoro en una habitación con chimenea, puede usarla para curarse un Punto Corporal."
       },
       {
         "numero": 9,
@@ -396,7 +441,21 @@
             "descripcion": "El suelo cede al pisar la baldosa suelta y una lanza brota del muro. Tira un dado de defensa: pierdes un punto de cuerpo por cada escudo que no salga."
           }
         ],
-        "marcadores": []
+        "marcadores": [],
+        "muebles": [
+          {
+            "nombre": "Mesa de banquetes",
+            "tipo": "Mesa",
+            "desde": [
+              20,
+              7
+            ],
+            "hasta": [
+              21,
+              9
+            ]
+          }
+        ]
       },
       {
         "numero": 14,
@@ -436,7 +495,21 @@
         ],
         "tesoros": [],
         "trampas": [],
-        "marcadores": []
+        "marcadores": [],
+        "muebles": [
+          {
+            "nombre": "Alacena del bodeguero",
+            "tipo": "Alacena",
+            "desde": [
+              19,
+              14
+            ],
+            "hasta": [
+              21,
+              14
+            ]
+          }
+        ]
       },
       {
         "numero": 17,
@@ -459,20 +532,25 @@
             "y": 16
           }
         ],
-        "tesoros": [
+        "tesoros": [],
+        "trampas": [],
+        "marcadores": [],
+        "muebles": [
           {
-            "nombre": "Monedas de oro (200)",
-            "x": 7,
-            "y": 15
-          },
-          {
-            "nombre": "Báculo Mágico",
-            "x": 7,
-            "y": 15
+            "nombre": "Tumba de la guarnición",
+            "tipo": "Tumba",
+            "desde": [
+              6,
+              14
+            ],
+            "hasta": [
+              8,
+              15
+            ],
+            "tesoro": "200 Monedas de Oro y un Báculo Mágico"
           }
         ],
-        "trampas": [],
-        "marcadores": []
+        "notas": "Letra B: \"El primer jugador que busque Tesoros encuentra 200 Monedas de Oro y un Báculo Mágico.\" (El tesoro está en la tumba.)"
       },
       {
         "numero": 18,
@@ -504,7 +582,7 @@
             "nombre": "Explorador caído (ficha de Calavera)",
             "x": 12,
             "y": 17,
-            "descripcion": "Un Héroe puede inspeccionar al explorador (acción) y tirar un Dado Rojo para hallar 15 Monedas de Oro (o menos). Tras inspeccionarlo, retira la ficha."
+            "descripcion": "Un Héroe adyacente puede usar una acción para inspeccionar a un explorador caído. Tira un Dado Rojo: 1-2 no encuentra nada; 3-4 encuentra 15 Monedas de Oro; 5-6 encuentra 40 Monedas de Oro. Tras inspeccionarlo, retira la ficha del tablero."
           }
         ]
       },
@@ -531,30 +609,47 @@
           {
             "nombre": "Guerrero del Terror",
             "x": 17,
-            "y": 15
+            "y": 15,
+            "tesoro": "300 Monedas de Oro y una nota andrajosa con manchas de sangre que dice: \"Los guerreros de la Reina Kessandria avanzan hacia Tuel-Vor en busca de Qwindrak. Tienen espías en todas partes. Estamos en grave peligro por nuestro descubrimiento. No sé cuánto tiempo nos queda.\""
           }
         ],
-        "tesoros": [
-          {
-            "nombre": "Monedas de oro (300)",
-            "x": 17,
-            "y": 15
-          },
-          {
-            "nombre": "Nota manchada de sangre de Sha-Del",
-            "x": 17,
-            "y": 15
-          }
-        ],
+        "tesoros": [],
         "trampas": [],
         "marcadores": [
           {
             "nombre": "Explorador caído (ficha de Calavera)",
             "x": 16,
             "y": 15,
-            "descripcion": "Un Héroe puede inspeccionar al explorador (acción) y tirar un Dado Rojo para hallar 15 Monedas de Oro (o menos). Tras inspeccionarlo, retira la ficha."
+            "descripcion": "Un Héroe adyacente puede usar una acción para inspeccionar a un explorador caído. Tira un Dado Rojo: 1-2 no encuentra nada; 3-4 encuentra 15 Monedas de Oro; 5-6 encuentra 40 Monedas de Oro. Tras inspeccionarlo, retira la ficha del tablero."
           }
-        ]
+        ],
+        "muebles": [
+          {
+            "nombre": "Cofre de Sha-Del",
+            "tipo": "Cofre",
+            "desde": [
+              18,
+              18
+            ],
+            "hasta": [
+              18,
+              18
+            ]
+          },
+          {
+            "nombre": "Banco de alquimista",
+            "tipo": "Banco de Alquimista",
+            "desde": [
+              15,
+              17
+            ],
+            "hasta": [
+              17,
+              18
+            ]
+          }
+        ],
+        "notas": "Letra D: \"El Capitán del Terror Sha-Del lleva la marca de la Reina Bruja. El primer jugador que busque Tesoros encuentra 300 Monedas de Oro y una nota andrajosa con manchas de sangre.\" (El tesoro está en el cuerpo de Sha-Del.) Con esta información concluye la Misión."
       }
     ],
     "pasillos": {
@@ -580,6 +675,32 @@
         }
       ],
       "marcadores": []
-    }
+    },
+    "instrucciones_voz_alta": [
+      {
+        "momento": "Al empezar la misión (mensaje del pergamino)",
+        "texto": "Entráis a la Cámara de Guerra y de inmediato escucháis el sonido de murmullos hoscos y preocupados como de ruidosas protestas. “¡No, no y no!”, estalla una voz que se oye con claridad sobre las demás. “Ese camino solo lleva a la muerte. Debemos posicionar el grueso de nuestras fuerzas aquí” —al girar la esquina lo veis golpear con un largo y calloso dedo índice el mapa que se despliega sobre la mesa— “al menos si lo que realmente buscamos es la victoria”. Mentor esboza una ligera sonrisa. Parece levemente entretenido por el discurso del estratega. “Si me permitís interrumpir”, dice en voz alta, anunciando su presencia. “Este, amigos míos, es Sir Ragnar”. “Mentor”, gruñe Ragnar. No aparta la mirada del mapa mientras asiente con la cabeza hacia el Loretome. “Puedo oler ese viejo libro desde aquí. ¿Me has traído refuerzos?”. Al fin, levanta la mirada y os presta atención. “Bienvenidos, Héroes”. Aplaude con estrépito. “No hay tiempo que perder. Enviamos a nuestros exploradores a la asolada fortaleza fronteriza de In-Gulden y no hemos vuelto a saber de ellos. Necesito que viajéis allí de inmediato y descubráis lo que ha pasado”."
+      },
+      {
+        "momento": "Letra A · El derrumbe (cuando el último Héroe pase por esas casillas)",
+        "texto": "“Se escucha un estruendo ensordecedor cuando el techo de repente se desploma y bloquea la salida”. Coloca una ficha de bloqueo doble en las casillas A y retira la ficha de la escalera de la salida del tablero."
+      },
+      {
+        "momento": "Letra B · Tumba de la guarnición",
+        "texto": "El primer jugador que busque Tesoros encuentra 200 Monedas de Oro y un Báculo Mágico."
+      },
+      {
+        "momento": "Letra C · Puerta del cuerno (al abrir una de estas puertas)",
+        "texto": "“El escalofriante sonido de un cuerno penetra el aire. Sentís la tensión cuando todas las Puertas de las ruinas se abren de golpe y los pasillos se inundan con los gritos de guerra de los Goblins y los Orcos”. Abre todas las Puertas marcadas con la letra C y coloca los Monstruos."
+      },
+      {
+        "momento": "Letra D · Salón del trono (final)",
+        "texto": "El Capitán del Terror Sha-Del lleva la marca de la Reina Bruja. El primer jugador que busque Tesoros encuentra 300 Monedas de Oro y una nota andrajosa con manchas de sangre que dice: “Los guerreros de la Reina Kessandria avanzan hacia Tuel-Vor en busca de Qwindrak. Tienen espías en todas partes. Estamos en grave peligro por nuestro descubrimiento. No sé cuánto tiempo nos queda”. Con esta información concluye la Misión."
+      },
+      {
+        "momento": "Primer explorador inspeccionado",
+        "texto": "“Plegada dentro en un bolsillo, hallas una nota rasgada. Dice: nos traicionó y busca el Huevo Nocturno. Eso es todo lo que puedes descifrar”."
+      }
+    ]
   }
 ]
