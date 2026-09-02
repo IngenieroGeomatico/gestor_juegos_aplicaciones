@@ -381,6 +381,17 @@
   "bendiciones_y_maldiciones": {
    "descripcion": "Objetos especiales de un solo uso, bendiciones del Oráculo y maldiciones que afectan a los héroes durante la campaña.",
    "mecanicas": {
+    "adquisicion_bendiciones_maldiciones": {
+     "descripcion": "Las Bendiciones y Maldiciones del Oráculo se adquieren al hablar con el Oráculo en el Altar de Morlenis (Misión 3: 'El Oráculo de Morledis'). Cada héroe puede usar su acción una vez para preguntar al Oráculo: '¿Qué me depara el futuro?'.",
+     "valores": {
+      "mision": "Misión 3: El Oráculo de Morledis",
+      "ubicacion": "Altar de Morlenis (habitación del Oráculo)",
+      "coste": "1 Acción por héroe",
+      "limite": "una vez por héroe"
+     },
+     "detalle": "En la habitación del Oráculo hay Cofres de Tesoro con ofrendas. Si el héroe SAQUEA los cofres (toma las 800 Monedas de Oro) y luego habla con el Oráculo, recibe la Maldición del Oráculo. Si el héroe NO saquea las ofrendas y habla con el Oráculo, recibe la Bendición del Oráculo. La decisión de saquear o no es irreversibles: una vez tomadas las monedas, la maldición está asegurada.",
+     "nota": "Este es el único mecanismo documentado para adquirir Bendiciones o Maldiciones. No existen cartas de tesoro, eventos aleatorios ni otros mecanismos genéricos en las reglas oficiales."
+    },
     "bendicion_del_oraculo": {
      "descripcion": "La Bendición del Oráculo es un objeto de un solo uso. Permite repetir TODOS los dados de un turno de Ataque, Defensa o Movimiento, pero se debe conservar el segundo resultado. También revela una habitación detrás de una puerta adyacente cerrada. El objeto desaparece tras usarse.",
      "valores": {
