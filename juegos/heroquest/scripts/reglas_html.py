@@ -97,6 +97,19 @@ def _formatear_valor(dato):
     return f'<span class="dato-val">{html.escape(str(dato))}</span>'
 
 
+def _formatear_valor_texto(dato) -> str:
+    """Convierte un valor a texto plano (para el atributo data-busqueda)."""
+    if isinstance(dato, bool):
+        return "Sí" if dato else "No"
+    if isinstance(dato, (int, float)):
+        return str(dato)
+    if isinstance(dato, (list, tuple)):
+        return " ".join(str(x) for x in dato)
+    if isinstance(dato, dict):
+        return " ".join(f"{_humano(k)} {_formatear_valor_texto(v)}" for k, v in dato.items())
+    return str(dato)
+
+
 def _tarjeta_mecanica(nombre: str, mec: dict) -> str:
     """Render de una tarjeta de mecánica."""
     valores = mec.get("valores", {})
@@ -119,8 +132,15 @@ def _tarjeta_mecanica(nombre: str, mec: dict) -> str:
         if detalle
         else ""
     )
+    # Texto plano para búsqueda (título + descripción + valores + detalle)
+    busqueda = " ".join([
+        _humano(nombre),
+        mec.get("descripcion", ""),
+        " ".join(f"{_humano(k)} {_formatear_valor_texto(v)}" for k, v in valores.items()),
+        detalle, nota,
+    ]).lower()
     return f"""
-    <article class="mecanica">
+    <article class="mecanica" data-busqueda="{html.escape(busqueda)}">
       <h3 class="mec-titulo">{html.escape(_humano(nombre))}{badge}</h3>
       <p class="mec-desc">{html.escape(mec.get("descripcion", ""))}</p>
       {nota_html}
@@ -305,15 +325,60 @@ def _render(reglas: dict) -> str:
     font-size:.82rem; color:#6b5638;
   }}
   .footer b {{ color:var(--rojo); }}
+  /* Buscador */
+  .buscador {{
+    position:sticky; top:0; z-index:100;
+    background:var(--papel); border-bottom:2px solid var(--borde);
+    padding:12px 18px; display:flex; align-items:center; gap:10px;
+    box-shadow:0 2px 8px rgba(0,0,0,.08);
+  }}
+  .buscador label {{ font-weight:bold; color:var(--madera); white-space:nowrap; }}
+  .buscador input {{
+    flex:1; padding:8px 14px; border:1px solid var(--borde); border-radius:20px;
+    font-size:.95rem; font-family:inherit; background:var(--claro);
+    outline:none; transition:border-color .2s;
+  }}
+  .buscador input:focus {{ border-color:var(--bronce); }}
+  .buscador .contador {{
+    font-size:.8rem; color:var(--bronce); white-space:nowrap;
+    min-width:60px; text-align:right;
+  }}
+  .mecanica.oculta {{ display:none; }}
+  .categoria.oculta {{ display:none; }}
+  .cat-sin-resultados {{ display:none; }}
+  .sin-resultados {{
+    text-align:center; padding:40px 20px; color:var(--bronce);
+    font-size:1.1rem; font-style:italic; display:none;
+  }}
+  .sin-resultados.visible {{ display:block; }}
+  /* Responsive mejorado */
   @media print {{
     body {{ background:#fff; }}
     .portada {{ box-shadow:none; }}
+    .buscador {{ display:none; }}
     .indice, .mecanica, .categoria {{ box-shadow:none; break-inside:avoid; }}
     .cat-ancla {{ display:none; }}
   }}
-  @media (max-width:640px) {{
-    .portada h1 {{ font-size:1.9rem; }}
-    .mecanicas {{ grid-template-columns:1fr; }}
+  @media (max-width:768px) {{
+    .portada {{ padding:24px 18px 20px; }}
+    .portada h1 {{ font-size:1.9rem; letter-spacing:1px; }}
+    .portada .sub {{ font-size:.88rem; }}
+    .portada .meta {{ gap:14px; font-size:.82rem; }}
+    .wrap {{ padding:16px 12px 30px; }}
+    .indice ul {{ gap:6px; }}
+    .indice li a {{ font-size:.85rem; padding:4px 12px; }}
+    .mecanicas {{ grid-template-columns:1fr; gap:10px; }}
+    .mecanica {{ padding:12px 14px; }}
+    .cat-cab h2 {{ font-size:1.25rem; }}
+    .buscador {{ padding:10px 12px; }}
+    .buscador input {{ font-size:.9rem; padding:7px 12px; }}
+  }}
+  @media (max-width:480px) {{
+    .portada h1 {{ font-size:1.5rem; }}
+    .portada .kicker {{ font-size:.7rem; letter-spacing:2px; }}
+    .dados {{ gap:6px; }}
+    .dado {{ width:36px; height:36px; font-size:1rem; }}
+    .buscador label {{ display:none; }}
   }}
 </style>
 </head>
@@ -331,9 +396,17 @@ def _render(reglas: dict) -> str:
   </header>
 
   <div class="wrap">
+    <div class="buscador" id="buscador">
+      <label for="buscar">&#128269;</label>
+      <input type="search" id="buscar" placeholder="Buscar mecánica..." autocomplete="off">
+      <span class="contador" id="contador">{total_mec} / {total_mec}</span>
+    </div>
+
     {idx}
 
     {f'<p style="margin:-10px 0 20px; font-style:italic; color:#6b5638; font-size:.92rem;">{html.escape(nota)}</p>' if nota else ''}
+
+    <div class="sin-resultados" id="sin-resultados">No se encontraron mecánicas para "{html.escape(nota or '')}".</div>
 
     {secciones}
 
@@ -342,6 +415,38 @@ def _render(reglas: dict) -> str:
       <p>Complementada con las normas del pack de misión HeroQuest: El Despertar y el Reglamento original (1989) como referencia.</p>
     </footer>
   </div>
+
+  <script>
+  (function() {{
+    const input = document.getElementById('buscar');
+    const contador = document.getElementById('contador');
+    const total = {total_mec};
+    const mecanicas = document.querySelectorAll('.mecanica');
+    const categorias = document.querySelectorAll('.categoria');
+    const sinResultados = document.getElementById('sin-resultados');
+
+    input.addEventListener('input', function() {{
+      const q = this.value.toLowerCase().trim();
+      let visibles = 0;
+
+      mecanicas.forEach(m => {{
+        const texto = m.getAttribute('data-busqueda') || '';
+        const match = !q || texto.includes(q);
+        m.classList.toggle('oculta', !match);
+        if (match) visibles++;
+      }});
+
+      // Ocultar categorías sin tarjetas visibles
+      categorias.forEach(cat => {{
+        const tarjetas = cat.querySelectorAll('.mecanica:not(.oculta)');
+        cat.classList.toggle('oculta', tarjetas.length === 0);
+      }});
+
+      contador.textContent = visibles + ' / ' + total;
+      sinResultados.classList.toggle('visible', visibles === 0 && q.length > 0);
+    }});
+  }})();
+  </script>
 </body>
 </html>"""
 
