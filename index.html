@@ -1,62 +1,151 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Gestor de Juegos y Aplicaciones</title>
-<style>
-  :root {
-    --papel:#f3ecdd; --tinta:#241a12; --bronce:#8a6d3b;
-    --madera:#5d4037; --claro:#fffdf7; --borde:#d8c9a8;
-  }
-  * { box-sizing:border-box; margin:0; padding:0; }
-  body {
-    font-family:Georgia,'Times New Roman',serif;
-    background:var(--papel); color:var(--tinta);
-    min-height:100vh; display:flex; flex-direction:column; align-items:center;
-  }
-  header {
-    background:linear-gradient(145deg,#3a2620 0%,#5d4037 55%,#4a3630 100%);
-    color:#f4e9d2; width:100%; padding:38px 32px 28px; text-align:center;
-    border-bottom:4px solid var(--bronce); box-shadow:0 3px 14px rgba(0,0,0,.35);
-  }
-  header h1 { font-size:2.2rem; letter-spacing:2px; margin-bottom:6px; }
-  header p { font-style:italic; color:#e8d9b8; }
-  main { max-width:800px; width:100%; padding:32px 20px 60px; }
-  .juego {
-    background:var(--claro); border:1px solid var(--borde); border-radius:14px;
-    padding:24px 28px; margin-bottom:20px;
-    box-shadow:0 2px 8px rgba(0,0,0,.06);
-    transition:box-shadow .2s;
-  }
-  .juego:hover { box-shadow:0 4px 16px rgba(0,0,0,.12); }
-  .juego h2 {
-    font-size:1.4rem; color:var(--madera); margin-bottom:4px;
-    display:flex; align-items:center; gap:10px;
-  }
-  .juego h2 .emoji { font-size:1.5rem; }
-  .juego .tipo {
-    display:inline-block; font-size:.75rem; text-transform:uppercase;
-    letter-spacing:.5px; color:var(--bronce); background:var(--papel);
-    border:1px solid var(--borde); border-radius:10px; padding:2px 10px;
-  }
-  .juego p { margin:8px 0 14px; font-size:.94rem; color:#5a4a3a; }
-  .enlaces { list-style:none; display:flex; flex-wrap:wrap; gap:8px; }
-  .enlaces a {
-    display:inline-flex; align-items:center; gap:6px;
-    background:var(--papel); border:1px solid var(--borde); border-radius:20px;
-    padding:6px 16px; color:var(--tinta); text-decoration:none; font-size:.9rem;
-    transition:background .15s, color .15s;
-  }
-  .enlaces a:hover { background:var(--madera); color:#f4e9d2; }
-  .enlaces a::before { content:"→"; color:var(--bronce); }
-  footer {
-    margin-top:auto; padding:18px 20px; text-align:center;
-    font-size:.8rem; color:#8a7a6a; border-top:1px solid var(--borde);
-    width:100%;
-  }
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gestor de Juegos y Aplicaciones</title>
+  <style>
+    :root {
+      --papel: #f3ecdd;
+      --tinta: #241a12;
+      --bronce: #8a6d3b;
+      --madera: #5d4037;
+      --claro: #fffdf7;
+      --borde: #d8c9a8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Georgia, 'Times New Roman', serif;
+      background: var(--papel);
+      color: var(--tinta);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    header {
+      background: linear-gradient(145deg, #3a2620 0%, #5d4037 55%, #4a3630 100%);
+      color: #f4e9d2;
+      width: 100%;
+      padding: 38px 32px 28px;
+      text-align: center;
+      border-bottom: 4px solid var(--bronce);
+      box-shadow: 0 3px 14px rgba(0, 0, 0, .35);
+    }
+
+    header h1 {
+      font-size: 2.2rem;
+      letter-spacing: 2px;
+      margin-bottom: 6px;
+    }
+
+    header p {
+      font-style: italic;
+      color: #e8d9b8;
+    }
+
+    main {
+      max-width: 800px;
+      width: 100%;
+      padding: 32px 20px 60px;
+    }
+
+    .juego {
+      background: var(--claro);
+      border: 1px solid var(--borde);
+      border-radius: 14px;
+      padding: 24px 28px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, .06);
+      transition: box-shadow .2s;
+    }
+
+    .juego:hover {
+      box-shadow: 0 4px 16px rgba(0, 0, 0, .12);
+    }
+
+    .juego h2 {
+      font-size: 1.4rem;
+      color: var(--madera);
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .juego h2 .emoji {
+      font-size: 1.5rem;
+    }
+
+    .juego .tipo {
+      display: inline-block;
+      font-size: .75rem;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      color: var(--bronce);
+      background: var(--papel);
+      border: 1px solid var(--borde);
+      border-radius: 10px;
+      padding: 2px 10px;
+    }
+
+    .juego p {
+      margin: 8px 0 14px;
+      font-size: .94rem;
+      color: #5a4a3a;
+    }
+
+    .enlaces {
+      list-style: none;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .enlaces a {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--papel);
+      border: 1px solid var(--borde);
+      border-radius: 20px;
+      padding: 6px 16px;
+      color: var(--tinta);
+      text-decoration: none;
+      font-size: .9rem;
+      transition: background .15s, color .15s;
+    }
+
+    .enlaces a:hover {
+      background: var(--madera);
+      color: #f4e9d2;
+    }
+
+    .enlaces a::before {
+      content: "→";
+      color: var(--bronce);
+    }
+
+    footer {
+      margin-top: auto;
+      padding: 18px 20px;
+      text-align: center;
+      font-size: .8rem;
+      color: #8a7a6a;
+      border-top: 1px solid var(--borde);
+      width: 100%;
+    }
+  </style>
 </head>
+
 <body>
   <header>
     <h1>Gestor de Juegos y Aplicaciones</h1>
@@ -66,23 +155,26 @@
   <main>
     <article class="juego">
       <h2><span class="emoji">&#9876;</span> HeroQuest <span class="tipo">Juego de mesa</span></h2>
-      <p>Mazmorras, combate, magia y tesoros. Reglas V2 de la comunidad, cartas generadas por plantillas y misiones montables en tablero.</p>
+      <p>Mazmorras, combate, magia y tesoros. Reglas V2 de la comunidad, cartas generadas por plantillas y misiones
+        montables en tablero.</p>
       <ul class="enlaces">
         <li><a href="juegos/heroquest/html/reglas_de_heroquest.html">Reglas</a></li>
+        <li><a href="juegos/heroquest/html/mision_1_el_refugio_del_guardian.html">Misión 1</a></li>
       </ul>
     </article>
 
-    <article class="juego">
+    <!-- <article class="juego">
       <h2><span class="emoji">&#127811;</span> Pokémon Champions <span class="tipo">Competitivo</span></h2>
       <p>Pokédex, sets competitivos, constructor de equipos y análisis de cobertura de tipos.</p>
       <ul class="enlaces">
-        <!-- sin HTML aún -->
       </ul>
-    </article>
+    </article> -->
+
   </main>
 
   <footer>
     <p>Generado con opencode · Fuentes en <a href="https://github.com/radi/gestor_juegos_aplicaciones">GitHub</a></p>
   </footer>
 </body>
+
 </html>
