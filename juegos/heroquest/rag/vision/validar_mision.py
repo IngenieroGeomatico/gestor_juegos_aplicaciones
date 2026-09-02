@@ -133,6 +133,18 @@ def slug(x):
     return x.lower().replace(" ", "_").replace("/", "_").replace("-", "_")
 
 
+def _puerta_punto(p, label):
+    """Devuelve (col, fila, label) para una puerta {x,y} o umbral {de,a}.
+    Para un umbral usa el punto medio de las dos casillas."""
+    if "de" in p and "a" in p:
+        de, a = p["de"], p["a"]
+        col = (de[0] + a[0]) / 2
+        fila = (de[1] + a[1]) / 2
+    else:
+        col, fila = p["x"], p["y"]
+    return col, fila, label
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("mapa")
@@ -184,9 +196,9 @@ def main():
     for p in mision.get("entrada_heroes", []):
         tipos["entrada"].append((p["x"], p["y"], "IN"))
     for p in mision.get("puertas", []):
-        tipos["puertas"].append((p["x"], p["y"], "P"))
+        tipos["puertas"].append(_puerta_punto(p, "P"))
     for p in mision.get("puertas_secretas", []):
-        tipos["puertas"].append((p["x"], p["y"], "PS"))
+        tipos["puertas"].append(_puerta_punto(p, "PS"))
     for sala in mision.get("salas", []):
         for m in sala.get("monstruos", []):
             tipos["monstruos"].append((m["x"], m["y"], f"M:{m['nombre']}"))
@@ -196,6 +208,10 @@ def main():
             tipos["trampas"].append((t["x"], t["y"], f"TR:{t['nombre']}"))
         for mark in sala.get("marcadores", []):
             tipos["marcadores"].append((mark["x"], mark["y"], f"MAR:{mark['nombre']}"))
+    for tipo_clave, tipo in (("monstruos", "monstruos"), ("tesoros", "tesoros"),
+                             ("trampas", "trampas"), ("marcadores", "marcadores")):
+        for it in mision.get("pasillos", {}).get(tipo_clave, []):
+            tipos[tipo].append((it["x"], it["y"], f"{TIPOS[tipo][0]}:{it.get('nombre','')}"))
     for L in cfgm.get("letras", []):
         prefijo = TIPOS["letras"][0]
         for col, fila in L["casillas"]:

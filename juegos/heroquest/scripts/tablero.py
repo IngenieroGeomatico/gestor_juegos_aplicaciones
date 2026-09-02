@@ -77,6 +77,25 @@ def punto_valido(tablero: dict, p: dict, contexto: str) -> list[str]:
     return []
 
 
+def puerta_valida(tablero: dict, p: dict, contexto: str) -> list[str]:
+    """Valida una puerta que puede ser un punto {x, y} o un umbral
+    {de: [x1, y1], a: [x2, y2]} (la línea que une dos casillas adyacentes).
+    Devuelve la lista de errores."""
+    if "de" in p and "a" in p:
+        de, a = p["de"], p["a"]
+        if not (isinstance(de, list) and len(de) == 2 and isinstance(a, list) and len(a) == 2):
+            return [f"{contexto}: umbral mal formado en {p} (esperaba 'de'/'a' con [x,y])"]
+        errores = []
+        errores += punto_valido(tablero, {"x": de[0], "y": de[1]}, f"{contexto} extremo 'de'")
+        errores += punto_valido(tablero, {"x": a[0], "y": a[1]}, f"{contexto} extremo 'a'")
+        if not (de[0] == a[0] or de[1] == a[1]):
+            errores.append(f"{contexto}: el umbral debe unir casillas alineadas (misma columna o fila) en {p}")
+        if abs((de[0] - a[0]) + (de[1] - a[1])) != 1:
+            errores.append(f"{contexto}: el umbral debe unir dos casillas adyacentes en {p}")
+        return errores
+    return punto_valido(tablero, p, contexto)
+
+
 def _punto_en_sala(sala: dict, x: int, y: int) -> bool:
     for rect in sala["rects"]:
         if rect["x"] <= x < rect["x"] + rect["ancho"] and rect["y"] <= y < rect["y"] + rect["alto"]:
@@ -116,11 +135,16 @@ def validar_misiones() -> int:
         for t in mision.get("entrada_heroes", []):
             errores += punto_valido(tablero, t, f"misión '{mision['nombre']}' entrada_heroes")
         for p in mision.get("puertas", []):
-            errores += punto_valido(tablero, p, f"misión '{mision['nombre']}' puerta")
+            errores += puerta_valida(tablero, p, f"misión '{mision['nombre']}' puerta")
         for p in mision.get("puertas_secretas", []):
-            errores += punto_valido(tablero, p, f"misión '{mision['nombre']}' puerta secreta")
+            errores += puerta_valida(tablero, p, f"misión '{mision['nombre']}' puerta secreta")
         for sala in mision.get("salas", []):
             errores += sala_pertenece(tablero, sala)
+        # Elementos en pasillo: se validan como jugables (sin exigir sala)
+        for obstaculo in ("monstruos", "tesoros", "trampas", "marcadores"):
+            for item in mision.get("pasillos", {}).get(obstaculo, []):
+                contexto = f"misión '{mision['nombre']}' pasillos.{obstaculo} '{item.get('nombre','?')}'"
+                errores += punto_valido(tablero, item, contexto)
 
     if errores:
         for e in errores:

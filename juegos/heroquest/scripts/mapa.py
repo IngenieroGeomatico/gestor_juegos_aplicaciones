@@ -88,6 +88,11 @@ def _puntos_mision(mision: dict) -> list[tuple[str, dict]]:
             puntos.append(("trampa", tr))
         for ma in sala.get("marcadores", []):
             puntos.append(("marcador", ma))
+    # Elementos en pasillo (fuera de sala)
+    for tipo_clave, tipo in (("monstruos", "monstruo"), ("tesoros", "tesoro"),
+                             ("trampas", "trampa"), ("marcadores", "marcador")):
+        for it in mision.get("pasillos", {}).get(tipo_clave, []):
+            puntos.append((tipo, it))
     return puntos
 
 
@@ -116,7 +121,8 @@ def _marcadores_png(d: ImageDraw.ImageDraw, mision: dict | None, ox: int, oy: in
         return
     r = int(celda * 0.36)
     for tipo, punto in _puntos_mision(mision):
-        cx, cy = ox + (punto["x"] - 0.5) * celda, oy + (punto["y"] - 0.5) * celda
+        gx, gy = _centro(punto)
+        cx, cy = ox + (gx - 0.5) * celda, oy + (gy - 0.5) * celda
         letra, color = MARCADORES[tipo]
         if tipo == "tesoro":
             d.polygon([(cx, cy - r), (cx + r, cy), (cx, cy + r), (cx - r, cy)], fill=color, outline="#000")
@@ -141,6 +147,15 @@ def _marcadores_png(d: ImageDraw.ImageDraw, mision: dict | None, ox: int, oy: in
 def _inicial(punto: dict, tipo: str) -> str:
     nombre = punto.get("nombre", "")
     return nombre[0].upper() if nombre else "?"
+
+
+def _centro(punto: dict) -> tuple[float, float]:
+    """Devuelve el centro (cx, cy) en coordenadas de casilla (enteras) de un punto.
+    Acepta {x, y} (casilla) o {de, a} (umbral: devuelve el punto medio)."""
+    if "de" in punto and "a" in punto:
+        de, a = punto["de"], punto["a"]
+        return (de[0] + a[0]) / 2, (de[1] + a[1]) / 2
+    return punto["x"], punto["y"]
 
 
 def _leyenda_png(d: ImageDraw.ImageDraw, mision: dict | None, w: int, h: int, leyenda: int) -> None:
@@ -180,7 +195,8 @@ def _marcadores_svg(partes: list[str], mision: dict | None, ox: int, oy: int, ce
         return
     r = celda * 0.36
     for tipo, punto in _puntos_mision(mision):
-        cx, cy = ox + (punto["x"] - 0.5) * celda, oy + (punto["y"] - 0.5) * celda
+        gx, gy = _centro(punto)
+        cx, cy = ox + (gx - 0.5) * celda, oy + (gy - 0.5) * celda
         letra, color = MARCADORES[tipo]
         if tipo == "tesoro":
             partes.append(f'<polygon points="{cx},{cy-r} {cx+r},{cy} {cx},{cy+r} {cx-r},{cy}" fill="{color}" stroke="#000"/>')

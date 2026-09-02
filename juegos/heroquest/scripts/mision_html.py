@@ -23,7 +23,7 @@ import mapa
 import tablero
 
 DATA_DIR = tablero.DATA_DIR
-HTML_DIR = DATA_DIR.parent / "mapas"
+HTML_DIR = DATA_DIR.parent / "html"
 
 
 def _cargar_mision(nombre: str) -> dict:
@@ -91,10 +91,18 @@ def _ficha_tesoro(t: dict | None, nombre: str) -> str:
     return f'<span class="tesoro">{html.escape(nombre)}{extras}</span>'
 
 
+def _formato_punto(p: dict) -> str:
+    """Devuelve la representación de un punto: casilla {x,y} o umbral {de,a}."""
+    if "de" in p and "a" in p:
+        de, a = p["de"], p["a"]
+        return f"({de[0]},{de[1]})–({a[0]},{a[1]})"
+    return f'({p.get("x","?")},{p.get("y","?")})'
+
+
 def _lista_puntos(puntos: list[dict]) -> str:
     if not puntos:
         return "—"
-    return ", ".join(f'({p.get("x","?")},{p.get("y","?")})' for p in puntos)
+    return ", ".join(_formato_punto(p) for p in puntos)
 
 
 def _lista_puntos_secretas(puntos: list[dict]) -> str:
@@ -102,7 +110,7 @@ def _lista_puntos_secretas(puntos: list[dict]) -> str:
         return "—"
     partes = []
     for p in puntos:
-        base = f'({p.get("x","?")},{p.get("y","?")})'
+        base = _formato_punto(p)
         if p.get("descripcion"):
             base += f': {html.escape(p["descripcion"])}'
         partes.append(base)
@@ -225,6 +233,40 @@ def _render(mision: dict, t: dict) -> str:
           {f'<div class="notas">{html.escape(sala["notas"])}</div>' if sala.get("notas") else ""}
         </section>""")
 
+    # Elementos en pasillo (fuera de sala)
+    pasillos = mision.get("pasillos", {})
+    if pasillos:
+        bloques = []
+        for etiqueta, clave in (("Monstruos", "monstruos"), ("Tesoros", "tesoros"),
+                                ("Trampas", "trampas"), ("Fichas / marcadores", "marcadores")):
+            items = pasillos.get(clave, [])
+            if not items:
+                continue
+            lis = []
+            for it in items:
+                pos = _formato_punto(it)
+                if clave == "monstruos":
+                    lis.append(f'<li>{_ficha_monstruo(_stats_monstruo(it["nombre"]), it["nombre"])}'
+                               f'<span class="pos"> · {pos}</span></li>')
+                elif clave in ("trampas", "marcadores"):
+                    lis.append(f'<li><b>{html.escape(it["nombre"])}</b> ({pos}). '
+                               f'{html.escape(it.get("descripcion", ""))}</li>')
+                else:
+                    lis.append(f'<li>{_ficha_tesoro(_stat_tesoro(it["nombre"]), it["nombre"])}'
+                               f'<span class="pos"> · {pos}</span></li>')
+            bloques.append(f'<div class="subtipo">{etiqueta}</div><ul class="tesoros">{"".join(lis)}</ul>')
+        pasillos_html = f"""
+        <section class="sala">
+          <header class="salacab">
+            <span class="salnum">Pasillos</span>
+            <span class="salanom">Elementos fuera de las salas</span>
+          </header>
+          <p class="saladesc">Refuerzos y trampas que ocupan los corredores y pasillos del tablero.</p>
+          {"".join(bloques)}
+        </section>"""
+    else:
+        pasillos_html = ""
+
     return f"""<!DOCTYPE html>
 <html lang="es">
 <head>
@@ -331,6 +373,8 @@ def _render(mision: dict, t: dict) -> str:
   <div class="salas">
     {''.join(salas_html)}
   </div>
+
+  {pasillos_html}
 
   <h2 style="color:var(--bronce); margin-bottom:10px;">Referencia del máster</h2>
   {_referencia()}
