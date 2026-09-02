@@ -220,6 +220,9 @@ __marimo__/
 # Imágenes generadas de mapas de HeroQuest
 juegos/heroquest/mapas/
 
+# Imágenes de validación extraídas de los mapas (pipeline de visión, artefactos de trabajo)
+juegos/heroquest/rag/vision/imagenes/
+
 # Cartas HTML generadas de HeroQuest
 juegos/heroquest/cartas/
 
@@ -239,7 +242,11 @@ juegos/heroquest/sources/all-testing-assets/
 
 # Directorio de trabajo de OpenCode
 .omo/
-juegos/heroquest/rag/documentos/*.pdf
+
+# PDFs descargados de Google Drive para el RAG (no viajan en el repo; se
+# regeneran con descargar_fuentes.py). Incluye subcarpetas por expansión y
+# ficheros .html/.part descargados.
+juegos/heroquest/rag/documentos/
 
 # Base de datos y vectorizador del RAG ligero (se generan con indexar_lite.py)
 juegos/heroquest/rag/chroma_db_lite/

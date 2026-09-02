@@ -127,6 +127,6 @@
     "url": "https://heroquest.es/temporal/web_HQ/reglas.html",
     "prioridad": "alta",
     "formato": "html",
-    "notas": "FUENTE DE VERDAD del agente. Reglas V2 del remake de la comunidad (licencia CC BY-NC-SA). Texto completo en HTML."
+    "notas": "FUENTE DE VERDAD del agente. Reglas V2 del remake de la comunidad (licencia CC BY-NC-SA). El dominio heroquest.es está aparcado (Sedo parking) y falla por SSL, así que el texto completo se recuperó vía Wayback Machine y se guardó de forma local en rag/documentos/Remake_HQ_es/reglas_v2_heroquest_es.md (no descargable directamente)."
   }
 ]

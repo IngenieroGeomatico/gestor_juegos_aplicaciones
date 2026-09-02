@@ -50,6 +50,29 @@ def _descargar_gdrive(file_id: str, destino: Path) -> bool:
         return False
 
 
+def _descargar_url(url: str, destino: Path) -> bool:
+    """Descarga un fichero desde una URL directa.
+
+    Intenta HTTPS y, si falla por SSL, reintenta con HTTP.
+    """
+    import requests
+    for proto in ("https://", "http://"):
+        if url.startswith("https://") or url.startswith("http://"):
+            full = url
+        else:
+            full = f"{proto}{url}"
+        try:
+            print(f"  Descargando desde {full[:70]}...")
+            resp = requests.get(full, timeout=60, allow_redirects=True)
+            resp.raise_for_status()
+            destino.write_bytes(resp.content)
+            print(f"  OK: {len(resp.content):,} bytes")
+            return True
+        except Exception as e:
+            print(f"  Error ({proto.rstrip(':')}): {e}")
+    return False
+
+
 def _slug(nombre: str) -> str:
     """Convierte un nombre en slug seguro para ficheros."""
     return "".join(c if c.isalnum() else "_" for c in nombre).strip("_")
@@ -78,8 +101,8 @@ def descargar_fuentes(
         nombre_lower = nombre.lower()
         fuentes = [f for f in fuentes if nombre_lower in f.get("nombre", "").lower()]
 
-    # Filtrar solo las descargables (con file_id)
-    descargables = [f for f in fuentes if f.get("file_id")]
+    # Filtrar solo las descargables (con file_id o url)
+    descargables = [f for f in fuentes if f.get("file_id") or f.get("url")]
 
     if not descargables:
         print("No se encontraron fuentes descargables con los filtros aplicados.")
@@ -91,7 +114,8 @@ def descargar_fuentes(
 
     for fuente in descargables:
         nombre_fuente = fuente["nombre"]
-        file_id = fuente["file_id"]
+        file_id = fuente.get("file_id")
+        url = fuente.get("url")
         expansion_fuente = fuente.get("expansion", "General")
         slug_expansion = _slug(expansion_fuente)
 
@@ -99,9 +123,10 @@ def descargar_fuentes(
         dir_expansion = _DESTINO / slug_expansion
         dir_expansion.mkdir(parents=True, exist_ok=True)
 
-        # Nombre del fichero
+        # Nombre del fichero (extensión según tipo)
         slug_nombre = _slug(nombre_fuente)
-        destino = dir_expansion / f"{slug_nombre}.pdf"
+        ext = ".pdf" if ".pdf" in str(fuente.get("url", "")).lower() or file_id else ".html"
+        destino = dir_expansion / f"{slug_nombre}{ext}"
 
         print(f"→ {nombre_fuente}")
         print(f"  Expansión: {expansion_fuente}")
@@ -111,7 +136,10 @@ def descargar_fuentes(
             print(f"  Ya existe: {destino.name}")
             continue
 
-        _descargar_gdrive(file_id, destino)
+        if file_id:
+            _descargar_gdrive(file_id, destino)
+        elif url:
+            _descargar_url(url, destino)
         print()
 
 

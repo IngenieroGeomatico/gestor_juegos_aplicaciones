@@ -39,6 +39,11 @@ def sala_en(tablero: dict, x: int, y: int) -> int | None:
     return None
 
 
+def es_no_jugable(tablero: dict, x: int, y: int) -> bool:
+    """True si la casilla (x, y) está marcada como roca dura / no jugable."""
+    return [x, y] in tablero.get("no_jugables", [])
+
+
 def pinta(tablero: dict) -> str:
     """Dibuja el tablero como cuadrícula ASCII: números de sala y '.' para pasillos."""
     lineas = []
@@ -47,6 +52,9 @@ def pinta(tablero: dict) -> str:
     for y in range(1, tablero["filas"] + 1):
         fila = f"{y:>3} "
         for x in range(1, tablero["columnas"] + 1):
+            if es_no_jugable(tablero, x, y):
+                fila += "#"
+                continue
             num = sala_en(tablero, x, y)
             if num is None:
                 fila += "."
@@ -57,12 +65,15 @@ def pinta(tablero: dict) -> str:
 
 
 def punto_valido(tablero: dict, p: dict, contexto: str) -> list[str]:
-    """Comprueba que un punto {x, y} caiga dentro del tablero. Devuelve errores."""
+    """Comprueba que un punto {x, y} caiga dentro del tablero y sea jugable.
+    Devuelve errores."""
     x, y = p.get("x"), p.get("y")
     if not isinstance(x, int) or not isinstance(y, int):
         return [f"{contexto}: coordenadas no enteras en {p}"]
     if not (1 <= x <= tablero["columnas"] and 1 <= y <= tablero["filas"]):
         return [f"{contexto}: ({x},{y}) fuera del tablero"]
+    if es_no_jugable(tablero, x, y):
+        return [f"{contexto}: ({x},{y}) cae en roca dura (casilla no jugable)"]
     return []
 
 

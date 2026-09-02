@@ -1,179 +1,420 @@
 {
-  "version": "1.0",
-  "fuente_de_verdad": "V2 de HeroQuest.es (remake de la comunidad, licencia CC BY-NC-SA)",
-  "nota": "Reglas canónicas del juego, agrupadas por categorías y mecánicas. Edita libremente este fichero para ampliar o ajustar las mecánicas; el agente lo consulta como fuente de referencia.",
-  "categorias": {
-    "componentes_y_preparacion": {
-      "descripcion": "Componentes, roles y puesta en marcha de la partida.",
-      "mecanicas": {
-        "jugadores": {
-          "descripcion": "Un jugador controla al Malvado Brujo (Zargon/Morcar) y sus fuerzas del mal; los demás controlan a los héroes ('personajes').",
-          "valores": {
-            "jugadores_min": 2,
-            "jugadores_max": 5
-          }
-        },
-        "heroes_base": {
-          "descripcion": "Héroes básicos del juego. El Mago y el Elfo son 'mágicos' y pueden lanzar hechizos.",
-          "valores": {
-            "barbaro": "A3 D3 Cu8 Me2",
-            "enano": "A3 D4 Cu7 Me3",
-            "elfo": "A2 D3 Cu6 Me4",
-            "mago": "A1 D2 Cu4 Me6"
-          },
-          "detalle": "A = ataque, D = defensa, Cu = cuerpo, Me = mente."
-        },
-        "clasificacion_cartas": {
-          "descripcion": "Al comenzar, el Malvado Brujo clasifica las cartas: Tesoros, Monstruos, Equipo de Batalla, Tesoros de Reto, Artefactos, Pociones Mágicas, Hechizos y Pergaminos.",
-          "valores": {}
-        }
-      }
+ "version": "1.0",
+ "fuente_de_verdad": "V2 de HeroQuest.es (remake de la comunidad, licencia CC BY-NC-SA)",
+ "nota": "Reglas canónicas del juego, agrupadas por categorías y mecánicas. Edita libremente este fichero para ampliar o ajustar las mecánicas; el agente lo consulta como fuente de referencia.",
+ "categorias": {
+  "componentes_y_preparacion": {
+   "descripcion": "Componentes, roles y puesta en marcha de la partida.",
+   "mecanicas": {
+    "jugadores": {
+     "descripcion": "Un jugador controla al Malvado Brujo (Zargon/Morcar) y sus fuerzas del mal; los demás controlan a los héroes ('personajes').",
+     "valores": {
+      "jugadores_min": 2,
+      "jugadores_max": 5
+     }
     },
-    "turnos_y_movimiento": {
-      "descripcion": "Orden de turno, movimiento y acciones disponibles.",
-      "mecanicas": {
-        "orden_de_juego": {
-          "descripcion": "El juego comienza por el jugador a la izquierda del Malvado Brujo y sigue en el sentido de las agujas del reloj. Se recomienda que empiecen los héroes no mágicos y luego los mágicos.",
-          "valores": {}
-        },
-        "acciones_por_turno": {
-          "descripcion": "Durante su turno, un personaje puede moverse y realizar una acción, o a la inversa.",
-          "valores": {}
-        },
-        "movimiento": {
-          "descripcion": "El movimiento se mide en casillas, limitado por el valor de movimiento y el equipo (algunas armaduras ralentizan).",
-          "valores": {}
-        }
-      }
+    "heroes_base": {
+     "descripcion": "Héroes básicos del juego. El Mago y el Elfo son 'mágicos' y pueden lanzar hechizos.",
+     "valores": {
+      "barbaro": "A3 D3 Cu8 Me2",
+      "enano": "A3 D4 Cu7 Me3",
+      "elfo": "A2 D3 Cu6 Me4",
+      "mago": "A1 D2 Cu4 Me6"
+     },
+     "detalle": "A = ataque, D = defensa, Cu = cuerpo, Me = mente."
     },
-    "combate": {
-      "descripcion": "Sistema de ataque y defensa con dados de combate.",
-      "mecanicas": {
-        "dados_de_combate": {
-          "descripcion": "Los dados de combate muestran calaveras (daño) y escudos (defensa). Los héroes buscan escudos blancos; los monstruos, escudos negros.",
-          "valores": {}
-        },
-        "ataque": {
-          "descripcion": "Para atacar se está normalmente en una de las cuatro casillas adyacentes. Se lanzan tantos dados de combate como indique el arma o la carta. Cada calavera que no se anule inflige un punto de daño de Cuerpo.",
-          "valores": {}
-        },
-        "defensa": {
-          "descripcion": "El defensor lanza sus dados de defensa; cada escudo del tipo adecuado cancela una calavera. Al llegar el Cuerpo a cero, la criatura muere.",
-          "valores": {}
-        },
-        "combate_sin_armas": {
-          "descripcion": "Sin arma se lucha con los puños lanzando un dado de combate; el acierto depende de la naturaleza del personaje.",
-          "valores": {
-            "barbaro": "cualquier calavera (50%)",
-            "elfo": "calavera blanca (33%)",
-            "mago": "calavera negra (16%)"
-          }
-        },
-        "muerte_del_heroe": {
-          "descripcion": "Cuando un héroe pierde todo su Cuerpo, se coloca su ficha de cadáver. El equipo puede recuperarse si otro héroe en línea de visión se coloca sobre ella (o tirando un dado si no hay nadie).",
-          "valores": {}
-        },
-        "aturdimiento": {
-          "descripcion": "Las calaveras negras aturden (no infligen daño de Cuerpo): hacen que la criatura pierda su siguiente turno. El defensor neutraliza primero las calaveras blancas y luego las negras.",
-          "valores": {}
-        }
-      }
-    },
-    "magia": {
-      "descripcion": "Lanzamiento de hechizos, coste de mente y consecuencias.",
-      "mecanicas": {
-        "tipos_de_personajes": {
-          "descripcion": "Solo los personajes mágicos lanzan hechizos (Mago y Elfo en el grupo base). Los no mágicos pueden lanzar algunos a través de pergaminos o artefactos.",
-          "valores": {}
-        },
-        "escuelas_elementales": {
-          "descripcion": "Los hechizos se clasifican en grupos elementales: Agua, Tierra, Fuego y Aire (y Terror). Un grupo de hechizos se compone de tres hechizos.",
-          "valores": {
-            "escuelas": [
-              "Agua",
-              "Tierra",
-              "Fuego",
-              "Aire",
-              "Terror"
-            ],
-            "hechizos_por_grupo": 3
-          }
-        },
-        "eleccion_de_hechizos": {
-          "descripcion": "Al principio del reto, el Mago puede llevar tres grupos de hechizos y el Elfo uno. Primero elige el Mago, luego el Elfo, y el Mago termina con los grupos restantes.",
-          "valores": {
-            "grupos_mago": 3,
-            "grupos_elfo": 1
-          }
-        },
-        "coste_de_mente": {
-          "descripcion": "Lanzar un hechizo cuesta Puntos de Mente (campo 'coste_mente' de cada hechizo). Una vez lanzado, la carta del hechizo se descarta y se retira del juego.",
-          "valores": {}
-        },
-        "estado_de_shock": {
-          "descripcion": "Cuando el Cuerpo o la Mente del héroe llega a cero, cae en estado de shock: solo puede moverse la mitad (redondeando hacia arriba), atacar con un máximo de un dado y defenderse con dos. Recuperar al menos un punto de Mente lo vuelve a la normalidad.",
-          "valores": {
-            "movimiento_mitad": true,
-            "dado_ataque_max": 1,
-            "dados_defensa_max": 2
-          }
-        },
-        "muerte_psiquica_del_monstruo": {
-          "descripcion": "Si la Mente de un monstruo llega a cero, el monstruo muere.",
-          "valores": {}
-        },
-        "linea_de_vision": {
-          "descripcion": "Los hechizos se lanzan sobre criaturas visibles. Las miniaturas en la misma habitación siempre son visibles; en pasadizos o habitaciones distintas se requiere una línea recta sin obstáculos (paredes, puertas cerradas u otras miniaturas).",
-          "valores": {}
-        }
-      }
-    },
-    "trampas": {
-      "descripcion": "Detección, activación y desactivación de trampas (pozos, rocas caídas, etc.).",
-      "mecanicas": {
-        "activacion": {
-          "descripcion": "Las trampas se activan al entrar en determinadas casillas o al accionar objetos. Aplican daño, desplazamiento y/o tiradas de dados según la trampa.",
-          "valores": {}
-        },
-        "saltar_una_trampa": {
-          "descripcion": "Saltar una trampa es igual que saltar un pozo: debe haber al menos una casilla libre después. Se lanza un dado de combate; si sale una calavera, se cae sobre la trampa activándola.",
-          "valores": {}
-        },
-        "desactivar_con_kit": {
-          "descripcion": "El Enano desactiva trampas con su kit de herramientas; los demás héroes lo intentan sin kit con una tirada (fallo -> activación).",
-          "valores": {}
-        }
-      }
-    },
-    "tesoros_y_tienda": {
-      "descripcion": "Incentivo económico, compra de equipo y tesoros de reto.",
-      "mecanicas": {
-        "monedas_de_oro": {
-          "descripcion": "Los héroes ganan monedas de oro como recompensa y las gastan en la tienda entre misiones.",
-          "valores": {}
-        },
-        "equipo_de_batalla": {
-          "descripcion": "Armas y armaduras con ataque, defensa y coste. Al comprar un arma, sus dados de ataque sustituyen a los propios del personaje (no se acumulan).",
-          "valores": {}
-        },
-        "tesoros_de_reto": {
-          "descripcion": "Objetos de valor que aparecen en las misiones y se reparten entre los héroes.",
-          "valores": {}
-        }
-      }
-    },
-    "misiones": {
-      "descripcion": "Estructura de un reto y preparación del tablero.",
-      "mecanicas": {
-        "partes_del_reto": {
-          "descripcion": "Cada reto tiene tres partes: el texto del pergamino (lo lee el Malvado Brujo), el mapa del reto (cómo se monta el tablero) y las notas finales (situaciones únicas).",
-          "valores": {}
-        },
-        "preparacion_del_tablero": {
-          "descripcion": "Solo la habitación de la escalera está montada al principio; el resto se coloca conforme los héroes avanzan por el tablero.",
-          "valores": {}
-        }
-      }
+    "clasificacion_cartas": {
+     "descripcion": "Al comenzar, el Malvado Brujo clasifica las cartas: Tesoros, Monstruos, Equipo de Batalla, Tesoros de Reto, Artefactos, Pociones Mágicas, Hechizos y Pergaminos.",
+     "valores": {}
     }
+   }
+  },
+  "turnos_y_movimiento": {
+   "descripcion": "Orden de turno, movimiento y acciones disponibles.",
+   "mecanicas": {
+    "orden_de_juego": {
+     "descripcion": "El juego comienza por el jugador a la izquierda del Malvado Brujo y sigue en el sentido de las agujas del reloj. Se recomienda que empiecen los héroes no mágicos y luego los mágicos.",
+     "valores": {}
+    },
+    "acciones_por_turno": {
+     "descripcion": "Durante su turno, un personaje puede moverse y realizar una acción, o a la inversa.",
+     "valores": {}
+    },
+    "movimiento": {
+     "descripcion": "El movimiento se mide en casillas, limitado por el valor de movimiento y el equipo (algunas armaduras ralentizan).",
+     "valores": {}
+    },
+    "movimiento_sin_amenazas": {
+     "descripcion": "Si no hay monstruos activos en el tablero, los héroes pueden optar por no tirar dados de movimiento y usar un valor fijo de 4 por cada Dado Rojo en lugar de tirar.",
+     "valores": {
+      "condicion": "sin monstruos activos en el tablero",
+      "movimiento_fijo_por_dado_rojo": 4,
+      "alternativa_a_tirar": true
+     },
+     "detalle": "Cuando no hay ningún monstruo en el tablero (todos han sido derrotados o aún no han aparecido), los héroes pueden elegir entre tirar los dados de movimiento normalmente o usar un valor fijo de 4 puntos de movimiento por cada Dado Rojo que tengan. Esta opción agiliza el desplazamiento cuando no hay amenazas."
+    },
+    "intercambio_objetos": {
+     "descripcion": "Un héroe puede dar una poción, artefacto u arma a otro héroe adyacente. Condición: ninguno de los dos héroes puede estar adyacente a un monstruo. El intercambio entre misiones es libre.",
+     "valores": {
+      "rango": "adyacente",
+      "objetos_permitidos": [
+       "pociones",
+       "artefactos",
+       "armas"
+      ],
+      "condicion_combate": "ninguno adyacente a un monstruo",
+      "entre_misiones": "libre"
+     },
+     "detalle": "Durante un turno, un héroe puede entregar un objeto (poción, artefacto o arma) a un héroe adyacente como parte de su acción. Para que el intercambio se produzca, ambos héroes no deben estar adyacentes a ningún monstruo. Entre misiones (en la fase de compras y preparación), el intercambio de objetos es libre sin restricciones."
+    }
+   }
+  },
+  "combate": {
+   "descripcion": "Sistema de ataque y defensa con dados de combate.",
+   "mecanicas": {
+    "dados_de_combate": {
+     "descripcion": "Los dados de combate muestran calaveras (daño) y escudos (defensa). Los héroes buscan escudos blancos; los monstruos, escudos negros.",
+     "valores": {}
+    },
+    "ataque": {
+     "descripcion": "Para atacar se está normalmente en una de las cuatro casillas adyacentes. Se lanzan tantos dados de combate como indique el arma o la carta. Cada calavera que no se anule inflige un punto de daño de Cuerpo.",
+     "valores": {}
+    },
+    "defensa": {
+     "descripcion": "El defensor lanza sus dados de defensa; cada escudo del tipo adecuado cancela una calavera. Al llegar el Cuerpo a cero, la criatura muere.",
+     "valores": {}
+    },
+    "combate_sin_armas": {
+     "descripcion": "Sin arma se lucha con los puños lanzando un dado de combate; el acierto depende de la naturaleza del personaje.",
+     "valores": {
+      "barbaro": "cualquier calavera (50%)",
+      "elfo": "calavera blanca (33%)",
+      "mago": "calavera negra (16%)"
+     }
+    },
+    "muerte_del_heroe": {
+     "descripcion": "Cuando un héroe pierde todo su Cuerpo, se coloca su ficha de cadáver. El equipo puede recuperarse si otro héroe en línea de visión se coloca sobre ella (o tirando un dado si no hay nadie).",
+     "valores": {}
+    },
+    "aturdimiento": {
+     "descripcion": "Las calaveras negras aturden (no infligen daño de Cuerpo): hacen que la criatura pierda su siguiente turno. El defensor neutraliza primero las calaveras blancas y luego las negras.",
+     "valores": {}
+    },
+    "aturdir": {
+     "descripcion": "Mecánica específica de aturdimiento para armas contundentes (mazas, garrotes, martillos). Las calaveras negras infligidas por armas contundentes aturden al defensor durante 1 turno. Un personaje puede estar aturdimiento como máximo 1 turno; el efecto no se acumula. El defensor neutraliza primero las calaveras blancas y luego las negras.",
+     "valores": {
+      "duracion_max_turnos": 1,
+      "apilable": false
+     },
+     "detalle": "Cuando un ataque con arma contundente genera calaveras negras que superan la defensa, el defensor queda aturdido y pierde su siguiente turno. Si ya está aturdimiento, un nuevo aturdimiento no extiende la duración más allá del turno perdido actual."
+    },
+    "envenenamiento": {
+     "descripcion": "Un veneno activo causa daño periódico al inicio de cada turno del personaje afectado. Se lanza 1 dado de combate para determinar el efecto. El veneno no se apila sobre sí mismo.",
+     "valores": {
+      "dado_por_turno": 1,
+      "apilable": false
+     },
+     "detalle": "Al inicio del turno del personaje envenenado, se lanza 1 dado de combate: Calavera Blanca = 1 punto de Cuerpo de daño y el veneno continúa; Calavera Negra = 1 punto de Cuerpo de daño y el veneno termina; Escudo Blanco = sin daño y el veneno continúa; Escudo Negro = sin daño y el veneno termina. No se acumulan múltiples venenos."
+    },
+    "ataques_dobles": {
+     "descripcion": "Algunos personajes o armas permiten realizar dos ataques separados en un mismo turno. Cada ataque requiere su propia tirada de defensa. Pueden dirigirse al mismo enemigo o a enemigos distintos, salvo que la regla especial indique lo contrario.",
+     "valores": {
+      "ataques_por_turno": 2,
+      "defensa_independiente": true
+     },
+     "detalle": "Cada ataque se resuelve por completo (tirada de ataque y tirada de defensa del objetivo) antes de proceder al siguiente. Si el primer ataque mata al objetivo, el segundo puede dirigirse a otro enemigo."
+    },
+    "armas_a_distancia": {
+     "descripcion": "Las armas a distancia permiten atacar enemigos que no están en casilla adyacente. Requieren línea de visión; las miniaturas bloquean la línea de visión. No hay límite de casillas de alcance, pero no se puede apuntar a un enemigo adyacente con un arma a distancia.",
+     "valores": {
+      "limite_casillas": "sin límite",
+      "adyacente": false,
+      "linea_de_vision_requerida": true
+     },
+     "detalle": "Para usar un arma a distancia, el personaje debe tener línea de visión recta al objetivo sin que haya paredes, puertas cerradas u otras miniaturas en el camino. No se puede atacar a enemigos adyacentes; si se desea atacar a un enemigo cercano, se debe usar un arma cuerpo a cuerpo."
+    },
+    "armas_arrojadizas": {
+     "descripcion": "Las armas arrojadizas (dagas, jabalinas) pueden usarse para ataque a distancia o cuerpo a cuerpo. Son de un solo uso: tras lanzarlas, se desechan. Para recuperarlas, se busca trampas y se tira 1 dado de combate; si sale Escudo Negro, el arma se pierde definitivamente.",
+     "valores": {
+      "usos": 1,
+      "rango": "distancia o adyacente",
+      "recuperacion_accion": "buscar trampas + 1 dado de combate",
+      "perdida_en_escudo_negro": true
+     },
+     "detalle": "Después de un combate en el que se usó un arma arrojadiza, si el arma quedó en la zona de combate (según las notas de la misión), un héroe puede intentar recuperarla en su turno como acción: busca trampas en la casilla del arma y lanza 1 dado de combate. Escudo Negro = arma perdida; cualquier otro resultado = arma recuperada."
+    }
+   }
+  },
+  "magia": {
+   "descripcion": "Lanzamiento de hechizos, coste de mente y consecuencias.",
+   "mecanicas": {
+    "tipos_de_personajes": {
+     "descripcion": "Solo los personajes mágicos lanzan hechizos (Mago y Elfo en el grupo base). Los no mágicos pueden lanzar algunos a través de pergaminos o artefactos.",
+     "valores": {}
+    },
+    "escuelas_elementales": {
+     "descripcion": "Los hechizos se clasifican en grupos elementales: Agua, Tierra, Fuego y Aire (y Terror). Un grupo de hechizos se compone de tres hechizos.",
+     "valores": {
+      "escuelas": [
+       "Agua",
+       "Tierra",
+       "Fuego",
+       "Aire",
+       "Terror"
+      ],
+      "hechizos_por_grupo": 3
+     }
+    },
+    "eleccion_de_hechizos": {
+     "descripcion": "Al principio del reto, el Mago puede llevar tres grupos de hechizos y el Elfo uno. Primero elige el Mago, luego el Elfo, y el Mago termina con los grupos restantes.",
+     "valores": {
+      "grupos_mago": 3,
+      "grupos_elfo": 1
+     }
+    },
+    "coste_de_mente": {
+     "descripcion": "Lanzar un hechizo cuesta Puntos de Mente (campo 'coste_mente' de cada hechizo). Una vez lanzado, la carta del hechizo se descarta y se retira del juego.",
+     "valores": {}
+    },
+    "estado_de_shock": {
+     "descripcion": "Cuando el Cuerpo o la Mente del héroe llega a cero, cae en estado de shock: solo puede moverse la mitad (redondeando hacia arriba), atacar con un máximo de un dado y defenderse con dos. Recuperar al menos un punto de Mente lo vuelve a la normalidad.",
+     "valores": {
+      "movimiento_mitad": true,
+      "dado_ataque_max": 1,
+      "dados_defensa_max": 2
+     }
+    },
+    "muerte_psiquica_del_monstruo": {
+     "descripcion": "Si la Mente de un monstruo llega a cero, el monstruo muere.",
+     "valores": {}
+    },
+    "linea_de_vision": {
+     "descripcion": "Los hechizos se lanzan sobre criaturas visibles. Las miniaturas en la misma habitación siempre son visibles; en pasadizos o habitaciones distintas se requiere una línea recta sin obstáculos (paredes, puertas cerradas u otras miniaturas).",
+     "valores": {}
+    },
+    "hechizos_de_terror": {
+     "descripcion": "El Terror es la quinta escuela elemental de magia. Algunos monstruos pueden conocer hechizos de Terror y lanzarlos una vez por Misión. Algunos hechizos son 'a voluntad' y se usan como acción del monstruo. No se pueden lanzar sobre criaturas que no tengan Puntos de Mente (p. ej., no se puede usar Sueño sobre Zombies).",
+     "valores": {
+      "lanzamientos_por_mision": 1,
+      "a_voluntad": "algunos hechizos se usan como acción",
+      "restriccion_mindpoints": "no afecta a criaturas sin Puntos de Mente"
+     },
+     "detalle": "Los monstruos que conocen hechizos de Terror pueden usarlos una vez durante toda la Misión. Si un monstruo tiene varios hechizos conocidos, cada uno se puede usar una vez independientemente de cuántos monstruos de ese tipo haya en el tablero. Los hechizos de Terror son especialmente peligrosos porque afectan a la mente de los héroes."
+    },
+    "hechizos_monstruos": {
+     "descripcion": "Los monstruos pueden lanzar hechizos contra los héroes si los conocen. Cada hechizo solo puede ser usado una vez por Misión, independientemente de cuántos monstruos del mismo tipo haya en el tablero.",
+     "valores": {
+      "lanzamientos_por_hechizo": 1,
+      "compartido_entre_monstruos": true
+     },
+     "detalle": "Si hay tres Ogros en el tablero y uno de ellos conoce 'Bola de Fuego', solo se puede lanzar una vez durante toda la Misión, no tres veces. El Malvado Brujo debe indicar qué hechizo se lanza y contra quién, respetando la línea de visión y las reglas del hechizo."
+    }
+   }
+  },
+  "trampas": {
+   "descripcion": "Detección, activación y desactivación de trampas (pozos, rocas caídas, etc.).",
+   "mecanicas": {
+    "activacion": {
+     "descripcion": "Las trampas se activan al entrar en determinadas casillas o al accionar objetos. Aplican daño, desplazamiento y/o tiradas de dados según la trampa.",
+     "valores": {}
+    },
+    "saltar_una_trampa": {
+     "descripcion": "Saltar una trampa es igual que saltar un pozo: debe haber al menos una casilla libre después. Se lanza un dado de combate; si sale una calavera, se cae sobre la trampa activándola.",
+     "valores": {}
+    },
+    "desactivar_con_kit": {
+     "descripcion": "El Enano desactiva trampas con su kit de herramientas; los demás héroes lo intentan sin kit con una tirada (fallo -> activación).",
+     "valores": {}
+    },
+    "trampa_hacha": {
+     "descripcion": "La trampa del hacha solo se activa al pisar la casilla del hacha negra. Las casillas con hacha blanca son rangos de efecto y no activan la trampa. Inflige 2 dados de combate de daño que no se pueden defender. Afecta a todos los héroes y monstruos en las casillas de hacha blanca.",
+     "valores": {
+      "dados_danio": 2,
+      "defendible": false,
+      "activacion": "casilla hacha negra",
+      "rango": "casillas hacha blanca"
+     },
+     "detalle": "La trampa del hacha es un mecanismo con dos tipos de casillas: la casilla del hacha negra (punto de activación) y las casillas de hacha blanca (rango de efecto). Al pisar la casilla negra, la trampa se activa e inflige 2 dados de combate de daño a todos los personajes en las casillas de hacha blanca. El daño no se puede defender con dados de defensa."
+    },
+    "pozo_tinieblas": {
+     "descripcion": "El pozo de tinieblas es más profundo que un pozo normal. Al caer, inflige automáticamente 1 punto de Cuerpo de daño. Además, se lanza 1 dado de combate si se lleva armadura media (Cota de Malla) o 2 dados si se lleva armadura pesada (Coraza).",
+     "valores": {
+      "danio_base": 1,
+      "dados_armadura_media": 1,
+      "dados_armadura_pesada": 2
+     },
+     "detalle": "Al caer en un pozo de tinieblas, el héroe pierde 1 punto de Cuerpo automáticamente. Luego, dependiendo de su armadura: sin armadura o ligera = sin tirada adicional; armadura media (Cota de Malla) = lanza 1 dado de combate más; armadura pesada (Coraza) = lanza 2 dados de combate más. Cada calavera obtenida es 1 punto adicional de daño."
+    },
+    "escaleras_resbaladizas": {
+     "descripcion": "Las escaleras resbaladizas no se pueden encontrar ni desactivar. Al pisarlas, se tira 1 dado de combate: Escudo Blanco = el héroe se resbala escaleras abajo, pierde 1 punto de Cuerpo y su turno termina. El resbalón también arrastra a criaturas cercanas.",
+     "valores": {
+      "encontrable": false,
+      "desactivable": false,
+      "condicion_activacion": "Escudo Blanco",
+      "danio": 1,
+      "efecto": "turno termina + arrastra cercanos"
+     },
+     "detalle": "Al pisar escaleras resbaladizas, se lanza 1 dado de combate. Si sale Escudo Blanco, el héroe se resbala y baja las escaleras con fuerza, perdiendo 1 punto de Cuerpo y terminando su turno inmediatamente. El movimiento de arrastre puede afectar a criaturas adyacentes, arrastrándolas también escaleras abajo. Si sale cualquier otro resultado, el héroe sube/baja sin problema."
+    },
+    "gran_bola_piedra": {
+     "descripcion": "La gran bola de piedra es una trampa especial para misiones específicas (Año 2 en adelante). La casilla de impacto está marcada en el mapa del reto. Puede colocarse un marcador de Derrumbe de Roca sobre la casilla de impacto.",
+     "valores": {
+      "tipo": "trampa especial",
+      "aparicion": "Misiones del Año 2 en adelante",
+      "marcador_asociado": "Derrumbe de Roca"
+     },
+     "detalle": "Esta trampa aparece en misiones avanzadas y se activa según las instrucciones específicas de la misión. La bola de piedra recorre una trayectoria determinada (marcada en el mapa) y afecta a todas las criaturas en su camino. La casilla de impacto final puede quedar bloqueada con un marcador de Derrumbe de Roca, impidiendo el paso hasta que se retire."
+    }
+   }
+  },
+  "tesoros_y_tienda": {
+   "descripcion": "Incentivo económico, compra de equipo y tesoros de reto.",
+   "mecanicas": {
+    "monedas_de_oro": {
+     "descripcion": "Los héroes ganan monedas de oro como recompensa y las gastan en la tienda entre misiones.",
+     "valores": {}
+    },
+    "equipo_de_batalla": {
+     "descripcion": "Armas y armaduras con ataque, defensa y coste. Al comprar un arma, sus dados de ataque sustituyen a los propios del personaje (no se acumulan).",
+     "valores": {}
+    },
+    "tesoros_de_reto": {
+     "descripcion": "Objetos de valor que aparecen en las misiones y se reparten entre los héroes.",
+     "valores": {}
+    },
+    "buscar_tesoros": {
+     "descripcion": "Los héroes buscan tesoros como acción. Solo se puede buscar en habitaciones que tengan al menos un mueble visible o un baúl secreto descubierto, sin monstruos.",
+     "valores": {
+      "accion": "Buscar tesoros es una acción (antes o después de moverse).",
+      "donde": "Solo en habitaciones sin monstruos y con al menos un mueble visible o un baúl secreto (visible u oculto). Nunca en pasillos ni en salas vacías de muebles.",
+      "por_heroe": "Cada personaje puede buscar una vez en cada habitación.",
+      "tesoro_de_reto": "Si las notas del Reto indican un tesoro en esa sala, NO se puede buscar carta: el tesoro se recoge de la forma que indique la nota (p. ej. PNJ, evento, cofre del Reto).",
+      "sin_tesoro_de_reto": "Si la sala tiene mueble(s) o baúl secreto y no tiene tesoro de Reto, el héroe roba 1 carta del mazo de Tesoros (oro, pócima, trampa o monstruo errante).",
+      "trampas": "Buscar tesoros sin buscar antes trampas en una sala trampeada: caer en la trampa más próxima y perder el turno.",
+      "muebles_con_efecto": "Al robar carta en una sala con chimenea el héroe recupera 1 PC (Hogar de sanación); en una sala con alacena la primera búsqueda roba 2 cartas (Almacenamiento astuto)."
+     },
+     "nota": "Norma propia del salón: buscar tesoro requiere un MUEBLE visible o un BAÚL SECRETO (oculto) en la sala. Si la nota del Reto ya da un tesoro concreto ahí, esa sala no da cartas: su tesoro se resuelve por la historia.",
+     "norma_propia": true
+    },
+    "hogar_de_sanacion": {
+     "descripcion": "Cuando un héroe roba una carta de Tesoro en una habitación que tiene chimenea (hogar), puede recuperar 1 punto de Cuerpo. La carta de tesoro se revela normalmente y resuelve su efecto, pero el bonus de curación es adicional.",
+     "valores": {
+      "puntos_cuerpo_recuperados": 1,
+      "condicion": "chimenea en la habitación"
+     },
+     "detalle": "La chimenea (hogar) representa un lugar de descanso y calidez. Cuando un héroe roba una carta de Tesoro en una habitación con chimenea, puede optar por recuperar 1 punto de Cuerpo (hasta el máximo inicial). Este efecto se aplica por cada búsqueda de tesoros que se realice en la habitación con chimenea."
+    },
+    "almacenamiento_astuto": {
+     "descripcion": "La primera vez que un héroe roba carta de Tesoro en una habitación que tiene despensa (almacén), roba 2 cartas de Tesoro en lugar de 1. Las cartas no usadas se devuelven al fondo del mazo en el orden en que se robaron.",
+     "valores": {
+      "cartas_extra_en_primera_búsqueda": 1,
+      "condicion": "despensa en la habitación",
+      "restriccion": "solo la primera búsqueda en esa habitación"
+     },
+     "detalle": "La despensa (almacén) representa provisiones escondidas. Solo el primer héroe que busque tesoros en esa habitación se beneficia; las búsquedas siguientes funcionan normalmente (1 carta). Las cartas no utilizadas se devuelven al fondo del mazo en el orden en que se robaron, manteniendo la integridad del mazo."
+    },
+    "baul_secreto": {
+     "descripcion": "Un baúl secreto es un mueble oculto en una sala (análogo a las puertas secretas). Al descubrirlo y abrirlo, contiene un tesoro. Cuenta como mueble para la norma de casa, así que habilita la búsqueda de tesoros en esa sala.",
+     "valores": {
+      "naturaleza": "Mueble oculto. Cuenta como mueble para la norma de casa (habilita buscar tesoro en la sala).",
+      "convive": "Puede coexistir con muebles visibles en la misma sala (cofre + baúl secreto, por ejemplo).",
+      "contenido": "1 carta del mazo de Tesoros, salvo que la nota del Reto indique un tesoro concreto dentro del baúl.",
+      "descubrimiento": "Se descubre con una acción de búsqueda (como puertas secretas): sin monstruos en línea de visión. Al encontrarlo se marca la ubicación.",
+      "apertura": "Al colocarse adyacente y declarar la apertura (sin coste de acción ni movimiento), como una puerta secreta.",
+      "busqueda_habilitada": "La sala con baúl (aunque no haya mueble visible) se puede buscar tesoro normal."
+     },
+     "nota": "El baúl secreto resuelve el dilema de las salas vacías: si la historia quiere un tesoro en una sala sin muebles visibles, el baúl secreto lo justifica. Se descubre como las puertas secretas y se abre sin coste.",
+     "norma_propia": true
+    }
+   }
+  },
+  "misiones": {
+   "descripcion": "Estructura de un reto y preparación del tablero.",
+   "mecanicas": {
+    "partes_del_reto": {
+     "descripcion": "Cada reto tiene tres partes: el texto del pergamino (lo lee el Malvado Brujo), el mapa del reto (cómo se monta el tablero) y las notas finales (situaciones únicas).",
+     "valores": {}
+    },
+    "preparacion_del_tablero": {
+     "descripcion": "Solo la habitación de la escalera está montada al principio; el resto se coloca conforme los héroes avanzan por el tablero.",
+     "valores": {}
+    },
+    "monstruos_grandes": {
+     "descripcion": "Los monstruos grandes ocupan 2 casillas en el tablero. Pueden atacar a cualquier criatura que se encuentre en cualquiera de las 10 casillas que rodean su figura (las 8 adyacentes a cada una de sus dos casillas, contando solapamientos).",
+     "valores": {
+      "casillas_ocupadas": 2,
+      "radio_ataque": 10,
+      "casillas_ataque": "las 8 adyacentes a cada una de sus dos casillas"
+     },
+     "detalle": "Al ocupar dos casillas, el monstruo grande tiene un área de amenaza ampliada. Puede atacar a enemigos en cualquiera de las casillas que rodean ambas casillas que ocupa (hasta un máximo de 10 casillas de ataque, contando los solapamientos entre las zonas adyacentes de cada casilla). Las flechas de dirección en el mapa del reto indican la orientación de las dos casillas."
+    },
+    "comienzo_y_final": {
+     "descripcion": "Los héroes no siempre comienzan ni terminan en la Escalera en Espiral. El mapa del reto indica con flechas los puntos de Entrada y Salida. Al comenzar, los héroes se colocan delante de la Puerta de entrada, y se le pide al Malvado Brujo que la abra.",
+     "valores": {
+      "punto_inicio": "variable (indicado en mapa del reto)",
+      "punto_fin": "variable (indicado en mapa del reto)"
+     },
+     "detalle": "Consultar siempre el mapa del reto para determinar dónde entran y salen los héroes. Las flechas en el mapa señalan la dirección de entrada/salida. Los héroes se colocan en las casillas frente a la puerta de entrada y se pide al Malvado Brujo que abra la puerta para comenzar la misión."
+    },
+    "tablero_dos_caras": {
+     "descripcion": "El tablero de juego tiene dos caras. El mapa del reto indica qué lado del tablero debe usarse para esa misión.",
+     "valores": {
+      "caras": 2,
+      "referencia": "mapa del reto"
+     },
+     "detalle": "Dependiendo de la misión, se usará la cara A o la cara B del tablero. El mapa del reto incluye una indicación clara de qué lado debe quedar hacia arriba. Verificar antes de montar las habitaciones."
+    }
+   }
+  },
+  "bendiciones_y_maldiciones": {
+   "descripcion": "Objetos especiales de un solo uso, bendiciones del Oráculo y maldiciones que afectan a los héroes durante la campaña.",
+   "mecanicas": {
+    "bendicion_del_oraculo": {
+     "descripcion": "La Bendición del Oráculo es un objeto de un solo uso. Permite repetir TODOS los dados de un turno de Ataque, Defensa o Movimiento, pero se debe conservar el segundo resultado. También revela una habitación detrás de una puerta adyacente cerrada. El objeto desaparece tras usarse.",
+     "valores": {
+      "usos": 1,
+      "reroll": "todos los dados de un turno (Ataque, Defensa o Movimiento)",
+      "conservar_segundo": true,
+      "efecto_adicional": "revela habitación detrás de puerta adyacente cerrada"
+     },
+     "detalle": "Cuando un héroe usa la Bendición del Oráculo, debe declarar qué tirada va a repetir (Ataque, Defensa o Movimiento) antes de volver a tirar. Se tiran TODOS los dados de nuevo y el segundo resultado es el definitivo, incluso si es peor. Además, como efecto adicional, el héroe puede mirar qué hay detrás de una puerta cerrada adyacente sin abrirla."
+    },
+    "maldicion_del_oraculo": {
+     "descripcion": "La Maldición del Oráculo es un token que se coloca en la Ficha de Personaje del héroe afectado. Una vez por Misión, el Malvado Brujo puede forzar la repetición de TODOS los dados de una tirada y elegir qué resultado usar (el original o el repetido). Se elimina pagando 800 Monedas de Oro entre Misiones.",
+     "valores": {
+      "usos_por_mision": 1,
+      "controlador": "Malvado Brujo",
+      "coste_limpiar": 800,
+      "moneda": "Monedas de Oro"
+     },
+     "detalle": "La maldición afecta a un héroe individual. El Malvado Brujo elige cuándo activarla (una vez por Misión), forzando al héroe a repetir una tirada completa y quedándose con el resultado que el Malvado Brujo prefiera (original o repetido). Para eliminarla, el héroe debe pagar 800 Monedas de Oro entre Misiones y no tiene acceso al Oráculo durante ese periodo."
+    },
+    "pergamino_destruir_simbolos": {
+     "descripcion": "El Pergamino para Destruir Símbolos se puede usar en cualquier momento y no consume acción. Destruye un símbolo mágico descubierto. No tiene efecto sobre símbolos alterados por botín. Es de un solo uso.",
+     "valores": {
+      "usos": 1,
+      "consume_accion": false,
+      "momento_uso": "en cualquier momento"
+     },
+     "detalle": "Cuando se usa este pergamino, se destruye permanentemente un símbolo mágico que haya sido descubierto en la misión. El pergamino no tiene efecto sobre símbolos que hayan sido alterados por algún efecto de botín (p. ej., un hechizo o artefacto que modifique un símbolo). El pergamino se descarta tras usarse."
+    },
+    "cuerno_de_los_forjados": {
+     "descripcion": "El Cuerno de los Forjados requiere 1 Acción para sonar. Cada héroe coloca 1 Esqueleto (MOV 8, A2 dados, D2 dados, C1, M0) en cualquier casilla de la misma habitación o pasillo. El Esqueleto se mueve después del héroe que lo controla y se defiende con Escudo Blanco. Los Esqueletos regresan al final de la Misión. Objeto de un solo uso que se convierte en polvo.",
+     "valores": {
+      "usos": 1,
+      "accion_requerida": "1 Acción",
+      "esqueleto_mov": 8,
+      "esqueleto_ataque": "2 dados",
+      "esqueleto_defensa": "2 dados",
+      "esqueleto_cuerpo": 1,
+      "esqueleto_mente": 0,
+      "defensa_esqueleto": "Escudo Blanco",
+      "duracion": "hasta final de Misión",
+      "destino_tras_uso": "se convierte en polvo"
+     },
+     "detalle": "Al sonar el cuerno, cada héroe (incluido el que lo usó) coloca 1 ficha de Esqueleto en cualquier casilla de la misma habitación o pasillo donde se encuentre. Cada Esqueleto se mueve inmediatamente después del héroe que lo controla en el turno. Los Esqueleto son criaturas simpáticas que no pueden abrir puertas ni buscar tesoros. Al final de la Misión, los Esqueletos desaparecen. El cuerno se descarta y se convierte en polvo tras usarse."
+    }
+   }
   }
+ }
 }

@@ -1,80 +1,1179 @@
 {
-  "esquema": "mision_mapa_v2",
-  "nota": "Ground-truth de mapas de El Despertar. Por cada misión guarda las DETECCIONES (automáticas de vision por computadora) y el GROUND-TRUTH (posiciones validadas manualmente contra el mapa del libro). La alineación px->casilla está validada sobre el mapa a 200 DPI. Las misiones siguientes se montan partiendo de estas validaciones.",
-  "pdf": "https://drive.google.com/uc?id=10y6gKUobO_mSaSH0DzYIQ726xYTTaAPh",
-  "dpi": 200,
-  "tablero": "original",
-  "M1": {
-    "nombre": "La Fortaleza Fronteriza de In-Gulden",
-    "pagina_pdf": 10,
-    "esquinas_tablero_px": {
-      "si": [166, 54],
-      "sd": [1544, 54],
-      "ii": [166, 1128],
-      "id": [1544, 1128]
-    },
-    "transformacion_px_a_casilla": {
-      "col_esq": "0.0188684*x - 3.13207547",
-      "fila_esq": "0.0176909*y - 0.955307263"
-    },
-    "detecciones": {
-      "letras": [
-        {"letra": "A", "casillas": [[13, 4], [14, 4]]},
-        {"letra": "B", "casillas": [[7, 17]]},
-        {"letra": "C", "casillas": [[8, 10], [21, 10]]},
-        {"letra": "D", "casillas": [[17, 16]]}
+ "esquema": "mision_mapa_v2",
+ "nota": "Ground-truth de mapas de El Despertar. Por cada misión guarda las DETECCIONES (automáticas de vision por computadora) y el GROUND-TRUTH (posiciones validadas manualmente contra el mapa del libro). La alineación px->casilla está validada sobre el mapa a 200 DPI. Las misiones siguientes se montan partiendo de estas validaciones.",
+ "pdf": "https://drive.google.com/uc?id=10y6gKUobO_mSaSH0DzYIQ726xYTTaAPh",
+ "dpi": 200,
+ "tablero": "original",
+ "M1": {
+  "nombre": "La Fortaleza Fronteriza de In-Gulden",
+  "pagina_pdf": 10,
+  "esquinas_tablero_px": {
+   "si": [
+    166,
+    54
+   ],
+   "sd": [
+    1544,
+    54
+   ],
+   "ii": [
+    166,
+    1128
+   ],
+   "id": [
+    1544,
+    1128
+   ]
+  },
+  "transformacion_px_a_casilla": {
+   "col_esq": "0.0188684*x - 3.13207547",
+   "fila_esq": "0.0176909*y - 0.955307263"
+  },
+  "detecciones": {
+   "letras": [
+    {
+     "letra": "A",
+     "casillas": [
+      [
+       13,
+       4
       ],
-      "exploradores_caidos": [
-        [3, 2], [15, 3], [12, 4], [8, 9], [16, 15], [12, 17]
+      [
+       14,
+       4
       ]
+     ]
     },
-    "ground_truth": {
-      "validador": "manual (usuario sobre mapa a 200 DPI)",
-      "letras": {
-        "A": {"casillas": [[13, 4], [14, 4]], "estado": "validado"},
-        "B": {"casillas": [[7, 17]], "estado": "validado"},
-        "C": {"casillas": [[8, 10], [21, 10]], "estado": "validado"},
-        "D": {"casillas": [[17, 16]], "estado": "validado"}
+    {
+     "letra": "B",
+     "casillas": [
+      [
+       7,
+       17
+      ]
+     ]
+    },
+    {
+     "letra": "C",
+     "casillas": [
+      [
+       8,
+       10
+      ],
+      [
+       21,
+       10
+      ]
+     ]
+    },
+    {
+     "letra": "D",
+     "casillas": [
+      [
+       17,
+       16
+      ]
+     ]
+    }
+   ],
+   "exploradores_caidos": [
+    [
+     3,
+     2
+    ],
+    [
+     15,
+     3
+    ],
+    [
+     12,
+     4
+    ],
+    [
+     8,
+     9
+    ],
+    [
+     16,
+     15
+    ],
+    [
+     12,
+     17
+    ]
+   ]
+  },
+  "ground_truth": {
+   "validador": "manual (usuario sobre mapa a 200 DPI)",
+   "letras": {
+    "A": {
+     "casillas": [
+      [
+       13,
+       4
+      ],
+      [
+       14,
+       4
+      ]
+     ],
+     "estado": "validado"
+    },
+    "B": {
+     "casillas": [
+      [
+       7,
+       17
+      ]
+     ],
+     "estado": "validado"
+    },
+    "C": {
+     "casillas": [
+      [
+       8,
+       10
+      ],
+      [
+       21,
+       10
+      ]
+     ],
+     "estado": "validado"
+    },
+    "D": {
+     "casillas": [
+      [
+       17,
+       16
+      ]
+     ],
+     "estado": "validado"
+    }
+   },
+   "entrada": {
+    "rect_casillas": [
+     [
+      13,
+      1
+     ],
+     [
+      14,
+      3
+     ]
+    ],
+    "estado": "validado"
+   },
+   "salida": {
+    "rect_casillas": [
+     [
+      20,
+      15
+     ],
+     [
+      21,
+      17
+     ]
+    ],
+    "estado": "validado"
+   },
+   "exploradores_caidos": {
+    "casillas": [
+     [
+      15,
+      3
+     ],
+     [
+      12,
+      4
+     ],
+     [
+      8,
+      9
+     ],
+     [
+      16,
+      15
+     ],
+     [
+      12,
+      17
+     ]
+    ],
+    "nota": "3,2 eliminada: zona roca sólida fuera del mapa",
+    "estado": "validado"
+   },
+   "derrumbe_letras_A": {
+    "casillas": [
+     [
+      13,
+      4
+     ],
+     [
+      14,
+      4
+     ]
+    ],
+    "nota": "corredor, bloquea salida. Confirma posición sobre trampa montada (14,10)",
+    "estado": "validado"
+   },
+   "puertas_cuerno_letras_C": {
+    "casillas": [
+     [
+      8,
+      10
+     ],
+     [
+      21,
+      10
+     ]
+    ],
+    "nota": "puertas del cuerno. Confirma posición sobre puertas montadas",
+    "estado": "validado"
+   },
+   "monstruos": {
+    "goblin": [
+     [
+      17,
+      7
+     ],
+     [
+      16,
+      4
+     ],
+     [
+      9,
+      8
+     ],
+     [
+      20,
+      6
+     ],
+     [
+      12,
+      5
+     ],
+     [
+      8,
+      12
+     ],
+     [
+      10,
+      7
+     ],
+     [
+      17,
+      4
+     ]
+    ],
+    "orco": [
+     [
+      19,
+      9
+     ],
+     [
+      11,
+      4
+     ],
+     [
+      7,
+      9
+     ],
+     [
+      20,
+      11
+     ],
+     [
+      9,
+      11
+     ],
+     [
+      19,
+      12
+     ],
+     [
+      15,
+      14
+     ],
+     [
+      18,
+      14
+     ],
+     [
+      15,
+      15
+     ]
+    ],
+    "zombie": [
+     [
+      9,
+      14
+     ],
+     [
+      8,
+      16
+     ],
+     [
+      6,
+      16
+     ]
+    ],
+    "abominacion": [
+     [
+      12,
+      16
+     ],
+     [
+      11,
+      17
+     ]
+    ],
+    "final": [
+     [
+      17,
+      15
+     ]
+    ],
+    "nota": "23 monstruos en total. Goblins/Orcos del cuerno (puertas C), suicidas según icono. Tipo confirmado por usuario sobre monstruos_detectados.png",
+    "estado": "validado"
+   },
+   "monstruos_catalogados_total": 23,
+   "trampas": {
+    "pozo_foso": [
+     [
+      16,
+      5
+     ],
+     [
+      11,
+      16
+     ]
+    ],
+    "lanza": [
+     [
+      18,
+      8
+     ],
+     [
+      13,
+      14
+     ]
+    ],
+    "derrumbe": [
+     [
+      11,
+      5
+     ],
+     [
+      9,
+      6
+     ]
+    ],
+    "nota": "Total 6 trampas: 2 pozos, 2 lanzas, 2 derrumbes. Las casillas (13,4)/(14,4) son letras A, no trampas (la letra marca el evento del techo que bloquea la salida).",
+    "estado": "validado"
+   },
+   "puertas": {
+    "cerrada": {
+     "umbrales_confirmados": [
+      {
+       "umbral": [
+        [
+         11,
+         13
+        ],
+        [
+         11,
+         14
+        ]
+       ],
+       "estado": "confirmado"
       },
-      "entrada": {
-        "rect_casillas": [[13, 1], [14, 3]],
-        "estado": "validado"
+      {
+       "umbral": [
+        [
+         16,
+         13
+        ],
+        [
+         16,
+         14
+        ]
+       ],
+       "estado": "confirmado"
       },
-      "salida": {
-        "rect_casillas": [[20, 15], [21, 17]],
-        "estado": "validado"
+      {
+       "umbral": [
+        [
+         9,
+         5
+        ],
+        [
+         10,
+         5
+        ]
+       ],
+       "estado": "confirmado"
       },
-      "exploradores_caidos": {
-        "casillas": [[15, 3], [12, 4], [8, 9], [16, 15], [12, 17]],
-        "nota": "3,2 eliminada: zona roca sólida fuera del mapa",
-        "estado": "validado"
+      {
+       "umbral": [
+        [
+         11,
+         6
+        ],
+        [
+         11,
+         7
+        ]
+       ],
+       "estado": "confirmado",
+       "nota": "sala 3 -> pasillo central"
       },
-      "derrumbe_letras_A": {
-        "casillas": [[13, 4], [14, 4]],
-        "nota": "corredor, bloquea salida. Confirma posición sobre trampa montada (14,10)",
-        "estado": "validado"
+      {
+       "umbral": [
+        [
+         7,
+         9
+        ],
+        [
+         7,
+         10
+        ]
+       ],
+       "estado": "confirmado",
+       "nota": "sala 8 -> pasillo oeste"
       },
-      "puertas_cuerno_letras_C": {
-        "casillas": [[8, 10], [21, 10]],
-        "nota": "puertas del cuerno. Confirma posición sobre puertas montadas",
-        "estado": "validado"
+      {
+       "umbral": [
+        [
+         19,
+         9
+        ],
+        [
+         19,
+         10
+        ]
+       ],
+       "estado": "confirmado",
+       "nota": "sala 9 -> pasillo este"
       },
-      "monstruos": {
-        "goblin": [[17, 7], [16, 4], [9, 8], [20, 6], [12, 5], [8, 12], [10, 7], [17, 4]],
-        "orco": [[19, 9], [11, 4], [7, 9], [20, 11], [9, 11], [19, 12], [15, 14], [18, 14], [15, 15]],
-        "zombie": [[9, 14], [8, 16], [6, 16]],
-        "abominacion": [[12, 16], [11, 17]],
-        "final": [[17, 15]],
-        "nota": "23 monstruos en total. Goblins/Orcos del cuerno (puertas C), suicidas según icono. Tipo confirmado por usuario sobre monstruos_detectados.png",
-        "estado": "validado"
+      {
+       "umbral": [
+        [
+         17,
+         6
+        ],
+        [
+         18,
+         6
+        ]
+       ],
+       "estado": "confirmado",
+       "nota": "sala 4 -> sala 9 (la puerta \"a la derecha\" del ?6)"
       },
-      "monstruos_catalogados_total": 23,
-      "salon_ShaDel_letra_D": {
-        "casillas": [[17, 16]],
-        "nota": "letra D marca sala de Sha-Del",
-        "estado": "validado"
+      {
+       "umbral": [
+        [
+         16,
+         6
+        ],
+        [
+         16,
+         7
+        ]
+       ],
+       "estado": "confirmado",
+       "nota": "sala 4 -> pasillo central (era ?5)"
       }
+     ],
+     "estado": "validado",
+     "nota": "8 cerradas confirmadas"
     },
-    "pendiente_de_validar": []
-  }
+    "abierta": [
+     {
+      "umbral": [
+       [
+        8,
+        10
+       ],
+       [
+        8,
+        11
+       ]
+      ],
+      "estado": "confirmado",
+      "nota": "ABIERTA (la letra C del cuerno marca el evento, no la etiqueta)"
+     },
+     {
+      "umbral": [
+       [
+        21,
+        10
+       ],
+       [
+        21,
+        11
+       ]
+      ],
+      "estado": "confirmado",
+      "nota": "ABIERTA (la letra C del cuerno marca el evento, no la etiqueta)"
+     }
+    ],
+    "secreta": [
+     {
+      "casilla": [
+       10,
+       18
+      ],
+      "estado": "confirmado"
+     },
+     {
+      "casilla": [
+       19,
+       16
+      ],
+      "estado": "confirmado"
+     }
+    ],
+    "nota": "Abiertas: (8,10)-(8,11) y (21,10)-(21,11) [C del cuerno = evento]. Cerradas (8): (11,13)-(11,14), (16,13)-(16,14), (9,5)-(10,5), (11,6)-(11,7), (7,9)-(7,10), (19,9)-(19,10), (17,6)-(18,6), (16,6)-(16,7). Secretas (2, casilla única): (10,18) y (19,16).",
+    "estado": "validado",
+    "candidatos_descartados": [
+     {
+      "candidato": "?1 (19,5)-(19,6)",
+      "motivo": "roca dura en el mapa"
+     },
+     {
+      "candidato": "?2 (20,5)-(20,6)",
+      "motivo": "roca dura en el mapa"
+     },
+     {
+      "candidato": "?3 (9,6)-(10,6)",
+      "motivo": "no es puerta"
+     },
+     {
+      "candidato": "?4 (10,6)-(10,7)",
+      "motivo": "no es puerta"
+     },
+     {
+      "candidato": "?7 (9,7)-(10,7)",
+      "motivo": "no es puerta"
+     },
+     {
+      "candidato": "?8 (7,11)-(8,11)",
+      "motivo": "roca dura / no puerta"
+     },
+     {
+      "candidato": "?9 (7,12)-(8,12)",
+      "motivo": "roca dura / no puerta"
+     },
+     {
+      "candidato": "?10 (8,13)-(8,14)",
+      "motivo": "no es puerta"
+     },
+     {
+      "candidato": "?11 (9,13)-(9,14)",
+      "motivo": "no es puerta"
+     },
+     {
+      "candidato": "?12 (18,13)-(18,14)",
+      "motivo": "no es puerta"
+     },
+     {
+      "candidato": "?13 (5,15)-(6,15)",
+      "motivo": "roca dura / no puerta"
+     },
+     {
+      "candidato": "?14 (5,16)-(6,16)",
+      "motivo": "roca dura / no puerta"
+     }
+    ],
+    "pendientes": []
+   },
+   "salon_ShaDel_letra_D": {
+    "casillas": [
+     [
+      17,
+      16
+     ]
+    ],
+    "nota": "letra D marca sala de Sha-Del",
+    "estado": "validado"
+   },
+   "roca_dura": {
+    "casillas": [
+     [
+      1,
+      1
+     ],
+     [
+      2,
+      1
+     ],
+     [
+      3,
+      1
+     ],
+     [
+      4,
+      1
+     ],
+     [
+      5,
+      1
+     ],
+     [
+      6,
+      1
+     ],
+     [
+      7,
+      1
+     ],
+     [
+      8,
+      1
+     ],
+     [
+      9,
+      1
+     ],
+     [
+      10,
+      1
+     ],
+     [
+      11,
+      1
+     ],
+     [
+      12,
+      1
+     ],
+     [
+      15,
+      1
+     ],
+     [
+      16,
+      1
+     ],
+     [
+      17,
+      1
+     ],
+     [
+      18,
+      1
+     ],
+     [
+      19,
+      1
+     ],
+     [
+      20,
+      1
+     ],
+     [
+      21,
+      1
+     ],
+     [
+      22,
+      1
+     ],
+     [
+      23,
+      1
+     ],
+     [
+      24,
+      1
+     ],
+     [
+      25,
+      1
+     ],
+     [
+      26,
+      1
+     ],
+     [
+      1,
+      2
+     ],
+     [
+      26,
+      2
+     ],
+     [
+      1,
+      3
+     ],
+     [
+      26,
+      3
+     ],
+     [
+      1,
+      4
+     ],
+     [
+      26,
+      4
+     ],
+     [
+      1,
+      5
+     ],
+     [
+      26,
+      5
+     ],
+     [
+      1,
+      6
+     ],
+     [
+      26,
+      6
+     ],
+     [
+      1,
+      7
+     ],
+     [
+      26,
+      7
+     ],
+     [
+      1,
+      8
+     ],
+     [
+      26,
+      8
+     ],
+     [
+      1,
+      9
+     ],
+     [
+      10,
+      9
+     ],
+     [
+      17,
+      9
+     ],
+     [
+      26,
+      9
+     ],
+     [
+      1,
+      10
+     ],
+     [
+      2,
+      10
+     ],
+     [
+      3,
+      10
+     ],
+     [
+      4,
+      10
+     ],
+     [
+      5,
+      10
+     ],
+     [
+      22,
+      10
+     ],
+     [
+      23,
+      10
+     ],
+     [
+      24,
+      10
+     ],
+     [
+      25,
+      10
+     ],
+     [
+      26,
+      10
+     ],
+     [
+      1,
+      11
+     ],
+     [
+      26,
+      11
+     ],
+     [
+      1,
+      12
+     ],
+     [
+      26,
+      12
+     ],
+     [
+      1,
+      13
+     ],
+     [
+      26,
+      13
+     ],
+     [
+      1,
+      14
+     ],
+     [
+      26,
+      14
+     ],
+     [
+      1,
+      15
+     ],
+     [
+      26,
+      15
+     ],
+     [
+      1,
+      16
+     ],
+     [
+      26,
+      16
+     ],
+     [
+      1,
+      17
+     ],
+     [
+      26,
+      17
+     ],
+     [
+      1,
+      18
+     ],
+     [
+      13,
+      18
+     ],
+     [
+      14,
+      18
+     ],
+     [
+      26,
+      18
+     ],
+     [
+      1,
+      19
+     ],
+     [
+      2,
+      19
+     ],
+     [
+      3,
+      19
+     ],
+     [
+      4,
+      19
+     ],
+     [
+      5,
+      19
+     ],
+     [
+      6,
+      19
+     ],
+     [
+      7,
+      19
+     ],
+     [
+      8,
+      19
+     ],
+     [
+      9,
+      19
+     ],
+     [
+      10,
+      19
+     ],
+     [
+      11,
+      19
+     ],
+     [
+      12,
+      19
+     ],
+     [
+      13,
+      19
+     ],
+     [
+      14,
+      19
+     ],
+     [
+      15,
+      19
+     ],
+     [
+      16,
+      19
+     ],
+     [
+      17,
+      19
+     ],
+     [
+      18,
+      19
+     ],
+     [
+      19,
+      19
+     ],
+     [
+      20,
+      19
+     ],
+     [
+      21,
+      19
+     ],
+     [
+      22,
+      19
+     ],
+     [
+      23,
+      19
+     ],
+     [
+      24,
+      19
+     ],
+     [
+      25,
+      19
+     ],
+     [
+      26,
+      19
+     ]
+    ],
+    "estado": "validado",
+    "nota": "96 casillas no jugables (84 marco + 12 piezas internas) marcadas en tableros.json; las letras, puertas, entrada, salida y elementos quedan excluidos."
+   },
+   "muebles": {
+    "fichas": [
+     {
+      "nombre": "chimenea",
+      "desde": [
+       6,
+       6
+      ],
+      "hasta": [
+       6,
+       8
+      ],
+      "estado": "confirmado"
+     },
+     {
+      "nombre": "mesa",
+      "desde": [
+       10,
+       2
+      ],
+      "hasta": [
+       12,
+       3
+      ],
+      "estado": "confirmado"
+     },
+     {
+      "nombre": "alacena",
+      "desde": [
+       15,
+       2
+      ],
+      "hasta": [
+       17,
+       2
+      ],
+      "estado": "confirmado"
+     },
+     {
+      "nombre": "mesa",
+      "desde": [
+       20,
+       7
+      ],
+      "hasta": [
+       21,
+       9
+      ],
+      "estado": "confirmado"
+     },
+     {
+      "nombre": "alacena",
+      "desde": [
+       19,
+       14
+      ],
+      "hasta": [
+       21,
+       14
+      ],
+      "estado": "confirmado"
+     },
+     {
+      "nombre": "cofre",
+      "desde": [
+       18,
+       18
+      ],
+      "hasta": [
+       18,
+       18
+      ],
+      "estado": "confirmado"
+     },
+     {
+      "nombre": "banco_alquimista",
+      "desde": [
+       15,
+       17
+      ],
+      "hasta": [
+       17,
+       18
+      ],
+      "estado": "confirmado"
+     },
+     {
+      "nombre": "tumba",
+      "desde": [
+       6,
+       14
+      ],
+      "hasta": [
+       8,
+       15
+      ],
+      "estado": "confirmado"
+     }
+    ],
+    "estado": "validado",
+    "nota": "Muebles de tablero dictados por el usuario. Rectangulos en casillas globales."
+   },
+   "tesoros": {
+    "asociaciones_sala": [
+     {
+      "sala": 17,
+      "tesoro": "200 Monedas de Oro + Báculo Mágico",
+      "mueble_contenedor": "tumba",
+      "posicion_montaje": {
+       "x": 7,
+       "y": 15
+      },
+      "casillas_mueble": [
+       [
+        6,
+        14
+       ],
+       [
+        8,
+        15
+       ]
+      ],
+      "letra_mapa": "B",
+      "historia": "El primer jugador que busque Tesoros encuentra 200 Monedas de Oro y un Báculo Mágico.",
+      "estado": "confirmado"
+     },
+     {
+      "sala": 19,
+      "tesoro": "300 Monedas de Oro + nota andrajosa de Sha-Del",
+      "mueble_contenedor": "cuerpo del Capitán del Terror Sha-Del (final, 17,15)",
+      "posicion_montaje": {
+       "x": 17,
+       "y": 15
+      },
+      "casillas_mueble": [
+       [
+        17,
+        15
+       ]
+      ],
+      "letra_mapa": "D",
+      "historia": "El Capitán del Terror Sha-Del lleva la marca de la Reina Bruja. El primer jugador que busque Tesoros encuentra 300 Monedas de Oro y una nota.",
+      "estado": "confirmado"
+     }
+    ],
+    "sin_tesoro_de_reto_muebles": [
+     {
+      "sala": 3,
+      "muebles": [
+       "mesa (10,2)-(12,3)"
+      ]
+     },
+     {
+      "sala": 4,
+      "muebles": [
+       "alacena (15,2)-(17,2)"
+      ]
+     },
+     {
+      "sala": 8,
+      "muebles": [
+       "chimenea (6,6)-(6,8)"
+      ]
+     },
+     {
+      "sala": 9,
+      "muebles": [
+       "mesa (20,7)-(21,9)"
+      ]
+     },
+     {
+      "sala": 15,
+      "muebles": [
+       "alacena (19,14)-(21,14)"
+      ]
+     }
+    ],
+    "inicio_no_tablero": [
+     "2 Pociones de Curación (las entrega Sir Ragnar al inicio)",
+     "15 Monedas de Oro por calavera de explorador caído (mecánica de inspección)"
+    ],
+    "regla_aplicada": "V2 HeroQuest.es — Buscar tesoros: solo en habitaciones sin monstruos, una vez por héroe y habitación. El primer jugador que busque en la sala encuentra el tesoro del Reto; los demás roban del mazo de Tesoros. Muebles sin tesoro del Reto = decorativos (mazo).",
+    "estado": "validado",
+    "nota_posiciones": "Montaje: el Báculo Mágico + 200 MO van en la tumba (sala 17, casilla (7,15)); las 300 MO + nota en el cuerpo de Sha-Del (sala 19, (17,15))."
+   }
+  },
+  "pendiente_de_validar": []
+ }
 }
