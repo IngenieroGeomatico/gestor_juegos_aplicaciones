@@ -22,7 +22,7 @@ import data_store
 import tablero
 
 DATA_DIR = tablero.DATA_DIR
-HTML_DIR = DATA_DIR.parent / "mapas"
+HTML_DIR = DATA_DIR.parent / "html"
 
 # Correcciones ortográficas para palabras clave que pierden tildes en snake_case
 _ACENTOS = {

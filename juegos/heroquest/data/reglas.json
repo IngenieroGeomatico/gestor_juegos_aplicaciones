@@ -36,10 +36,22 @@
      "descripcion": "El juego comienza por el jugador a la izquierda del Malvado Brujo y sigue en el sentido de las agujas del reloj. Se recomienda que empiecen los héroes no mágicos y luego los mágicos.",
      "valores": {}
     },
-    "acciones_por_turno": {
-     "descripcion": "Durante su turno, un personaje puede moverse y realizar una acción, o a la inversa.",
-     "valores": {}
-    },
+     "acciones_por_turno": {
+      "descripcion": "Durante su turno, un personaje puede moverse y realizar una acción, o a la inversa. Las acciones disponibles son:",
+      "valores": {
+       "acciones": [
+        "Atacar a un enemigo adyacente (o a distancia con arma a distancia)",
+        "Lanzar un hechizo (solo personajes mágicos)",
+        "Buscar tesoros (solo en habitaciones sin monstruos y con mueble visible o baúl secreto)",
+        "Buscar puertas secretas (sin monstruos en línea de visión)",
+        "Buscar trampas (sin monstruos en la sala)",
+        "Desactivar trampas (requiere kit de herramientas o habilidad del Enano)",
+        "Cambiar, equipar o quitar objetos puestos (armas, armaduras, escudos)",
+        "Correr (+5 casillas de movimiento, reemplaza el movimiento normal)"
+       ]
+      },
+      "detalle": "El movimiento y la acción se pueden realizar en cualquier orden (mover y luego actuar, o actuar y luego mover), pero el movimiento no se puede dividir (no se puede mover una parte, actuar y volver a mover). Algunas cosas NO son acciones: abrir una puerta, tomar una poción (máximo 1 por turno), revelar lo que hay detrás de una puerta secreta al abrirla y usar el Pergamino para Destruir Símbolos."
+     },
     "movimiento": {
      "descripcion": "El movimiento se mide en casillas, limitado por el valor de movimiento y el equipo (algunas armaduras ralentizan).",
      "valores": {}

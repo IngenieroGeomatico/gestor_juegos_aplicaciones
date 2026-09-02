@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reglas de HeroQuest · Manual de referencia</title>
+<style>
+  :root {
+    --papel:#f3ecdd; --tinta:#241a12; --bronce:#8a6d3b; --rojo:#9c2b2b;
+    --madera:#5d4037; --claro:#fffdf7; --borde:#d8c9a8;
+    --azul:#3b5b92; --verde:#2e7d32;
+  }
+  * { box-sizing:border-box; }
+  html { scroll-behavior:smooth; }
+  body {
+    margin:0; padding:0; font-family:Georgia,'Times New Roman',serif;
+    background:var(--papel); color:var(--tinta); line-height:1.5;
+  }
+  .portada {
+    background:linear-gradient(145deg,#3a2620 0%,#5d4037 55%,#4a3630 100%);
+    color:#f4e9d2; padding:38px 32px 28px; text-align:center;
+    border-bottom:4px solid var(--bronce); box-shadow:0 3px 14px rgba(0,0,0,.35);
+  }
+  .portada .kicker { letter-spacing:4px; font-size:.8rem; text-transform:uppercase; color:#c9a96a; }
+  .portada h1 { margin:8px 0 4px; font-size:2.6rem; letter-spacing:2px; }
+  .portada .sub { font-style:italic; color:#e8d9b8; margin:0 0 16px; }
+  .portada .meta { display:flex; justify-content:center; gap:26px; flex-wrap:wrap; font-size:.9rem; color:#e8d9b8; }
+  .portada .meta b { color:#fff; }
+  .dados { display:flex; justify-content:center; gap:10px; margin-top:18px; }
+  .dado {
+    width:44px; height:44px; background:#f4e9d2; border-radius:10px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:1.25rem; position:relative; box-shadow:0 3px 8px rgba(0,0,0,.4);
+    border:1px solid #c9a96a;
+  }
+  .wrap { max-width:1080px; margin:0 auto; padding:22px 18px 40px; }
+  .indice {
+    background:var(--claro); border:1px solid var(--borde); border-radius:12px;
+    padding:14px 18px; margin:20px 0 26px; box-shadow:0 2px 8px rgba(0,0,0,.06);
+  }
+  .indice::before { content:"Índice · categorías"; font-weight:bold; color:var(--bronce); text-transform:uppercase; letter-spacing:.5px; font-size:.85rem; display:block; margin-bottom:8px; }
+  .indice ul { list-style:none; margin:0; padding:0; display:flex; flex-wrap:wrap; gap:8px; }
+  .indice li a {
+    display:inline-flex; align-items:center; gap:8px;
+    background:var(--papel); border:1px solid var(--borde); border-radius:20px;
+    padding:5px 14px; color:var(--tinta); text-decoration:none; font-size:.92rem;
+    transition:background .15s, color .15s;
+  }
+  .indice li a:hover { background:var(--madera); color:#f4e9d2; }
+  .idx-n { background:var(--bronce); color:#fff; font-size:.72rem; border-radius:10px; padding:1px 8px; }
+  .categoria { margin-bottom:26px; scroll-margin-top:14px; }
+  .cat-cab {
+    display:flex; align-items:center; gap:12px;
+    border-bottom:3px solid var(--bronce); padding-bottom:8px; margin-bottom:14px;
+  }
+  .cat-cab h2 { margin:0; font-size:1.5rem; color:var(--madera); }
+  .cat-n { margin-left:auto; font-size:.8rem; color:var(--bronce); text-transform:uppercase; letter-spacing:.5px; }
+  .cat-ancla {
+    background:var(--madera); color:#f4e9d2; text-decoration:none; font-size:.85rem;
+    width:28px; height:28px; display:flex; align-items:center; justify-content:center; border-radius:50%;
+  }
+  .mecanicas {
+    display:grid; grid-template-columns:repeat(auto-fill,minmax(310px,1fr)); gap:14px;
+  }
+  .mecanica {
+    background:var(--claro); border:1px solid var(--borde); border-radius:12px;
+    padding:14px 16px; box-shadow:0 2px 6px rgba(0,0,0,.06); break-inside:avoid;
+  }
+  .mec-titulo { margin:0 0 6px; font-size:1.05rem; color:var(--madera); display:flex; align-items:center; gap:8px; }
+  .mec-titulo::before {
+    content:"▸"; color:var(--bronce); font-size:.95rem;
+  }
+  .mec-desc { margin:.2em 0 .7em; font-size:.94rem; }
+  .badge-casa {
+    display:inline-block; background:linear-gradient(135deg,#f4e3b8,#e8c868);
+    color:#4a3a1e; font-size:.7rem; font-weight:700; padding:2px 8px;
+    border-radius:10px; border:1px solid #c9a738; vertical-align:middle;
+    margin-left:6px; letter-spacing:.3px;
+    box-shadow:0 1px 3px rgba(138,109,59,.18);
+  }
+  .valores {
+    width:100%; border-collapse:collapse; font-size:.88rem; margin:6px 0;
+    background:#f9f4e8; border-radius:8px; overflow:hidden;
+  }
+  .valores th {
+    text-align:left; padding:4px 10px; color:var(--bronce); font-weight:bold;
+    border-bottom:1px solid var(--borde); white-space:nowrap; vertical-align:top;
+    width:38%;
+  }
+  .valores td { padding:4px 10px; border-bottom:1px solid var(--borde); }
+  .valores tr:last-child th, .valores tr:last-child td { border-bottom:none; }
+  .dato-val { font-weight:bold; }
+  .dato-val.num { color:var(--azul); }
+  .dato-lista { margin:2px 0; padding-left:18px; }
+  .dato-lista li { margin:1px 0; }
+  .nota {
+    margin:8px 0; padding:10px 12px;
+    background:linear-gradient(135deg,#fbf3d9,#f4e3b8);
+    border:1px solid #d9bc7a; border-left:5px solid var(--bronce);
+    border-radius:8px; font-size:.9rem; color:#4a3a1e; line-height:1.45;
+    box-shadow:0 1px 4px rgba(138,109,59,.18);
+  }
+  .nota::before {
+    content:"•"; color:var(--bronce); font-weight:bold; margin-right:6px;
+  }
+  .detalle { margin-top:8px; border-top:1px dashed var(--borde); padding-top:6px; }
+  .detalle summary { cursor:pointer; font-size:.85rem; color:var(--bronce); font-weight:bold; }
+  .detalle p { margin:.4em 0 0; font-size:.9rem; color:#4a3d2e; font-style:italic; }
+  .footer {
+    margin-top:30px; padding-top:14px; border-top:2px solid var(--bronce);
+    font-size:.82rem; color:#6b5638;
+  }
+  .footer b { color:var(--rojo); }
+  @media print {
+    body { background:#fff; }
+    .portada { box-shadow:none; }
+    .indice, .mecanica, .categoria { box-shadow:none; break-inside:avoid; }
+    .cat-ancla { display:none; }
+  }
+  @media (max-width:640px) {
+    .portada h1 { font-size:1.9rem; }
+    .mecanicas { grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body id="top">
+  <header class="portada">
+    <div class="kicker">HeroQuest · Manual de referencia</div>
+    <h1>LAS REGLAS</h1>
+    <p class="sub">Normas de juego, combate, magia, trampas y tesoros</p>
+    <div class="meta">
+      <span>Versión de datos: <b>1.0</b></span>
+      <span>Mecánicas: <b>51</b></span>
+      <span>Categorías: <b>8</b></span>
+    </div>
+    <div class='dados'><div class='dado'><span>💀</span><i class='p1'></i><i class='p2'></i></div><div class='dado'><span>🛡</span><i class='p1'></i><i class='p2'></i></div><div class='dado'><span>💀</span><i class='p1'></i><i class='p2'></i></div><div class='dado'><span>🛡</span><i class='p1'></i><i class='p2'></i></div><div class='dado'><span>⚔</span><i class='p1'></i><i class='p2'></i></div><div class='dado'><span>💀</span><i class='p1'></i><i class='p2'></i></div></div>
+  </header>
+
+  <div class="wrap">
+    <nav class='indice'><ul><li><a href='#cat-componentes_y_preparacion'>Componentes y preparación<span class='idx-n'>3</span></a></li><li><a href='#cat-turnos_y_movimiento'>Turnos y movimiento<span class='idx-n'>5</span></a></li><li><a href='#cat-combate'>Combate<span class='idx-n'>11</span></a></li><li><a href='#cat-magia'>Magia<span class='idx-n'>9</span></a></li><li><a href='#cat-trampas'>Trampas<span class='idx-n'>7</span></a></li><li><a href='#cat-tesoros_y_tienda'>Tesoros y tienda<span class='idx-n'>7</span></a></li><li><a href='#cat-misiones'>Misiones<span class='idx-n'>5</span></a></li><li><a href='#cat-bendiciones_y_maldiciones'>Bendiciones y maldiciones<span class='idx-n'>4</span></a></li></ul></nav>
+
+    <p style="margin:-10px 0 20px; font-style:italic; color:#6b5638; font-size:.92rem;">Reglas canónicas del juego, agrupadas por categorías y mecánicas. Edita libremente este fichero para ampliar o ajustar las mecánicas; el agente lo consulta como fuente de referencia.</p>
+
+    
+    <section class="categoria" id="cat-componentes_y_preparacion">
+      <header class="cat-cab">
+        <a class="cat-ancla" href="#top">↑</a>
+        <h2>Componentes y preparación</h2>
+        <span class="cat-n">3 mecánicas</span>
+      </header>
+      <div class="mecanicas">
+    <article class="mecanica">
+      <h3 class="mec-titulo">Jugadores</h3>
+      <p class="mec-desc">Un jugador controla al Malvado Brujo (Zargon/Morcar) y sus fuerzas del mal; los demás controlan a los héroes (&#x27;personajes&#x27;).</p>
+      
+      <table class='valores'><tbody><tr><th scope='row'>Jugadores Min</th><td><span class="dato-val num">2</span></td></tr><tr><th scope='row'>Jugadores Max</th><td><span class="dato-val num">5</span></td></tr></tbody></table>
+      
+    </article>
+    <article class="mecanica">
+      <h3 class="mec-titulo">Héroes Base</h3>
+      <p class="mec-desc">Héroes básicos del juego. El Mago y el Elfo son &#x27;mágicos&#x27; y pueden lanzar hechizos.</p>
+      
+      <table class='valores'><tbody><tr><th scope='row'>Bárbaro</th><td><span class="dato-val">A3 D3 Cu8 Me2</span></td></tr><tr><th scope='row'>Enano</th><td><span class="dato-val">A3 D4 Cu7 Me3</span></td></tr><tr><th scope='row'>Elfo</th><td><span class="dato-val">A2 D3 Cu6 Me4</span></td></tr><tr><th scope='row'>Mago</th><td><span class="dato-val">A1 D2 Cu4 Me6</span></td></tr></tbody></table>
+      <details class="detalle"><summary>Detalle</summary><p>A = ataque, D = defensa, Cu = cuerpo, Me = mente.</p></details>
+    </article>
+    <article class="mecanica">
+      <h3 class="mec-titulo">Clasificación Cartas</h3>
+      <p class="mec-desc">Al comenzar, el Malvado Brujo clasifica las cartas: Tesoros, Monstruos, Equipo de Batalla, Tesoros de Reto, Artefactos, Pociones Mágicas, Hechizos y Pergaminos.</p>
+      
+      
+      
+    </article></div>
+    </section>
+    <section class="categoria" id="cat-turnos_y_movimiento">
+      <header class="cat-cab">
+        <a class="cat-ancla" href="#top">↑</a>
+        <h2>Turnos y movimiento</h2>
+        <span class="cat-n">5 mecánicas</span>
+      </header>
+      <div class="mecanicas">
+    <article class="mecanica">
+      <h3 class="mec-titulo">Orden De Juego</h3>
+      <p class="mec-desc">El juego comienza por el jugador a la izquierda del Malvado Brujo y sigue en el sentido de las agujas del reloj. Se recomienda que empiecen los héroes no mágicos y luego los mágicos.</p>
+      
+      
+      
+    </article>
+    <article class="mecanica">
+      <h3 class="mec-titulo">Acciones Por Turno</h3>
+      <p class="mec-desc">Durante su turno, un personaje puede moverse y realizar una acción, o a la inversa. Las acciones disponibles son:</p>
+      
+      <table class='valores'><tbody><tr><th scope='row'>Acciones</th><td><ul class='dato-lista'><li>Atacar a un enemigo adyacente (o a distancia con arma a distancia)</li><li>Lanzar un hechizo (solo personajes mágicos)</li><li>Buscar tesoros (solo en habitaciones sin monstruos y con mueble visible o baúl secreto)</li><li>Buscar puertas secretas (sin monstruos en línea de visión)</li><li>Buscar trampas (sin monstruos en la sala)</li><li>Desactivar trampas (requiere kit de herramientas o habilidad del Enano)</li><li>Cambiar, equipar o quitar objetos puestos (armas, armaduras, escudos)</li><li>Correr (+5 casillas de movimiento, reemplaza el movimiento normal)</li></ul></td></tr></tbody></table>
+      <details class="detalle"><summary>Detalle</summary><p>El movimiento y la acción se pueden realizar en cualquier orden (mover y luego actuar, o actuar y luego mover), pero el movimiento no se puede dividir (no se puede mover una parte, actuar y volver a mover). Algunas cosas NO son acciones: abrir una puerta, tomar una poción (máximo 1 por turno), revelar lo que hay detrás de una puerta secreta al abrirla y usar el Pergamino para Destruir Símbolos.</p></details>
+    </article>
+    <article class="mecanica">
+      <h3 class="mec-titulo">Movimiento</h3>
+      <p class="mec-desc">El movimiento se mide en casillas, limitado por el valor de movimiento y el equipo (algunas armaduras ralentizan).</p>
+      
+      
+      
+    </article>
+    <article class="mecanica">
+      <h3 class="mec-titulo">Movimiento Sin Amenazas</h3>
+      <p class="mec-desc">Si no hay monstruos activos en el tablero, los héroes pueden optar por no tirar dados de movimiento y usar un valor fijo de 4 por cada Dado Rojo en lugar de tirar.</p>
+      
+      <table class='valores'><tbody><tr><th scope='row'>Condicion</th><td><span class="dato-val">sin monstruos activos en el tablero</span></td></tr><tr><th scope='row'>Movimiento Fijo Por Dado Rojo</th><td><span class="dato-val num">4</span></td></tr><tr><th scope='row'>Alternativa A Tirar</th><td><span class="dato-val">Sí</span></td></tr></tbody></table>
+      <details class="detalle"><summary>Detalle</summary><p>Cuando no hay ningún monstruo en el tablero (todos han sido derrotados o aún no han aparecido), los héroes pueden elegir entre tirar los dados de movimiento normalmente o usar un valor fijo de 4 puntos de movimiento por cada Dado Rojo que tengan. Esta opción agiliza el desplazamiento cuando no hay amenazas.</p></details>
+    </article>
+    <article class="mecanica">
+      <h3 class="mec-titulo">Intercambio Objetos</h3>
+      <p class="mec-desc">Un héroe puede dar una poción, artefacto u arma a otro héroe adyacente. Condición: ninguno de los dos héroes puede estar adyacente a un monstruo. El intercambio entre misiones es libre.</p>
+      
+      <table class='valores'><tbody><tr><th scope='row'>Rango</th><td><span class="dato-val">adyacente</span></td></tr><tr><th scope='row'>Objetos Permitidos</th><td><ul class='dato-lista'><li>pociones</li><li>artefactos</li><li>armas</li></ul></td></tr><tr><th scope='row'>Condicion Combate</th><td><span class="dato-val">ninguno adyacente a un monstruo</span></td></tr><tr><th scope='row'>Entre Misiones</th><td><span class="dato-val">libre</span></td></tr></tbody></table>
+      <details class="detalle"><summary>Detalle</summary><p>Durante un turno, un héroe puede entregar un objeto (poción, artefacto o arma) a un héroe adyacente como parte de su acción. Para que el intercambio se produzca, ambos héroes no deben estar adyacentes a ningún monstruo. Entre misiones (en la fase de compras y preparación), el intercambio de objetos es libre sin restricciones.</p></details>
+    </article></div>
+    </section>
+    <section class="categoria" id="cat-combate">
+      <header class="cat-cab">
+        <a class="cat-ancla" href="#top">↑</a>
+        <h2>Combate</h2>
+        <span class="cat-n">11 mecánicas</span>
+      </header>
+      <div class="mecanicas">
+    <article class="mecanica">
+      <h3 class="mec-titulo">Dados De Combate</h3>
+      <p class="mec-desc">Los dados de combate muestran calaveras (daño) y escudos (defensa). Los héroes buscan escudos blancos; los monstruos, escudos negros.</p>
+      
+      
+      
+    </article>
+    <article class="mecanica">
+      <h3 class="mec-titulo">Ataque</h3>
+      <p class="mec-desc">Para atacar se está normalmente en una de las cuatro casillas adyacentes. Se lanzan tantos dados de combate como indique el arma o la carta. Cada calavera que no se anule inflige un punto de daño de Cuerpo.</p>
+      
+      
+      
+    </article>
+    <article class="mecanica">
+      <h3 class="mec-titulo">Defensa</h3>
+      <p class="mec-desc">El defensor lanza sus dados de defensa; cada escudo del tipo adecuado cancela una calavera. Al llegar el Cuerpo a cero, la criatura muere.</p>
+      
+      
+      
+    </article>
+    <article class="mecanica">
+      <h3 class="mec-titulo">Combate Sin Armas</h3>
+      <p class="mec-desc">Sin arma se lucha con los puños lanzando un dado de combate; el acierto depende de la naturaleza del personaje.</p>
+      
+      <table class='valores'><tbody><tr><th scope='row'>Bárbaro</th><td><span class="dato-val">cualquier calavera (50%)</span></td></tr><tr><th scope='row'>Elfo</th><td><span class="dato-val">calavera blanca (33%)</span></td></tr><tr><th scope='row'>Mago</th><td><span class="dato-val">calavera negra (16%)</span></td></tr></tbody></table>
+      
+    </article>
+    <article class="mecanica">
+      <h3 class="mec-titulo">Muerte Del Héroe</h3>
+      <p class="mec-desc">Cuando un héroe pierde todo su Cuerpo, se coloca su ficha de cadáver. El equipo puede recuperarse si otro héroe en línea de visión se coloca sobre ella (o tirando un dado si no hay nadie).</p>
+      
+      
+      
+    </article>
+    <article class="mecanica">
+      <h3 class="mec-titulo">Aturdimiento</h3>
+      <p class="mec-desc">Las calaveras negras aturden (no infligen daño de Cuerpo): hacen que la criatura pierda su siguiente turno. El defensor neutraliza primero las calaveras blancas y luego las negras.</p>
+      
+      
+      
+    </article>
+    <article class="mecanica">
+      <h3 class="mec-titulo">Aturdir</h3>
+      <p class="mec-desc">Mecánica específica de aturdimiento para armas contundentes (mazas, garrotes, martillos). Las calaveras negras infligidas por armas contundentes aturden al defensor durante 1 turno. Un personaje puede estar aturdimiento como máximo 1 turno; el efecto no se acumula. El defensor neutraliza primero las calaveras blancas y luego las negras.</p>
+      
+      <table class='valores'><tbody><tr><th scope='row'>Duracion Max Turnos</th><td><span class="dato-val num">1</span></td></tr><tr><th scope='row'>Apilable</th><td><span class="dato-val">No</span></td></tr></tbody></table>
+      <details class="detalle"><summary>Detalle</summary><p>Cuando un ataque con arma contundente genera calaveras negras que superan la defensa, el defensor queda aturdido y pierde su siguiente turno. Si ya está aturdimiento, un nuevo aturdimiento no extiende la duración más allá del turno perdido actual.</p></details>
+    </article>
+    <article class="mecanica">
+      <h3 class="mec-titulo">Envenenamiento</h3>
+      <p class="mec-desc">Un veneno activo causa daño periódico al inicio de cada turno del personaje afectado. Se lanza 1 dado de combate para determinar el efecto. El veneno no se apila sobre sí mismo.</p>
+      
+      <table class='valores'><tbody><tr><th scope='row'>Dado Por Turno</th><td><span class="dato-val num">1</span></td></tr><tr><th scope='row'>Apilable</th><td><span class="dato-val">No</span></td></tr></tbody></table>
+      <details class="detalle"><summary>Detalle</summary><p>Al inicio del turno del personaje envenenado, se lanza 1 dado de combate: Calavera Blanca = 1 punto de Cuerpo de daño y el veneno continúa; Calavera Negra = 1 punto de Cuerpo de daño y el veneno termina; Escudo Blanco = sin daño y el veneno continúa; Escudo Negro = sin daño y el veneno termina. No se acumulan múltiples venenos.</p></details>
+    </article>
+    <article class="mecanica">
+      <h3 class="mec-titulo">Ataques Dobles</h3>
+      <p class="mec-desc">Algunos personajes o armas permiten realizar dos ataques separados en un mismo turno. Cada ataque requiere su propia tirada de defensa. Pueden dirigirse al mismo enemigo o a enemigos distintos, salvo que la regla especial indique lo contrario.</p>
+      
+      <table class='valores'><tbody><tr><th scope='row'>Ataques Por Turno</th><td><span class="dato-val num">2</span></td></tr><tr><th scope='row'>Defensa Independiente</th><td><span class="dato-val">Sí</span></td></tr></tbody></table>
+      <details class="detalle"><summary>Detalle</summary><p>Cada ataque se resuelve por completo (tirada de ataque y tirada de defensa del objetivo) antes de proceder al siguiente. Si el primer ataque mata al objetivo, el segundo puede dirigirse a otro enemigo.</p></details>
+    </article>
+    <article class="mecanica">
+      <h3 class="mec-titulo">Armas A Distancia</h3>
+      <p class="mec-desc">Las armas a distancia permiten atacar enemigos que no están en casilla adyacente. Requieren línea de visión; las miniaturas bloquean la línea de visión. No hay límite de casillas de alcance, pero no se puede apuntar a un enemigo adyacente con un arma a distancia.</p>
+      
+      <table class='valores'><tbody><tr><th scope='row'>Limite Casillas</th><td><span class="dato-val">sin límite</span></td></tr><tr><th scope='row'>Adyacente</th><td><span class="dato-val">No</span></td></tr><tr><th scope='row'>Línea De Visión Requerida</th><td><span class="dato-val">Sí</span></td></tr></tbody></table>
+      <details class="detalle"><summary>Detalle</summary><p>Para usar un arma a distancia, el personaje debe tener línea de visión recta al objetivo sin que haya paredes, puertas cerradas u otras miniaturas en el camino. No se puede atacar a enemigos adyacentes; si se desea atacar a un enemigo cercano, se debe usar un arma cuerpo a cuerpo.</p></details>
+    </article>
+    <article class="mecanica">
+      <h3 class="mec-titulo">Armas Arrojadizas</h3>
+      <p class="mec-desc">Las armas arrojadizas (dagas, jabalinas) pueden usarse para ataque a distancia o cuerpo a cuerpo. Son de un solo uso: tras lanzarlas, se desechan. Para recuperarlas, se busca trampas y se tira 1 dado de combate; si sale Escudo Negro, el arma se pierde definitivamente.</p>
+      
+      <table class='valores'><tbody><tr><th scope='row'>Usos</th><td><span class="dato-val num">1</span></td></tr><tr><th scope='row'>Rango</th><td><span class="dato-val">distancia o adyacente</span></td></tr><tr><th scope='row'>Recuperacion Accion</th><td><span class="dato-val">buscar trampas + 1 dado de combate</span></td></tr><tr><th scope='row'>Perdida En Escudo Negro</th><td><span class="dato-val">Sí</span></td></tr></tbody></table>
+      <details class="detalle"><summary>Detalle</summary><p>Después de un combate en el que se usó un arma arrojadiza, si el arma quedó en la zona de combate (según las notas de la misión), un héroe puede intentar recuperarla en su turno como acción: busca trampas en la casilla del arma y lanza 1 dado de combate. Escudo Negro = arma perdida; cualquier otro resultado = arma recuperada.</p></details>
+    </article></div>
+    </section>
+    <section class="categoria" id="cat-magia">
+      <header class="cat-cab">
+        <a class="cat-ancla" href="#top">↑</a>
+        <h2>Magia</h2>
+        <span class="cat-n">9 mecánicas</span>
+      </header>
+      <div class="mecanicas">
+    <article class="mecanica">
+      <h3 class="mec-titulo">Tipos De Personajes</h3>
+      <p class="mec-desc">Solo los personajes mágicos lanzan hechizos (Mago y Elfo en el grupo base). Los no mágicos pueden lanzar algunos a través de pergaminos o artefactos.</p>
+      
+      
+      
+    </article>
+    <article class="mecanica">
+      <h3 class="mec-titulo">Escuelas Elementales</h3>
+      <p class="mec-desc">Los hechizos se clasifican en grupos elementales: Agua, Tierra, Fuego y Aire (y Terror). Un grupo de hechizos se compone de tres hechizos.</p>
+      
+      <table class='valores'><tbody><tr><th scope='row'>Escuelas</th><td><ul class='dato-lista'><li>Agua</li><li>Tierra</li><li>Fuego</li><li>Aire</li><li>Terror</li></ul></td></tr><tr><th scope='row'>Hechizos Por Grupo</th><td><span class="dato-val num">3</span></td></tr></tbody></table>
+      
+    </article>
+    <article class="mecanica">
+      <h3 class="mec-titulo">Elección De Hechizos</h3>
+      <p class="mec-desc">Al principio del reto, el Mago puede llevar tres grupos de hechizos y el Elfo uno. Primero elige el Mago, luego el Elfo, y el Mago termina con los grupos restantes.</p>
+      
+      <table class='valores'><tbody><tr><th scope='row'>Grupos Mago</th><td><span class="dato-val num">3</span></td></tr><tr><th scope='row'>Grupos Elfo</th><td><span class="dato-val num">1</span></td></tr></tbody></table>
+      
+    </article>
+    <article class="mecanica">
+      <h3 class="mec-titulo">Coste De Mente</h3>
+      <p class="mec-desc">Lanzar un hechizo cuesta Puntos de Mente (campo &#x27;coste_mente&#x27; de cada hechizo). Una vez lanzado, la carta del hechizo se descarta y se retira del juego.</p>
+      
+      
+      
+    </article>
+    <article class="mecanica">
+      <h3 class="mec-titulo">Estado De Shock</h3>
+      <p class="mec-desc">Cuando el Cuerpo o la Mente del héroe llega a cero, cae en estado de shock: solo puede moverse la mitad (redondeando hacia arriba), atacar con un máximo de un dado y defenderse con dos. Recuperar al menos un punto de Mente lo vuelve a la normalidad.</p>
+      
+      <table class='valores'><tbody><tr><th scope='row'>Movimiento Mitad</th><td><span class="dato-val">Sí</span></td></tr><tr><th scope='row'>Dado Ataque Max</th><td><span class="dato-val num">1</span></td></tr><tr><th scope='row'>Dados Defensa Max</th><td><span class="dato-val num">2</span></td></tr></tbody></table>
+      
+    </article>
+    <article class="mecanica">
+      <h3 class="mec-titulo">Muerte Psíquica Del Monstruo</h3>
+      <p class="mec-desc">Si la Mente de un monstruo llega a cero, el monstruo muere.</p>
+      
+      
+      
+    </article>
+    <article class="mecanica">
+      <h3 class="mec-titulo">Línea De Visión</h3>
+      <p class="mec-desc">Los hechizos se lanzan sobre criaturas visibles. Las miniaturas en la misma habitación siempre son visibles; en pasadizos o habitaciones distintas se requiere una línea recta sin obstáculos (paredes, puertas cerradas u otras miniaturas).</p>
+      
+      
+      
+    </article>
+    <article class="mecanica">
+      <h3 class="mec-titulo">Hechizos De Terror</h3>
+      <p class="mec-desc">El Terror es la quinta escuela elemental de magia. Algunos monstruos pueden conocer hechizos de Terror y lanzarlos una vez por Misión. Algunos hechizos son &#x27;a voluntad&#x27; y se usan como acción del monstruo. No se pueden lanzar sobre criaturas que no tengan Puntos de Mente (p. ej., no se puede usar Sueño sobre Zombies).</p>
+      
+      <table class='valores'><tbody><tr><th scope='row'>Lanzamientos Por Mision</th><td><span class="dato-val num">1</span></td></tr><tr><th scope='row'>A Voluntad</th><td><span class="dato-val">algunos hechizos se usan como acción</span></td></tr><tr><th scope='row'>Restriccion Mindpoints</th><td><span class="dato-val">no afecta a criaturas sin Puntos de Mente</span></td></tr></tbody></table>
+      <details class="detalle"><summary>Detalle</summary><p>Los monstruos que conocen hechizos de Terror pueden usarlos una vez durante toda la Misión. Si un monstruo tiene varios hechizos conocidos, cada uno se puede usar una vez independientemente de cuántos monstruos de ese tipo haya en el tablero. Los hechizos de Terror son especialmente peligrosos porque afectan a la mente de los héroes.</p></details>
+    </article>
+    <article class="mecanica">
+      <h3 class="mec-titulo">Hechizos Monstruos</h3>
+      <p class="mec-desc">Los monstruos pueden lanzar hechizos contra los héroes si los conocen. Cada hechizo solo puede ser usado una vez por Misión, independientemente de cuántos monstruos del mismo tipo haya en el tablero.</p>
+      
+      <table class='valores'><tbody><tr><th scope='row'>Lanzamientos Por Hechizo</th><td><span class="dato-val num">1</span></td></tr><tr><th scope='row'>Compartido Entre Monstruos</th><td><span class="dato-val">Sí</span></td></tr></tbody></table>
+      <details class="detalle"><summary>Detalle</summary><p>Si hay tres Ogros en el tablero y uno de ellos conoce &#x27;Bola de Fuego&#x27;, solo se puede lanzar una vez durante toda la Misión, no tres veces. El Malvado Brujo debe indicar qué hechizo se lanza y contra quién, respetando la línea de visión y las reglas del hechizo.</p></details>
+    </article></div>
+    </section>
+    <section class="categoria" id="cat-trampas">
+      <header class="cat-cab">
+        <a class="cat-ancla" href="#top">↑</a>
+        <h2>Trampas</h2>
+        <span class="cat-n">7 mecánicas</span>
+      </header>
+      <div class="mecanicas">
+    <article class="mecanica">
+      <h3 class="mec-titulo">Activación</h3>
+      <p class="mec-desc">Las trampas se activan al entrar en determinadas casillas o al accionar objetos. Aplican daño, desplazamiento y/o tiradas de dados según la trampa.</p>
+      
+      
+      
+    </article>
+    <article class="mecanica">
+      <h3 class="mec-titulo">Saltar Una Trampa</h3>
+      <p class="mec-desc">Saltar una trampa es igual que saltar un pozo: debe haber al menos una casilla libre después. Se lanza un dado de combate; si sale una calavera, se cae sobre la trampa activándola.</p>
+      
+      
+      
+    </article>
+    <article class="mecanica">
+      <h3 class="mec-titulo">Desactivar Con Kit</h3>
+      <p class="mec-desc">El Enano desactiva trampas con su kit de herramientas; los demás héroes lo intentan sin kit con una tirada (fallo -&gt; activación).</p>
+      
+      
+      
+    </article>
+    <article class="mecanica">
+      <h3 class="mec-titulo">Trampa Hacha</h3>
+      <p class="mec-desc">La trampa del hacha solo se activa al pisar la casilla del hacha negra. Las casillas con hacha blanca son rangos de efecto y no activan la trampa. Inflige 2 dados de combate de daño que no se pueden defender. Afecta a todos los héroes y monstruos en las casillas de hacha blanca.</p>
+      
+      <table class='valores'><tbody><tr><th scope='row'>Dados Danio</th><td><span class="dato-val num">2</span></td></tr><tr><th scope='row'>Defendible</th><td><span class="dato-val">No</span></td></tr><tr><th scope='row'>Activación</th><td><span class="dato-val">casilla hacha negra</span></td></tr><tr><th scope='row'>Rango</th><td><span class="dato-val">casillas hacha blanca</span></td></tr></tbody></table>
+      <details class="detalle"><summary>Detalle</summary><p>La trampa del hacha es un mecanismo con dos tipos de casillas: la casilla del hacha negra (punto de activación) y las casillas de hacha blanca (rango de efecto). Al pisar la casilla negra, la trampa se activa e inflige 2 dados de combate de daño a todos los personajes en las casillas de hacha blanca. El daño no se puede defender con dados de defensa.</p></details>
+    </article>
+    <article class="mecanica">
+      <h3 class="mec-titulo">Pozo Tinieblas</h3>
+      <p class="mec-desc">El pozo de tinieblas es más profundo que un pozo normal. Al caer, inflige automáticamente 1 punto de Cuerpo de daño. Además, se lanza 1 dado de combate si se lleva armadura media (Cota de Malla) o 2 dados si se lleva armadura pesada (Coraza).</p>
+      
+      <table class='valores'><tbody><tr><th scope='row'>Danio Base</th><td><span class="dato-val num">1</span></td></tr><tr><th scope='row'>Dados Armadura Media</th><td><span class="dato-val num">1</span></td></tr><tr><th scope='row'>Dados Armadura Pesada</th><td><span class="dato-val num">2</span></td></tr></tbody></table>
+      <details class="detalle"><summary>Detalle</summary><p>Al caer en un pozo de tinieblas, el héroe pierde 1 punto de Cuerpo automáticamente. Luego, dependiendo de su armadura: sin armadura o ligera = sin tirada adicional; armadura media (Cota de Malla) = lanza 1 dado de combate más; armadura pesada (Coraza) = lanza 2 dados de combate más. Cada calavera obtenida es 1 punto adicional de daño.</p></details>
+    </article>
+    <article class="mecanica">
+      <h3 class="mec-titulo">Escaleras Resbaladizas</h3>
+      <p class="mec-desc">Las escaleras resbaladizas no se pueden encontrar ni desactivar. Al pisarlas, se tira 1 dado de combate: Escudo Blanco = el héroe se resbala escaleras abajo, pierde 1 punto de Cuerpo y su turno termina. El resbalón también arrastra a criaturas cercanas.</p>
+      
+      <table class='valores'><tbody><tr><th scope='row'>Encontrable</th><td><span class="dato-val">No</span></td></tr><tr><th scope='row'>Desactivable</th><td><span class="dato-val">No</span></td></tr><tr><th scope='row'>Condicion Activación</th><td><span class="dato-val">Escudo Blanco</span></td></tr><tr><th scope='row'>Danio</th><td><span class="dato-val num">1</span></td></tr><tr><th scope='row'>Efecto</th><td><span class="dato-val">turno termina + arrastra cercanos</span></td></tr></tbody></table>
+      <details class="detalle"><summary>Detalle</summary><p>Al pisar escaleras resbaladizas, se lanza 1 dado de combate. Si sale Escudo Blanco, el héroe se resbala y baja las escaleras con fuerza, perdiendo 1 punto de Cuerpo y terminando su turno inmediatamente. El movimiento de arrastre puede afectar a criaturas adyacentes, arrastrándolas también escaleras abajo. Si sale cualquier otro resultado, el héroe sube/baja sin problema.</p></details>
+    </article>
+    <article class="mecanica">
+      <h3 class="mec-titulo">Gran Bola Piedra</h3>
+      <p class="mec-desc">La gran bola de piedra es una trampa especial para misiones específicas (Año 2 en adelante). La casilla de impacto está marcada en el mapa del reto. Puede colocarse un marcador de Derrumbe de Roca sobre la casilla de impacto.</p>
+      
+      <table class='valores'><tbody><tr><th scope='row'>Tipo</th><td><span class="dato-val">trampa especial</span></td></tr><tr><th scope='row'>Aparicion</th><td><span class="dato-val">Misiones del Año 2 en adelante</span></td></tr><tr><th scope='row'>Marcador Asociado</th><td><span class="dato-val">Derrumbe de Roca</span></td></tr></tbody></table>
+      <details class="detalle"><summary>Detalle</summary><p>Esta trampa aparece en misiones avanzadas y se activa según las instrucciones específicas de la misión. La bola de piedra recorre una trayectoria determinada (marcada en el mapa) y afecta a todas las criaturas en su camino. La casilla de impacto final puede quedar bloqueada con un marcador de Derrumbe de Roca, impidiendo el paso hasta que se retire.</p></details>
+    </article></div>
+    </section>
+    <section class="categoria" id="cat-tesoros_y_tienda">
+      <header class="cat-cab">
+        <a class="cat-ancla" href="#top">↑</a>
+        <h2>Tesoros y tienda</h2>
+        <span class="cat-n">7 mecánicas</span>
+      </header>
+      <div class="mecanicas">
+    <article class="mecanica">
+      <h3 class="mec-titulo">Monedas De Oro</h3>
+      <p class="mec-desc">Los héroes ganan monedas de oro como recompensa y las gastan en la tienda entre misiones.</p>
+      
+      
+      
+    </article>
+    <article class="mecanica">
+      <h3 class="mec-titulo">Equipo De Batalla</h3>
+      <p class="mec-desc">Armas y armaduras con ataque, defensa y coste. Al comprar un arma, sus dados de ataque sustituyen a los propios del personaje (no se acumulan).</p>
+      
+      
+      
+    </article>
+    <article class="mecanica">
+      <h3 class="mec-titulo">Tesoros De Reto</h3>
+      <p class="mec-desc">Objetos de valor que aparecen en las misiones y se reparten entre los héroes.</p>
+      
+      
+      
+    </article>
+    <article class="mecanica">
+      <h3 class="mec-titulo">Buscar Tesoros<span class="badge-casa">🏠 REGLA DE CASA</span></h3>
+      <p class="mec-desc">Los héroes buscan tesoros como acción. Solo se puede buscar en habitaciones que tengan al menos un mueble visible o un baúl secreto descubierto, sin monstruos.</p>
+      <div class="nota">Norma propia del salón: buscar tesoro requiere un MUEBLE visible o un BAÚL SECRETO (oculto) en la sala. Si la nota del Reto ya da un tesoro concreto ahí, esa sala no da cartas: su tesoro se resuelve por la historia.</div>
+      <table class='valores'><tbody><tr><th scope='row'>Accion</th><td><span class="dato-val">Buscar tesoros es una acción (antes o después de moverse).</span></td></tr><tr><th scope='row'>Donde</th><td><span class="dato-val">Solo en habitaciones sin monstruos y con al menos un mueble visible o un baúl secreto (visible u oculto). Nunca en pasillos ni en salas vacías de muebles.</span></td></tr><tr><th scope='row'>Por Héroe</th><td><span class="dato-val">Cada personaje puede buscar una vez en cada habitación.</span></td></tr><tr><th scope='row'>Tesoro De Reto</th><td><span class="dato-val">Si las notas del Reto indican un tesoro en esa sala, NO se puede buscar carta: el tesoro se recoge de la forma que indique la nota (p. ej. PNJ, evento, cofre del Reto).</span></td></tr><tr><th scope='row'>Sin Tesoro De Reto</th><td><span class="dato-val">Si la sala tiene mueble(s) o baúl secreto y no tiene tesoro de Reto, el héroe roba 1 carta del mazo de Tesoros (oro, pócima, trampa o monstruo errante).</span></td></tr><tr><th scope='row'>Trampas</th><td><span class="dato-val">Buscar tesoros sin buscar antes trampas en una sala trampeada: caer en la trampa más próxima y perder el turno.</span></td></tr><tr><th scope='row'>Muebles Con Efecto</th><td><span class="dato-val">Al robar carta en una sala con chimenea el héroe recupera 1 PC (Hogar de sanación); en una sala con alacena la primera búsqueda roba 2 cartas (Almacenamiento astuto).</span></td></tr></tbody></table>
+      
+    </article>
+    <article class="mecanica">
+      <h3 class="mec-titulo">Hogar De Sanación</h3>
+      <p class="mec-desc">Cuando un héroe roba una carta de Tesoro en una habitación que tiene chimenea (hogar), puede recuperar 1 punto de Cuerpo. La carta de tesoro se revela normalmente y resuelve su efecto, pero el bonus de curación es adicional.</p>
+      
+      <table class='valores'><tbody><tr><th scope='row'>Puntos Cuerpo Recuperados</th><td><span class="dato-val num">1</span></td></tr><tr><th scope='row'>Condicion</th><td><span class="dato-val">chimenea en la habitación</span></td></tr></tbody></table>
+      <details class="detalle"><summary>Detalle</summary><p>La chimenea (hogar) representa un lugar de descanso y calidez. Cuando un héroe roba una carta de Tesoro en una habitación con chimenea, puede optar por recuperar 1 punto de Cuerpo (hasta el máximo inicial). Este efecto se aplica por cada búsqueda de tesoros que se realice en la habitación con chimenea.</p></details>
+    </article>
+    <article class="mecanica">
+      <h3 class="mec-titulo">Almacenamiento Astuto</h3>
+      <p class="mec-desc">La primera vez que un héroe roba carta de Tesoro en una habitación que tiene despensa (almacén), roba 2 cartas de Tesoro en lugar de 1. Las cartas no usadas se devuelven al fondo del mazo en el orden en que se robaron.</p>
+      
+      <table class='valores'><tbody><tr><th scope='row'>Cartas Extra En Primera Búsqueda</th><td><span class="dato-val num">1</span></td></tr><tr><th scope='row'>Condicion</th><td><span class="dato-val">despensa en la habitación</span></td></tr><tr><th scope='row'>Restriccion</th><td><span class="dato-val">solo la primera búsqueda en esa habitación</span></td></tr></tbody></table>
+      <details class="detalle"><summary>Detalle</summary><p>La despensa (almacén) representa provisiones escondidas. Solo el primer héroe que busque tesoros en esa habitación se beneficia; las búsquedas siguientes funcionan normalmente (1 carta). Las cartas no utilizadas se devuelven al fondo del mazo en el orden en que se robaron, manteniendo la integridad del mazo.</p></details>
+    </article>
+    <article class="mecanica">
+      <h3 class="mec-titulo">Baúl Secreto<span class="badge-casa">🏠 REGLA DE CASA</span></h3>
+      <p class="mec-desc">Un baúl secreto es un mueble oculto en una sala (análogo a las puertas secretas). Al descubrirlo y abrirlo, contiene un tesoro. Cuenta como mueble para la norma de casa, así que habilita la búsqueda de tesoros en esa sala.</p>
+      <div class="nota">El baúl secreto resuelve el dilema de las salas vacías: si la historia quiere un tesoro en una sala sin muebles visibles, el baúl secreto lo justifica. Se descubre como las puertas secretas y se abre sin coste.</div>
+      <table class='valores'><tbody><tr><th scope='row'>Naturaleza</th><td><span class="dato-val">Mueble oculto. Cuenta como mueble para la norma de casa (habilita buscar tesoro en la sala).</span></td></tr><tr><th scope='row'>Convive</th><td><span class="dato-val">Puede coexistir con muebles visibles en la misma sala (cofre + baúl secreto, por ejemplo).</span></td></tr><tr><th scope='row'>Contenido</th><td><span class="dato-val">1 carta del mazo de Tesoros, salvo que la nota del Reto indique un tesoro concreto dentro del baúl.</span></td></tr><tr><th scope='row'>Descubrimiento</th><td><span class="dato-val">Se descubre con una acción de búsqueda (como puertas secretas): sin monstruos en línea de visión. Al encontrarlo se marca la ubicación.</span></td></tr><tr><th scope='row'>Apertura</th><td><span class="dato-val">Al colocarse adyacente y declarar la apertura (sin coste de acción ni movimiento), como una puerta secreta.</span></td></tr><tr><th scope='row'>Busqueda Habilitada</th><td><span class="dato-val">La sala con baúl (aunque no haya mueble visible) se puede buscar tesoro normal.</span></td></tr></tbody></table>
+      
+    </article></div>
+    </section>
+    <section class="categoria" id="cat-misiones">
+      <header class="cat-cab">
+        <a class="cat-ancla" href="#top">↑</a>
+        <h2>Misiones</h2>
+        <span class="cat-n">5 mecánicas</span>
+      </header>
+      <div class="mecanicas">
+    <article class="mecanica">
+      <h3 class="mec-titulo">Partes Del Reto</h3>
+      <p class="mec-desc">Cada reto tiene tres partes: el texto del pergamino (lo lee el Malvado Brujo), el mapa del reto (cómo se monta el tablero) y las notas finales (situaciones únicas).</p>
+      
+      
+      
+    </article>
+    <article class="mecanica">
+      <h3 class="mec-titulo">Preparación Del Tablero</h3>
+      <p class="mec-desc">Solo la habitación de la escalera está montada al principio; el resto se coloca conforme los héroes avanzan por el tablero.</p>
+      
+      
+      
+    </article>
+    <article class="mecanica">
+      <h3 class="mec-titulo">Monstruos Grandes</h3>
+      <p class="mec-desc">Los monstruos grandes ocupan 2 casillas en el tablero. Pueden atacar a cualquier criatura que se encuentre en cualquiera de las 10 casillas que rodean su figura (las 8 adyacentes a cada una de sus dos casillas, contando solapamientos).</p>
+      
+      <table class='valores'><tbody><tr><th scope='row'>Casillas Ocupadas</th><td><span class="dato-val num">2</span></td></tr><tr><th scope='row'>Radio Ataque</th><td><span class="dato-val num">10</span></td></tr><tr><th scope='row'>Casillas Ataque</th><td><span class="dato-val">las 8 adyacentes a cada una de sus dos casillas</span></td></tr></tbody></table>
+      <details class="detalle"><summary>Detalle</summary><p>Al ocupar dos casillas, el monstruo grande tiene un área de amenaza ampliada. Puede atacar a enemigos en cualquiera de las casillas que rodean ambas casillas que ocupa (hasta un máximo de 10 casillas de ataque, contando los solapamientos entre las zonas adyacentes de cada casilla). Las flechas de dirección en el mapa del reto indican la orientación de las dos casillas.</p></details>
+    </article>
+    <article class="mecanica">
+      <h3 class="mec-titulo">Comienzo Y Final</h3>
+      <p class="mec-desc">Los héroes no siempre comienzan ni terminan en la Escalera en Espiral. El mapa del reto indica con flechas los puntos de Entrada y Salida. Al comenzar, los héroes se colocan delante de la Puerta de entrada, y se le pide al Malvado Brujo que la abra.</p>
+      
+      <table class='valores'><tbody><tr><th scope='row'>Punto Inicio</th><td><span class="dato-val">variable (indicado en mapa del reto)</span></td></tr><tr><th scope='row'>Punto Fin</th><td><span class="dato-val">variable (indicado en mapa del reto)</span></td></tr></tbody></table>
+      <details class="detalle"><summary>Detalle</summary><p>Consultar siempre el mapa del reto para determinar dónde entran y salen los héroes. Las flechas en el mapa señalan la dirección de entrada/salida. Los héroes se colocan en las casillas frente a la puerta de entrada y se pide al Malvado Brujo que abra la puerta para comenzar la misión.</p></details>
+    </article>
+    <article class="mecanica">
+      <h3 class="mec-titulo">Tablero Dos Caras</h3>
+      <p class="mec-desc">El tablero de juego tiene dos caras. El mapa del reto indica qué lado del tablero debe usarse para esa misión.</p>
+      
+      <table class='valores'><tbody><tr><th scope='row'>Caras</th><td><span class="dato-val num">2</span></td></tr><tr><th scope='row'>Referencia</th><td><span class="dato-val">mapa del reto</span></td></tr></tbody></table>
+      <details class="detalle"><summary>Detalle</summary><p>Dependiendo de la misión, se usará la cara A o la cara B del tablero. El mapa del reto incluye una indicación clara de qué lado debe quedar hacia arriba. Verificar antes de montar las habitaciones.</p></details>
+    </article></div>
+    </section>
+    <section class="categoria" id="cat-bendiciones_y_maldiciones">
+      <header class="cat-cab">
+        <a class="cat-ancla" href="#top">↑</a>
+        <h2>Bendiciones y maldiciones</h2>
+        <span class="cat-n">4 mecánicas</span>
+      </header>
+      <div class="mecanicas">
+    <article class="mecanica">
+      <h3 class="mec-titulo">Bendición Del Oráculo</h3>
+      <p class="mec-desc">La Bendición del Oráculo es un objeto de un solo uso. Permite repetir TODOS los dados de un turno de Ataque, Defensa o Movimiento, pero se debe conservar el segundo resultado. También revela una habitación detrás de una puerta adyacente cerrada. El objeto desaparece tras usarse.</p>
+      
+      <table class='valores'><tbody><tr><th scope='row'>Usos</th><td><span class="dato-val num">1</span></td></tr><tr><th scope='row'>Reroll</th><td><span class="dato-val">todos los dados de un turno (Ataque, Defensa o Movimiento)</span></td></tr><tr><th scope='row'>Conservar Segundo</th><td><span class="dato-val">Sí</span></td></tr><tr><th scope='row'>Efecto Adicional</th><td><span class="dato-val">revela habitación detrás de puerta adyacente cerrada</span></td></tr></tbody></table>
+      <details class="detalle"><summary>Detalle</summary><p>Cuando un héroe usa la Bendición del Oráculo, debe declarar qué tirada va a repetir (Ataque, Defensa o Movimiento) antes de volver a tirar. Se tiran TODOS los dados de nuevo y el segundo resultado es el definitivo, incluso si es peor. Además, como efecto adicional, el héroe puede mirar qué hay detrás de una puerta cerrada adyacente sin abrirla.</p></details>
+    </article>
+    <article class="mecanica">
+      <h3 class="mec-titulo">Maldición Del Oráculo</h3>
+      <p class="mec-desc">La Maldición del Oráculo es un token que se coloca en la Ficha de Personaje del héroe afectado. Una vez por Misión, el Malvado Brujo puede forzar la repetición de TODOS los dados de una tirada y elegir qué resultado usar (el original o el repetido). Se elimina pagando 800 Monedas de Oro entre Misiones.</p>
+      
+      <table class='valores'><tbody><tr><th scope='row'>Usos Por Mision</th><td><span class="dato-val num">1</span></td></tr><tr><th scope='row'>Controlador</th><td><span class="dato-val">Malvado Brujo</span></td></tr><tr><th scope='row'>Coste Limpiar</th><td><span class="dato-val num">800</span></td></tr><tr><th scope='row'>Moneda</th><td><span class="dato-val">Monedas de Oro</span></td></tr></tbody></table>
+      <details class="detalle"><summary>Detalle</summary><p>La maldición afecta a un héroe individual. El Malvado Brujo elige cuándo activarla (una vez por Misión), forzando al héroe a repetir una tirada completa y quedándose con el resultado que el Malvado Brujo prefiera (original o repetido). Para eliminarla, el héroe debe pagar 800 Monedas de Oro entre Misiones y no tiene acceso al Oráculo durante ese periodo.</p></details>
+    </article>
+    <article class="mecanica">
+      <h3 class="mec-titulo">Pergamino Destruir Símbolos</h3>
+      <p class="mec-desc">El Pergamino para Destruir Símbolos se puede usar en cualquier momento y no consume acción. Destruye un símbolo mágico descubierto. No tiene efecto sobre símbolos alterados por botín. Es de un solo uso.</p>
+      
+      <table class='valores'><tbody><tr><th scope='row'>Usos</th><td><span class="dato-val num">1</span></td></tr><tr><th scope='row'>Consume Accion</th><td><span class="dato-val">No</span></td></tr><tr><th scope='row'>Momento Uso</th><td><span class="dato-val">en cualquier momento</span></td></tr></tbody></table>
+      <details class="detalle"><summary>Detalle</summary><p>Cuando se usa este pergamino, se destruye permanentemente un símbolo mágico que haya sido descubierto en la misión. El pergamino no tiene efecto sobre símbolos que hayan sido alterados por algún efecto de botín (p. ej., un hechizo o artefacto que modifique un símbolo). El pergamino se descarta tras usarse.</p></details>
+    </article>
+    <article class="mecanica">
+      <h3 class="mec-titulo">Cuerno De Los Forjados</h3>
+      <p class="mec-desc">El Cuerno de los Forjados requiere 1 Acción para sonar. Cada héroe coloca 1 Esqueleto (MOV 8, A2 dados, D2 dados, C1, M0) en cualquier casilla de la misma habitación o pasillo. El Esqueleto se mueve después del héroe que lo controla y se defiende con Escudo Blanco. Los Esqueletos regresan al final de la Misión. Objeto de un solo uso que se convierte en polvo.</p>
+      
+      <table class='valores'><tbody><tr><th scope='row'>Usos</th><td><span class="dato-val num">1</span></td></tr><tr><th scope='row'>Accion Requerida</th><td><span class="dato-val">1 Acción</span></td></tr><tr><th scope='row'>Esqueleto Mov</th><td><span class="dato-val num">8</span></td></tr><tr><th scope='row'>Esqueleto Ataque</th><td><span class="dato-val">2 dados</span></td></tr><tr><th scope='row'>Esqueleto Defensa</th><td><span class="dato-val">2 dados</span></td></tr><tr><th scope='row'>Esqueleto Cuerpo</th><td><span class="dato-val num">1</span></td></tr><tr><th scope='row'>Esqueleto Mente</th><td><span class="dato-val num">0</span></td></tr><tr><th scope='row'>Defensa Esqueleto</th><td><span class="dato-val">Escudo Blanco</span></td></tr><tr><th scope='row'>Duracion</th><td><span class="dato-val">hasta final de Misión</span></td></tr><tr><th scope='row'>Destino Tras Uso</th><td><span class="dato-val">se convierte en polvo</span></td></tr></tbody></table>
+      <details class="detalle"><summary>Detalle</summary><p>Al sonar el cuerno, cada héroe (incluido el que lo usó) coloca 1 ficha de Esqueleto en cualquier casilla de la misma habitación o pasillo donde se encuentre. Cada Esqueleto se mueve inmediatamente después del héroe que lo controla en el turno. Los Esqueleto son criaturas simpáticas que no pueden abrir puertas ni buscar tesoros. Al final de la Misión, los Esqueletos desaparecen. El cuerno se descarta y se convierte en polvo tras usarse.</p></details>
+    </article></div>
+    </section>
+
+    <footer class="footer">
+      <p><b>Fuente de verdad:</b> V2 de HeroQuest.es (remake de la comunidad, licencia CC BY-NC-SA).</p>
+      <p>Complementada con las normas del pack de misión HeroQuest: El Despertar y el Reglamento original (1989) como referencia.</p>
+    </footer>
+  </div>
+</body>
+</html>
