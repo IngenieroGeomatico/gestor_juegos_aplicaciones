@@ -300,8 +300,10 @@
        "entre_misiones": "Al comenzar un nuevo reto, ambos puntos se restauran a sus valores originales de ficha."
       },
       "mente": {
+       "pocion_de_mente": "La Poción de Mente recupera 2 Puntos de Mente al consumirse. No consume acción. Máximo 1 por turno.",
+       "hoguera": "En habitaciones con chimenea (hoguera), cada búsqueda de tesoro recupera 2 PM adicionales.",
        "entre_misiones": "Los PM se restauran completamente al comenzar un nuevo reto.",
-       "no_recuperacion_media_mision": "No existe ningún mecanismo para recuperar PM durante una misión. Los hechizos se descartan tras usarse y no devuelven PM gastados."
+       "no_recuperacion_otros": "Los hechizos no devuelven PM gastados. No hay otros mecanismos de recuperación de PM durante la misión."
       }
      },
      "detalle": "La recuperación de Cuerpo es limitada durante la misión: solo pociones, chimeneas y hechizos de curación. La Mente es un recurso finito que solo se repone entre misiones, lo que obliga al Mago y al Elfo a gestionar sus lanzamientos con cuidado."

@@ -270,6 +270,33 @@
     }
   },
   {
+    "nombre": "Poción de mente",
+    "tipo": "Poción",
+    "ataque": 0,
+    "defensa": 0,
+    "coste": 250,
+    "descripcion": "Recupera 2 Puntos de Mente al consumirse. Solo puede ser usada por personajes mágicos (Mago y Elfo).",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/Poción_de_mente.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Equipo.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    }
+  },
+  {
     "nombre": "Espada de gemas",
     "tipo": "Arma cuerpo a cuerpo",
     "ataque": 3,
