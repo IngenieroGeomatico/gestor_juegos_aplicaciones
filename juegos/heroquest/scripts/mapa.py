@@ -231,7 +231,9 @@ def _marcadores_png(img: Image.Image, mision: dict | None, ox: int, oy: int, cel
             d.polygon([(cx, cy - r), (cx + r, cy), (cx, cy + r), (cx - r, cy)], fill=color, outline="#000")
             d.text((cx, cy), _inicial(punto, tipo), fill="#000", font=_fuente(int(r)), anchor="mm")
         elif tipo in ("puerta", "puerta_secreta"):
-            d.rectangle([cx - r, cy - r, cx + r, cy + r], fill=color, outline="#000")
+            # Puerta como rectángulo orientado según cómo une las dos celdas
+            x1, y1, x2, y2 = _rect_puerta(punto, cx, cy, r)
+            d.rectangle([x1, y1, x2, y2], fill=color, outline="#000")
             d.text((cx, cy), letra, fill="#fff", font=_fuente(int(r)), anchor="mm")
         elif tipo == "trampa":
             d.ellipse([cx - r, cy - r, cx + r, cy + r], fill=color, outline="#000")
@@ -259,6 +261,23 @@ def _centro(punto: dict) -> tuple[float, float]:
         de, a = punto["de"], punto["a"]
         return (de[0] + a[0]) / 2, (de[1] + a[1]) / 2
     return punto["x"], punto["y"]
+
+
+def _rect_puerta(punto: dict, cx: float, cy: float, r: float) -> tuple[float, float, float, float]:
+    """Devuelve las 4 coordenadas (x1, y1, x2, y2) del rectángulo de una puerta.
+
+    La orientación depende de cómo une las dos celdas:
+    - celdas lado a lado (misma fila Y, X varía) -> muro vertical -> rectángulo VERTICAL
+    - celdas apiladas (misma columna X, Y varía)  -> muro horizontal -> rectángulo HORIZONTAL
+    - sin {de/a} -> por defecto horizontal.
+    """
+    vertical = False
+    if "de" in punto and "a" in punto:
+        de, a = punto["de"], punto["a"]
+        vertical = de[1] == a[1]  # misma fila Y -> lado a lado -> rect vertical
+    if vertical:
+        return cx - r * 0.75, cy - r * 1.5, cx + r * 0.75, cy + r * 1.5
+    return cx - r * 1.5, cy - r * 0.75, cx + r * 1.5, cy + r * 0.75
 
 
 def _leyenda_png(d: ImageDraw.ImageDraw, mision: dict | None, w: int, h: int, leyenda: int) -> None:
@@ -384,7 +403,9 @@ def _marcadores_svg(partes: list[str], mision: dict | None, ox: int, oy: int, ce
             partes.append(f'<polygon points="{cx},{cy-r} {cx+r},{cy} {cx},{cy+r} {cx-r},{cy}" fill="{color}" stroke="#000"/>')
             partes.append(f'<text x="{cx}" y="{cy+4}" font-family="sans-serif" font-size="{int(r*0.9)}" text-anchor="middle" fill="#000" font-weight="bold">{_inicial(punto, tipo)}</text>')
         elif tipo in ("puerta", "puerta_secreta"):
-            partes.append(f'<rect x="{cx-r}" y="{cy-r}" width="{2*r}" height="{2*r}" fill="{color}" stroke="#000"/>')
+            # Puerta como rectángulo orientado según cómo une las dos celdas
+            x1, y1, x2, y2 = _rect_puerta(punto, cx, cy, r)
+            partes.append(f'<rect x="{x1}" y="{y1}" width="{x2-x1}" height="{y2-y1}" fill="{color}" stroke="#000"/>')
             partes.append(f'<text x="{cx}" y="{cy+4}" font-family="sans-serif" font-size="{int(r*0.9)}" text-anchor="middle" fill="#fff" font-weight="bold">{letra}</text>')
         elif tipo == "trampa":
             partes.append(f'<circle cx="{cx}" cy="{cy}" r="{int(r*0.9)}" fill="{color}" stroke="#000"/>')

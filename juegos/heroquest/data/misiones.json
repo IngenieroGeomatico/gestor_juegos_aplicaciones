@@ -258,13 +258,13 @@
     ],
     "puertas_secretas": [
       {
-        "x": 10,
-        "y": 18,
+        "de": [9, 18],
+        "a": [10, 18],
         "descripcion": "Salida trasera de la fortaleza"
       },
       {
-        "x": 19,
-        "y": 16,
+        "de": [18, 16],
+        "a": [19, 16],
         "descripcion": "Estancia oculta tras el trono"
       }
     ],
@@ -547,10 +547,10 @@
               8,
               15
             ],
-            "tesoro": "200 Monedas de Oro y un Báculo Mágico"
+            "tesoro": "200 Monedas de Oro y un Bastón del Mago"
           }
         ],
-        "notas": "Letra B: \"El primer jugador que busque Tesoros encuentra 200 Monedas de Oro y un Báculo Mágico.\" (El tesoro está en la tumba.)"
+        "notas": "Letra B: \"El primer jugador que busque Tesoros encuentra 200 Monedas de Oro y un Bastón del Mago.\" (El tesoro está en la tumba.)"
       },
       {
         "numero": 18,
@@ -687,7 +687,7 @@
       },
       {
         "momento": "Letra B · Tumba de la guarnición",
-        "texto": "El primer jugador que busque Tesoros encuentra 200 Monedas de Oro y un Báculo Mágico."
+        "texto": "El primer jugador que busque Tesoros encuentra 200 Monedas de Oro y un Bastón del Mago."
       },
       {
         "momento": "Letra C · Puerta del cuerno (al abrir una de estas puertas)",
