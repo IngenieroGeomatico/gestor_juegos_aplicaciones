@@ -17,7 +17,7 @@ coherente con el nivel y el presupuesto del grupo.
 
 ---
 
-## Catálogo de precios (ver `armas.json`)
+## Catálogo de precios (ver `equipo.json`, `tesoros.json`, `artefactos.json`)
 
 ### Armas cuerpo a cuerpo
 | Arma | Ataque | Coste | Nota |
@@ -105,7 +105,7 @@ coherente con el nivel y el presupuesto del grupo.
 
 | Error | Cómo evitarlo |
 |-------|---------------|
-| Recomendar objeto que no existe | Consultar `armas.json` siempre |
+| Recomendar objeto que no existe | Consultar `equipo.json` siempre |
 | Exceder presupuesto | Sumar costes antes de sugerir |
 | Poner armadura a dos personajes | Solo 1 armadura activa por héroe |
 | Olvidar que el Mago no necesita armas | Su fuerza es la magia |

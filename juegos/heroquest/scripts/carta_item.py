@@ -26,7 +26,7 @@ FORMATOS = ("png", "svg")
 CARAS = ("anverso", "dorso", "ambas")
 
 # JSONs de items (usan plantilla genérica)
-FICHEROS_ITEMS = ("armas", "hechizos")
+FICHEROS_ITEMS = ("equipo", "tesoros", "artefactos", "hechizos")
 
 # JSONs de personajes/monstruos (usan plantillas específicas)
 FICHEROS_TIPO = ("personajes", "monstruos")
@@ -94,7 +94,7 @@ def main() -> None:
 
     if es_item:
         # Items: usar plantilla genérica
-        tipo_carta = fichero  # "armas", "hechizos"
+        tipo_carta = fichero  # "equipo", "tesoros", "artefactos", "hechizos"
         base = Path(args.salida) if args.salida else CARTAS_DIR / f"carta_{tipo_carta}__{data_store.slug(args.nombre)}"
         base.parent.mkdir(parents=True, exist_ok=True)
 

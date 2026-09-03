@@ -126,7 +126,7 @@ Mínimo 0 golpes.
 ## Economy (entre misiones)
 
 - **Oro ganado**: recompensa de la misión + tesoros encontrados
-- **Tienda**: comprar armas/armaduras/pociones (ver `armas.json`)
+- **Tienda**: comprar armas/armaduras/pociones (ver `equipo.json`)
 - **Límite**: máx. 10 items por personaje
 - **Pociones**: máx. 2 por héroe (ocupan espacio)
 

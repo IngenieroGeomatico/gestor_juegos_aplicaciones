@@ -1,173 +1,11 @@
 [
   {
-    "nombre": "Daga",
-    "tipo": "Arma cuerpo a cuerpo",
-    "ataque": 1,
-    "defensa": 0,
-    "coste": 25,
-    "descripcion": "Pequeña hoja fácil de ocultar.",
-    "plantillas": {
-      "cara": {
-        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
-        "arte": "sources/arte/Daga.png",
-        "marco_arte": "sources/plantillas/large-window-frame.svg",
-        "archivos_fondo": [
-          "sources/arte_fondos/window-parchment.png",
-          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
-        ]
-      },
-      "dorso": {
-        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
-        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
-        "archivos_fondo": [
-          "sources/arte_fondos/Equipo.jpeg",
-          "sources/plantillas/bordered.svg"
-        ]
-      }
-    }
-  },
-  {
-    "nombre": "Espada corta",
-    "tipo": "Arma cuerpo a cuerpo",
-    "ataque": 2,
-    "defensa": 0,
-    "coste": 75,
-    "descripcion": "Hoja equilibrada y fiable.",
-    "plantillas": {
-      "cara": {
-        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
-        "arte": "sources/arte/Espada_corta.png",
-        "marco_arte": "sources/plantillas/large-window-frame.svg",
-        "archivos_fondo": [
-          "sources/arte_fondos/window-parchment.png",
-          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
-        ]
-      },
-      "dorso": {
-        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
-        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
-        "archivos_fondo": [
-          "sources/arte_fondos/Equipo.jpeg",
-          "sources/plantillas/bordered.svg"
-        ]
-      }
-    }
-  },
-  {
-    "nombre": "Hacha de batalla",
-    "tipo": "Arma cuerpo a cuerpo",
-    "ataque": 3,
-    "defensa": 0,
-    "coste": 100,
-    "descripcion": "Hacha pesada de gran impacto.",
-    "plantillas": {
-      "cara": {
-        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
-        "arte": "sources/arte/Hacha_de_batalla.png",
-        "marco_arte": "sources/plantillas/large-window-frame.svg",
-        "archivos_fondo": [
-          "sources/arte_fondos/window-parchment.png",
-          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
-        ]
-      },
-      "dorso": {
-        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
-        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
-        "archivos_fondo": [
-          "sources/arte_fondos/Equipo.jpeg",
-          "sources/plantillas/bordered.svg"
-        ]
-      }
-    }
-  },
-  {
-    "nombre": "Mandoble",
-    "tipo": "Arma cuerpo a cuerpo",
-    "ataque": 3,
-    "defensa": 0,
-    "coste": 150,
-    "descripcion": "Espada de dos manos reservada a los más fuertes.",
-    "plantillas": {
-      "cara": {
-        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
-        "arte": "sources/arte/Mandoble.png",
-        "marco_arte": "sources/plantillas/large-window-frame.svg",
-        "archivos_fondo": [
-          "sources/arte_fondos/window-parchment.png",
-          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
-        ]
-      },
-      "dorso": {
-        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
-        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
-        "archivos_fondo": [
-          "sources/arte_fondos/Equipo.jpeg",
-          "sources/plantillas/bordered.svg"
-        ]
-      }
-    }
-  },
-  {
-    "nombre": "Ballesta",
-    "tipo": "Arma a distancia",
-    "ataque": 3,
-    "defensa": 0,
-    "coste": 175,
-    "descripcion": "Permite atacar a distancia con precisión.",
-    "plantillas": {
-      "cara": {
-        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
-        "arte": "sources/arte/Ballesta.png",
-        "marco_arte": "sources/plantillas/large-window-frame.svg",
-        "archivos_fondo": [
-          "sources/arte_fondos/window-parchment.png",
-          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
-        ]
-      },
-      "dorso": {
-        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
-        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
-        "archivos_fondo": [
-          "sources/arte_fondos/Equipo.jpeg",
-          "sources/plantillas/bordered.svg"
-        ]
-      }
-    }
-  },
-  {
-    "nombre": "Báculo del mago",
-    "tipo": "Arma cuerpo a cuerpo",
-    "ataque": 1,
-    "defensa": 0,
-    "coste": 10,
-    "descripcion": "Principal herramienta del mago para canalizar sus conjuros.",
-    "plantillas": {
-      "cara": {
-        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
-        "arte": "sources/arte/Báculo_del_mago.png",
-        "marco_arte": "sources/plantillas/large-window-frame.svg",
-        "archivos_fondo": [
-          "sources/arte_fondos/window-parchment.png",
-          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
-        ]
-      },
-      "dorso": {
-        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
-        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
-        "archivos_fondo": [
-          "sources/arte_fondos/Equipo.jpeg",
-          "sources/plantillas/bordered.svg"
-        ]
-      }
-    }
-  },
-  {
     "nombre": "Yelmo",
-    "tipo": "Armadura",
     "ataque": 0,
     "defensa": 1,
-    "coste": 100,
-    "descripcion": "Protege la cabeza de los golpes.",
+    "coste": 125,
+    "descripcion": "Este casco te otorga 1 dado de defensa adicional. No puede ser utilizado por el Mago.",
+    "subtipo": "Armadura",
     "plantillas": {
       "cara": {
         "plantilla_padre": "sources/plantillas/generic-card-up.svg",
@@ -190,11 +28,11 @@
   },
   {
     "nombre": "Escudo",
-    "tipo": "Armadura",
     "ataque": 0,
     "defensa": 1,
-    "coste": 200,
-    "descripcion": "Bloque de madera y metal para detener ataques.",
+    "coste": 150,
+    "descripcion": "Te otorga 1 dado de defensa adicional. No puede ser combinado con el Hacha de Batalla ni con el Bastón. No puede ser utilizado por el Mago.",
+    "subtipo": "Armadura",
     "plantillas": {
       "cara": {
         "plantilla_padre": "sources/plantillas/generic-card-up.svg",
@@ -216,8 +54,250 @@
     }
   },
   {
+    "nombre": "Hacha de Batalla",
+    "ataque": 4,
+    "defensa": 0,
+    "coste": 450,
+    "descripcion": "Pesada hacha de doble filo que otorga una fuerza de ataque de 4 dados de combate. No puedes utilizar un escudo cuando la lleves. No puede ser utilizada por el Mago.",
+    "subtipo": "Arma cuerpo a cuerpo",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/Hacha_de_batalla.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Equipo.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    }
+  },
+  {
+    "nombre": "Brazaletes",
+    "ataque": 0,
+    "defensa": 1,
+    "coste": 550,
+    "descripcion": "Brazaletes de cuero reforzado que otorgan 1 dado de defensa adicional. Pueden combinarse con el Yelmo y/o el Escudo.",
+    "subtipo": "Armadura"
+  },
+  {
+    "nombre": "Espada Larga",
+    "ataque": 3,
+    "defensa": 0,
+    "coste": 350,
+    "descripcion": "Otorga una fuerza de ataque de 3 dados de combate. Debido a su longitud te permite atacar en diagonal. No puede ser utilizada por el Mago.",
+    "subtipo": "Arma cuerpo a cuerpo"
+  },
+  {
+    "nombre": "Cota de Malla",
+    "ataque": 0,
+    "defensa": 1,
+    "coste": 500,
+    "descripcion": "Armadura ligera que otorga 1 dado de defensa adicional. Puede combinarse con el Yelmo y/o el Escudo. No puede ser utilizada por el Mago.",
+    "subtipo": "Armadura"
+  },
+  {
+    "nombre": "Ballesta",
+    "ataque": 3,
+    "defensa": 0,
+    "coste": 350,
+    "descripcion": "Arma de largo alcance con una fuerza de ataque de 3 dados de combate. Puedes disparar a cualquier monstruo que puedas ver, salvo a uno adyacente. Suministro ilimitado de flechas. No puede ser utilizada por el Mago.",
+    "subtipo": "Arma a distancia",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/Ballesta.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Equipo.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    }
+  },
+  {
+    "nombre": "Espada Ancha",
+    "ataque": 3,
+    "defensa": 0,
+    "coste": 250,
+    "descripcion": "Esta espada te otorga una fuerza de ataque de 3 dados de combate. No puede ser utilizada por el Mago.",
+    "subtipo": "Arma cuerpo a cuerpo"
+  },
+  {
+    "nombre": "Daga",
+    "ataque": 1,
+    "defensa": 0,
+    "coste": 200,
+    "descripcion": "Afilado cuchillo con una fuerza de ataque de 1 dado de combate. También puede lanzarse a cualquier monstruo que puedas ver, pero se pierde una vez lanzada.",
+    "subtipo": "Arma cuerpo a cuerpo",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/Daga.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Equipo.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    }
+  },
+  {
+    "nombre": "Hacha Enana",
+    "ataque": 2,
+    "defensa": 0,
+    "coste": 400,
+    "descripcion": "Hacha de mano que otorga 2 dados de combate en el ataque. Puede lanzarse a cualquier monstruo que puedas ver, pero se pierde una vez lanzada.",
+    "subtipo": "Arma cuerpo a cuerpo"
+  },
+  {
+    "nombre": "Agua Bendita",
+    "ataque": 0,
+    "defensa": 0,
+    "coste": 25,
+    "descripcion": "Puedes utilizar el Agua Bendita en lugar de atacar. Mata a cualquier muerto viviente (esqueletos, zombis o momias). La carta se descarta después de utilizarse.",
+    "subtipo": "Objeto"
+  },
+  {
+    "nombre": "Coraza",
+    "ataque": 0,
+    "defensa": 2,
+    "coste": 850,
+    "descripcion": "Pesada armadura de metal que otorga 2 dados de defensa adicionales. Al ser tan pesada, solo puedes tirar 1 dado rojo de movimiento mientras la lleves puesta. Puede combinarse con el Yelmo y/o el Escudo. No puede ser utilizada por el Mago.",
+    "subtipo": "Armadura"
+  },
+  {
+    "nombre": "Poción de Velocidad",
+    "ataque": 0,
+    "defensa": 0,
+    "coste": 150,
+    "descripcion": "Puedes beber esta poción en cualquier momento. Te permite tirar el doble de dados la próxima vez que te muevas. La carta se descarta tras ser utilizada.",
+    "subtipo": "Poción"
+  },
+  {
+    "nombre": "Espada Corta",
+    "ataque": 2,
+    "defensa": 0,
+    "coste": 200,
+    "descripcion": "Esta espada te otorga una fuerza de ataque de 2 dados de combate. No puede ser utilizada por el Mago.",
+    "subtipo": "Arma cuerpo a cuerpo",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/Espada_corta.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Equipo.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    }
+  },
+  {
+    "nombre": "Bastón",
+    "ataque": 1,
+    "defensa": 0,
+    "coste": 100,
+    "descripcion": "Largo y robusto bastón de madera con una fuerza de ataque de 1 dado de combate. Debido a su longitud te permite atacar en diagonal. No puedes utilizar un escudo cuando lo lleves.",
+    "hechizos_aprendibles": 1,
+    "subtipo": "Bastón"
+  },
+  {
+    "nombre": "Conjunto de Herramientas",
+    "ataque": 0,
+    "defensa": 0,
+    "coste": 250,
+    "descripcion": "Otorga un 50% de probabilidad de desactivar cualquier trampa que haya sido encontrada, siempre que no haya sido activada.",
+    "subtipo": "Herramienta"
+  },
+  {
+    "nombre": "Mandoble",
+    "ataque": 3,
+    "defensa": 0,
+    "coste": 150,
+    "descripcion": "Espada de dos manos reservada a los más fuertes.",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/Mandoble.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Equipo.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    },
+    "subtipo": "Arma cuerpo a cuerpo"
+  },
+  {
+    "nombre": "Báculo del mago",
+    "ataque": 1,
+    "defensa": 0,
+    "coste": 10,
+    "descripcion": "Principal herramienta del mago para canalizar sus conjuros.",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/Báculo_del_mago.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Equipo.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    },
+    "subtipo": "Arma cuerpo a cuerpo"
+  },
+  {
     "nombre": "Armadura de placas",
-    "tipo": "Armadura",
     "ataque": 0,
     "defensa": 2,
     "coste": 400,
@@ -240,11 +320,11 @@
           "sources/plantillas/bordered.svg"
         ]
       }
-    }
+    },
+    "subtipo": "Armadura"
   },
   {
     "nombre": "Poción de curación",
-    "tipo": "Poción",
     "ataque": 0,
     "defensa": 0,
     "coste": 300,
@@ -267,11 +347,11 @@
           "sources/plantillas/bordered.svg"
         ]
       }
-    }
+    },
+    "subtipo": "Poción"
   },
   {
     "nombre": "Poción de mente",
-    "tipo": "Poción",
     "ataque": 0,
     "defensa": 0,
     "coste": 250,
@@ -294,11 +374,11 @@
           "sources/plantillas/bordered.svg"
         ]
       }
-    }
+    },
+    "subtipo": "Poción"
   },
   {
     "nombre": "Espada de gemas",
-    "tipo": "Arma cuerpo a cuerpo",
     "ataque": 3,
     "defensa": 0,
     "coste": 400,
@@ -321,6 +401,7 @@
           "sources/plantillas/bordered.svg"
         ]
       }
-    }
+    },
+    "subtipo": "Arma cuerpo a cuerpo"
   }
 ]

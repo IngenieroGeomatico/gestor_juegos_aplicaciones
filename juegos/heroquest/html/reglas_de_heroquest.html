@@ -175,7 +175,7 @@
     <p class="sub">Normas de juego, combate, magia, trampas y tesoros</p>
     <div class="meta">
       <span>Versión de datos: <b>1.0</b></span>
-      <span>Mecánicas: <b>54</b></span>
+      <span>Mecánicas: <b>57</b></span>
       <span>Categorías: <b>8</b></span>
     </div>
     <div class='dados'><div class='dado'><span>💀</span><i class='p1'></i><i class='p2'></i></div><div class='dado'><span>🛡</span><i class='p1'></i><i class='p2'></i></div><div class='dado'><span>💀</span><i class='p1'></i><i class='p2'></i></div><div class='dado'><span>🛡</span><i class='p1'></i><i class='p2'></i></div><div class='dado'><span>⚔</span><i class='p1'></i><i class='p2'></i></div><div class='dado'><span>💀</span><i class='p1'></i><i class='p2'></i></div></div>
@@ -185,10 +185,10 @@
     <div class="buscador" id="buscador">
       <label for="buscar">&#128269;</label>
       <input type="search" id="buscar" placeholder="Buscar mecánica..." autocomplete="off">
-      <span class="contador" id="contador">54 / 54</span>
+      <span class="contador" id="contador">57 / 57</span>
     </div>
 
-    <nav class='indice'><ul><li><a href='#cat-componentes_y_preparacion'>Componentes y preparación<span class='idx-n'>3</span></a></li><li><a href='#cat-turnos_y_movimiento'>Turnos y movimiento<span class='idx-n'>5</span></a></li><li><a href='#cat-combate'>Combate<span class='idx-n'>11</span></a></li><li><a href='#cat-magia'>Magia<span class='idx-n'>9</span></a></li><li><a href='#cat-trampas'>Trampas<span class='idx-n'>7</span></a></li><li><a href='#cat-tesoros_y_tienda'>Tesoros y tienda<span class='idx-n'>9</span></a></li><li><a href='#cat-misiones'>Misiones<span class='idx-n'>5</span></a></li><li><a href='#cat-bendiciones_y_maldiciones'>Bendiciones y maldiciones<span class='idx-n'>5</span></a></li></ul></nav>
+    <nav class='indice'><ul><li><a href='#cat-componentes_y_preparacion'>Componentes y preparación<span class='idx-n'>3</span></a></li><li><a href='#cat-turnos_y_movimiento'>Turnos y movimiento<span class='idx-n'>5</span></a></li><li><a href='#cat-combate'>Combate<span class='idx-n'>11</span></a></li><li><a href='#cat-magia'>Magia<span class='idx-n'>12</span></a></li><li><a href='#cat-trampas'>Trampas<span class='idx-n'>7</span></a></li><li><a href='#cat-tesoros_y_tienda'>Tesoros y tienda<span class='idx-n'>9</span></a></li><li><a href='#cat-misiones'>Misiones<span class='idx-n'>5</span></a></li><li><a href='#cat-bendiciones_y_maldiciones'>Bendiciones y maldiciones<span class='idx-n'>5</span></a></li></ul></nav>
 
     <p style="margin:-10px 0 20px; font-style:italic; color:#6b5638; font-size:.92rem;">Reglas canónicas del juego, agrupadas por categorías y mecánicas. Edita libremente este fichero para ampliar o ajustar las mecánicas; el agente lo consulta como fuente de referencia.</p>
 
@@ -356,7 +356,7 @@
       <header class="cat-cab">
         <a class="cat-ancla" href="#top">↑</a>
         <h2>Magia</h2>
-        <span class="cat-n">9 mecánicas</span>
+        <span class="cat-n">12 mecánicas</span>
       </header>
       <div class="mecanicas">
     <article class="mecanica" data-busqueda="tipos de personajes solo los personajes mágicos lanzan hechizos (mago y elfo en el grupo base). los no mágicos pueden lanzar algunos a través de pergaminos o artefactos.   ">
@@ -386,6 +386,27 @@
       
       
       
+    </article>
+    <article class="mecanica" data-busqueda="uso desde carta gratis regla de casa: si la carta de hechizo físico no indica coste de mente, su uso por carta es gratis (coste_mente = 0). el coste de mente solo se aplica cuando el hechizo está aprendido. coste por carta el que indique la carta (0 si no indica nada) aplica a cartas de hechizo físicas del set base  ">
+      <h3 class="mec-titulo">Uso Desde Carta Gratis<span class="badge-casa">🏠 REGLA DE CASA</span></h3>
+      <p class="mec-desc">Regla de casa: si la carta de hechizo físico no indica coste de mente, su uso por carta es GRATIS (coste_mente = 0). El coste de mente solo se aplica cuando el hechizo está aprendido.</p>
+      
+      <table class='valores'><tbody><tr><th scope='row'>Coste Por Carta</th><td><span class="dato-val">el que indique la carta (0 si no indica nada)</span></td></tr><tr><th scope='row'>Aplica A</th><td><span class="dato-val">cartas de hechizo físicas del set base</span></td></tr></tbody></table>
+      
+    </article>
+    <article class="mecanica" data-busqueda="aprendizaje de hechizos regla de casa: un hechizo puede aprenderse para poder usarse más veces. al estar aprendido, su uso sí gasta puntos de mente según el campo &#x27;coste_aprendido&#x27; de cada hechizo. el coste_aprendido no se calcula automáticamente: es un dato propio de cada carta (por regla general = coste_mente + 1, pero algunas magias pueden ser excepción). coste aprendido default coste_mente + 1 campo coste_aprendido excepciones posibles, se fijan por carta mientras la carta sin aprender se usa gratis (si no indica coste), un hechizo aprendido consume pm cada vez que se lanza. por regla general, el coste_aprendido es el coste_mente de la carta + 1 (p. ej. un hechizo gratis pasa a costar 1 pm). sin embargo, &#x27;coste_aprendido&#x27; es un parámetro propio de cada carta de magia, por si alguna magia no cumple la regla. ">
+      <h3 class="mec-titulo">Aprendizaje De Hechizos<span class="badge-casa">🏠 REGLA DE CASA</span></h3>
+      <p class="mec-desc">Regla de casa: un hechizo puede APRENDERSE para poder usarse más veces. Al estar aprendido, su uso sí gasta Puntos de Mente según el campo &#x27;coste_aprendido&#x27; de cada hechizo. El coste_aprendido no se calcula automáticamente: es un dato propio de cada carta (por regla general = coste_mente + 1, pero algunas magias pueden ser excepción).</p>
+      
+      <table class='valores'><tbody><tr><th scope='row'>Coste Aprendido Default</th><td><span class="dato-val">coste_mente + 1</span></td></tr><tr><th scope='row'>Campo</th><td><span class="dato-val">coste_aprendido</span></td></tr><tr><th scope='row'>Excepciones</th><td><span class="dato-val">posibles, se fijan por carta</span></td></tr></tbody></table>
+      <details class="detalle"><summary>Detalle</summary><p>Mientras la carta sin aprender se usa gratis (si no indica coste), un hechizo aprendido consume PM cada vez que se lanza. Por regla general, el coste_aprendido es el coste_mente de la carta + 1 (p. ej. un hechizo gratis pasa a costar 1 PM). Sin embargo, &#x27;coste_aprendido&#x27; es un parámetro propio de cada carta de magia, por si alguna magia no cumple la regla.</p></details>
+    </article>
+    <article class="mecanica" data-busqueda="capacidad segun baston regla de casa: el número máximo de hechizos que un personaje puede tener aprendidos depende del bastón/vara que porta. es un parámetro de la carta del bastón: el campo &#x27;hechizos_aprendibles&#x27;. si la carta del bastón no pone nada, el personaje solo aprende 1 hechizo. campo hechizos_aprendibles por defecto 1 cada bastón, báculo o varita lleva su dato &#x27;hechizos_aprendibles&#x27; (nº máximo de hechizos que puede tener memorizados/ aprendidos a la vez). si la carta del bastón no indica este parámetro, el valor por defecto es 1: el personaje solo podrá tener 1 hechizo aprendido. ">
+      <h3 class="mec-titulo">Capacidad Segun Baston<span class="badge-casa">🏠 REGLA DE CASA</span></h3>
+      <p class="mec-desc">Regla de casa: el número máximo de hechizos que un personaje puede tener APRENDIDOS depende del bastón/vara que porta. Es un parámetro de la carta del bastón: el campo &#x27;hechizos_aprendibles&#x27;. Si la carta del bastón no pone nada, el personaje solo aprende 1 hechizo.</p>
+      
+      <table class='valores'><tbody><tr><th scope='row'>Campo</th><td><span class="dato-val">hechizos_aprendibles</span></td></tr><tr><th scope='row'>Por Defecto</th><td><span class="dato-val num">1</span></td></tr></tbody></table>
+      <details class="detalle"><summary>Detalle</summary><p>Cada bastón, báculo o varita lleva su dato &#x27;hechizos_aprendibles&#x27; (nº máximo de hechizos que puede tener memorizados/ aprendidos a la vez). Si la carta del bastón no indica este parámetro, el valor por defecto es 1: el personaje solo podrá tener 1 hechizo aprendido.</p></details>
     </article>
     <article class="mecanica" data-busqueda="estado de shock cuando el cuerpo o la mente del héroe llega a cero, cae en estado de shock: solo puede moverse la mitad (redondeando hacia arriba), atacar con un máximo de un dado y defenderse con dos. recuperar al menos un punto de mente lo vuelve a la normalidad. movimiento mitad sí dado ataque max 1 dados defensa max 2  ">
       <h3 class="mec-titulo">Estado De Shock</h3>
@@ -648,7 +669,7 @@
   (function() {
     const input = document.getElementById('buscar');
     const contador = document.getElementById('contador');
-    const total = 54;
+    const total = 57;
     const mecanicas = document.querySelectorAll('.mecanica');
     const categorias = document.querySelectorAll('.categoria');
     const sinResultados = document.getElementById('sin-resultados');

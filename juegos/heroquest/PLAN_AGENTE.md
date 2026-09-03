@@ -233,7 +233,7 @@ Sugerencias de compra entre misiones.
 | Mago | Nada (guardar oro) | - |
 
 ## Regla de oro
-- No recomendar objetos que no existan en armas.json
+- No recomendar objetos que no existan en equipo.json
 - Respetar límite de 10 items por personaje
 - Poções: máx. 2 por héroe (ocupan espacio)
 ```

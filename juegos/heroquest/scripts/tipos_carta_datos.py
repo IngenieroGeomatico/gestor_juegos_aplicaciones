@@ -30,9 +30,9 @@ class TipoDatos:
     """Definición de datos de un tipo de carta (sin lógica de render).
 
     - `id`: identificador de CLI ('arma', 'monstruo', ...).
-    - `fichero`: nombre del JSON en data/ (sin extensión), p. ej. 'armas'.
+    - `fichero`: nombre del JSON en data/ (sin extensión), p. ej. 'equipo'.
     - `campos`: lista de campos declarados.
-    - `discriminador`: para los tipos que comparten fichero (armas.json), el
+    - `discriminador`: para los tipos que comparten fichero (equipo.json), el
       valor fijo del campo `tipo` que los distingue (None si el fichero es
       exclusivo del tipo).
     """
@@ -106,7 +106,7 @@ MONSTRUO = TipoDatos(
 
 ARMA = TipoDatos(
     id="arma",
-    fichero="armas",
+    fichero="equipo",
     discriminador="Arma cuerpo a cuerpo",
     campos=[
         Campo("nombre", "Nombre del arma"),
@@ -119,7 +119,7 @@ ARMA = TipoDatos(
 
 ARMADURA = TipoDatos(
     id="armadura",
-    fichero="armas",
+    fichero="equipo",
     discriminador="Armadura",
     fijos={"ataque": 0},
     campos=[
@@ -132,7 +132,7 @@ ARMADURA = TipoDatos(
 
 POCION = TipoDatos(
     id="pocion",
-    fichero="armas",
+    fichero="equipo",
     discriminador="Poción",
     fijos={"ataque": 0, "defensa": 0},
     campos=[
@@ -148,13 +148,51 @@ HECHIZO = TipoDatos(
     campos=[
         Campo("nombre", "Nombre del hechizo"),
         Campo("escuela", "Escuela elemental (Agua, Aire, Fuego, Tierra, Terror)"),
-        Campo("coste_mente", "Coste en puntos de mente", tipo=int),
+        Campo("coste_mente", "Coste en puntos de mente por carta (0 = gratis)"),
+        Campo("coste_aprendido", "Coste en puntos de mente al usarlo aprendido", tipo=int, requerido=False, default=1),
         Campo("descripcion", "Descripción del efecto", requerido=False, default=""),
     ],
 )
 
+TESORO = TipoDatos(
+    id="tesoro",
+    fichero="tesoros",
+    campos=[
+        Campo("nombre", "Nombre de la carta de tesoro"),
+        Campo("subtipo", "Subtipo (Gema, Oro, Joyas, Poción, Peligro, Monstruo, ...)", requerido=False, default=""),
+        Campo("coste", "Coste en monedas de oro (precio de venta)", tipo=int, requerido=False, default=0),
+        Campo("descripcion", "Descripción del tesoro", requerido=False, default=""),
+    ],
+)
 
-_TIPOS: list[TipoDatos] = [PERSONAJE, MONSTRUO, ARMA, ARMADURA, POCION, HECHIZO]
+EQUIPO = TipoDatos(
+    id="equipo",
+    fichero="equipo",
+    campos=[
+        Campo("nombre", "Nombre del equipo"),
+        Campo("subtipo", "Subtipo (Arma, Armadura, Herramienta, Poción, Bastón, ...)"),
+        Campo("ataque", "Dados de ataque que otorga", tipo=int, requerido=False, default=0),
+        Campo("defensa", "Dados de defensa que otorga", tipo=int, requerido=False, default=0),
+        Campo("coste", "Coste en monedas de oro", tipo=int),
+        Campo("descripcion", "Descripción opcional", requerido=False, default=""),
+    ],
+)
+
+ARTEFACTO = TipoDatos(
+    id="artefacto",
+    fichero="artefactos",
+    campos=[
+        Campo("nombre", "Nombre del artefacto"),
+        Campo("subtipo", "Subtipo (Arma, Armadura, Anillo, Varita, Capa, Bastón, ...)"),
+        Campo("ataque", "Dados de ataque que otorga", tipo=int, requerido=False, default=0),
+        Campo("defensa", "Dados de defensa que otorga", tipo=int, requerido=False, default=0),
+        Campo("coste", "Coste en monedas de oro (precio de venta)", tipo=int, requerido=False, default=0),
+        Campo("descripcion", "Descripción opcional", requerido=False, default=""),
+    ],
+)
+
+
+_TIPOS: list[TipoDatos] = [PERSONAJE, MONSTRUO, ARMA, ARMADURA, POCION, HECHIZO, TESORO, EQUIPO, ARTEFACTO]
 
 TIPOS: dict[str, TipoDatos] = {t.id: t for t in _TIPOS}
 

@@ -41,7 +41,9 @@ Situación de los datos y scripts:
 | Tipo | Fichero | Campos |
 |------|---------|--------|
 | Héroes | `juegos/heroquest/data/personajes.json` | nombre, clase, ataque, defensa, cuerpo, mente, movimiento, arma_inicial, armadura_inicial, descripcion y `plantillas` (receta de carta: `cara` y `dorso`, ver más abajo) |
-| Armas y equipo | `juegos/heroquest/data/armas.json` | nombre, tipo (Arma cuerpo a cuerpo / Arma a distancia / Armadura / Poción), ataque, defensa, coste, descripcion |
+| Armas y equipo | `juegos/heroquest/data/equipo.json` | subtipo (Arma cuerpo a cuerpo / Arma a distancia / Armadura / Poción / Herramienta / Bastón), ataque, defensa, coste, descripcion; los bastones llevan `hechizos_aprendibles` |
+| Tesoros | `juegos/heroquest/data/tesoros.json` | nombre, subtipo, coste (precio de venta), descripcion, devolver |
+| Artefactos | `juegos/heroquest/data/artefactos.json` | nombre, subtipo, ataque, defensa, coste (precio de venta), descripcion |
 | Monstruos | `juegos/heroquest/data/monstruos.json` | nombre, ataque, defensa, cuerpo, mente, movimiento, descripcion |
 | Hechizos | `juegos/heroquest/data/hechizos.json` | nombre, escuela elemental (Agua / Aire / Fuego / Tierra / Terror), coste_mente, descripcion |
 | Reglas | `juegos/heroquest/data/reglas.json` | **normas canónicas del juego** agrupadas por categorías y mecánicas, editables. Cada mecánica tiene descripcion, valores (parámetros) y detalle. Este fichero es tu referencia de reglas (además de la V2 de HQ.es) y el usuario puede ampliarlo |
@@ -58,7 +60,7 @@ Despertar). Las coordenadas son **globales** de la cuadrícula del tablero
 - `puertas[]` — casillas con puerta
 - `salas[]` — cada sala es `{ numero, nombre, descripcion, monstruos[], tesoros[] }`
   con `monstruos[]`/`tesoros[]` como `{ nombre, x, y }` y `nombre` referenciando
-  `monstruos.json`/`armas.json`. Las coordenadas deben caer **dentro** de la sala.
+  `monstruos.json`/`equipo.json`/`tesoros.json`/`artefactos.json`. Las coordenadas deben caer **dentro** de la sala.
 
 Consulta el tablero (salas numeradas, `.` = pasillo) con
 `uv run juegos/heroquest/scripts/tablero.py ver --tablero original`.

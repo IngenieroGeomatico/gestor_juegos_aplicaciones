@@ -1,0 +1,117 @@
+[
+  {
+    "nombre": "Armadura de Borin",
+    "ataque": 0,
+    "defensa": 2,
+    "coste": 2000,
+    "descripcion": "Mágica vestimenta acorazada que otorga 2 dados de defensa adicionales. A diferencia de la coraza normal, es ultraligera y no ralentiza a quien la lleve. Puede combinarse con el Yelmo y/o el Escudo. No puede ser utilizada por el Mago.",
+    "subtipo": "Armadura"
+  },
+  {
+    "nombre": "Vara de Telekinesis",
+    "ataque": 0,
+    "defensa": 0,
+    "coste": 1500,
+    "descripcion": "Una vez por misión puedes utilizarla para atrapar a un monstruo en un campo de fuerza mágica. Pierde su siguiente turno, aunque puede resistir tirando 1 dado rojo por cada punto mental: si saca un 6, resiste el hechizo.",
+    "hechizos_aprendibles": 1,
+    "subtipo": "Vara"
+  },
+  {
+    "nombre": "Elixir de Vida",
+    "ataque": 0,
+    "defensa": 0,
+    "coste": 2000,
+    "descripcion": "Pequeña botella de líquido perlado que devuelve la vida a un héroe muerto, restaurando todos sus puntos corporales y mentales. Solo puede utilizarse una vez.",
+    "subtipo": "Poción"
+  },
+  {
+    "nombre": "Espada Larga de la Fortuna",
+    "ataque": 3,
+    "defensa": 0,
+    "coste": 2000,
+    "descripcion": "Esta espada te permite atacar en diagonal y otorga 3 dados de ataque. Una vez por misión, el héroe puede volver a lanzar 1 dado de ataque. No puede ser utilizada por el Mago.",
+    "subtipo": "Arma cuerpo a cuerpo"
+  },
+  {
+    "nombre": "Azote de Orcos",
+    "ataque": 2,
+    "defensa": 0,
+    "coste": 1600,
+    "descripcion": "Mágica espada corta con 2 dados de ataque. Puedes atacar dos veces si te enfrentas a un orco. No puede ser utilizada por el Mago.",
+    "subtipo": "Arma cuerpo a cuerpo"
+  },
+  {
+    "nombre": "Filo del Fantasma",
+    "ataque": 1,
+    "defensa": 0,
+    "coste": 1800,
+    "descripcion": "Daga ornamentada con 1 dado de ataque. Una vez por misión, cuando atacas con ella tu objetivo no puede defenderse, pues el arma atraviesa su armadura.",
+    "subtipo": "Arma cuerpo a cuerpo"
+  },
+  {
+    "nombre": "Anillo de Retorno",
+    "ataque": 0,
+    "defensa": 0,
+    "coste": 1200,
+    "descripcion": "Al invocarse, devuelve a todos los héroes que el portador pueda ver al punto de partida de la misión. Solo se puede utilizar una vez.",
+    "subtipo": "Anillo"
+  },
+  {
+    "nombre": "Anillo de Fortaleza",
+    "ataque": 0,
+    "defensa": 0,
+    "coste": 1000,
+    "descripcion": "Este anillo mágico otorga 1 punto corporal adicional al héroe.",
+    "subtipo": "Anillo"
+  },
+  {
+    "nombre": "Anillo de Hechizos",
+    "ataque": 0,
+    "defensa": 0,
+    "coste": 1500,
+    "descripcion": "Permite que un héroe lance un hechizo dos veces (no simultáneamente). Al comienzo de una misión, el portador debe declarar cuál de sus hechizos está alojado en el anillo.",
+    "subtipo": "Anillo"
+  },
+  {
+    "nombre": "Filo del Espíritu",
+    "ataque": 3,
+    "defensa": 0,
+    "coste": 2000,
+    "descripcion": "Espada mágica con un espeluznante mango de hueso tallado. Tira 3 dados de ataque, o 4 si atacas a un muerto viviente (esqueletos, zombis o momias). No puede ser utilizada por el Mago.",
+    "subtipo": "Arma cuerpo a cuerpo"
+  },
+  {
+    "nombre": "Talismán de la Sabiduría",
+    "ataque": 0,
+    "defensa": 0,
+    "coste": 1200,
+    "descripcion": "Este medallón mágico otorga 1 punto mental adicional al héroe mientras lo lleve puesto.",
+    "subtipo": "Talismán"
+  },
+  {
+    "nombre": "Varita Mágica",
+    "ataque": 0,
+    "defensa": 0,
+    "coste": 1500,
+    "descripcion": "Permite a un héroe lanzar dos hechizos distintos en su turno en lugar de un solo hechizo.",
+    "hechizos_aprendibles": 1,
+    "subtipo": "Varita"
+  },
+  {
+    "nombre": "Capa de Mago",
+    "ataque": 0,
+    "defensa": 1,
+    "coste": 1500,
+    "descripcion": "Capa mágica de tela brillante provista de runas místicas. Solo puede llevarla el Mago. Otorga 1 dado de defensa adicional.",
+    "subtipo": "Capa"
+  },
+  {
+    "nombre": "Bastón del Mago",
+    "ataque": 2,
+    "defensa": 0,
+    "coste": 2000,
+    "descripcion": "Largo y antiguo bastón que brilla con una suave luz azul. Solo puede utilizarlo el Mago. Otorga 2 dados de ataque y la habilidad de atacar en diagonal.",
+    "hechizos_aprendibles": 1,
+    "subtipo": "Bastón"
+  }
+]

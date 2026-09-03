@@ -53,21 +53,22 @@ def estadisticas_grupo() -> dict:
 # ── Armas / Equipo ──────────────────────────────────────────────────────────
 
 def listar_armas() -> list[dict]:
-    """Lista todas las armas con stats."""
-    return cargar("armas")
+    """Lista todas las armas con stats (desde equipo.json)."""
+    return cargar("equipo")
 
 
 def buscar_item(nombre: str) -> dict | None:
-    """Busca un arma/armadura/poción por nombre exacto."""
-    for a in cargar("armas"):
-        if a.get("nombre") == nombre:
-            return a
+    """Busca un arma/armadura/poción por nombre exacto en equipo, tesoros y artefactos."""
+    for fichero in ("equipo", "tesoros", "artefactos"):
+        for a in cargar(fichero):
+            if a.get("nombre") == nombre:
+                return a
     return None
 
 
 def listar_por_tipo(tipo_item: str) -> list[dict]:
-    """Filtra equipo por tipo: 'Arma cuerpo a cuerpo', 'Armadura', 'Poción', etc."""
-    return [a for a in cargar("armas") if a.get("tipo") == tipo_item]
+    """Filtra equipo por subtipo: 'Arma cuerpo a cuerpo', 'Armadura', 'Poción', etc."""
+    return [a for a in cargar("equipo") if (a.get("subtipo") or a.get("tipo")) == tipo_item]
 
 
 # ── Monstruos ────────────────────────────────────────────────────────────────

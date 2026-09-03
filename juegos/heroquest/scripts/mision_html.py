@@ -42,9 +42,10 @@ def _stats_monstruo(nombre: str) -> dict | None:
 
 
 def _stat_tesoro(nombre: str) -> dict | None:
-    for a in data_store.cargar("armas"):
-        if a["nombre"] == nombre:
-            return a
+    for fichero in ("equipo", "tesoros", "artefactos", "hechizos"):
+        for a in data_store.cargar(fichero):
+            if a["nombre"] == nombre:
+                return a
     return None
 
 
@@ -180,17 +181,22 @@ def _referencia() -> str:
       </table></div>
     </section>""")
 
-    armas = data_store.cargar("armas")
-    filas_a = "".join(
-        f'<tr><td>{html.escape(a["nombre"])}</td><td>{html.escape(a["tipo"])}</td>'
-        f'<td>{"A" + str(a["ataque"]) if a.get("ataque") else "—"}</td>'
-        f'<td>{"D" + str(a["defensa"]) if a.get("defensa") else "—"}</td>'
-        f'<td>{a["coste"]}</td></tr>'
-        for a in armas
-    )
+    def _fila_item(a):
+        subtipo = a.get("subtipo") or a.get("tipo", "")
+        return (
+            f'<tr><td>{html.escape(a["nombre"])}</td><td>{html.escape(subtipo)}</td>'
+            f'<td>{"A" + str(a["ataque"]) if a.get("ataque") else "—"}</td>'
+            f'<td>{"D" + str(a["defensa"]) if a.get("defensa") else "—"}</td>'
+            f'<td>{a.get("coste", "—")}</td></tr>'
+        )
+
+    equipos = data_store.cargar("equipo")
+    tesoros = data_store.cargar("tesoros")
+    artefactos = data_store.cargar("artefactos")
+    filas_a = "".join(_fila_item(a) for a in (equipos + tesoros + artefactos))
     secciones.append(f"""
     <section class="panel">
-      <h3>Armas y equipo</h3>
+      <h3>Armas y equipo, tesoros y artefactos</h3>
       <div class="tabla-wrap"><table>
         <thead><tr><th>Nombre</th><th>Tipo</th><th>Ataque</th><th>Defensa</th><th>Coste</th></tr></thead>
         <tbody>{filas_a}</tbody>

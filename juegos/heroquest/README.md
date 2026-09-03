@@ -7,9 +7,11 @@ Juego de mesa clásico de mazmorras. Esta carpeta contiene los datos y scripts d
 Ficheros JSON con el contenido del juego:
 
 - `personajes.json` — Héroes (clase, ataque, defensa, cuerpo, mente, movimiento)
-- `armas.json` — Armas, armaduras y pociones (ataque, defensa, coste)
+- `equipo.json` — Equipo de batalla: armas, armaduras, pociones y herramientas (subtipo, ataque, defensa, coste); los bastones/vara llevan `hechizos_aprendibles` (nº de hechizos que pueden memorizar; 1 por defecto)
+- `tesoros.json` — Cartas del mazo de Tesoro (Gema, Oro, Joyas, Peligro, Pociones Heroica/Defensa/Fuerza/Curativa, Monstruo Errante, Nada)
+- `artefactos.json` — Artefactos y objetos mágicos (Armadura de Borin, Vara de Telekinesis, Elixir de Vida, Espadas mágicas, Anillos, Talismán, Varita, Capa y Bastón del Mago, etc.)
 - `monstruos.json` — Enemigos (ataque, defensa, cuerpo, mente, movimiento)
-- `hechizos.json` — Conjuros y cartas de magia (nombre, escuela, coste_mente, descripcion)
+- `hechizos.json` — Conjuros y cartas de magia (nombre, escuela, coste_mente por carta, coste_aprendido, descripcion)
 - `reglas.json` — **Normas canónicas del juego** agrupadas por categorías y
   mecánicas editables (combate, magia, trampas, turnos, tesoros, misiones...).
   Es editable: amplía o ajusta mecánicas libremente y el agente lo consulta como
@@ -463,8 +465,9 @@ héroe, por ejemplo:
 El módulo `scripts/plantillas.py` es el loader (cachea las plantillas, lee las
 anclas y sustituye los marcadores `{{...}}`).
 
-> Cualquier entrada nueva de `personajes.json`, `monstruos.json`, `armas.json` o
-> `hechizos.json` necesita su bloque `plantillas` para poder renderizar su carta;
+> Cualquier entrada nueva de `personajes.json`, `monstruos.json`, `equipo.json`,
+> `tesoros.json`, `artefactos.json` o `hechizos.json` necesita su bloque
+> `plantillas` para poder renderizar su carta;
 > sin él se gestiona como dato (`nueva_carta.py`, `listar.py`, `eliminar.py`)
 > pero no tiene carta.
 

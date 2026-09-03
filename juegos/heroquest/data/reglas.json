@@ -188,6 +188,33 @@
      "descripcion": "Lanzar un hechizo cuesta Puntos de Mente (campo 'coste_mente' de cada hechizo). Una vez lanzado, la carta del hechizo se descarta y se retira del juego.",
      "valores": {}
     },
+    "uso_desde_carta_gratis": {
+     "descripcion": "Regla de casa: si la carta de hechizo físico no indica coste de mente, su uso por carta es GRATIS (coste_mente = 0). El coste de mente solo se aplica cuando el hechizo está aprendido.",
+     "valores": {
+      "coste_por_carta": "el que indique la carta (0 si no indica nada)",
+      "aplica_a": "cartas de hechizo físicas del set base"
+     },
+     "norma_propia": true
+    },
+    "aprendizaje_de_hechizos": {
+     "descripcion": "Regla de casa: un hechizo puede APRENDERSE para poder usarse más veces. Al estar aprendido, su uso sí gasta Puntos de Mente según el campo 'coste_aprendido' de cada hechizo. El coste_aprendido no se calcula automáticamente: es un dato propio de cada carta (por regla general = coste_mente + 1, pero algunas magias pueden ser excepción).",
+     "valores": {
+      "coste_aprendido_default": "coste_mente + 1",
+      "campo": "coste_aprendido",
+      "excepciones": "posibles, se fijan por carta"
+     },
+     "detalle": "Mientras la carta sin aprender se usa gratis (si no indica coste), un hechizo aprendido consume PM cada vez que se lanza. Por regla general, el coste_aprendido es el coste_mente de la carta + 1 (p. ej. un hechizo gratis pasa a costar 1 PM). Sin embargo, 'coste_aprendido' es un parámetro propio de cada carta de magia, por si alguna magia no cumple la regla.",
+     "norma_propia": true
+    },
+    "capacidad_segun_baston": {
+     "descripcion": "Regla de casa: el número máximo de hechizos que un personaje puede tener APRENDIDOS depende del bastón/vara que porta. Es un parámetro de la carta del bastón: el campo 'hechizos_aprendibles'. Si la carta del bastón no pone nada, el personaje solo aprende 1 hechizo.",
+     "valores": {
+      "campo": "hechizos_aprendibles",
+      "por_defecto": 1
+     },
+     "detalle": "Cada bastón, báculo o varita lleva su dato 'hechizos_aprendibles' (nº máximo de hechizos que puede tener memorizados/ aprendidos a la vez). Si la carta del bastón no indica este parámetro, el valor por defecto es 1: el personaje solo podrá tener 1 hechizo aprendido.",
+     "norma_propia": true
+    },
     "estado_de_shock": {
      "descripcion": "Cuando el Cuerpo o la Mente del héroe llega a cero, cae en estado de shock: solo puede moverse la mitad (redondeando hacia arriba), atacar con un máximo de un dado y defenderse con dos. Recuperar al menos un punto de Mente lo vuelve a la normalidad.",
      "valores": {
