@@ -385,3 +385,11 @@ Agente:
 - [ ] Implementar tools de acceso a datos
 - [ ] Configurar ChromaDB
 - [ ] Test de integración completa
+
+### 6.1 Pendientes visuales Misión 1 (La Fortaleza Fronteriza de In-Gulden)
+
+- [ ] **Salida**: no se ve bien en el mapa. Revisar el marcador/gliifo de la salida trasera de la fortaleza (puerta secreta [9,18]-[10,18]) y mejorar su representación.
+- [ ] **Rocas / pasajes intransitables**: las rocas y zonas por las que no se puede pasar no se distinguen bien. Revisar cómo se pintan (probablemente como pasillo) y darles un aspecto diferenciado que comunique que son intransitables.
+- [ ] Revisar el icono "F" / marcadores de exploradores caídos del mapa (señalado en sesiones previas).
+- [ ] Generar los 3 iconos de héroes que faltan (Enana, Elfo, Elfa) en `sources/arte_iconos/`.
+- [ ] Generar plantillas/arte para los 21 hechizos nuevos, tesoros y artefactos (hoy el render falla con `ValueError: ... no declara plantillas.cara.plantilla_padre`).
