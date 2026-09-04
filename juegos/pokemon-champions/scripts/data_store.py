@@ -1,8 +1,14 @@
-"""Utilidades compartidas para los datos de Pokémon Champions."""
+"""Utilidades compartidas para los datos de Pokémon Champions.
+
+La E/S JSON genérica vive en ``comun/json_store.py`` (a nivel de repo). Este
+módulo añade encima la capa específica del juego: cachés LRU de los datos de
+referencia (pokedex, movimientos, chart de tipos) y las consultas de
+efectividad y búsqueda.
+"""
 
 from __future__ import annotations
 
-import json
+import importlib.util
 from functools import lru_cache
 from pathlib import Path
 
@@ -11,19 +17,29 @@ DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 CLAVES_ESPECIE = ("numero", "nombre", "tipos", "stats", "habilidades", "legendario", "movimientos")
 
 
+def _cargar_json_store():
+    """Carga ``comun/json_store.py`` por ruta, sin tocar ``sys.path``.
+
+    Funciona con ``uv run <ruta>.py`` aunque el repo no esté instalado como
+    paquete.
+    """
+    raiz = Path(__file__).resolve().parents[3]
+    ruta = raiz / "comun" / "json_store.py"
+    spec = importlib.util.spec_from_file_location("comun.json_store", ruta)
+    modulo = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(modulo)
+    return modulo
+
+
+_js = _cargar_json_store()
+
+
 def cargar(nombre: str) -> list[dict]:
-    ruta = DATA_DIR / f"{nombre}.json"
-    if not ruta.exists():
-        return []
-    with ruta.open(encoding="utf-8") as f:
-        return json.load(f)
+    return _js.cargar_json(DATA_DIR, nombre)
 
 
 def guardar(nombre: str, datos: list[dict]) -> None:
-    ruta = DATA_DIR / f"{nombre}.json"
-    with ruta.open("w", encoding="utf-8") as f:
-        json.dump(datos, f, ensure_ascii=False, indent=2)
-        f.write("\n")
+    _js.guardar_json(DATA_DIR, nombre, datos)
     _invalidar_cache()
 
 

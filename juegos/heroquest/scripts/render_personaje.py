@@ -48,46 +48,32 @@ Contrato de datos que consumen las plantillas (además de los stats numéricos):
 
 from __future__ import annotations
 
-import base64
-import io
 import re
 import xml.sax.saxutils
 from pathlib import Path
 
-from PIL import Image, ImageOps
+from PIL import Image
 
 import plantillas
+import render_utils
+from render_utils import (
+    FONT_FAMILY,
+    JUEGO_DIR,
+    PX_CARTA_ANCHO,
+    PX_CARTA_ALTO,
+    colocar_subsvg as _colocar_subsvg,
+    documento_svg as _documento_svg,
+    factor_res as _factor_res,
+    frag_fondo as _frag_fondo_util,
+    frag_imagen as _frag_imagen,
+    inyectar_fondo as _inyectar_fondo,
+    limpiar_para_resvg as _limpiar_para_resvg,
+    rasterizar as _rasterizar,
+    resolver as _resolver,
+    viewbox as _viewbox,
+)
 
-# Raíz del juego (…/juegos/heroquest), para resolver rutas relativas del JSON.
-JUEGO_DIR = Path(__file__).resolve().parent.parent
-
-# Fuente de la carta (libre, OFL). Se embebe en el SVG como @font-face para que
-# resvg la use de forma consistente (si no, cae a una fuente por defecto y los
-# textos no casan con los números). Se usa **Amarna** (glyphic humanist sans,
-# OFL-1.1), una alternativa libre a la Carter Sans original de las cartas HQ
-# 2021: ambas son "flare/glyphic sans" inspiradas en Albertus, con serifas
-# suaves en las mayúsculas. Se embeben instancias estáticas Regular/Bold (resvg
-# no interpola fuentes variables, así que necesitamos una cara bold real).
-FUENTE_DIR = JUEGO_DIR / "sources" / "fuentes"
-FUENTE_REGULAR = FUENTE_DIR / "Amarna-Regular.ttf"
-FUENTE_BOLD = FUENTE_DIR / "Amarna-Bold.ttf"
-# Reserva: la variable original, si no existen las instancias estáticas.
-FUENTE_TTF = FUENTE_DIR / "Amarna[wght].ttf"
-FONT_FAMILY = "Amarna"
-
-# --- Tamaño físico de la carta (idéntico al del sistema clásico) ---
-MM_CARTA_ANCHO = 63
-MM_CARTA_ALTO = 88
-DPI_CARTA = 300
-PX_CARTA_ANCHO = round(MM_CARTA_ANCHO / 25.4 * DPI_CARTA)   # 744
-PX_CARTA_ALTO = round(MM_CARTA_ALTO / 25.4 * DPI_CARTA)     # 1039
-
-# Factor de resolución para incrustar imágenes: las anclas están en coordenadas
-# del viewBox de la plantilla (~189 px de ancho), pero la carta se rasteriza a
-# 744 px. Incrustar al tamaño del ancla dejaría el arte pixelado; se multiplica
-# por este factor (viewBox -> px físicos) para incrustar a resolución real.
-# Se calcula por SVG en tiempo de render; este es un mínimo de seguridad.
-_FACTOR_RES_MIN = 1.0
+_cargar_svg_texto = render_utils.cargar_svg_texto
 
 # Estilo del número de stat que se pinta sobre las anclas ph-valor-*.
 COLOR_VALOR = "#3a2416"
@@ -155,139 +141,8 @@ def _lineas_etiqueta(etiqueta: str) -> list[str]:
 
 
 # --------------------------------------------------------------------------
-# Utilidades
-# --------------------------------------------------------------------------
-
-def _resolver(ruta: str) -> Path:
-    """Resuelve una ruta del JSON (relativa a la carpeta del juego) a Path."""
-    p = Path(ruta)
-    return p if p.is_absolute() else JUEGO_DIR / p
-
-
-def _imagen_data_uri(ruta: Path, ancho: int, alto: int) -> str:
-    """Incrusta una imagen recortada "cover" (x/y-mid slice) como data URI.
-
-    Si la imagen tiene canal alfa (PNG con transparencia) se preserva usando
-    PNG; así el fondo transparente del arte NO se vuelve negro. Si es opaca, se
-    usa JPEG (más ligero).
-    """
-    with Image.open(ruta) as im:
-        im = ImageOps.exif_transpose(im)
-        tiene_alpha = im.mode in ("RGBA", "LA") or (
-            im.mode == "P" and "transparency" in im.info
-        )
-        im = im.convert("RGBA" if tiene_alpha else "RGB")
-        im = ImageOps.fit(im, (max(1, ancho), max(1, alto)), Image.LANCZOS)
-        buf = io.BytesIO()
-        if tiene_alpha:
-            im.save(buf, format="PNG")
-            mime = "png"
-        else:
-            im.save(buf, format="JPEG", quality=88)
-            mime = "jpeg"
-    return f"data:image/{mime};base64," + base64.b64encode(buf.getvalue()).decode("ascii")
-
-
-def _face(ruta: Path, peso: str) -> str:
-    """Un bloque @font-face para `ruta` con el `font-weight` indicado."""
-    datos = base64.b64encode(ruta.read_bytes()).decode("ascii")
-    return (
-        f"@font-face{{font-family:'{FONT_FAMILY}';font-style:normal;"
-        f"font-weight:{peso};src:url('data:font/ttf;base64,{datos}')"
-        " format('truetype');}"
-    )
-
-
-def _font_face() -> str:
-    """Devuelve un <style> con las caras Regular y Bold de la fuente embebidas.
-
-    Embeber la fuente como @font-face con data URI garantiza que resvg la use.
-    Se embeben caras estáticas Regular (400) y Bold (700) porque resvg no
-    interpola la variable original y `font-weight:bold` no se aplicaría.
-    """
-    caras: list[str] = []
-    if FUENTE_REGULAR.exists():
-        caras.append(_face(FUENTE_REGULAR, "normal"))
-    elif FUENTE_TTF.exists():
-        caras.append(_face(FUENTE_TTF, "normal"))
-    if FUENTE_BOLD.exists():
-        caras.append(_face(FUENTE_BOLD, "bold"))
-    if not caras:
-        return ""
-    return "<style>" + "".join(caras) + "</style>"
-
-
-def _cargar_svg_texto(ruta: Path) -> str:
-    """Lee un fichero SVG de disco (para plantillas referenciadas por el JSON)."""
-    if not ruta.exists():
-        raise FileNotFoundError(f"No existe la plantilla/asset: {ruta}")
-    return ruta.read_text(encoding="utf-8")
-
-
-# Atributos y elementos con prefijos de Inkscape/sodipodi: resvg no los conoce
-# y aborta con "unknown namespace prefix". Se eliminan del SVG compuesto final.
-_RE_ATTR_NS = re.compile(r'\s+(?:inkscape|sodipodi|svg):[\w-]+="[^"]*"')
-_RE_ELEM_NS = re.compile(r"<(?:inkscape|sodipodi):[\w-]+\b[^>]*/?>")
-
-
-def _limpiar_para_resvg(svg: str) -> str:
-    """Quita atributos/elementos con prefijos que resvg no reconoce."""
-    svg = _RE_ELEM_NS.sub("", svg)
-    svg = _RE_ATTR_NS.sub("", svg)
-    return svg
-
-
-def _viewbox(svg: str) -> tuple[float, float, float, float]:
-    """Devuelve (min_x, min_y, ancho, alto) del viewBox de un SVG."""
-    m = re.search(r'viewBox="([-\d.eE]+)\s+([-\d.eE]+)\s+([-\d.eE]+)\s+([-\d.eE]+)"', svg)
-    if not m:
-        # Sin viewBox: usa width/height como tamaño y origen 0,0.
-        aw = re.search(r'\bwidth="([-\d.eE]+)"', svg)
-        ah = re.search(r'\bheight="([-\d.eE]+)"', svg)
-        return (0.0, 0.0, float(aw.group(1)) if aw else 100.0,
-                float(ah.group(1)) if ah else 100.0)
-    return (float(m.group(1)), float(m.group(2)), float(m.group(3)), float(m.group(4)))
-
-
-def _colocar_subsvg(sub_svg: str, geom: dict[str, float]) -> str:
-    """Devuelve el interior de `sub_svg` escalado/trasladado al ancla `geom`.
-
-    El sub-SVG (ribbon, hero-stats) se dibuja en sus propias coordenadas de
-    viewBox; aquí lo posamos dentro de la caja del ancla respetando su origen.
-    """
-    min_x, min_y, vb_w, vb_h = _viewbox(sub_svg)
-    if vb_w <= 0 or vb_h <= 0:
-        return ""
-    escala_x = geom["width"] / vb_w
-    escala_y = geom["height"] / vb_h
-    interior = plantillas.interior(sub_svg)
-    return (
-        f'<g transform="translate({geom["x"]}, {geom["y"]}) '
-        f'scale({escala_x}, {escala_y}) translate({-min_x}, {-min_y})">'
-        f"{interior}</g>"
-    )
-
-
-# --------------------------------------------------------------------------
 # Fragmentos de contenido para cada ancla de la plantilla padre
 # --------------------------------------------------------------------------
-
-def _frag_imagen(ruta: Path, geom: dict[str, float], factor_res: float = 1.0) -> str:
-    """Imagen recortada "cover" que llena exactamente el ancla `geom`.
-
-    `factor_res` multiplica la resolución a la que se incrusta la imagen (los
-    píxeles reales del data URI) sin cambiar su tamaño en el lienzo, para evitar
-    el pixelado al rasterizar la carta a su resolución física.
-    """
-    px_w = max(1, round(geom["width"] * factor_res))
-    px_h = max(1, round(geom["height"] * factor_res))
-    uri = _imagen_data_uri(ruta, px_w, px_h)
-    return (
-        f'<image x="{geom["x"]}" y="{geom["y"]}" '
-        f'width="{geom["width"]}" height="{geom["height"]}" '
-        f'href="{uri}" preserveAspectRatio="xMidYMid slice" />'
-    )
-
 
 # Tamaño de fuente del nombre en el ribbon (en coords del viewBox del ribbon,
 # 564×144). La plantilla lo trae a 12px, que al escalar queda diminuto.
@@ -482,8 +337,7 @@ def render_svg(entrada: dict) -> str:
     padre = _cargar_svg_texto(padre_ruta)
 
     # Factor viewBox -> px físicos, para incrustar imágenes a resolución real.
-    _, _, vb_w, _ = _viewbox(padre)
-    factor_res = max(_FACTOR_RES_MIN, PX_CARTA_ANCHO / vb_w) if vb_w else _FACTOR_RES_MIN
+    factor_res = _factor_res(padre)
 
     # Anclas de la plantilla padre (geometría en sus coordenadas de grupo).
     geom_arte = plantillas.ancla(padre, "ph-arte")
@@ -525,32 +379,9 @@ def render_svg(entrada: dict) -> str:
                                bloques=bloques)
     # El rect guía 'carta' (marco de referencia) no debe dibujarse.
     cuerpo = plantillas._eliminar_ancla(cuerpo, "carta", "")
-    if fondo_frag:
-        cuerpo = _inyectar_fondo(cuerpo, fondo_frag)
+    cuerpo = _inyectar_fondo(cuerpo, fondo_frag)
 
-    min_x, min_y, vb_w, vb_h = _viewbox(padre)
-
-    return (
-        '<?xml version="1.0" encoding="UTF-8"?>'
-        f'<svg xmlns="http://www.w3.org/2000/svg" '
-        f'xmlns:xlink="http://www.w3.org/1999/xlink" '
-        f'viewBox="{min_x} {min_y} {vb_w} {vb_h}" '
-        f'width="{PX_CARTA_ANCHO}" height="{PX_CARTA_ALTO}">'
-        f"{_font_face()}{cuerpo}</svg>"
-    )
-
-
-def _inyectar_fondo(cuerpo: str, fondo_frag: str) -> str:
-    """Inserta el fondo como primer hijo del primer grupo <g ...> del cuerpo.
-
-    Así el fondo hereda el mismo transform del grupo padre (donde viven las
-    anclas y el rect 'carta') y queda detrás de todo el contenido.
-    """
-    m = re.search(r"<g\b[^>]*>", cuerpo)
-    if not m:
-        return fondo_frag + cuerpo
-    pos = m.end()
-    return cuerpo[:pos] + fondo_frag + cuerpo[pos:]
+    return _documento_svg(padre, cuerpo)
 
 
 # --------------------------------------------------------------------------
@@ -676,91 +507,23 @@ def render_svg_verso(entrada: dict) -> str:
     cuerpo = plantillas.render(padre, textos={"NOMBRE": entrada.get("nombre", "")},
                                bloques=bloques)
     cuerpo = plantillas._eliminar_ancla(cuerpo, "carta", "")
-    if fondo_frag:
-        cuerpo = _inyectar_fondo(cuerpo, fondo_frag)
+    cuerpo = _inyectar_fondo(cuerpo, fondo_frag)
 
-    min_x, min_y, vb_w, vb_h = _viewbox(padre)
-
-    return (
-        '<?xml version="1.0" encoding="UTF-8"?>'
-        f'<svg xmlns="http://www.w3.org/2000/svg" '
-        f'xmlns:xlink="http://www.w3.org/1999/xlink" '
-        f'viewBox="{min_x} {min_y} {vb_w} {vb_h}" '
-        f'width="{PX_CARTA_ANCHO}" height="{PX_CARTA_ALTO}">'
-        f"{_font_face()}{cuerpo}</svg>"
-    )
-
-
-def _frag_fondo_svg(ruta: Path, geom: dict[str, float]) -> str:
-    """Incrusta un SVG de fondo (p. ej. el borde) escalado a la caja `geom`.
-
-    El SVG se dibuja en sus propias coordenadas de viewBox; aquí se escala
-    (X e Y por separado) para llenar exactamente la caja de la carta, como
-    hacen ribbon/hero-stats. Se limpia de prefijos que resvg no reconoce.
-    """
-    svg = _limpiar_para_resvg(_cargar_svg_texto(ruta))
-    return _colocar_subsvg(svg, geom)
+    return _documento_svg(padre, cuerpo)
 
 
 def _frag_fondo(cara: dict, padre: str, factor_res: float = 1.0) -> str:
-    """Fondo(s) ajustados al rectángulo de la carta (rect 'carta').
+    """Fondo(s) de la cara `cara` ajustados al rectángulo de la carta.
 
-    Usa la geometría del `<rect id="carta">` de la plantilla padre como límite
-    del fondo, para que encaje exactamente con la carta visible (y no con el
-    viewBox completo, que incluye margen sobrante). Si no existe ese rect, cae
-    al viewBox. `factor_res` multiplica la resolución de incrustado de las
-    imágenes PNG/JPG.
-
-    `archivos_fondo` es una lista en ORDEN DE RENDERIZADO: el primero es el que
-    va MÁS ABAJO (se pinta primero) y cada siguiente se superpone encima. Cada
-    entrada puede ser una imagen (`.png`, `.jpg`, ...) o un SVG (`.svg`, p. ej.
-    el borde decorativo), que se incrusta como vector escalado a la carta.
+    Delega en `render_utils.frag_fondo`, pasando la lista `archivos_fondo` de la
+    receta. Ver la utilidad para el detalle del orden de renderizado.
     """
-    archivos = cara.get("archivos_fondo") or []
-    if not archivos:
-        return ""
-
-    caja = plantillas.ancla(padre, "carta")
-    if caja and caja.get("width") and caja.get("height"):
-        x, y, w, h = caja["x"], caja["y"], caja["width"], caja["height"]
-    else:
-        x, y, w, h = _viewbox(padre)
-    geom = {"x": x, "y": y, "width": w, "height": h}
-
-    px_w = max(1, round(w * factor_res))
-    px_h = max(1, round(h * factor_res))
-    partes: list[str] = []
-    for archivo in archivos:
-        ruta = _resolver(archivo)
-        if not ruta.exists():
-            continue
-        if ruta.suffix.lower() == ".svg":
-            partes.append(_frag_fondo_svg(ruta, geom))
-        else:
-            uri = _imagen_data_uri(ruta, px_w, px_h)
-            partes.append(
-                f'<image x="{x}" y="{y}" width="{w}" height="{h}" '
-                f'href="{uri}" preserveAspectRatio="xMidYMid slice" />'
-            )
-    return "".join(partes)
+    return _frag_fondo_util(cara.get("archivos_fondo") or [], padre, factor_res)
 
 
 # --------------------------------------------------------------------------
 # Rasterizado a PNG (resvg)
 # --------------------------------------------------------------------------
-
-def _rasterizar(svg: str) -> Image.Image:
-    """Rasteriza un SVG (str) a PNG (744 × 1039 px) con resvg."""
-    import resvg_py
-
-    datos = resvg_py.svg_to_bytes(
-        svg_string=_limpiar_para_resvg(svg),
-        width=PX_CARTA_ANCHO,
-        height=PX_CARTA_ALTO,
-        background="#ffffff",
-    )
-    return Image.open(io.BytesIO(datos)).convert("RGB")
-
 
 def render_png(entrada: dict) -> Image.Image:
     """Rasteriza el anverso de la carta del personaje a PNG con resvg."""

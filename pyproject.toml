@@ -7,3 +7,28 @@ dependencies = [
     "pyyaml>=6.0",
     "resvg-py>=0.4.0",
 ]
+
+# Dependencias opcionales del subsistema RAG de HeroQuest (juegos/heroquest/rag/).
+# No se instalan con `uv sync` a secas para mantener el entorno base ligero.
+# Instálalas cuando vayas a indexar/buscar sobre el material oficial o usar
+# las utilidades de visión:
+#   uv sync --extra rag           # búsqueda/indexado + descarga + OCR/visión
+#   uv sync --extra rag-lite      # solo variante ligera (PDF + numpy, sin ChromaDB)
+#   uv sync --all-extras          # todo
+[project.optional-dependencies]
+# Variante ligera: indexado/búsqueda TF-IDF con sqlite (indexar_lite.py,
+# busqueda_lite.py) y utilidades de visión (numpy). Extracción de PDF con pymupdf.
+rag-lite = [
+    "numpy>=1.26",
+    "pymupdf>=1.24",
+    "requests>=2.31",
+]
+# Variante completa: añade el motor vectorial ChromaDB con embeddings
+# (indexar.py, busqueda.py) sobre la variante ligera.
+rag = [
+    "numpy>=1.26",
+    "pymupdf>=1.24",
+    "requests>=2.31",
+    "chromadb>=0.5",
+    "sentence-transformers>=3.0",
+]

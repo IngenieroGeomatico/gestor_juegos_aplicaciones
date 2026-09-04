@@ -1,11 +1,35 @@
-"""Utilidades compartidas para leer y escribir los datos JSON de HeroQuest."""
+"""Utilidades compartidas para leer y escribir los datos JSON de HeroQuest.
+
+La E/S JSON genérica vive en ``comun/json_store.py`` (a nivel de repo). Este
+módulo añade encima la capa específica de HeroQuest: la validación de `tipo`
+contra ``TIPOS`` y las operaciones de alto nivel (añadir/eliminar/listar).
+"""
 
 from __future__ import annotations
 
-import json
+import importlib.util
 from pathlib import Path
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
+
+
+def _cargar_json_store():
+    """Carga ``comun/json_store.py`` por ruta, sin tocar ``sys.path``.
+
+    Funciona con ``uv run <ruta>.py`` aunque el repo no esté instalado como
+    paquete: sube hasta la raíz del repo (donde está ``comun/``) y lo importa
+    con ``importlib``.
+    """
+    raiz = Path(__file__).resolve().parents[3]
+    ruta = raiz / "comun" / "json_store.py"
+    spec = importlib.util.spec_from_file_location("comun.json_store", ruta)
+    modulo = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(modulo)
+    return modulo
+
+
+_js = _cargar_json_store()
+slug = _js.slug
 
 TIPOS = (
     "personajes",
@@ -30,37 +54,19 @@ def cargar_json(nombre: str) -> list[dict]:
     A diferencia de `cargar`, no valida `nombre` contra TIPOS, por lo que
     sirve para ficheros auxiliares como `tableros`. Devuelve [] si no existe.
     """
-    ruta = DATA_DIR / f"{nombre}.json"
-    if not ruta.exists():
-        return []
-    with ruta.open(encoding="utf-8") as f:
-        return json.load(f)
-
-
-def slug(nombre: str) -> str:
-    """Convierte un nombre en un identificador seguro para ficheros.
-
-    'Espada Larga' -> 'Espada_Larga'; conserva alfanuméricos y sustituye el
-    resto por '_', recortando los '_' de los extremos.
-    """
-    return "".join(c if c.isalnum() else "_" for c in nombre).strip("_")
+    return _js.cargar_json(DATA_DIR, nombre)
 
 
 def cargar(tipo: str) -> list[dict]:
     """Devuelve la lista de entradas de un tipo de dato."""
-    ruta = _ruta(tipo)
-    if not ruta.exists():
-        return []
-    with ruta.open(encoding="utf-8") as f:
-        return json.load(f)
+    _ruta(tipo)  # valida el tipo contra TIPOS
+    return _js.cargar_json(DATA_DIR, tipo)
 
 
 def guardar(tipo: str, datos: list[dict]) -> None:
     """Escribe la lista de entradas de un tipo de dato."""
-    ruta = _ruta(tipo)
-    with ruta.open("w", encoding="utf-8") as f:
-        json.dump(datos, f, ensure_ascii=False, indent=2)
-        f.write("\n")
+    _ruta(tipo)  # valida el tipo antes de escribir
+    _js.guardar_json(DATA_DIR, tipo, datos)
 
 
 def existe(tipo: str, nombre: str) -> bool:

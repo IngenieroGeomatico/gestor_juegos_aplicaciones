@@ -5,15 +5,28 @@ Reutiliza `data_store.py` (ya existente en scripts/) como backend.
 
 from __future__ import annotations
 
-import sys
+import importlib.util
 from pathlib import Path
 
-# Añadir scripts/ al path para reutilizar data_store
-_SCRIPTS_DIR = Path(__file__).resolve().parent.parent / "scripts"
-if str(_SCRIPTS_DIR) not in sys.path:
-    sys.path.insert(0, str(_SCRIPTS_DIR))
 
-from data_store import cargar, cargar_json, slug  # noqa: E402
+def _cargar_data_store():
+    """Carga ``scripts/data_store.py`` por ruta, sin modificar ``sys.path``.
+
+    Reutiliza el backend de datos del juego (que a su vez se apoya en el helper
+    JSON compartido del repo) sin depender de tener el repo instalado como
+    paquete ni de manipular ``sys.path`` globalmente.
+    """
+    ruta = Path(__file__).resolve().parent.parent / "scripts" / "data_store.py"
+    spec = importlib.util.spec_from_file_location("heroquest.data_store", ruta)
+    modulo = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(modulo)
+    return modulo
+
+
+_ds = _cargar_data_store()
+cargar = _ds.cargar
+cargar_json = _ds.cargar_json
+slug = _ds.slug
 
 
 # ── Personajes ───────────────────────────────────────────────────────────────
