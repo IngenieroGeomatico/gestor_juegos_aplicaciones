@@ -56,35 +56,130 @@
     "escuela": "Aire",
     "coste_mente": 0,
     "coste_aprendido": 1,
-    "descripcion": "Crea una pequeña tempestad que rodea a un monstruo de tu elección. Ese monstruo pierde su siguiente turno."
+    "descripcion": "Crea una pequeña tempestad que rodea a un monstruo de tu elección. Ese monstruo pierde su siguiente turno.",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/Tempestad.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Hechizo_de_aire.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    }
   },
   {
     "nombre": "Ráfaga",
     "escuela": "Aire",
     "coste_mente": 0,
     "coste_aprendido": 1,
-    "descripcion": "Lánzalo sobre cualquier héroe, incluido tú mismo. Su poderosa ráfaga de energía permite a ese héroe lanzar el doble de dados rojos la próxima vez que se mueva."
+    "descripcion": "Lánzalo sobre cualquier héroe, incluido tú mismo. Su poderosa ráfaga de energía permite a ese héroe lanzar el doble de dados rojos la próxima vez que se mueva.",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/Ráfaga.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Hechizo_de_aire.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    }
   },
   {
     "nombre": "Genio",
     "escuela": "Aire",
     "coste_mente": 0,
     "coste_aprendido": 1,
-    "descripcion": "Conjura un genio que puede abrir cualquier puerta del tablero (mostrando lo que hay más allá) o atacar a cualquier monstruo en su línea de visión con 5 dados de combate."
+    "descripcion": "Conjura un genio que puede abrir cualquier puerta del tablero (mostrando lo que hay más allá) o atacar a cualquier monstruo en su línea de visión con 5 dados de combate.",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/Genio.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Hechizo_de_aire.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    }
   },
   {
     "nombre": "Fuego de la Ira",
     "escuela": "Fuego",
     "coste_mente": 0,
     "coste_aprendido": 1,
-    "descripcion": "Envuelve a cualquier monstruo en llamas. Causa 1 punto de daño corporal, a menos que el monstruo inmediatamente saque un 5 o un 6 con un dado rojo."
+    "descripcion": "Envuelve a cualquier monstruo en llamas. Causa 1 punto de daño corporal, a menos que el monstruo inmediatamente saque un 5 o un 6 con un dado rojo.",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/Fuego_de_la_Ira.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Hechizo_de_fuego.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    }
   },
   {
     "nombre": "Valentía",
     "escuela": "Fuego",
     "coste_mente": 0,
     "coste_aprendido": 1,
-    "descripcion": "Lánzalo sobre cualquier héroe, incluido tú mismo. La próxima vez que ataque podrá tirar 2 dados extra de combate. El hechizo se rompe cuando no hay monstruos en la línea de visión del héroe."
+    "descripcion": "Lánzalo sobre cualquier héroe, incluido tú mismo. La próxima vez que ataque podrá tirar 2 dados extra de combate. El hechizo se rompe cuando no hay monstruos en la línea de visión del héroe.",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/Valentía.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Hechizo_de_fuego.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    }
   },
   {
     "nombre": "Bola de Fuego",
@@ -117,111 +212,415 @@
     "escuela": "Agua",
     "coste_mente": 0,
     "coste_aprendido": 1,
-    "descripcion": "Lánzalo sobre cualquier héroe, incluido tú mismo. El contacto con el agua cura hasta 4 puntos corporales, sin sobrepasar el número inicial de puntos del héroe."
+    "descripcion": "Lánzalo sobre cualquier héroe, incluido tú mismo. El contacto con el agua cura hasta 4 puntos corporales, sin sobrepasar el número inicial de puntos del héroe.",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/Agua_Milagrosa.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Hechizo_de_agua.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    }
   },
   {
     "nombre": "Niebla",
     "escuela": "Agua",
     "coste_mente": 0,
     "coste_aprendido": 1,
-    "descripcion": "Lánzalo sobre cualquier héroe, incluido tú mismo. En su siguiente movimiento, el héroe puede moverse sin ser visto a través de casillas ocupadas por monstruos."
+    "descripcion": "Lánzalo sobre cualquier héroe, incluido tú mismo. En su siguiente movimiento, el héroe puede moverse sin ser visto a través de casillas ocupadas por monstruos.",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/Niebla.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Hechizo_de_agua.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    }
   },
   {
     "nombre": "Dormir",
     "escuela": "Terror",
     "coste_mente": 0,
     "coste_aprendido": 1,
-    "descripcion": "Duerme a un monstruo en un sueño profundo para que no pueda moverse, atacar o defenderse. Puede romperse de inmediato o en un turno posterior. El monstruo tira 1 dado rojo por cada punto mental; si saca un 6, el hechizo se rompe. No puede usarse contra momias, zombis o esqueletos."
+    "descripcion": "Duerme a un monstruo en un sueño profundo para que no pueda moverse, atacar o defenderse. Puede romperse de inmediato o en un turno posterior. El monstruo tira 1 dado rojo por cada punto mental; si saca un 6, el hechizo se rompe. No puede usarse contra momias, zombis o esqueletos.",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/Dormir.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Hechizo_de_terror.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    }
   },
   {
     "nombre": "Piel de Roca",
     "escuela": "Tierra",
     "coste_mente": 0,
     "coste_aprendido": 1,
-    "descripcion": "Lánzalo sobre cualquier héroe, incluido tú mismo. Ese héroe puede tirar 1 dado de combate adicional al defenderse. El hechizo se rompe cuando el héroe sufre 1 punto de daño corporal."
+    "descripcion": "Lánzalo sobre cualquier héroe, incluido tú mismo. Ese héroe puede tirar 1 dado de combate adicional al defenderse. El hechizo se rompe cuando el héroe sufre 1 punto de daño corporal.",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/Piel_de_Roca.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Hechizo_de_tierra.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    }
   },
   {
     "nombre": "Cura Corporal",
     "escuela": "Tierra",
     "coste_mente": 0,
     "coste_aprendido": 1,
-    "descripcion": "Lánzalo sobre cualquier héroe, incluido tú mismo. Su poder mágico restaura inmediatamente hasta 4 puntos corporales, sin sobrepasar el número inicial de puntos del héroe."
+    "descripcion": "Lánzalo sobre cualquier héroe, incluido tú mismo. Su poder mágico restaura inmediatamente hasta 4 puntos corporales, sin sobrepasar el número inicial de puntos del héroe.",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/Cura_Corporal.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Hechizo_de_tierra.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    }
   },
   {
     "nombre": "A Través de la Roca",
     "escuela": "Tierra",
     "coste_mente": 0,
     "coste_aprendido": 1,
-    "descripcion": "Lánzalo sobre cualquier héroe, incluido tú mismo. Ese héroe puede atravesar paredes en su siguiente movimiento, tantas como le permita su tirada de dados. Cuidado: si termina su movimiento en una zona de roca sólida, queda atrapado para siempre."
+    "descripcion": "Lánzalo sobre cualquier héroe, incluido tú mismo. Ese héroe puede atravesar paredes en su siguiente movimiento, tantas como le permita su tirada de dados. Cuidado: si termina su movimiento en una zona de roca sólida, queda atrapado para siempre.",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/A_Través_de_la_Roca.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Hechizo_de_tierra.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    }
   },
   {
     "nombre": "Invocar Muertos Vivientes",
     "escuela": "Terror",
     "coste_mente": 0,
     "coste_aprendido": 1,
-    "descripcion": "Conjura un grupo de muertos vivientes para rodear y proteger a quien lo lanza. Tira 1 dado rojo: 1 o 2 = 4 esqueletos; 3 o 4 = 3 esqueletos y 2 zombis; 5 o 6 = 2 zombis y 2 momias."
+    "descripcion": "Conjura un grupo de muertos vivientes para rodear y proteger a quien lo lanza. Tira 1 dado rojo: 1 o 2 = 4 esqueletos; 3 o 4 = 3 esqueletos y 2 zombis; 5 o 6 = 2 zombis y 2 momias.",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/Invocar_Muertos_Vivientes.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Hechizo_de_terror.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    }
   },
   {
     "nombre": "Invocar Orcos",
     "escuela": "Terror",
     "coste_mente": 0,
     "coste_aprendido": 1,
-    "descripcion": "Conjura un grupo de orcos para rodear y proteger a quien lo lanza. Tira 1 dado rojo: 1, 2 o 3 = 4 orcos; 4 o 5 = 5 orcos; 6 = 6 orcos."
+    "descripcion": "Conjura un grupo de orcos para rodear y proteger a quien lo lanza. Tira 1 dado rojo: 1, 2 o 3 = 4 orcos; 4 o 5 = 5 orcos; 6 = 6 orcos.",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/Invocar_Orcos.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Hechizo_de_terror.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    }
   },
   {
     "nombre": "Oxidación",
     "escuela": "Tierra",
     "coste_mente": 0,
     "coste_aprendido": 1,
-    "descripcion": "Hace que cualquier espada o yelmo metálico se vuelva tan frágil e inútil que nunca podrá volver a utilizarse. No es efectivo contra artefactos."
+    "descripcion": "Hace que cualquier espada o yelmo metálico se vuelva tan frágil e inútil que nunca podrá volver a utilizarse. No es efectivo contra artefactos.",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/Oxidación.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Hechizo_de_tierra.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    }
   },
   {
     "nombre": "Rayo Mortífero",
     "escuela": "Terror",
     "coste_mente": 0,
     "coste_aprendido": 1,
-    "descripcion": "Lánzalo en dirección horizontal, vertical o diagonal. El rayo se desplaza en línea recta hasta que golpea una pared o una puerta cerrada. Provoca 2 puntos de daño corporal a todos los héroes o monstruos en su camino."
+    "descripcion": "Lánzalo en dirección horizontal, vertical o diagonal. El rayo se desplaza en línea recta hasta que golpea una pared o una puerta cerrada. Provoca 2 puntos de daño corporal a todos los héroes o monstruos en su camino.",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/Rayo_Mortífero.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Hechizo_de_terror.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    }
   },
   {
     "nombre": "Bola en Llamas",
     "escuela": "Fuego",
     "coste_mente": 0,
     "coste_aprendido": 1,
-    "descripcion": "Envuelve a cualquier héroe en una bola en llamas. Provoca 2 puntos de daño corporal. El héroe tira 2 dados rojos; por cada 5 o 6 que saque, el daño se reduce 1 punto."
+    "descripcion": "Envuelve a cualquier héroe en una bola en llamas. Provoca 2 puntos de daño corporal. El héroe tira 2 dados rojos; por cada 5 o 6 que saque, el daño se reduce 1 punto.",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/Bola_en_Llamas.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Hechizo_de_fuego.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    }
   },
   {
     "nombre": "Nube de Terror",
     "escuela": "Terror",
     "coste_mente": 0,
     "coste_aprendido": 1,
-    "descripcion": "Paraliza a todos los héroes situados en la misma habitación o pasillo: son incapaces de moverse, atacar o defenderse. Puede romperse de inmediato o en un turno posterior. Cada víctima tira 1 dado rojo por punto mental; si saca un 6, rompe el hechizo."
+    "descripcion": "Paraliza a todos los héroes situados en la misma habitación o pasillo: son incapaces de moverse, atacar o defenderse. Puede romperse de inmediato o en un turno posterior. Cada víctima tira 1 dado rojo por punto mental; si saca un 6, rompe el hechizo.",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/Nube_de_Terror.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Hechizo_de_terror.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    }
   },
   {
     "nombre": "Dominación",
     "escuela": "Terror",
     "coste_mente": 0,
     "coste_aprendido": 1,
-    "descripcion": "Pone a cualquier héroe bajo el control de Zargon. Puede romperse de inmediato o en un turno posterior. El héroe tira 1 dado rojo por punto mental; si saca un 6, lo rompe. Hasta entonces, Zargon puede mover al héroe como un monstruo y atacar a otros héroes."
+    "descripcion": "Pone a cualquier héroe bajo el control de Zargon. Puede romperse de inmediato o en un turno posterior. El héroe tira 1 dado rojo por punto mental; si saca un 6, lo rompe. Hasta entonces, Zargon puede mover al héroe como un monstruo y atacar a otros héroes.",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/Dominación.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Hechizo_de_terror.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    }
   },
   {
     "nombre": "Huída Fugaz",
     "escuela": "Aire",
     "coste_mente": 0,
     "coste_aprendido": 1,
-    "descripcion": "Permite a quien lo lance desaparecer y teletransportarse instantáneamente a un lugar seguro que solo Zargon conoce, marcado en el mapa de la misión."
+    "descripcion": "Permite a quien lo lance desaparecer y teletransportarse instantáneamente a un lugar seguro que solo Zargon conoce, marcado en el mapa de la misión.",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/Huída_Fugaz.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Hechizo_de_aire.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    }
   },
   {
     "nombre": "Miedo",
     "escuela": "Terror",
     "coste_mente": 0,
     "coste_aprendido": 1,
-    "descripcion": "Hace que un héroe entre en pánico y solo pueda utilizar un dado de combate para atacar. Puede romperse en el siguiente turno. El héroe tira 1 dado rojo por punto mental; si saca un 6, lo rompe."
+    "descripcion": "Hace que un héroe entre en pánico y solo pueda utilizar un dado de combate para atacar. Puede romperse en el siguiente turno. El héroe tira 1 dado rojo por punto mental; si saca un 6, lo rompe.",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/Miedo.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Hechizo_de_terror.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    }
   },
   {
     "nombre": "Tormenta de Fuego",
     "escuela": "Fuego",
     "coste_mente": 0,
     "coste_aprendido": 1,
-    "descripcion": "Crea una zona de fuego que causa 3 puntos de daño corporal a todos los héroes y monstruos en la misma habitación, sin afectar a quien lo lanza. Las víctimas tiran 2 dados rojos; por cada 5 o 6 que saquen, el daño se reduce 1 punto. No puede usarse en pasillos."
+    "descripcion": "Crea una zona de fuego que causa 3 puntos de daño corporal a todos los héroes y monstruos en la misma habitación, sin afectar a quien lo lanza. Las víctimas tiran 2 dados rojos; por cada 5 o 6 que saquen, el daño se reduce 1 punto. No puede usarse en pasillos.",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/Tormenta_de_Fuego.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Hechizo_de_fuego.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    }
   }
 ]

@@ -86,7 +86,26 @@
     "defensa": 1,
     "coste": 550,
     "descripcion": "Brazaletes de cuero reforzado que otorgan 1 dado de defensa adicional. Pueden combinarse con el Yelmo y/o el Escudo.",
-    "subtipo": "Armadura"
+    "subtipo": "Armadura",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/Brazaletes.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Equipo.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    }
   },
   {
     "nombre": "Espada Larga",
@@ -94,7 +113,26 @@
     "defensa": 0,
     "coste": 350,
     "descripcion": "Otorga una fuerza de ataque de 3 dados de combate. Debido a su longitud te permite atacar en diagonal. No puede ser utilizada por el Mago.",
-    "subtipo": "Arma cuerpo a cuerpo"
+    "subtipo": "Arma cuerpo a cuerpo",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/Espada_Larga.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Equipo.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    }
   },
   {
     "nombre": "Cota de Malla",
@@ -102,7 +140,26 @@
     "defensa": 1,
     "coste": 500,
     "descripcion": "Armadura ligera que otorga 1 dado de defensa adicional. Puede combinarse con el Yelmo y/o el Escudo. No puede ser utilizada por el Mago.",
-    "subtipo": "Armadura"
+    "subtipo": "Armadura",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/Cota_de_Malla.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Equipo.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    }
   },
   {
     "nombre": "Ballesta",
@@ -137,7 +194,26 @@
     "defensa": 0,
     "coste": 250,
     "descripcion": "Esta espada te otorga una fuerza de ataque de 3 dados de combate. No puede ser utilizada por el Mago.",
-    "subtipo": "Arma cuerpo a cuerpo"
+    "subtipo": "Arma cuerpo a cuerpo",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/Espada_Ancha.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Equipo.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    }
   },
   {
     "nombre": "Daga",
@@ -172,7 +248,26 @@
     "defensa": 0,
     "coste": 400,
     "descripcion": "Hacha de mano que otorga 2 dados de combate en el ataque. Puede lanzarse a cualquier monstruo que puedas ver, pero se pierde una vez lanzada.",
-    "subtipo": "Arma cuerpo a cuerpo"
+    "subtipo": "Arma cuerpo a cuerpo",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/Hacha_Enana.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Equipo.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    }
   },
   {
     "nombre": "Agua Bendita",
@@ -180,7 +275,26 @@
     "defensa": 0,
     "coste": 25,
     "descripcion": "Puedes utilizar el Agua Bendita en lugar de atacar. Mata a cualquier muerto viviente (esqueletos, zombis o momias). La carta se descarta después de utilizarse.",
-    "subtipo": "Objeto"
+    "subtipo": "Objeto",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/Agua_Bendita.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Equipo.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    }
   },
   {
     "nombre": "Coraza",
@@ -188,7 +302,26 @@
     "defensa": 2,
     "coste": 850,
     "descripcion": "Pesada armadura de metal que otorga 2 dados de defensa adicionales. Al ser tan pesada, solo puedes tirar 1 dado rojo de movimiento mientras la lleves puesta. Puede combinarse con el Yelmo y/o el Escudo. No puede ser utilizada por el Mago.",
-    "subtipo": "Armadura"
+    "subtipo": "Armadura",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/Coraza.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Equipo.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    }
   },
   {
     "nombre": "Poción de Velocidad",
@@ -196,7 +329,26 @@
     "defensa": 0,
     "coste": 150,
     "descripcion": "Puedes beber esta poción en cualquier momento. Te permite tirar el doble de dados la próxima vez que te muevas. La carta se descarta tras ser utilizada.",
-    "subtipo": "Poción"
+    "subtipo": "Poción",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/Poción_de_Velocidad.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Equipo.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    }
   },
   {
     "nombre": "Espada Corta",
@@ -232,7 +384,26 @@
     "coste": 100,
     "descripcion": "Largo y robusto bastón de madera con una fuerza de ataque de 1 dado de combate. Debido a su longitud te permite atacar en diagonal. No puedes utilizar un escudo cuando lo lleves.",
     "hechizos_aprendibles": 1,
-    "subtipo": "Bastón"
+    "subtipo": "Bastón",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/Bastón.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Equipo.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    }
   },
   {
     "nombre": "Conjunto de Herramientas",
@@ -240,7 +411,26 @@
     "defensa": 0,
     "coste": 250,
     "descripcion": "Otorga un 50% de probabilidad de desactivar cualquier trampa que haya sido encontrada, siempre que no haya sido activada.",
-    "subtipo": "Herramienta"
+    "subtipo": "Herramienta",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/Conjunto_de_Herramientas.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Equipo.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    }
   },
   {
     "nombre": "Mandoble",

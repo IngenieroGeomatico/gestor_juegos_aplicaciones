@@ -5,7 +5,26 @@
     "defensa": 2,
     "coste": 2000,
     "descripcion": "Mágica vestimenta acorazada que otorga 2 dados de defensa adicionales. A diferencia de la coraza normal, es ultraligera y no ralentiza a quien la lleve. Puede combinarse con el Yelmo y/o el Escudo. No puede ser utilizada por el Mago.",
-    "subtipo": "Armadura"
+    "subtipo": "Armadura",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/Armadura_de_Borin.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Artefacto.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    }
   },
   {
     "nombre": "Vara de Telekinesis",
@@ -14,7 +33,26 @@
     "coste": 1500,
     "descripcion": "Una vez por misión puedes utilizarla para atrapar a un monstruo en un campo de fuerza mágica. Pierde su siguiente turno, aunque puede resistir tirando 1 dado rojo por cada punto mental: si saca un 6, resiste el hechizo.",
     "hechizos_aprendibles": 1,
-    "subtipo": "Vara"
+    "subtipo": "Vara",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/Vara_de_Telekinesis.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Artefacto.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    }
   },
   {
     "nombre": "Elixir de Vida",
@@ -22,7 +60,26 @@
     "defensa": 0,
     "coste": 2000,
     "descripcion": "Pequeña botella de líquido perlado que devuelve la vida a un héroe muerto, restaurando todos sus puntos corporales y mentales. Solo puede utilizarse una vez.",
-    "subtipo": "Poción"
+    "subtipo": "Poción",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/Elixir_de_Vida.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Artefacto.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    }
   },
   {
     "nombre": "Espada Larga de la Fortuna",
@@ -30,7 +87,26 @@
     "defensa": 0,
     "coste": 2000,
     "descripcion": "Esta espada te permite atacar en diagonal y otorga 3 dados de ataque. Una vez por misión, el héroe puede volver a lanzar 1 dado de ataque. No puede ser utilizada por el Mago.",
-    "subtipo": "Arma cuerpo a cuerpo"
+    "subtipo": "Arma cuerpo a cuerpo",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/Espada_Larga_de_la_Fortuna.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Artefacto.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    }
   },
   {
     "nombre": "Azote de Orcos",
@@ -38,7 +114,26 @@
     "defensa": 0,
     "coste": 1600,
     "descripcion": "Mágica espada corta con 2 dados de ataque. Puedes atacar dos veces si te enfrentas a un orco. No puede ser utilizada por el Mago.",
-    "subtipo": "Arma cuerpo a cuerpo"
+    "subtipo": "Arma cuerpo a cuerpo",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/Azote_de_Orcos.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Artefacto.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    }
   },
   {
     "nombre": "Filo del Fantasma",
@@ -46,7 +141,26 @@
     "defensa": 0,
     "coste": 1800,
     "descripcion": "Daga ornamentada con 1 dado de ataque. Una vez por misión, cuando atacas con ella tu objetivo no puede defenderse, pues el arma atraviesa su armadura.",
-    "subtipo": "Arma cuerpo a cuerpo"
+    "subtipo": "Arma cuerpo a cuerpo",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/Filo_del_Fantasma.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Artefacto.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    }
   },
   {
     "nombre": "Anillo de Retorno",
@@ -54,7 +168,26 @@
     "defensa": 0,
     "coste": 1200,
     "descripcion": "Al invocarse, devuelve a todos los héroes que el portador pueda ver al punto de partida de la misión. Solo se puede utilizar una vez.",
-    "subtipo": "Anillo"
+    "subtipo": "Anillo",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/Anillo_de_Retorno.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Artefacto.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    }
   },
   {
     "nombre": "Anillo de Fortaleza",
@@ -62,7 +195,26 @@
     "defensa": 0,
     "coste": 1000,
     "descripcion": "Este anillo mágico otorga 1 punto corporal adicional al héroe.",
-    "subtipo": "Anillo"
+    "subtipo": "Anillo",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/Anillo_de_Fortaleza.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Artefacto.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    }
   },
   {
     "nombre": "Anillo de Hechizos",
@@ -70,7 +222,26 @@
     "defensa": 0,
     "coste": 1500,
     "descripcion": "Permite que un héroe lance un hechizo dos veces (no simultáneamente). Al comienzo de una misión, el portador debe declarar cuál de sus hechizos está alojado en el anillo.",
-    "subtipo": "Anillo"
+    "subtipo": "Anillo",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/Anillo_de_Hechizos.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Artefacto.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    }
   },
   {
     "nombre": "Filo del Espíritu",
@@ -78,7 +249,26 @@
     "defensa": 0,
     "coste": 2000,
     "descripcion": "Espada mágica con un espeluznante mango de hueso tallado. Tira 3 dados de ataque, o 4 si atacas a un muerto viviente (esqueletos, zombis o momias). No puede ser utilizada por el Mago.",
-    "subtipo": "Arma cuerpo a cuerpo"
+    "subtipo": "Arma cuerpo a cuerpo",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/Filo_del_Espíritu.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Artefacto.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    }
   },
   {
     "nombre": "Talismán de la Sabiduría",
@@ -86,7 +276,26 @@
     "defensa": 0,
     "coste": 1200,
     "descripcion": "Este medallón mágico otorga 1 punto mental adicional al héroe mientras lo lleve puesto.",
-    "subtipo": "Talismán"
+    "subtipo": "Talismán",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/Talismán_de_la_Sabiduría.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Artefacto.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    }
   },
   {
     "nombre": "Varita Mágica",
@@ -95,7 +304,26 @@
     "coste": 1500,
     "descripcion": "Permite a un héroe lanzar dos hechizos distintos en su turno en lugar de un solo hechizo.",
     "hechizos_aprendibles": 1,
-    "subtipo": "Varita"
+    "subtipo": "Varita",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/Varita_Mágica.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Artefacto.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    }
   },
   {
     "nombre": "Capa de Mago",
@@ -103,7 +331,26 @@
     "defensa": 1,
     "coste": 1500,
     "descripcion": "Capa mágica de tela brillante provista de runas místicas. Solo puede llevarla el Mago. Otorga 1 dado de defensa adicional.",
-    "subtipo": "Capa"
+    "subtipo": "Capa",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/Capa_de_Mago.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Artefacto.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    }
   },
   {
     "nombre": "Bastón del Mago",
@@ -112,6 +359,25 @@
     "coste": 2000,
     "descripcion": "Largo y antiguo bastón que brilla con una suave luz azul. Solo puede utilizarlo el Mago. Otorga 2 dados de ataque y la habilidad de atacar en diagonal.",
     "hechizos_aprendibles": 1,
-    "subtipo": "Bastón"
+    "subtipo": "Bastón",
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/Bastón_del_Mago.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Artefacto.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    }
   }
 ]

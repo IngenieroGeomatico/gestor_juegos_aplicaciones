@@ -3,72 +3,300 @@
     "nombre": "Gema!",
     "coste": 35,
     "descripcion": "Escondida en la puntera de una vieja bota encuentras una pequeña gema que vale 35 monedas de oro. Anota el dinero en tu hoja de personaje. No devuelvas esta carta al mazo.",
-    "devolver": false
+    "devolver": false,
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/Gema.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Tesoro.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    }
   },
   {
     "nombre": "Oro! (15)",
     "coste": 15,
     "descripcion": "Entre viejos trapos, andrajosas túnicas y sucias mantas encuentras 15 monedas de oro. Anota el dinero en tu hoja de personaje. No devuelvas esta carta al mazo.",
-    "devolver": false
+    "devolver": false,
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/Oro___15.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Tesoro.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    }
   },
   {
     "nombre": "Oro! (25)",
     "coste": 25,
     "descripcion": "Encuentras una piedra suelta y la arrancas de la pared. Detrás de ella descubres una pequeña bolsa de cuero con 25 monedas de oro. Anota el dinero en tu hoja de personaje. No devuelvas esta carta al mazo.",
-    "devolver": false
+    "devolver": false,
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/Oro___25.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Tesoro.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    }
   },
   {
     "nombre": "Joyas!",
     "coste": 50,
     "descripcion": "Encuentras un pequeño cofre de madera forrado de terciopelo que contiene joyas muy pequeñas por valor de 50 monedas de oro. Anota el dinero en tu hoja de personaje. No devuelvas esta carta al mazo.",
-    "devolver": false
+    "devolver": false,
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/Joyas.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Tesoro.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    }
   },
   {
     "nombre": "Poción Heroica",
     "coste": 100,
     "descripcion": "Encuentras una bolsa de cuero colgada en la pared. Si bebes la poción que contiene antes de atacar, puedes hacer dos ataques en lugar de uno. Solo puede utilizarse una vez. No devuelvas esta carta al mazo.",
-    "devolver": false
+    "devolver": false,
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/Poción_Heroica.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Tesoro.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    }
   },
   {
     "nombre": "Poción de Defensa",
     "coste": 150,
     "descripcion": "Entre una colección de botellas viejas encuentras un pequeño frasco con un líquido transparente. Al beberlo te da 2 dados de combate adicionales la próxima vez que te defiendas. Solo se puede utilizar una vez. No devuelvas esta carta al mazo.",
-    "devolver": false
+    "devolver": false,
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/Poción_de_Defensa.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Tesoro.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    }
   },
   {
     "nombre": "Poción de Fuerza",
     "coste": 150,
     "descripcion": "Encuentras un pequeño frasco púrpura de extraño olor. Al beberlo te permite tirar 2 dados de combate adicionales la próxima vez que ataques. Solo se puede utilizar una vez. No devuelvas esta carta al mazo.",
-    "devolver": false
+    "devolver": false,
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/Poción_de_Fuerza.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Tesoro.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    }
   },
   {
     "nombre": "Poción Curativa",
     "coste": 100,
     "descripcion": "En un fardo de harapos encuentras una pequeña botella de líquido azulado. Al beberla restauras un número de puntos corporales igual a una tirada de 1 dado rojo, sin superar tu número inicial. Solo se puede utilizar una vez. No devuelvas esta carta al mazo.",
-    "devolver": false
+    "devolver": false,
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/Poción_Curativa.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Tesoro.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    }
   },
   {
     "nombre": "Peligro! (Agujero)",
     "coste": 0,
     "descripcion": "De repente, el suelo bajo tus pies cede. Caes en un agujero poco profundo perdiendo 1 punto corporal y terminando tu turno. Puedes salir y moverte normalmente en tu próximo turno. Devuelve esta carta al final del mazo.",
-    "devolver": true
+    "devolver": true,
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/Peligro___Agujero.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Tesoro.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    }
   },
   {
     "nombre": "Peligro! (Flecha)",
     "coste": 0,
     "descripcion": "Mientras buscas, una flecha oculta sale disparada de la pared y te impacta. Pierdes 1 punto corporal y tu turno termina. Devuelve esta carta al final del mazo.",
-    "devolver": true
+    "devolver": true,
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/Peligro___Flecha.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Tesoro.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    }
   },
   {
     "nombre": "Monstruo Errante",
     "coste": 0,
     "descripcion": "Mientras exploras, un monstruo te acecha y ataca. Zargon coloca al monstruo errante (indicado en el libro de misiones) en cualquier casilla junto a ti. El monstruo te ataca inmediatamente. Devuelve esta carta al final del mazo.",
-    "devolver": true
+    "devolver": true,
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/Monstruo_Errante.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Tesoro.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    }
   },
   {
     "nombre": "Nada!",
     "coste": 0,
     "descripcion": "A pesar de tu búsqueda minuciosa, no encuentras nada.",
-    "devolver": false
+    "devolver": false,
+    "plantillas": {
+      "cara": {
+        "plantilla_padre": "sources/plantillas/generic-card-up.svg",
+        "arte": "sources/arte/Nada.png",
+        "marco_arte": "sources/plantillas/large-window-frame.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/window-parchment.png",
+          "sources/plantillas/small-large-artwork-border-blend-texture.svg"
+        ]
+      },
+      "dorso": {
+        "plantilla_padre": "sources/plantillas/generic-card-down.svg",
+        "plantilla_leyenda": "sources/plantillas/ribbon.svg",
+        "archivos_fondo": [
+          "sources/arte_fondos/Tesoro.jpeg",
+          "sources/plantillas/bordered.svg"
+        ]
+      }
+    }
   }
 ]

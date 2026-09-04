@@ -75,6 +75,11 @@
       <stop offset="45%" stop-color="#e23b46"/>
       <stop offset="100%" stop-color="#8f1420"/>
     </radialGradient>
+    <radialGradient id="pocion-azul" cx="42%" cy="30%" r="80%">
+      <stop offset="0%" stop-color="#a8dcff"/>
+      <stop offset="45%" stop-color="#3b7fe2"/>
+      <stop offset="100%" stop-color="#16308f"/>
+    </radialGradient>
     <linearGradient id="vidrio" x1="0" y1="0" x2="1" y2="0">
       <stop offset="0%" stop-color="#ffffff" stop-opacity="0.55"/>
       <stop offset="30%" stop-color="#cfe0e6" stop-opacity="0.18"/>
@@ -98,9 +103,80 @@
       <stop offset="45%" stop-color="#8a3fd0"/>
       <stop offset="100%" stop-color="#3a1060"/>
     </radialGradient>
+    <radialGradient id="aire" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#ffffff"/>
+        <stop offset="50%" stop-color="#d8e8f0"/>
+        <stop offset="100%" stop-color="#a0b8c8"/>
+     </radialGradient>
+     <radialGradient id="agua" cx="50%" cy="45%" r="60%">
+        <stop offset="0%" stop-color="#e0f8ff"/>
+        <stop offset="45%" stop-color="#60c8f0"/>
+        <stop offset="100%" stop-color="#1060a0"/>
+     </radialGradient>
+     <radialGradient id="tierra" cx="50%" cy="45%" r="60%">
+        <stop offset="0%" stop-color="#f0e8d0"/>
+        <stop offset="45%" stop-color="#80a040"/>
+        <stop offset="100%" stop-color="#405020"/>
+     </radialGradient>
+     <linearGradient id="oxido" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#8b4513"/>
+        <stop offset="50%" stop-color="#b22222"/>
+        <stop offset="100%" stop-color="#d2691e"/>
+     </linearGradient>
+
+    <!-- NUEVOS GRADIENTES PARA ARTEFACTOS -->
+    <linearGradient id="hueso" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FDF5E6"/>
+      <stop offset="50%" stop-color="#E8DDCB"/>
+      <stop offset="100%" stop-color="#D7C7B7"/>
+    </linearGradient>
+    <radialGradient id="filo-espectral" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#E0F8FF" stop-opacity="0.8"/>
+      <stop offset="70%" stop-color="#A0D8EF" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#5B8BE0" stop-opacity="0.2"/>
+    </radialGradient>
+    <radialGradient id="tela-magica" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#4A4AFF"/>
+      <stop offset="60%" stop-color="#0A0A2A"/>
+      <stop offset="100%" stop-color="#05051A"/>
+    </radialGradient>
+    <radialGradient id="elixir-perlado" cx="42%" cy="30%" r="80%">
+      <stop offset="0%" stop-color="#FFF0F5"/>
+      <stop offset="50%" stop-color="#FFDDF0"/>
+      <stop offset="100%" stop-color="#E0B0C0"/>
+    </radialGradient>
+
+    <!-- NUEVOS GRADIENTES PARA TESOROS -->
+    <radialGradient id="pocion-heroica" cx="42%" cy="30%" r="80%">
+      <stop offset="0%" stop-color="#fff3c0"/>
+      <stop offset="45%" stop-color="#ffd23a"/>
+      <stop offset="100%" stop-color="#a06f10"/>
+    </radialGradient>
+    <radialGradient id="pocion-defensa" cx="42%" cy="30%" r="80%">
+      <stop offset="0%" stop-color="#e4e8f0"/>
+      <stop offset="45%" stop-color="#98a4b8"/>
+      <stop offset="100%" stop-color="#545c6d"/>
+    </radialGradient>
+    <radialGradient id="pocion-fuerza" cx="42%" cy="30%" r="80%">
+      <stop offset="0%" stop-color="#e0b0ff"/>
+      <stop offset="45%" stop-color="#8a3fd0"/>
+      <stop offset="100%" stop-color="#3a1060"/>
+    </radialGradient>
+    <radialGradient id="pocion-curativa-tesoro" cx="42%" cy="30%" r="80%">
+      <stop offset="0%" stop-color="#a8dcff"/>
+      <stop offset="45%" stop-color="#3b7fe2"/>
+      <stop offset="100%" stop-color="#16308f"/>
+    </radialGradient>
 
     <filter id="sombra" x="-60%" y="-60%" width="220%" height="220%">
       <feDropShadow dx="0" dy="6" stdDeviation="7" flood-color="#000000" flood-opacity="0.45"/>
     </filter>
+    <filter id="textura-roca">
+        <feTurbulence type="fractalNoise" baseFrequency="0.1" numOctaves="2" result="turbulence"/>
+        <feDiffuseLighting in="turbulence" lighting-color="#d2b48c" surfaceScale="5" result="lighting">
+            <feDistantLight azimuth="225" elevation="60"/>
+        </feDiffuseLighting>
+        <feComposite in="lighting" in2="SourceGraphic" operator="in" result="composite"/>
+     </filter>
   </defs>
 <rect width="700" height="500" fill="url(#fondo)"/><ellipse cx="350" cy="250" rx="230" ry="205" fill="url(#halo)"/><g filter="url(#sombra)"><g transform="translate(350 0)"><path d="M 0 90 L 128 118 L 118 250 C 110 330 60 388 0 418 C -60 388 -110 330 -118 250 L -128 118 Z" fill="url(#oro)" stroke="#5c4413" stroke-width="3" stroke-linejoin="round"/><path d="M 0 108 L 110 132 L 101 246 C 94 318 52 368 0 396 C -52 368 -94 318 -101 246 L -110 132 Z" fill="url(#acero-h)" stroke="#454b5b" stroke-width="2"/><path d="M 0 112 L 0 392" stroke="#3a4150" stroke-width="2" opacity="0.4"/><path d="M -96 140 L -8 122 L -8 388 C -52 362 -88 316 -96 250 Z" fill="#ffffff" opacity="0.16"/><circle cx="0" cy="250" r="40" fill="none" stroke="url(#oro)" stroke-width="5"/><ellipse cx="0" cy="250" rx="30" ry="30" fill="url(#gema-roja)" stroke="#3a2a10" stroke-width="2"/><ellipse cx="-9.0" cy="239.5" rx="9.6" ry="8.4" fill="#ffffff" opacity="0.6"/><circle cx="-90" cy="140" r="6" fill="url(#oro-pomo)" stroke="#5c4413" stroke-width="1.5"/><circle cx="90" cy="140" r="6" fill="url(#oro-pomo)" stroke="#5c4413" stroke-width="1.5"/><circle cx="-70" cy="300" r="6" fill="url(#oro-pomo)" stroke="#5c4413" stroke-width="1.5"/><circle cx="70" cy="300" r="6" fill="url(#oro-pomo)" stroke="#5c4413" stroke-width="1.5"/><circle cx="0" cy="380" r="6" fill="url(#oro-pomo)" stroke="#5c4413" stroke-width="1.5"/></g></g></svg>

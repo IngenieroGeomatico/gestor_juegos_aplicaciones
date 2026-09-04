@@ -75,6 +75,11 @@
       <stop offset="45%" stop-color="#e23b46"/>
       <stop offset="100%" stop-color="#8f1420"/>
     </radialGradient>
+    <radialGradient id="pocion-azul" cx="42%" cy="30%" r="80%">
+      <stop offset="0%" stop-color="#a8dcff"/>
+      <stop offset="45%" stop-color="#3b7fe2"/>
+      <stop offset="100%" stop-color="#16308f"/>
+    </radialGradient>
     <linearGradient id="vidrio" x1="0" y1="0" x2="1" y2="0">
       <stop offset="0%" stop-color="#ffffff" stop-opacity="0.55"/>
       <stop offset="30%" stop-color="#cfe0e6" stop-opacity="0.18"/>
@@ -98,9 +103,80 @@
       <stop offset="45%" stop-color="#8a3fd0"/>
       <stop offset="100%" stop-color="#3a1060"/>
     </radialGradient>
+    <radialGradient id="aire" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#ffffff"/>
+        <stop offset="50%" stop-color="#d8e8f0"/>
+        <stop offset="100%" stop-color="#a0b8c8"/>
+     </radialGradient>
+     <radialGradient id="agua" cx="50%" cy="45%" r="60%">
+        <stop offset="0%" stop-color="#e0f8ff"/>
+        <stop offset="45%" stop-color="#60c8f0"/>
+        <stop offset="100%" stop-color="#1060a0"/>
+     </radialGradient>
+     <radialGradient id="tierra" cx="50%" cy="45%" r="60%">
+        <stop offset="0%" stop-color="#f0e8d0"/>
+        <stop offset="45%" stop-color="#80a040"/>
+        <stop offset="100%" stop-color="#405020"/>
+     </radialGradient>
+     <linearGradient id="oxido" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#8b4513"/>
+        <stop offset="50%" stop-color="#b22222"/>
+        <stop offset="100%" stop-color="#d2691e"/>
+     </linearGradient>
+
+    <!-- NUEVOS GRADIENTES PARA ARTEFACTOS -->
+    <linearGradient id="hueso" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FDF5E6"/>
+      <stop offset="50%" stop-color="#E8DDCB"/>
+      <stop offset="100%" stop-color="#D7C7B7"/>
+    </linearGradient>
+    <radialGradient id="filo-espectral" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#E0F8FF" stop-opacity="0.8"/>
+      <stop offset="70%" stop-color="#A0D8EF" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#5B8BE0" stop-opacity="0.2"/>
+    </radialGradient>
+    <radialGradient id="tela-magica" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#4A4AFF"/>
+      <stop offset="60%" stop-color="#0A0A2A"/>
+      <stop offset="100%" stop-color="#05051A"/>
+    </radialGradient>
+    <radialGradient id="elixir-perlado" cx="42%" cy="30%" r="80%">
+      <stop offset="0%" stop-color="#FFF0F5"/>
+      <stop offset="50%" stop-color="#FFDDF0"/>
+      <stop offset="100%" stop-color="#E0B0C0"/>
+    </radialGradient>
+
+    <!-- NUEVOS GRADIENTES PARA TESOROS -->
+    <radialGradient id="pocion-heroica" cx="42%" cy="30%" r="80%">
+      <stop offset="0%" stop-color="#fff3c0"/>
+      <stop offset="45%" stop-color="#ffd23a"/>
+      <stop offset="100%" stop-color="#a06f10"/>
+    </radialGradient>
+    <radialGradient id="pocion-defensa" cx="42%" cy="30%" r="80%">
+      <stop offset="0%" stop-color="#e4e8f0"/>
+      <stop offset="45%" stop-color="#98a4b8"/>
+      <stop offset="100%" stop-color="#545c6d"/>
+    </radialGradient>
+    <radialGradient id="pocion-fuerza" cx="42%" cy="30%" r="80%">
+      <stop offset="0%" stop-color="#e0b0ff"/>
+      <stop offset="45%" stop-color="#8a3fd0"/>
+      <stop offset="100%" stop-color="#3a1060"/>
+    </radialGradient>
+    <radialGradient id="pocion-curativa-tesoro" cx="42%" cy="30%" r="80%">
+      <stop offset="0%" stop-color="#a8dcff"/>
+      <stop offset="45%" stop-color="#3b7fe2"/>
+      <stop offset="100%" stop-color="#16308f"/>
+    </radialGradient>
 
     <filter id="sombra" x="-60%" y="-60%" width="220%" height="220%">
       <feDropShadow dx="0" dy="6" stdDeviation="7" flood-color="#000000" flood-opacity="0.45"/>
     </filter>
+    <filter id="textura-roca">
+        <feTurbulence type="fractalNoise" baseFrequency="0.1" numOctaves="2" result="turbulence"/>
+        <feDiffuseLighting in="turbulence" lighting-color="#d2b48c" surfaceScale="5" result="lighting">
+            <feDistantLight azimuth="225" elevation="60"/>
+        </feDiffuseLighting>
+        <feComposite in="lighting" in2="SourceGraphic" operator="in" result="composite"/>
+     </filter>
   </defs>
 <rect width="700" height="500" fill="url(#fondo)"/><ellipse cx="350" cy="240" rx="235" ry="205" fill="url(#halo)"/><g filter="url(#sombra)"><g transform="translate(350 250)"><ellipse cx="0" cy="0" rx="180" ry="90" fill="#8a3fd0" opacity="0.15"/><path d="M -180 0 C -120 -34 -60 -30 -10 -14 L -10 14 C -60 30 -120 34 -180 0 Z" fill="url(#caos)" opacity="0.55"/><g stroke="#c98fff" stroke-width="4" stroke-linecap="round" opacity="0.7" fill="none"><path d="M -170 -24 C -120 -30 -80 -26 -40 -16"/><path d="M -170 24 C -120 30 -80 26 -40 16"/></g><path d="M 130 0 L 40 -46 C 10 -30 10 30 40 46 Z" fill="url(#caos)" stroke="#3a1060" stroke-width="3" stroke-linejoin="round"/><circle cx="46" cy="0" r="26" fill="url(#caos)"/><circle cx="38" cy="-8" r="9" fill="#e0b0ff" opacity="0.85"/><g stroke="#e0b0ff" stroke-width="3" stroke-linecap="round" opacity="0.85"><path d="M 120 -26 L 132 -14 M 132 -26 L 120 -14"/><path d="M 96 40 L 108 52 M 108 40 L 96 52"/></g></g></g></svg>
