@@ -41,7 +41,9 @@ Situación de los datos y scripts:
 | Tipo | Fichero | Campos |
 |------|---------|--------|
 | Héroes | `juegos/heroquest/data/personajes.json` | nombre, clase, ataque, defensa, cuerpo, mente, movimiento, arma_inicial, armadura_inicial, descripcion y `plantillas` (receta de carta: `cara` y `dorso`, ver más abajo) |
-| Armas y equipo | `juegos/heroquest/data/armas.json` | nombre, tipo (Arma cuerpo a cuerpo / Arma a distancia / Armadura / Poción), ataque, defensa, coste, descripcion |
+| Armas y equipo | `juegos/heroquest/data/equipo.json` | subtipo (Arma cuerpo a cuerpo / Arma a distancia / Armadura / Poción / Herramienta / Bastón), ataque, defensa, coste, descripcion; los bastones llevan `hechizos_aprendibles` |
+| Tesoros | `juegos/heroquest/data/tesoros.json` | nombre, subtipo, coste (precio de venta), descripcion, devolver |
+| Artefactos | `juegos/heroquest/data/artefactos.json` | nombre, subtipo, ataque, defensa, coste (precio de venta), descripcion |
 | Monstruos | `juegos/heroquest/data/monstruos.json` | nombre, ataque, defensa, cuerpo, mente, movimiento, descripcion |
 | Hechizos | `juegos/heroquest/data/hechizos.json` | nombre, escuela elemental (Agua / Aire / Fuego / Tierra / Terror), coste_mente, descripcion |
 | Reglas | `juegos/heroquest/data/reglas.json` | **normas canónicas del juego** agrupadas por categorías y mecánicas, editables. Cada mecánica tiene descripcion, valores (parámetros) y detalle. Este fichero es tu referencia de reglas (además de la V2 de HQ.es) y el usuario puede ampliarlo |
@@ -49,6 +51,7 @@ Situación de los datos y scripts:
 | Tableros | `juegos/heroquest/data/tableros.json` | id, nombre, columnas, filas, salas[] (numero, rects en coordenadas globales de la cuadrícula, color). Se genera desde el SVG del tablero con `tablero_svg.py` |
 | Modelos 3D | `juegos/heroquest/data/impresion3d.json` | recurso de referencia (no editable): plataformas, categorías y buscadores/tags de archivos 3D gratuitos (héroes, monstruos, mobiliario, tablero, dados) |
 | Modelos 3D WH40K | `juegos/heroquest/data/impresion3d_warhammer40k.json` | recurso de referencia (no editable): mismo esquema que `impresion3d.json` pero para Warhammer 40K por facciones (marines del caos, demonios del caos, tiránidos, eldars, taus, orkos, necrones, marines espaciales proxy y terreno de tablero) |
+| Estilo visual | `juegos/heroquest/data/estilo.json` | **configuración visual transversal**: qué sprites se usan para muebles, trampas, puertas, entrada/salida y calaveras (slugs de `sources/arte_iconos/mapa/`, convención `_1`优先 `_0` fallback), glifos de respaldo y colores. `mapa.py` lo carga al inicio; al编辑ar este JSON se cambian los iconos de todas las misiones sin tocar código |
 
 Las misiones **se montan en uno de los dos tableros del juego** (HeroQuest: El
 Despertar). Las coordenadas son **globales** de la cuadrícula del tablero
@@ -58,7 +61,7 @@ Despertar). Las coordenadas son **globales** de la cuadrícula del tablero
 - `puertas[]` — casillas con puerta
 - `salas[]` — cada sala es `{ numero, nombre, descripcion, monstruos[], tesoros[] }`
   con `monstruos[]`/`tesoros[]` como `{ nombre, x, y }` y `nombre` referenciando
-  `monstruos.json`/`armas.json`. Las coordenadas deben caer **dentro** de la sala.
+  `monstruos.json`/`equipo.json`/`tesoros.json`/`artefactos.json`. Las coordenadas deben caer **dentro** de la sala.
 
 Consulta el tablero (salas numeradas, `.` = pasillo) con
 `uv run juegos/heroquest/scripts/tablero.py ver --tablero original`.
@@ -98,9 +101,11 @@ Los scripts de utilidad viven en `juegos/heroquest/scripts/`:
 - `render_generico.py` — **motor de render de las cartas genéricas** de items
   (armas, armaduras, pociones y hechizos) con la plantilla generic-card, en SVG
   y PNG. Misma filosofía guiada por datos (receta `plantillas` en el JSON)
-- `plantillas.py` — loader de plantillas SVG: carga (con caché), lee las anclas
-  `id="ph-*"` (rectángulos invisibles cuya geometría se lee) y sustituye los
-  marcadores `{{...}}`
+- `plantillas.py` — loader de las plantillas SVG: carga (con caché), lee las
+  anclas `id="ph-*"` (rectángulos invisibles cuya geometría se lee para colocar
+  contenido) y sustituye los marcadores de texto `{{...}}`. La estructura de la
+  carta (marco, banners, tabla de stats) vive en `sources/plantillas/` como SVG
+  editables (Inkscape), no en Python
 - `preparar_reversos.py` — recorta/endereza las fotos `*_back.jpg` de `sources/`
   hacia `sources/reversos/`
 - `generar_arte.py` — genera el **arte del anverso** de armas/objetos y **hechizos**
@@ -135,6 +140,51 @@ Los scripts de utilidad viven en `juegos/heroquest/scripts/`:
   validación de cada tipo, que consume `nueva_carta.py`
 - `data_store.py` — funciones compartidas (cargar, guardar, añadir, existe,
   eliminar, listar; helpers `slug` y `cargar_json`)
+
+Los scripts de **visión de mapas** viven en `juegos/heroquest/rag/vision/`
+(ver *Digitalizar misiones desde el PDF del libreto* más abajo):
+`extraer_mapa.py`, `alinear.py`, `ret.py`, `leer_mapa.py`,
+`validar_monstruos.py` y `validar_mision.py`.
+
+## Digitalizar misiones desde el PDF del libreto (libros escaneados)
+
+Cuando la campaña llega solo como **PDF escaneado** (por ejemplo
+*El Despertar / First Light*, en `juegos/heroquest/mapas/`), las misiones no
+tienen capa de texto: hay que leerlas de la imagen con el pipeline de **visión**
+de `juegos/heroquest/rag/vision/` (extraer mapa → alinear con la cuadrícula
+26×19 → detectar por color → validar con el usuario → volcar a `misiones.json`).
+
+**Lo esencial para no olvidarlo:**
+
+1. **Paginación del libreto.** El mapa de la misión *n* está en la **página par
+   `2n+8`** (M1→10, M2→12, M3→14, …) y el texto (intro, notas de Zargon,
+   recompensas) en la impar siguiente `2n+9`. `rag/vision/extraer_mapa.py` usa
+   `idx = 7 + 2·n` (0-based).
+2. **Paso por paso** (scripts en `rag/vision/`):
+   - `extraer_mapa.py <libreto.pdf> <mision> --salida mapa_m<N>.png --dpi 200`
+     → extrae la página del mapa (1687×1198 a 200 DPI).
+   - `ret.py <mapa_m<N>.png> <mision> --salida ret_<N>.png` → dibuja la retícula
+     26×19 numerada para **validar la alineación visualmente con el usuario**
+     (el agente no ve imágenes; las esquinas del tablero, en píxeles, van a
+     `rag/vision/misiones_vision.json` como `esquinas_tablero_px`).
+   - `leer_mapa.py <mapa_m<N>.png> <mision>` → detecta por color letras
+     (rojo), calaveras (negro) y monstruos (verde).
+   - `validar_monstruos.py <mapa_m<N>.png> --key M<N>` → numera los iconos de
+     monstruo `V1..Vn` (col, fila).
+   - `validar_mision.py <mapa_m<N>.png> --key M<N> --mision "<nombre>"`
+     [--entrada c1,f1:c2,f2] [--salida ...] → pinta sobre el mapa real lo
+     modelado en `misiones.json` (una imagen por tipo: monstruos, tesoros,
+     puertas, letras, calaveras…) para validar el montaje.
+3. **Ground-truth** por misión en `rag/vision/misiones_vision.json`
+   (esquinas, transformación px→casilla, detecciones automáticas y `ground_truth`
+   validado con el usuario). La misión 1 es la plantilla completa.
+4. **Wrapper de acceso** (`juegos/heroquest/tools/vision.py`): `automatico_extraer_mapa`,
+   `dibujar_reticula`, `leer_mapa`, `detectar_monstruos` y `validar_montaje`.
+5. Documentación completa del flujo en `skills/vision_mapa.md` y en el README
+   (sección *Digitalizar las misiones desde el PDF del libreto*).
+
+Las misiones 2-10 de El Despertar usan el tablero **`cara-b`** (el libreto manda
+dar la vuelta al tablero). 
 
 ## Cartas guiadas por plantillas (motor guiado por datos)
 
@@ -231,10 +281,6 @@ dorso) en su JSON y coloca sus assets (arte, iconos, fondos) en `sources/`.
 Consulta estas fuentes para inspirarte o contrastar estadísticas antes de generar
 contenido nuevo:
 
-- **Reglas V2 de HeroQuest.es** — **tu fuente de verdad** de las reglas. El sistema
-  del remake de la comunidad (licencia CC BY-NC-SA) vive en
-  `https://heroquest.es/temporal/web_HQ/reglas.html` y está indexado para el RAG.
-  Úsalo como referencia canónica del sistema de juego.
 - **HeroQuester.eu** (https://heroquester.eu/) — web fan en español con noticias,
   comunidad, entrevistas y descargas: mapas, nuevas aventuras, libros, cartas y
   material fanmade. La sección "Archivos" (https://heroquester.eu/archivos) reúne

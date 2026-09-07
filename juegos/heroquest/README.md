@@ -34,6 +34,12 @@ Ficheros JSON con el contenido del juego:
   facciones: marines del caos, demonios del caos (incluido el Soul Grinder de
   Khorne), tiránidos, eldars/aeldari, t'au, orkos, necrones y marines espaciales
   proxy, además de terreno y plantillas de tablero
+- `estilo.json` — **Configuración visual transversal** de las misiones: qué sprites
+  se usan para muebles, trampas, puertas, entrada/salida y calaveras (slugs en
+  `sources/arte_iconos/mapa/`), con la convención `_1`优先 `_0` fallback.
+  También glifos de respaldo y colores de elementos. `mapa.py` lo carga al
+  inicio; al editar este JSON se cambian los iconos de todas las misiones sin
+  tocar código Python
 
 ### Herramientas IA para generar modelos 3D (STL)
 
@@ -145,6 +151,46 @@ para fotos de abajo.
 > Alternativa para fotos (sin SVG): el flujo `tablero_calibrar.py` (endereza la
 > foto y dibuja una rejilla numerada) → trazar `data/<id>.rooms.txt` a mano →
 > `tablero_construir.py`. Es más laborioso; usa el SVG siempre que puedas.
+
+### Digitalizar las misiones desde el PDF del libreto (libros escaneados)
+
+Cuando una campaña llega solo como **PDF escaneado** (el caso de
+*El Despertar / First Light*, `mapas/Libreto_de_Misiones_El_Despertar_First_Light_HQ21_Español_Heval.pdf`),
+las misiones no tienen capa de texto y hay que **leerlas de la imagen**.
+Se usan los scripts de visión de `rag/vision/`, que alinean la página del mapa
+con la cuadrícula 26×19, detectan los elementos por color y guardan el
+ground-truth validado en `rag/vision/misiones_vision.json`.
+
+**Numeración de páginas del libreto.** El mapa de la misión *n* está en la
+**página par `2n+8`** (M1→10, M2→12, …) y el texto —intro, notas de Zargon,
+recompensas— en la impar siguiente (`2n+9`: M1→11, M2→13, …). El script
+`extraer_mapa.py` ya aplica esta fórmula (`idx = 7 + 2·n`, índice 0-based).
+
+Flujo por misión:
+
+```bash
+# 1) Extraer la página de mapa del PDF (200 DPI) → rag/vision/imagenes/mapa_m<N>.png
+uv run juegos/heroquest/rag/vision/extraer_mapa.py \
+  <libreto.pdf> <mision> --salida rag/vision/imagenes/mapa_m<mision>.png
+
+# 2) Dibujar la retícula sobre el mapa para validar la alineación
+uv run juegos/heroquest/rag/vision/ret.py <mapa_m<N>.png> <mision> --salida ret_<N>.png
+
+# 3) Detección automática por color (letras rojas, calaveras negras, monstruos verdes)
+uv run juegos/heroquest/rag/vision/leer_mapa.py <mapa_m<N>.png> <mision> --salida leer_<N>.png
+uv run juegos/heroquest/rag/vision/validar_monstruos.py <mapa_m<N>.png> --key M<N>
+
+# 4) Validar el montaje de misiones.json contra el mapa real (imagen por tipo)
+uv run juegos/heroquest/rag/vision/validar_mision.py <mapa_m<N>.png> \
+  --key M<N> --mision "<nombre en misiones.json>" [--entrada c1,f1:c2,f2] [--salida ...]
+```
+
+Como el modelo no ve las imágenes, la alineación y las posiciones se **validan
+visualmente con el usuario** (que confirma la retícula y cada clase de elemento).
+Para más detalle, ver la skill [skills/vision_mapa.md](skills/vision_mapa.md) y el
+wrapper `tools/vision.py`, que expone este flujo como funciones:
+`automatico_extraer_mapa`, `dibujar_reticula`, `leer_mapa`, `detectar_monstruos`
+y `validar_montaje`.
 
 ## Agente
 

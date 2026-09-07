@@ -83,6 +83,37 @@ assert resultado["valida"]
 
 ---
 
+## Representación del arte (campo `arte`)
+
+Cualquier pieza que se dibuje en el mapa (mueble, trampa, puerta, puerta
+secreta, marcador con icono) puede declarar **cómo se orienta su arte** con un
+campo opcional `arte`, transversal a todos los tipos:
+
+```json
+{
+  "tipo": "Tumba",
+  "desde": [6, 14],
+  "hasta": [8, 15],
+  "arte": {
+    "orientacion": "vertical",
+    "invertir": true
+  }
+}
+```
+
+- `arte.orientacion` (`"horizontal"` | `"vertical"`): **cómo está dibujado el
+  sprite** (su eje largo). El render gira la imagen 90° cuando la orientación
+  del sprite no coincide con la del rectángulo que ocupa (si no se declara, se
+  infiere del propio PNG).
+- `arte.invertir` (`true`/`false`): añade +180° sobre la orientación base
+  (por si el arte llega al revés).
+
+El rectángulo (`desde`→`hasta`) marca la posición/extensión real de la pieza en
+el tablero y **no debe cambiarse** para corregir la orientación: la orientación
+se ajusta únicamente con `arte`.
+
+---
+
 ## Ejemplo de misión nivel 1
 
 ```json

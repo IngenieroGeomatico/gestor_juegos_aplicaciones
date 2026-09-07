@@ -19,8 +19,12 @@ def main():
     args = ap.parse_args()
 
     doc = pymupdf.open(args.pdf)
-    # Misión n -> página de mapa (índice 0-based)
-    idx = 8 + 2 * args.mision
+    # Misión n -> página de mapa (índice 0-based).
+    # El texto de la misión 1 está en la página 11 y su mapa en la 10; el texto
+    # de la misión 2 en la 13 y su mapa en la 12... es decir, los mapas van en
+    # las páginas PARES y el texto en las IMPARES siguientes. Por lo tanto el
+    # mapa de la misión n está en la página 2n+8 (1-based) = índice 2n+7.
+    idx = 7 + 2 * args.mision
     if idx >= doc.page_count:
         raise SystemExit(f"página {idx} fuera de rango (solo {doc.page_count} páginas)")
     pix = doc[idx].get_pixmap(dpi=args.dpi)
