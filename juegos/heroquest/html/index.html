@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HeroQuest · Misiones</title>
+<style>
+  :root {
+    --papel:#f3ecdd; --tinta:#241a12; --bronce:#8a6d3b; --rojo:#9c2b2b;
+    --madera:#5d4037; --claro:#fffdf7; --borde:#d8c9a8; --verde:#2e7d32;
+  }
+  * { box-sizing:border-box; }
+  body {
+    margin:0; padding:24px; font-family:Georgia,'Times New Roman',serif;
+    background:var(--papel); color:var(--tinta); line-height:1.5;
+  }
+  .portada {
+    background:linear-gradient(135deg,#3a2620,#5d4037); color:#f4e9d2;
+    padding:26px 30px; border-radius:12px; margin-bottom:22px;
+    box-shadow:0 3px 10px rgba(0,0,0,.25);
+  }
+  .portada h1 { margin:0 0 8px; font-size:1.9rem; }
+  .portada p { margin:0; color:#e8d9b8; max-width:72ch; }
+  .campana { margin-bottom:26px; }
+  .campana h2 {
+    font-size:1.15rem; color:var(--madera); text-transform:uppercase;
+    letter-spacing:.6px; border-bottom:2px solid var(--bronce);
+    padding-bottom:6px; margin:0 0 12px;
+  }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:14px; }
+  .tarjeta {
+    display:flex; flex-direction:column; gap:8px; text-decoration:none;
+    background:var(--claro); border:1px solid var(--borde); border-radius:12px;
+    padding:14px 16px; min-height:100%; color:var(--tinta);
+    box-shadow:0 2px 6px rgba(0,0,0,.06);
+  }
+  a.tarjeta:hover { border-color:var(--bronce); box-shadow:0 4px 12px rgba(0,0,0,.12); }
+  .tarjeta h3 { margin:0; font-size:1.12rem; color:var(--madera); }
+  .tarjeta p { margin:0 0 auto; font-size:.95rem; color:#4a3a28; }
+  .meta { display:flex; gap:12px; flex-wrap:wrap; font-size:.85rem; color:#7a6a50; }
+  .meta b { color:var(--tinta); }
+  .pie { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:8px; }
+  .etiqueta { color:var(--bronce); font-size:.82rem; }
+  .estado {
+    font-size:.78rem; font-weight:bold; padding:3px 9px; border-radius:12px;
+    white-space:nowrap;
+  }
+  .estado.listo { background:#e6f1e6; color:var(--verde); border:1px solid #bcd8bc; }
+  .estado.falta { background:#f5e6e6; color:var(--rojo); border:1px solid #e0c0c0; }
+  .reco { margin-top:6px; border-top:1px dashed var(--borde); padding-top:6px; font-size:.85rem; color:#5a4a38; }
+  .reco b { display:block; font-size:.75rem; color:#9c6b00; text-transform:uppercase; letter-spacing:.4px; }
+  .zdg { font-style:italic; color:#9a8570; }
+  .nota {
+    background:var(--claro); border:1px dashed var(--borde); border-radius:10px;
+    padding:12px 16px; font-size:.9rem; color:#5a4a38; margin-top:20px;
+  }
+  @media print {
+    body { background:#fff; }
+    .portada, .tarjeta { box-shadow:none; }
+    a.tarjeta { color:var(--tinta); }
+  }
+</style>
+</head>
+<body>
+  <header class="portada">
+    <h1>HeroQuest · Misiones</h1>
+    <p>Índice de misiones por campaña. Qwindrak, la Reina Kessandria y la
+    Sincroforma aguardan en El Despertar; el propio libreto puede crecer con
+    otras campañas, como las misiones originales de Las Mazmorras de Morcar.</p>
+  </header>
+
+  
+    <section class="campana">
+      <h2>El Despertar</h2>
+      <div class="grid"><div class="col">
+        <a class="tarjeta" href="mision__La_Fortaleza_Fronteriza_de_In_Gulden.html">
+          <h3>La Fortaleza Fronteriza de In-Gulden</h3>
+          <div class="meta"><span>Tablero: <b>original</b></span><span>Nivel: <b>1</b></span></div>
+          <p>Penetrar en la fortaleza de In-Gulden, inspeccionar a los exploradores caídos, abrirse paso hasta el salón del trono, acabar con el Capitán del Terror Sha-Del y recuperar su nota.</p>
+          <div class="pie"><span class="etiqueta">10 salas · 23 monstruos</span>
+            <span class="estado listo">Ficha del máster →</span></div>
+          <div class="reco"><b>Recompensa</b>300 Monedas de Oro y la nota que revela que la Reina Kessandria avanza hacia Tuel-Vor en busca de Qwindrak.</div>
+        </a></div><div class="col"><div class="tarjeta pendiente"><h3>El Brujo de Tuel-Vor</h3><div class="meta"><span class="zdg">Libreto · sin datos</span></div><p>Cruzar los Portales del Terror en el retiro del brujo y desvelar los primeros pasos de su Sincroforma.</p><div class="pie"><span class="estado falta">Pendiente de modelar</span></div></div></div><div class="col"><div class="tarjeta pendiente"><h3>El Oráculo de Morledis</h3><div class="meta"><span class="zdg">Libreto · sin datos</span></div><p>Liberar al Alto Sacerdote capturado y recuperar &quot;Las Visiones del Rey Agrain&quot; para el Príncipe Magnus.</p><div class="pie"><span class="estado falta">Pendiente de modelar</span></div></div></div><div class="col"><div class="tarjeta pendiente"><h3>La Fortaleza del Rey del Fuego</h3><div class="meta"><span class="zdg">Libreto · sin datos</span></div><p>Hallar en las ruinas enanas el Pasadizo Secreto de la montaña y el Mapa de Glordrin, mientras la Reina Kessandria acecha.</p><div class="pie"><span class="estado falta">Pendiente de modelar</span></div></div></div><div class="col"><div class="tarjeta pendiente"><h3>Los Horrores de la Sideroforima</h3><div class="meta"><span class="zdg">Libreto · sin datos</span></div><p>Investigar las celdas de los experimentos de Qwindrak y deshacer sus criaturas antes de alcanzar su altar.</p><div class="pie"><span class="estado falta">Pendiente de modelar</span></div></div></div><div class="col"><div class="tarjeta pendiente"><h3>El Anillo de Retorno</h3><div class="meta"><span class="zdg">Libreto · sin datos</span></div><p>Encontrar el Anillo de Retorno en la sala del trono del brujo en plena batalla con los Guerreros del Terror.</p><div class="pie"><span class="estado falta">Pendiente de modelar</span></div></div></div><div class="col"><div class="tarjeta pendiente"><h3>La Tumba del Rey del Fuego</h3><div class="meta"><span class="zdg">Libreto · sin datos</span></div><p>Invocar con el anillo el espíritu del Rey Forgrin en su tumba y recuperar el Cuerno de los Forjados.</p><div class="pie"><span class="estado falta">Pendiente de modelar</span></div></div></div><div class="col"><div class="tarjeta pendiente"><h3>Los Tesoros del Rey Forgrin</h3><div class="meta"><span class="zdg">Libreto · sin datos</span></div><p>Rescatar los legendarios Tesoros de las Minas del Rey Forgrin y resolver el acertijo de la Enciclopedia de Galik.</p><div class="pie"><span class="estado falta">Pendiente de modelar</span></div></div></div><div class="col"><div class="tarjeta pendiente"><h3>El Sonido del Cuerno de los Forjados</h3><div class="meta"><span class="zdg">Libreto · sin datos</span></div><p>Atravesar los cinco Salones de la Ordalía y derrotar al general Abraxus en Los Salones con el Cuerno de los Forjados.</p><div class="pie"><span class="estado falta">Pendiente de modelar</span></div></div></div><div class="col"><div class="tarjeta pendiente"><h3>El Poder de la Sideroforima</h3><div class="meta"><span class="zdg">Libreto · sin datos</span></div><p>Batalla final contra Qwindrak en todas sus formas y testigos del despertar de Alousen, la última Vidente de Escamas.</p><div class="pie"><span class="estado falta">Pendiente de modelar</span></div></div></div><div class="col">
+        <a class="tarjeta" href="mision__El_Refugio_del_Guardián.html">
+          <h3>El Refugio del Guardián</h3>
+          <div class="meta"><span>Tablero: <b>original</b></span><span>Nivel: <b>1</b></span></div>
+          <p>Encuentra al Guardián retenido en la mazmorra y devuélvelo sano y salvo a la superficie.</p>
+          <div class="pie"><span class="etiqueta">4 salas · 7 monstruos · 3 tesoros</span>
+            <span class="estado listo">Ficha del máster →</span></div>
+          <div class="reco"><b>Recompensa</b>100 monedas de oro y la gratitud del Rey de los Valles.</div>
+        </a></div><div class="col">
+        <a class="tarjeta" href="mision__La_Máscara_del_Cuervo.html">
+          <h3>La Máscara del Cuervo</h3>
+          <div class="meta"><span>Tablero: <b>original</b></span><span>Nivel: <b>1</b></span></div>
+          <p>Penetrar en la abadía de Corvhal, abrirse paso hasta el Tabernáculo del Cuervo, recuperar la Máscara de manos del traidor Vael y regresar con ella a Tuel-Vor.</p>
+          <div class="pie"><span class="etiqueta">3 salas · 6 monstruos · 2 tesoros</span>
+            <span class="estado listo">Ficha del máster →</span></div>
+          <div class="reco"><b>Recompensa</b>150 Monedas de Oro, la Máscara del Cuervo y el favor del Prior de Tuel-Vor.</div>
+        </a></div></div>
+    </section>
+
+  <div class="nota">
+    <b>Cómo crece este índice:</b> cada ficha de misión se genera con
+    <code>mision_html.py --mision "Nombre"</code> y el hub se regenera con
+    <code>misiones_html.py</code>. Para agrupar misiones de otra campaña,
+    añade a la misión el campo opcional <code>"campana": "Nombre"</code> en
+    <code>data/misiones.json</code>. Las misiones del libreto escaneado que
+    aún no tienen datos aparecen marcadas como pendientes en la hoja de ruta.
+  </div>
+</body>
+</html>

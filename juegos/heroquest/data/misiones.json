@@ -16,6 +16,16 @@
         "y": 2
       }
     ],
+    "salida_heroes": {
+      "de": [
+        20,
+        15
+      ],
+      "a": [
+        21,
+        17
+      ]
+    },
     "puertas": [
       {
         "x": 6,
@@ -142,16 +152,18 @@
       {
         "x": 14,
         "y": 2
-      },
-      {
-        "x": 13,
-        "y": 3
-      },
-      {
-        "x": 14,
-        "y": 3
       }
     ],
+    "salida_heroes": {
+      "de": [
+        20,
+        15
+      ],
+      "a": [
+        21,
+        16
+      ]
+    },
     "puertas": [
       {
         "de": [
@@ -242,7 +254,8 @@
           8,
           11
         ],
-        "descripcion": "Puerta del cuerno (letra C): al abrirla suena el cuerno y entran los refuerzos."
+        "descripcion": "Puerta del cuerno (letra C): al abrirla suena el cuerno y entran los refuerzos.",
+        "estado": "abierta"
       },
       {
         "de": [
@@ -253,18 +266,31 @@
           21,
           11
         ],
-        "descripcion": "Puerta del cuerno (letra C): al abrirla suena el cuerno y entran los refuerzos."
+        "descripcion": "Puerta del cuerno (letra C): al abrirla suena el cuerno y entran los refuerzos.",
+        "estado": "abierta"
       }
     ],
     "puertas_secretas": [
       {
-        "de": [9, 18],
-        "a": [10, 18],
+        "de": [
+          9,
+          18
+        ],
+        "a": [
+          10,
+          18
+        ],
         "descripcion": "Salida trasera de la fortaleza"
       },
       {
-        "de": [18, 16],
-        "a": [19, 16],
+        "de": [
+          18,
+          16
+        ],
+        "a": [
+          19,
+          16
+        ],
         "descripcion": "Estancia oculta tras el trono"
       }
     ],
@@ -313,7 +339,10 @@
             "hasta": [
               12,
               3
-            ]
+            ],
+            "arte": {
+              "orientacion": "horizontal"
+            }
           }
         ],
         "notas": "El primer jugador que busque Tesoros en esta sala encuentra el tesoro del Reto; el resto roban del mazo de Tesoros."
@@ -362,7 +391,11 @@
             "hasta": [
               17,
               2
-            ]
+            ],
+            "arte": {
+              "orientacion": "horizontal",
+              "invertir": true
+            }
           }
         ],
         "notas": "Alacena (regla de casa): el primer Héroe que saque una carta de Tesoro en una habitación con alacena roba dos cartas de Tesoro en su lugar."
@@ -411,7 +444,10 @@
             "hasta": [
               6,
               8
-            ]
+            ],
+            "arte": {
+              "orientacion": "horizontal"
+            }
           }
         ],
         "notas": "Chimenea (regla oficial): cuando un Héroe saca una carta de Tesoro en una habitación con chimenea, puede usarla para curarse un Punto Corporal."
@@ -453,7 +489,10 @@
             "hasta": [
               21,
               9
-            ]
+            ],
+            "arte": {
+              "orientacion": "horizontal"
+            }
           }
         ]
       },
@@ -507,7 +546,10 @@
             "hasta": [
               21,
               14
-            ]
+            ],
+            "arte": {
+              "orientacion": "horizontal"
+            }
           }
         ]
       },
@@ -547,7 +589,10 @@
               8,
               15
             ],
-            "tesoro": "200 Monedas de Oro y un Bastón del Mago"
+            "tesoro": "200 Monedas de Oro y un Bastón del Mago",
+            "arte": {
+              "orientacion": "vertical"
+            }
           }
         ],
         "notas": "Letra B: \"El primer jugador que busque Tesoros encuentra 200 Monedas de Oro y un Bastón del Mago.\" (El tesoro está en la tumba.)"
@@ -634,7 +679,11 @@
             "hasta": [
               18,
               18
-            ]
+            ],
+            "arte": {
+              "orientacion": "horizontal",
+              "invertir": true
+            }
           },
           {
             "nombre": "Banco de alquimista",
@@ -646,10 +695,20 @@
             "hasta": [
               17,
               18
-            ]
+            ],
+            "arte": {
+              "orientacion": "horizontal"
+            }
           }
         ],
         "notas": "Letra D: \"El Capitán del Terror Sha-Del lleva la marca de la Reina Bruja. El primer jugador que busque Tesoros encuentra 300 Monedas de Oro y una nota andrajosa con manchas de sangre.\" (El tesoro está en el cuerpo de Sha-Del.) Con esta información concluye la Misión."
+      },
+      {
+        "numero": 21,
+        "nombre": "Sala 21",
+        "descripcion": "",
+        "monstruos": [],
+        "tesoros": []
       }
     ],
     "pasillos": {
@@ -700,6 +759,257 @@
       {
         "momento": "Primer explorador inspeccionado",
         "texto": "“Plegada dentro en un bolsillo, hallas una nota rasgada. Dice: nos traicionó y busca el Huevo Nocturno. Eso es todo lo que puedes descifrar”."
+      }
+    ]
+  },
+  {
+    "nombre": "La Máscara del Cuervo",
+    "tablero": "original",
+    "nivel": 1,
+    "introduccion": "La Máscara del Cuervo, reliquia venerada del templo de Tuel-Vor, ha desaparecido junto al acólito Vael. Los sabios creen que se ha refugiado en la abadía abandonada de Corvhal, entre las criptas donde la Orden del Cuervo selló sus secretos. Si los guardianes de la reliquia despiertan, nadie en la región estará a salvo.",
+    "objetivo": "Penetrar en la abadía de Corvhal, abrirse paso hasta el Tabernáculo del Cuervo, recuperar la Máscara de manos del traidor Vael y regresar con ella a Tuel-Vor.",
+    "recompensa": "150 Monedas de Oro, la Máscara del Cuervo y el favor del Prior de Tuel-Vor.",
+    "notas": "El Prior entrega al grupo una Poción de curación al comenzar. Tesoro del Reto: el primer jugador que busque Tesoros en el Tabernáculo del Cuervo encuentra la Máscara del Cuervo (150 Monedas de Oro), colgada del cuello del Guerrero del Caos que encarna al traidor Vael. Con la reliquia en su poder, los Héroes pueden concluir la misión regresando por donde entraron; la puerta secreta del Concejo acorta el regreso si la encuentran.",
+    "entrada_heroes": [
+      {
+        "x": 13,
+        "y": 1
+      },
+      {
+        "x": 14,
+        "y": 1
+      },
+      {
+        "x": 13,
+        "y": 2
+      },
+      {
+        "x": 14,
+        "y": 2
+      }
+    ],
+    "salida_heroes": {
+      "de": [
+        20,
+        15
+      ],
+      "a": [
+        21,
+        17
+      ]
+    },
+    "puertas": [
+      {
+        "de": [
+          12,
+          3
+        ],
+        "a": [
+          13,
+          3
+        ],
+        "descripcion": "Entrada al Vestíbulo Profanado desde el corredor"
+      },
+      {
+        "de": [
+          13,
+          8
+        ],
+        "a": [
+          13,
+          7
+        ],
+        "descripcion": "Puerta norte del Concejo"
+      },
+      {
+        "de": [
+          14,
+          8
+        ],
+        "a": [
+          14,
+          7
+        ],
+        "descripcion": "Puerta norte del Concejo"
+      },
+      {
+        "de": [
+          16,
+          10
+        ],
+        "a": [
+          17,
+          10
+        ],
+        "descripcion": "Salida este del Concejo"
+      },
+      {
+        "de": [
+          18,
+          12
+        ],
+        "a": [
+          17,
+          12
+        ],
+        "descripcion": "Puerta del Tabernáculo del Cuervo"
+      }
+    ],
+    "puertas_secretas": [
+      {
+        "de": [
+          15,
+          12
+        ],
+        "a": [
+          15,
+          13
+        ],
+        "descripcion": "Salida trasera del Concejo (regreso corto)"
+      }
+    ],
+    "salas": [
+      {
+        "numero": 3,
+        "nombre": "El Vestíbulo Profanado",
+        "descripcion": "Los bancos de la antigua sala de guardia yacen astillados y un olor a moho y a cera apagada impregna el aire. Algo hurga entre los escombros.",
+        "monstruos": [
+          {
+            "nombre": "Trasgo",
+            "x": 10,
+            "y": 3
+          },
+          {
+            "nombre": "Trasgo",
+            "x": 11,
+            "y": 5
+          }
+        ],
+        "tesoros": [],
+        "trampas": [
+          {
+            "nombre": "Losa quebrada",
+            "x": 12,
+            "y": 5,
+            "descripcion": "La losa cruje al pisarla y cede medio palmo: el Héroe tropieza y pierde 1 punto de Cuerpo. Termina su turno."
+          }
+        ],
+        "marcadores": [],
+        "muebles": []
+      },
+      {
+        "numero": 11,
+        "nombre": "La Sala del Concejo",
+        "descripcion": "El gran salón donde la Orden celebraba sus votos. Un mural de cuervos de piedra vela desde las paredes y las sombras van y vienen entre las columnas.",
+        "monstruos": [
+          {
+            "nombre": "Orco",
+            "x": 12,
+            "y": 9
+          },
+          {
+            "nombre": "Orco",
+            "x": 15,
+            "y": 11
+          }
+        ],
+        "tesoros": [
+          {
+            "nombre": "Poción de curación",
+            "x": 13,
+            "y": 11
+          }
+        ],
+        "trampas": [],
+        "marcadores": [],
+        "muebles": [
+          {
+            "nombre": "Mesa del Concejo",
+            "tipo": "Mesa",
+            "desde": [
+              13,
+              9
+            ],
+            "hasta": [
+              14,
+              10
+            ]
+          }
+        ],
+        "notas": "Los Orcos guardan la mesa ceremonial. El primer jugador que busque Tesoros en esta sala roba del mazo de Tesoros."
+      },
+      {
+        "numero": 15,
+        "nombre": "El Tabernáculo del Cuervo",
+        "descripcion": "Ante un altar de obsidiana se alza Vael. Su rostro ya no es humano: la sombra del Cuervo cubre su armadura y su mirada arde con luz pálida.",
+        "monstruos": [
+          {
+            "nombre": "Guerrero del Caos",
+            "x": 20,
+            "y": 11,
+            "tesoro": "La Máscara del Cuervo (150 Monedas de Oro). Con ella concluye la Misión."
+          },
+          {
+            "nombre": "Trasgo",
+            "x": 18,
+            "y": 13
+          }
+        ],
+        "tesoros": [
+          {
+            "nombre": "Espada Corta",
+            "x": 21,
+            "y": 12
+          }
+        ],
+        "trampas": [],
+        "marcadores": [],
+        "muebles": [
+          {
+            "nombre": "Altar del Cuervo",
+            "tipo": "Altar",
+            "desde": [
+              19,
+              14
+            ],
+            "hasta": [
+              21,
+              14
+            ]
+          }
+        ],
+        "notas": "Tesoro del Reto: el primer jugador que busque Tesoros en esta sala encuentra la Máscara del Cuervo (150 Monedas de Oro) y la nota de Vael: “el Cuervo me ha tomado, pero vosotros no llegaréis a la Reina Kessandria”."
+      }
+    ],
+    "pasillos": {
+      "monstruos": [],
+      "tesoros": [],
+      "trampas": [
+        {
+          "nombre": "Trampa de lanza",
+          "x": 17,
+          "y": 13,
+          "descripcion": "El suelo cede al pisar la baldosa suelta y una lanza brota del muro. Tira un dado de defensa: pierdes 1 punto de Cuerpo por cada escudo que no salga."
+        }
+      ],
+      "marcadores": []
+    },
+    "instrucciones_voz_alta": [
+      {
+        "momento": "Al empezar la misión",
+        "texto": "El Prior de Tuel-Vor os recibe en el atrio del templo con la Máscara vacía en las manos. “Hace tres noches, el acólito Vael me traicionó y huyó con la reliquia. Los sabios lo rastrearon hasta la abadía de Corvhal, pero nos advirtió de una maldición: la Orden del Cuervo ha despertado. Recuperad la Máscara y volved con bien.”"
+      },
+      {
+        "momento": "Sala del Concejo (al entrar)",
+        "texto": "El gran salón se alza en silencio. Los cuervos del mural parecen seguir vuestros pasos y, entre las columnas, algo cruza veloz de una sombra a otra."
+      },
+      {
+        "momento": "Tabernáculo del Cuervo (sala final)",
+        "texto": "“Habéis llegado tarde, peregrinos”, susurra Vael con una voz que no es la suya. “El Cuervo ya ha tomado mi carne.” La sombra de la reliquia se alza tras él y la sala entera se hiela."
+      },
+      {
+        "momento": "Tesoro del Reto · La Máscara del Cuervo",
+        "texto": "Del cuello inerte de Vael cuelga la Máscara del Cuervo, intacta salvo por una mancha de sangre. Junto a ella, una nota arrugada: “la Reina Kessandria busca el Huevo Nocturno; informad a Tuel-Vor antes de que sea tarde”. Con la reliquia en vuestro poder, la Misión concluye."
       }
     ]
   }

@@ -150,6 +150,16 @@ def validar_misiones() -> int:
             continue
         for t in mision.get("entrada_heroes", []):
             errores += punto_valido(tablero, t, f"misión '{mision['nombre']}' entrada_heroes")
+        salidas = mision.get("salida_heroes") or []
+        if isinstance(salidas, dict):
+            salidas = [salidas]
+        for s in salidas:
+            if "de" in s and "a" in s:
+                contexto = f"misión '{mision['nombre']}' salida_heroes"
+                errores += punto_valido(tablero, {"x": s["de"][0], "y": s["de"][1]}, contexto)
+                errores += punto_valido(tablero, {"x": s["a"][0], "y": s["a"][1]}, contexto)
+            else:
+                errores += punto_valido(tablero, s, f"misión '{mision['nombre']}' salida_heroes")
         for p in mision.get("puertas", []):
             errores += puerta_valida(tablero, p, f"misión '{mision['nombre']}' puerta")
         for p in mision.get("puertas_secretas", []):
