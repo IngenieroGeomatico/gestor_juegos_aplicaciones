@@ -26,6 +26,35 @@ DATA_DIR = tablero.DATA_DIR
 HTML_DIR = DATA_DIR.parent / "html"
 
 
+def _sprite_data_uri(slug: str, angulo: int = 0) -> str:
+    """Data URI base64 del icono de mapa `slug` YA rotado a `angulo` grados.
+
+    Usa exactamente el mismo procedimiento que el render inicial del SVG
+    (`_icono_orientado_peq`), de modo que al conmutar el estado en el toggle
+    la orientación y el recorte quedan idénticos a la puerta original."""
+    ruta = mapa._icono_mapa(slug)
+    if not ruta:
+        return ""
+    return mapa._icono_orientado_peq(ruta, angulo % 360, 180)
+
+
+def _angulos_puertas(mision: dict) -> set[int]:
+    """Ángulos de giro de las puertas normales de la misión (0/90/…).
+
+    Replica la lógica de `mapa._marcadores_svg` para incrustar en el toggle
+    los sprites pre-rotados que coinciden con el render inicial."""
+    angulos: set[int] = set()
+    slug = mapa.PUERTA_ICONO or mapa.PUERTA_ABIERTA_ICONO
+    ruta_icono = mapa._icono_mapa(slug)
+    r = 1.0  # la proporción del rect no depende del tamaño de celda
+    for punto in mision.get("puertas", []):
+        if "de" not in punto or "a" not in punto:
+            continue
+        x1, y1, x2, y2 = mapa._rect_puerta(punto, 0, 0, r, 34)  # misma celda que _mapa_svg
+        angulos.add(mapa._gira_sprite(punto, ruta_icono, x2 - x1, y2 - y1))
+    return angulos or {0}
+
+
 def _cargar_mision(nombre: str) -> dict:
     for m in data_store.cargar("misiones"):
         if m["nombre"] == nombre:
@@ -49,11 +78,81 @@ def _stat_tesoro(nombre: str) -> dict | None:
     return None
 
 
-def _mapa_svg(mision: dict, t: dict) -> str:
-    celda, leyenda, margen, titulo = 34, 60, 40, 40
+def _mapa_svg(mision: dict, t: dict, mostrar: str = "salas", sufijo_id: str = "") -> str:
+    celda, margen, titulo = 34, 40, 40
     w = margen * 2 + t["columnas"] * celda
-    h = titulo + margen * 2 + t["filas"] * celda + leyenda
-    return mapa._render_svg(t, mision, w, h, titulo, margen, celda, leyenda)
+    h = titulo + margen * 2 + t["filas"] * celda
+    return mapa._render_svg(t, mision, w, h, titulo, margen, celda,
+                            mostrar=mostrar, sufijo_id=sufijo_id)
+
+
+def _leyenda_mapa(mision: dict) -> str:
+    """Leyenda pegajosa del mapa: los sprites dibujados y los rectángulos de color."""
+    items: list[str] = []
+
+    def swatch(slug: str) -> str:
+        uri = _sprite_data_uri(slug, 0)
+        return f'<img class="leyendaimg" src="{uri}" alt="">' if uri else ""
+
+    # Rectángulos de color (siempre presentes en el mapa)
+    colores = [
+        (mapa.COLOR_ENTRADA, "Entrada"),
+        (mapa.COLOR_SALIDA, "Salida"),
+        (mapa.COLOR_TESORO, "Tesoro"),
+        (mapa.COLOR_PASILLO, "Pasillo"),
+        (mapa.COLOR_ROCA, "Roca dura"),
+    ]
+    for color, nombre in colores:
+        items.append(
+            f'<span class="leyenda-item"><span class="chip" style="background:{color}"></span>{nombre}</span>'
+        )
+
+    # Sprites presentes en esta misión
+    sprites: list[tuple[str, str]] = []
+    if mision.get("puertas"):
+        sprites.append((mapa.PUERTA_ICONO, "Puerta cerrada"))
+        sprites.append((mapa.PUERTA_ABIERTA_ICONO, "Puerta abierta"))
+    if mision.get("puertas_secretas"):
+        sprites.append((mapa.PUERTA_SECRETA_ICONO, "Puerta secreta"))
+    entrada, salida = mision.get("entrada_heroes"), mision.get("salida_heroes")
+    if mapa.ENTRADA_ICONO == mapa.SALIDA_ICONO:
+        if entrada and salida:
+            sprites.append((mapa.ENTRADA_ICONO, "Entrada / Salida"))
+        elif entrada:
+            sprites.append((mapa.ENTRADA_ICONO, "Entrada"))
+        elif salida:
+            sprites.append((mapa.SALIDA_ICONO, "Salida"))
+    else:
+        if entrada:
+            sprites.append((mapa.ENTRADA_ICONO, "Entrada"))
+        if salida:
+            sprites.append((mapa.SALIDA_ICONO, "Salida"))
+    for _, mu in mapa._muebles_mision(mision):
+        slug = (mapa.MUEBLE_ICONO or {}).get(mu.get("tipo", ""))
+        if slug:
+            sprites.append((slug, mu["nombre"]))
+    for sala in mision.get("salas", []):
+        for tr in sala.get("trampas", []):
+            slug = (mapa.TRAMPA_ICONO or {}).get(tr.get("nombre", ""))
+            if slug:
+                sprites.append((slug, tr["nombre"]))
+    for grupo in (mision.get("pasillos", {}).get("marcadores", []),):
+        for it in grupo:
+            if "calavera" in (it.get("nombre") or "").lower():
+                sprites.append((mapa._CALAVERA_SLUG, it.get("nombre", "Calavera")))
+
+    vistos: set[str] = set()
+    for slug, nombre in sprites:
+        if not slug or slug in vistos:
+            continue
+        vistos.add(slug)
+        items.append(f'<span class="leyenda-item">{swatch(slug)}<span>{html.escape(nombre)}</span></span>')
+
+    return f"""
+    <div class="leyenda">
+      <h3>Leyenda del mapa</h3>
+      <div class="leyenda-items">{"".join(items)}</div>
+    </div>"""
 
 
 def _casillas_vida(cuerpo: int) -> str:
@@ -128,24 +227,6 @@ def _formato_mueble(mu: dict) -> str:
     if len(d) == 2 and len(h2) == 2:
         return f"({d[0]},{d[1]})–({h2[0]},{h2[1]})"
     return "—"
-
-
-def _lista_puntos(puntos: list[dict]) -> str:
-    if not puntos:
-        return "—"
-    return ", ".join(_formato_punto(p) for p in puntos)
-
-
-def _lista_puntos_secretas(puntos: list[dict]) -> str:
-    if not puntos:
-        return "—"
-    partes = []
-    for p in puntos:
-        base = _formato_punto(p)
-        if p.get("descripcion"):
-            base += f': {html.escape(p["descripcion"])}'
-        partes.append(base)
-    return "; ".join(partes)
 
 
 def _tabla_referencia(registros: list[dict], columnas: tuple[str, ...]) -> str:
@@ -327,6 +408,19 @@ def _render(mision: dict, t: dict) -> str:
     else:
         pasillos_html = ""
 
+    # Sprites de puertas incrustados (base64) pre-rotados por ángulo, para el
+    # toggle: coinciden con el render inicial del SVG y evitan depender de
+    # rutas absolutas de ICONOS_DIR al abrir el HTML desde cualquier sitio.
+    slug_cerrada = mapa.PUERTA_ICONO
+    slug_abierta = mapa.PUERTA_ABIERTA_ICONO
+    sprites: dict[str, str] = {}
+    for slug in (slug_abierta, slug_cerrada):
+        if not slug:
+            continue
+        for angulo in sorted(_angulos_puertas(mision)):
+            sprites[f"{slug}_{angulo}"] = _sprite_data_uri(slug, angulo)
+    sprites_js = "{" + ", ".join(f"'{k}': '{v}'" for k, v in sprites.items()) + "}"
+
     return f"""<!DOCTYPE html>
 <html lang="es">
 <head>
@@ -360,6 +454,25 @@ def _render(mision: dict, t: dict) -> str:
   }}
   .mapa-wrap h2 {{ margin:0 0 10px; font-size:1.1rem; color:var(--bronce); }}
   .mapa-wrap svg {{ display:block; margin:0 auto; max-width:100%; height:auto; }}
+  .mapa-switch {{ display:flex; gap:8px; margin-bottom:12px; }}
+  .switch-btn {{
+    background:transparent; border:1px solid var(--borde); color:var(--tinta);
+    padding:6px 14px; border-radius:20px; cursor:pointer; font-size:.9rem;
+  }}
+  .switch-btn.active {{ background:var(--madera); color:#f4e9d2; border-color:var(--madera); font-weight:bold; }}
+  .mapa-panel svg {{ display:none; }}
+  .mapa-panel.visible svg {{ display:block; }}
+  .leyenda {{
+    position:sticky; bottom:0; z-index:20; margin-bottom:22px;
+    background:rgba(243,236,221,.97); border:1px solid var(--borde);
+    border-radius:12px; padding:10px 14px;
+    box-shadow:0 -2px 12px rgba(0,0,0,.14);
+  }}
+  .leyenda h3 {{ margin:0 0 8px; font-size:.8rem; color:var(--bronce); text-transform:uppercase; letter-spacing:.5px; }}
+  .leyenda-items {{ display:flex; flex-wrap:wrap; gap:6px 16px; align-items:center; }}
+  .leyenda-item {{ display:inline-flex; align-items:center; gap:6px; font-size:.85rem; color:#3c2f1f; }}
+  .chip {{ width:18px; height:18px; border-radius:4px; border:1px solid rgba(0,0,0,.25); display:inline-block; flex:none; }}
+  .leyendaimg {{ height:30px; width:auto; object-fit:contain; }}
   .grid {{ display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:10px; }}
   .salas {{ display:grid; grid-template-columns:repeat(auto-fit,minmax(340px,1fr)); gap:16px; }}
   .sala {{ background:var(--claro); border:1px solid var(--borde); border-radius:12px; padding:14px 16px; box-shadow:0 2px 6px rgba(0,0,0,.06); }}
@@ -404,6 +517,7 @@ def _render(mision: dict, t: dict) -> str:
   @media print {{
     body {{ background:#fff; }}
     .portada, .sala, .panel, .mapa-wrap {{ box-shadow:none; }}
+    .leyenda {{ position:static; box-shadow:none; }}
   }}
 </style>
 </head>
@@ -426,24 +540,22 @@ def _render(mision: dict, t: dict) -> str:
 
   {_panel_voz_alta(mision)}
 
-  <div class="datos">
-    <div class="dato">
-      <h2>Entrada de héroes</h2>
-      <p>{_lista_puntos(mision.get("entrada_heroes", []))}</p>
+  <div class="mapa-seccion">
+  <div class="mapa-wrap">
+    <h2>Mapa de la misión</h2>
+    <div class="mapa-switch" role="tablist">
+      <button class="switch-btn active" data-mapa="salas" role="tab" aria-selected="true">Nº de sala</button>
+      <button class="switch-btn" data-mapa="coordenadas" role="tab" aria-selected="false">Coordenadas</button>
     </div>
-    <div class="dato">
-      <h2>Puertas</h2>
-      <p>{_lista_puntos(mision.get("puertas", []))}</p>
+    <div class="mapa-panel" id="mapa-salas">
+      {_mapa_svg(mision, t, mostrar="salas", sufijo_id="-salas")}
     </div>
-    <div class="dato">
-      <h2>Puertas secretas</h2>
-      <p>{_lista_puntos_secretas(mision.get("puertas_secretas", []))}</p>
+    <div class="mapa-panel oculto" id="mapa-coordenadas">
+      {_mapa_svg(mision, t, mostrar="coordenadas", sufijo_id="-coord")}
     </div>
   </div>
 
-  <div class="mapa-wrap">
-    <h2>Mapa de la misión</h2>
-    {_mapa_svg(mision, t)}
+  {_leyenda_mapa(mision)}
   </div>
 
   <div class="salas">
@@ -454,6 +566,74 @@ def _render(mision: dict, t: dict) -> str:
 
   <h2 style="color:var(--bronce); margin-bottom:10px;">Referencia del máster</h2>
   {_referencia()}
+  <script>
+    (function () {{
+      var panelSalas = document.getElementById('mapa-salas');
+      var panelCoords = document.getElementById('mapa-coordenadas');
+      function mostrar(nombre) {{
+        panelSalas.classList.toggle('visible', nombre === 'salas');
+        panelCoords.classList.toggle('visible', nombre === 'coordenadas');
+        document.querySelectorAll('.switch-btn').forEach(function (b) {{
+          var activo = b.getAttribute('data-mapa') === nombre;
+          b.classList.toggle('active', activo);
+          b.setAttribute('aria-selected', activo ? 'true' : 'false');
+        }});
+      }}
+      document.querySelectorAll('.switch-btn').forEach(function (b) {{
+        b.addEventListener('click', function () {{ mostrar(b.getAttribute('data-mapa')); }});
+      }});
+
+      /* ── Toggle de puertas ── */
+      var COLOR_ABIERTA = '{mapa.COLOR_PUERTA_ABIERTA}';
+      var COLOR_CERRADA = '{mapa.COLOR_PUERTA_CERRADA}';
+      var SLUG_ABIERTA = '{mapa.PUERTA_ABIERTA_ICONO}';
+      var SLUG_CERRADA = '{mapa.PUERTA_ICONO}';
+      /* Sprites incrustados en base64, pre-rotados por ángulo: {sprites_js} */
+      var SPRITES = {sprites_js};
+
+      function resolverIcono(slug, angulo) {{
+        return SPRITES[slug + '_' + angulo] || SPRITES[slug + '_0'] || '';
+      }}
+
+      function pintarPuerta(g, nueva, slug, borde) {{
+        g.setAttribute('data-estado', nueva);
+        var angulo = parseInt(g.getAttribute('data-angulo') || '0', 10);
+        /* Actualizar imagen: la rotación ya está en los píxeles del sprite,
+           así que el recorte 'slice' queda igual que en el render inicial */
+        var img = g.querySelector('image');
+        if (img) {{
+          img.setAttribute('href', resolverIcono(slug, angulo));
+          img.removeAttribute('transform');
+        }}
+        /* Actualizar borde */
+        var rect = g.querySelector('rect[stroke]');
+        if (rect && rect.getAttribute('fill') === 'none') {{
+          rect.setAttribute('stroke', borde);
+        }}
+      }}
+
+      function togglePuerta(g) {{
+        var de = g.getAttribute('data-de');
+        var a = g.getAttribute('data-a');
+        var actual = g.getAttribute('data-estado');
+        var nueva = actual === 'abierta' ? 'cerrada' : 'abierta';
+        var slug = nueva === 'abierta' ? SLUG_ABIERTA : SLUG_CERRADA;
+        var borde = nueva === 'abierta' ? COLOR_ABIERTA : COLOR_CERRADA;
+        /* Sincronizar todas las vistas (salas y coordenadas) */
+        document.querySelectorAll('.puerta-interactiva').forEach(function (otra) {{
+          if (otra.getAttribute('data-de') === de && otra.getAttribute('data-a') === a) {{
+            pintarPuerta(otra, nueva, slug, borde);
+          }}
+        }});
+      }}
+
+      document.querySelectorAll('.puerta-interactiva').forEach(function (g) {{
+        g.addEventListener('click', function () {{ togglePuerta(g); }});
+      }});
+
+      mostrar('salas');
+    }})();
+  </script>
 </body>
 </html>"""
 
