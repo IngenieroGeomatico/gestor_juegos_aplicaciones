@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="220" height="220" viewBox="0 0 220 220">
+  <defs>
+    <linearGradient id="madera" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"  stop-color="#5a3a1c"/>
+      <stop offset="45%" stop-color="#a06a35"/>
+      <stop offset="60%" stop-color="#8a5828"/>
+      <stop offset="100%" stop-color="#3f2711"/>
+    </linearGradient>
+    <linearGradient id="madera-verde" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"  stop-color="#2e5d34"/>
+      <stop offset="50%" stop-color="#4d8a4a"/>
+      <stop offset="100%" stop-color="#2a4f2c"/>
+    </linearGradient>
+    <linearGradient id="madera-roja" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"  stop-color="#7c2621"/>
+      <stop offset="45%" stop-color="#a0402f"/>
+      <stop offset="100%" stop-color="#5e1f1a"/>
+    </linearGradient>
+    <linearGradient id="piedra" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"  stop-color="#9aa0a8"/>
+      <stop offset="50%" stop-color="#747c88"/>
+      <stop offset="100%" stop-color="#4d545e"/>
+    </linearGradient>
+    <linearGradient id="piedra-clara" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"  stop-color="#d9d4c8"/>
+      <stop offset="100%" stop-color="#9a9180"/>
+    </linearGradient>
+    <linearGradient id="oro" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"  stop-color="#f6d98a"/>
+      <stop offset="50%" stop-color="#c99a3f"/>
+      <stop offset="100%" stop-color="#8a641f"/>
+    </linearGradient>
+    <linearGradient id="fuego" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"  stop-color="#ffd54f"/>
+      <stop offset="50%" stop-color="#ff8f00"/>
+      <stop offset="100%" stop-color="#d84315"/>
+    </linearGradient>
+  </defs>
+<ellipse cx="110" cy="188" rx="82" ry="12" fill="#000" opacity="0.18"/><rect x="14" y="168" width="192" height="30" rx="3" fill="#4b5561" stroke="#1a1a1a" stroke-width="2.5"/><path d="M 54 152 L 54 113.0 L 85.0 92 L 116 113.0 L 116 152 Z" fill="#8f9aa6" stroke="#1a1a1a" stroke-width="2.5"/><path d="M 65.16 125.0 L 104.84 125.0" stroke="#3a4149" stroke-width="2"/><path d="M 120 168 L 120 134.2 L 155.0 116 L 190 134.2 L 190 168 Z" fill="#6b7684" stroke="#1a1a1a" stroke-width="2.5"/><path d="M 132.6 144.6 L 177.4 144.6" stroke="#3a4149" stroke-width="2"/><path d="M 40 180 L 40 151.4 L 73.0 136 L 106 151.4 L 106 180 Z" fill="#757f8c" stroke="#1a1a1a" stroke-width="2.5"/><path d="M 51.879999999999995 160.2 L 94.12 160.2" stroke="#3a4149" stroke-width="2"/><path d="M 104 70 L 104 44.0 L 133.0 30 L 162 44.0 L 162 70 Z" fill="#9aa5b1" stroke="#1a1a1a" stroke-width="2.5"/><path d="M 114.44 52.0 L 151.56 52.0" stroke="#3a4149" stroke-width="2"/><path d="M 152 110 L 152 76.2 L 174.0 58 L 196 76.2 L 196 110 Z" fill="#808b98" stroke="#1a1a1a" stroke-width="2.5"/><path d="M 159.92 86.6 L 188.07999999999998 86.6" stroke="#3a4149" stroke-width="2"/><path d="M 14 130 L 14 91.0 L 36.0 70 L 58 91.0 L 58 130 Z" fill="#8a94a0" stroke="#1a1a1a" stroke-width="2.5"/><path d="M 21.92 103.0 L 50.08 103.0" stroke="#3a4149" stroke-width="2"/><path d="M 86 48 L 86 22.0 L 103.0 8 L 120 22.0 L 120 48 Z" fill="#a3adb8" stroke="#1a1a1a" stroke-width="2.5"/><path d="M 92.12 30.0 L 113.88 30.0" stroke="#3a4149" stroke-width="2"/></svg>

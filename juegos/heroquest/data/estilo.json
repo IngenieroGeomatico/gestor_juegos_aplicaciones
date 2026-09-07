@@ -1,0 +1,60 @@
+{
+  "sprite_dir": "sources/arte_iconos/mapa",
+  "trampas": {
+    "Trampa de pozo": "trampafoso",
+    "Trampa de lanza": "trampalanza",
+    "El derrumbe": "tramparocas"
+  },
+  "muebles": {
+    "Mesa": "mesa",
+    "Alacena": "alacena",
+    "Chimenea": "chimenea",
+    "Tumba": "tumba",
+    "Cofre": "cofre",
+    "Banco de Alquimista": "bancoalquimista",
+    "Altar": "piedra",
+    "Potro": "potro",
+    "Trono": "trono",
+    "Reja de mazmorra": "rejamazmorra",
+    "Estantería de armas": "estanteriadearmas",
+    "Mesa de hechizos": "mesa dehechizos",
+    "Biblioteca": "bilbioteca"
+  },
+  "puertas": {
+    "abierta": "puertaabierta",
+    "cerrada": "puertacerrada",
+    "secreta": "puertasecreta"
+  },
+  "entrada_salida": {
+    "entrada": "escalera",
+    "salida": "escalera"
+  },
+  "calavera": "calabera",
+  "glifos": {
+    "Mesa": "M",
+    "Alacena": "A",
+    "Chimenea": "C",
+    "Tumba": "T",
+    "Cofre": "C",
+    "Banco de Alquimista": "B",
+    "Potro": "P",
+    "Trono": "T",
+    "Reja de mazmorra": "R",
+    "Estantería de armas": "E",
+    "Mesa de hechizos": "H",
+    "Biblioteca": "B"
+  },
+  "colores": {
+    "entrada": "#2e8b57",
+    "entrada_fondo": "#d8ebdc",
+    "puerta_abierta": "#2e8b57",
+    "puerta_cerrada": "#b71c1c",
+    "salida": "#455a64",
+    "salida_fondo": "#cfc7b5",
+    "tesoro": "#f6c700",
+    "pasillo": "#eadfc8",
+    "roca": "#4b5561",
+    "roca_trama": "#000000",
+    "roca_ficha": "#6d5b45"
+  }
+}

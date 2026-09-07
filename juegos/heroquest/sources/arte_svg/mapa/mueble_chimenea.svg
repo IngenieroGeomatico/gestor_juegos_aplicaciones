@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="220" height="220" viewBox="0 0 220 220">
+  <defs>
+    <linearGradient id="madera" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"  stop-color="#5a3a1c"/>
+      <stop offset="45%" stop-color="#a06a35"/>
+      <stop offset="60%" stop-color="#8a5828"/>
+      <stop offset="100%" stop-color="#3f2711"/>
+    </linearGradient>
+    <linearGradient id="madera-verde" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"  stop-color="#2e5d34"/>
+      <stop offset="50%" stop-color="#4d8a4a"/>
+      <stop offset="100%" stop-color="#2a4f2c"/>
+    </linearGradient>
+    <linearGradient id="madera-roja" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"  stop-color="#7c2621"/>
+      <stop offset="45%" stop-color="#a0402f"/>
+      <stop offset="100%" stop-color="#5e1f1a"/>
+    </linearGradient>
+    <linearGradient id="piedra" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"  stop-color="#9aa0a8"/>
+      <stop offset="50%" stop-color="#747c88"/>
+      <stop offset="100%" stop-color="#4d545e"/>
+    </linearGradient>
+    <linearGradient id="piedra-clara" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"  stop-color="#d9d4c8"/>
+      <stop offset="100%" stop-color="#9a9180"/>
+    </linearGradient>
+    <linearGradient id="oro" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"  stop-color="#f6d98a"/>
+      <stop offset="50%" stop-color="#c99a3f"/>
+      <stop offset="100%" stop-color="#8a641f"/>
+    </linearGradient>
+    <linearGradient id="fuego" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"  stop-color="#ffd54f"/>
+      <stop offset="50%" stop-color="#ff8f00"/>
+      <stop offset="100%" stop-color="#d84315"/>
+    </linearGradient>
+  </defs>
+<ellipse cx="110" cy="176" rx="76" ry="12" fill="#000" opacity="0.18"/><rect x="30" y="120" width="160" height="72" fill="url(#piedra)" stroke="#1a1a1a" stroke-width="3"/><rect x="42" y="128" width="36" height="56" rx="3" fill="url(#piedra)" stroke="#333a44" stroke-width="2"/><rect x="142" y="128" width="36" height="56" rx="3" fill="url(#piedra)" stroke="#333a44" stroke-width="2"/><path d="M 90 192 L 90 130 Q 110 100 130 130 L 130 192 Z" fill="#1c1c1c" stroke="#1a1a1a" stroke-width="3"/><path d="M 110 108 Q 122 124 110 138 Q 100 128 110 108 Z" fill="url(#fuego)" stroke="#b02a12" stroke-width="2"/><path d="M 108 116 Q 116 128 108 138 Q 102 126 108 116 Z" fill="#ffeb9e"/><path d="M 90 142 Q 96 150 110 150 Q 124 150 130 142 L 132 150 L 88 150 Z" fill="#3a1c0e"/><rect x="24" y="104" width="172" height="20" rx="4" fill="url(#piedra)" stroke="#1a1a1a" stroke-width="3"/><path d="M 30 104 L 110 76 L 190 104" fill="none" stroke="#1a1a1a" stroke-width="5" stroke-linejoin="round"/><path d="M 30 104 L 110 76 L 190 104" fill="url(#piedra)" stroke="#1a1a1a" stroke-width="3" stroke-linejoin="round"/></svg>
