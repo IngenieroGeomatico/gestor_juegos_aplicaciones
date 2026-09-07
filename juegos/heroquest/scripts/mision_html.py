@@ -87,38 +87,50 @@ def _mapa_svg(mision: dict, t: dict, mostrar: str = "salas", sufijo_id: str = ""
 
 
 def _lanzador_dados() -> str:
-    """Lanzador de dados de combate HeroQuest (ataque rojo / defensa blanco).
+    """Lanzador de dados de HeroQuest.
 
-    La probabilidad real del HeroQuest: el dado de ataque tiene 3 calaveras,
-    1 escudo blanco y 2 escudos negros; el de defensa, 3 escudos blancos,
-    1 escudo negro y 2 calaveras. El cuadro contabiliza calaveras en ataque y
-    escudos blancos en defensa (los escudos negros no cuentan).
+    Dados de combate: el de ataque tiene 3 calaveras, 1 escudo blanco y
+    2 escudos negros; el de defensa, 3 escudos blancos, 1 escudo negro y
+    2 calaveras. Se contabilizan calaveras en ataque y escudos blancos en
+    defensa (los escudos negros no cuentan). Dado de movimiento: d6 numerado
+    (el héroe tira tantos como su valor Mov y suma las casillas).
     """
     return """
     <div class="lanzador-dados">
       <h4>Lanzador de dados</h4>
       <div class="banco-dados">
         <div class="grupo">
+          <span class="etiqueta etq-ataque">Ataque</span>
+          <div id="res-ataque" class="resultado"></div>
           <div class="control">
-            <span class="etiqueta etq-ataque">Ataque</span>
             <button type="button" onclick="cambiar('ataque',-1)" title="Menos dados">&minus;</button>
             <span id="num-ataque" class="cantidad">4</span>
             <button type="button" onclick="cambiar('ataque',1)" title="Más dados">+</button>
             <button type="button" class="lanzar" onclick="lanzar('ataque')">Lanzar</button>
           </div>
-          <div id="res-ataque" class="resultado"></div>
           <div id="total-ataque" class="total"></div>
         </div>
         <div class="grupo">
+          <span class="etiqueta etq-defensa">Defensa</span>
+          <div id="res-defensa" class="resultado"></div>
           <div class="control">
-            <span class="etiqueta etq-defensa">Defensa</span>
             <button type="button" onclick="cambiar('defensa',-1)" title="Menos dados">&minus;</button>
             <span id="num-defensa" class="cantidad">2</span>
             <button type="button" onclick="cambiar('defensa',1)" title="Más dados">+</button>
             <button type="button" class="lanzar" onclick="lanzar('defensa')">Lanzar</button>
           </div>
-          <div id="res-defensa" class="resultado"></div>
           <div id="total-defensa" class="total"></div>
+        </div>
+        <div class="grupo">
+          <span class="etiqueta etq-movimiento">Movimiento</span>
+          <div id="res-movimiento" class="resultado"></div>
+          <div class="control">
+            <button type="button" onclick="cambiar('movimiento',-1)" title="Menos dados">&minus;</button>
+            <span id="num-movimiento" class="cantidad">2</span>
+            <button type="button" onclick="cambiar('movimiento',1)" title="Más dados">+</button>
+            <button type="button" class="lanzar" onclick="lanzar('movimiento')">Lanzar</button>
+          </div>
+          <div id="total-movimiento" class="total"></div>
         </div>
       </div>
     </div>"""
@@ -155,6 +167,31 @@ _DADO_ESCUDO_NEGRO = (
     'd="M24 5.6 10 12v13.4c0 9.4 6.2 16.2 14 17.6 7.8-1.4 14-8.2 14-17.6V12Z"/></svg>'
 )
 
+# Caras del dado de movimiento (d6 numerado, valores 1-6 con pips). En la V2 el
+# "Dado Rojo" es un d6: se usa para movimiento (el héroe tira tantos como su
+# valor Mov), inspeccionar exploradores caídos (1-2/3-4/5-6) y resistir como
+# la Vara de Telekinesis ("si saca un 6").
+_PIPS = {
+    1: [(24, 24)],
+    2: [(34, 14), (14, 34)],
+    3: [(34, 14), (24, 24), (14, 34)],
+    4: [(14, 14), (34, 14), (14, 34), (34, 34)],
+    5: [(14, 14), (34, 14), (24, 24), (14, 34), (34, 34)],
+    6: [(14, 14), (34, 14), (14, 24), (34, 24), (14, 34), (34, 34)],
+}
+
+
+def _dado_pip_svg(valor: int, color: str = "#96281b") -> str:
+    """SVG de un dado de movimiento (d6) con el valor 1-6 dibujado como pips."""
+    pips = "".join(
+        f'<circle cx="{x}" cy="{y}" r="4.6" fill="{color}"/>' for x, y in _PIPS[valor]
+    )
+    return (
+        '<svg viewBox="0 0 48 48" width="30" height="30" aria-hidden="true">'
+        f'<rect x="5" y="5" width="38" height="38" rx="8" fill="#fdf6e3" '
+        f'stroke="#c18d5e" stroke-width="2"/>{pips}</svg>'
+    )
+
 
 def _js_dados() -> str:
     """JavaScript del lanzador de dados (dados de combate HeroQuest).
@@ -170,18 +207,20 @@ def _js_dados() -> str:
             "escudo-blanco": _DADO_ESCUDO_BLANCO,
             "escudo-negro": _DADO_ESCUDO_NEGRO,
         },
-        "defensa": {
+"defensa": {
             "calavera": _DADO_CALAVERA_OSCURA,
             "escudo-blanco": _DADO_ESCUDO_BLANCO,
             "escudo-negro": _DADO_ESCUDO_NEGRO,
         },
+        "movimiento": {str(n): _dado_pip_svg(n) for n in range(1, 7)},
     }
     return (
         "/* ── Lanzador de dados ── */\n"
         "var CARAS = " + json.dumps(caras) + ";\n"
         "var CARAS_LISTA = {"
         "'ataque': ['calavera','calavera','calavera','escudo-blanco','escudo-negro','escudo-negro'],"
-        "'defensa': ['escudo-blanco','escudo-blanco','escudo-blanco','escudo-negro','calavera','calavera']};\n"
+        "'defensa': ['escudo-blanco','escudo-blanco','escudo-blanco','escudo-negro','calavera','calavera'],"
+        "'movimiento': ['1','2','3','4','5','6']};\n"
         "function cambiar(tipo, delta) {\n"
         "  var spa = document.getElementById('num-' + tipo);\n"
         "  var n = Math.min(8, Math.max(1, parseInt(spa.textContent, 10) + delta));\n"
@@ -208,18 +247,21 @@ def _js_dados() -> str:
         "  var n = parseInt(document.getElementById('num-' + tipo).textContent, 10);\n"
         "  var caras = CARAS_LISTA[tipo];\n"
         "  var res = document.getElementById('res-' + tipo);\n"
-        "  var cont = []; var golpes = 0; var escudos = 0;\n"
+        "  var cont = []; var golpes = 0; var escudos = 0; var suma = 0;\n"
         "  for (var i = 0; i < n; i++) {\n"
         "    var f = caras[Math.floor(Math.random() * 6)];\n"
         "    if (f === 'calavera') { golpes++; }\n"
         "    if (f === 'escudo-blanco') { escudos++; }\n"
+        "    var v = parseInt(f, 10);\n"
+        "    if (!isNaN(v)) { suma += v; }\n"
         "    cont.push('<span class=\"dado dado-' + tipo + '\">' + CARAS[tipo][f] + '</span>');\n"
         "  }\n"
         "  res.innerHTML = cont.join('');\n"
         "  document.getElementById('res-' + tipo).closest('.grupo').classList.remove('aviso');\n"
-        "  var total = tipo === 'ataque'\n"
-        "    ? (golpes + ' golpe' + (golpes === 1 ? '' : 's'))\n"
-        "    : (escudos + ' escudo' + (escudos === 1 ? '' : 's'));\n"
+        "  var total;\n"
+        "  if (tipo === 'ataque') { total = golpes + ' golpe' + (golpes === 1 ? '' : 's'); }\n"
+        "  else if (tipo === 'defensa') { total = escudos + ' escudo' + (escudos === 1 ? '' : 's'); }\n"
+        "  else { total = suma + ' casilla' + (suma === 1 ? '' : 's'); }\n"
         "  var tt = document.getElementById('total-' + tipo);\n"
         "  tt.textContent = total;\n"
         "  tt.className = 'total';\n"
@@ -234,7 +276,7 @@ def _js_dados() -> str:
         "  if (e.key === 'Escape' && !document.getElementById('modal-dados').hidden) { cerrarDados(); }\n"
         "});\n"
         "window.cambiar = cambiar; window.lanzar = lanzar; window.abrirDados = abrirDados; window.cerrarDados = cerrarDados;\n"
-        "lanzar('ataque'); lanzar('defensa');\n"
+        "lanzar('ataque'); lanzar('defensa'); lanzar('movimiento');\n"
     )
 
 
@@ -630,37 +672,42 @@ def _render(mision: dict, t: dict) -> str:
   .leyenda-item {{ display:inline-flex; align-items:center; gap:6px; font-size:.85rem; color:#3c2f1f; }}
   .chip {{ width:18px; height:18px; border-radius:4px; border:1px solid rgba(0,0,0,.25); display:inline-block; flex:none; }}
   .leyendaimg {{ height:30px; width:auto; object-fit:contain; }}
-  .lanzador-dados {{ background:linear-gradient(135deg,#3a2620,#5d4037); color:#f4e9d2;
-    border:1px solid #2e1f19; border-radius:12px; padding:8px 10px;
-    box-shadow:0 2px 8px rgba(0,0,0,.25); }}
-  .lanzador-dados h4 {{ margin:0 0 6px; font-size:.72rem; color:#e8d9b8;
+  .lanzador-dados {{ color:var(--tinta); }}
+  .lanzador-dados h4 {{ margin:0 0 10px; font-size:.8rem; color:var(--bronce);
+    text-transform:uppercase; letter-spacing:.6px; }}
+  .banco-dados {{ display:flex; flex-direction:column; gap:8px; }}
+  .grupo {{ display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+    background:#f6efe0; border:1px solid #e2cfae; border-radius:10px; padding:8px 10px; }}
+  .etiqueta {{ flex:none; width:88px; font-size:.7rem; font-weight:bold;
     text-transform:uppercase; letter-spacing:.5px; }}
-  .banco-dados {{ display:flex; gap:8px; flex-wrap:wrap; }}
-  .grupo {{ flex:1; min-width:170px; background:rgba(0,0,0,.18); border-radius:8px; padding:6px 8px; }}
-  .control {{ display:flex; align-items:center; gap:5px; }}
-  .etiqueta {{ font-size:.68rem; text-transform:uppercase; letter-spacing:.3px; margin-right:2px; }}
-  .etq-ataque {{ color:#ff9d87; font-weight:bold; }}
-  .etq-defensa {{ color:#cfb893; font-weight:bold; }}
-  .control button {{ width:22px; height:22px; border-radius:6px; border:1px solid rgba(255,255,255,.35);
-    background:rgba(255,255,255,.12); color:#f4e9d2; font-size:.85rem; line-height:1; cursor:pointer; }}
-  .control button:hover {{ background:rgba(255,255,255,.25); }}
-  .control .lanzar {{ width:auto; padding:0 10px; font-size:.72rem; text-transform:uppercase;
-    letter-spacing:.4px; background:var(--bronce); border-color:var(--bronce); color:#fff; font-weight:bold; }}
-  .cantidad {{ min-width:20px; text-align:center; font-size:.95rem; font-weight:bold; }}
-  .resultado {{ min-height:42px; display:flex; flex-wrap:wrap; align-items:center; }}
-  .dado {{ display:inline-flex; width:36px; height:36px; margin:0 3px 3px 0; border-radius:8px;
+  .etq-ataque {{ color:#a92f22; }}
+  .etq-defensa {{ color:#7a5c2e; }}
+  .etq-movimiento {{ color:#2e6b57; }}
+  .resultado {{ flex:1 1 200px; min-height:36px; display:flex; flex-wrap:wrap;
+    gap:4px; align-items:center; }}
+  .control {{ flex:none; display:flex; align-items:center; gap:5px; }}
+  .control button {{ width:24px; height:24px; border-radius:6px; border:1px solid var(--borde);
+    background:var(--claro); color:var(--tinta); font-size:.9rem; line-height:1; cursor:pointer; }}
+  .control button:hover {{ background:var(--borde); }}
+  .control .lanzar {{ width:auto; padding:0 12px; font-size:.7rem; text-transform:uppercase;
+    letter-spacing:.5px; background:var(--bronce); border-color:var(--bronce); color:#fff; font-weight:bold; }}
+  .cantidad {{ min-width:22px; text-align:center; font-size:1rem; font-weight:bold; color:var(--tinta); }}
+  .total {{ flex:none; min-width:112px; text-align:right; font-size:.8rem; font-weight:bold; color:#3c2f1f; }}
+  .dado {{ display:inline-flex; width:36px; height:36px; border-radius:8px;
     align-items:center; justify-content:center; }}
   .dado svg {{ width:24px; height:24px; }}
   .dado-ataque {{ background:linear-gradient(135deg,#d64541,#96281b); border:1px solid #7d1f14;
     box-shadow:inset 0 -3px 0 rgba(0,0,0,.28); }}
   .dado-defensa {{ background:linear-gradient(135deg,#fdfcf7,#e6dcc2); border:1px solid #b7a583;
     box-shadow:inset 0 -3px 0 rgba(0,0,0,.12); }}
-  .total {{ font-size:.78rem; font-weight:bold; color:#f4e9d2; }}
-  .total.aviso {{ color:#ffd27f; font-style:italic; }}
+  .dado-movimiento {{ background:transparent; border:none; box-shadow:none; }}
+  .total {{ font-size:.8rem; font-weight:bold; color:#3c2f1f; }}
+  .total.aviso {{ color:#a06a00; font-style:italic; }}
   .grupo.aviso {{ outline:2px solid #e0a020; outline-offset:-2px; }}
   .dado.pendiente {{ opacity:.6; }}
   .dado-ataque.pendiente {{ color:#fdf6e3; }}
   .dado-defensa.pendiente {{ color:#3a3024; }}
+  .dado-movimiento.pendiente {{ color:#96281b; }}
   .dado.pendiente::after {{ content:'?'; font-family:Georgia,serif; font-size:17px; font-weight:bold; }}
   .modal-dados {{ position:fixed; inset:0; z-index:100; display:flex;
     align-items:center; justify-content:center; }}
@@ -778,7 +825,7 @@ def _render(mision: dict, t: dict) -> str:
     <div class="modal-caja" role="dialog" aria-modal="true" aria-label="Lanzador de dados">
       <button type="button" class="modal-cerrar" onclick="cerrarDados()" aria-label="Cerrar">&times;</button>
       {_lanzador_dados()}
-      <p class="modal-pie">Escudo negro: sin efecto. Calavera = golpe en ataque; escudo blanco = bloqueo en defensa.</p>
+      <p class="modal-pie">Escudo negro: sin efecto. Calavera = golpe en ataque; escudo blanco = bloqueo en defensa. Movimiento: tira tantos dados como el valor Mov de la carta (2) y avanza el total en casillas; sin amenazas puedes usar 4 por dado en vez de tirar.</p>
     </div>
   </div>
   <script>
