@@ -1198,7 +1198,9 @@
    ]
   },
   "pendiente_de_validar": [
-   "detecciones"
+   "numeros_portales",
+   "puertas_entrada_salida",
+   "tesoros_muebles"
   ],
   "transformacion_px_a_casilla": {
    "col_esq": "0.0189091*x -3.1956364",
@@ -1209,197 +1211,368 @@
     {
      "V": 1,
      "col": 1,
-     "fila": 1
+     "fila": 1,
+     "es_monstruo": false,
+     "tipo": null,
+     "score_verde": 0.002
     },
     {
      "V": 2,
      "col": 12,
-     "fila": 1
+     "fila": 1,
+     "es_monstruo": false,
+     "tipo": null,
+     "score_verde": 0.06
     },
     {
      "V": 3,
      "col": 3,
-     "fila": 1
+     "fila": 1,
+     "es_monstruo": true,
+     "tipo": "goblin",
+     "score_verde": 0.439,
+     "conf_ncc": 0.773,
+     "confirmado_usuario": false
     },
     {
      "V": 4,
      "col": 5,
-     "fila": 1
+     "fila": 1,
+     "es_monstruo": true,
+     "tipo": "goblin",
+     "score_verde": 0.434,
+     "conf_ncc": 0.64,
+     "confirmado_usuario": false
     },
     {
      "V": 5,
      "col": 14,
-     "fila": 1
+     "fila": 1,
+     "es_monstruo": true,
+     "tipo": "goblin",
+     "score_verde": 0.484,
+     "conf_ncc": 0.707,
+     "confirmado_usuario": false
     },
     {
      "V": 6,
      "col": 1,
-     "fila": 2
+     "fila": 2,
+     "es_monstruo": false,
+     "tipo": null,
+     "score_verde": 0.011
     },
     {
      "V": 7,
      "col": 16,
-     "fila": 2
+     "fila": 2,
+     "es_monstruo": true,
+     "tipo": "esqueleto",
+     "score_verde": 0.411,
+     "conf_ncc": 0.594,
+     "confirmado_usuario": true
     },
     {
      "V": 8,
      "col": 17,
-     "fila": 2
+     "fila": 2,
+     "es_monstruo": true,
+     "tipo": "zombie",
+     "score_verde": 0.429,
+     "conf_ncc": 0.491,
+     "confirmado_usuario": true
     },
     {
      "V": 9,
      "col": 19,
-     "fila": 2
+     "fila": 2,
+     "es_monstruo": true,
+     "tipo": "zombie",
+     "score_verde": 0.404,
+     "conf_ncc": 0.461,
+     "confirmado_usuario": true
     },
     {
      "V": 10,
      "col": 5,
-     "fila": 3
+     "fila": 3,
+     "es_monstruo": true,
+     "tipo": "goblin",
+     "score_verde": 0.474,
+     "conf_ncc": 0.695,
+     "confirmado_usuario": false
     },
     {
      "V": 11,
      "col": 10,
-     "fila": 4
+     "fila": 4,
+     "es_monstruo": true,
+     "tipo": "abominacion",
+     "score_verde": 0.54,
+     "conf_ncc": 0.468,
+     "confirmado_usuario": false
     },
     {
      "V": 12,
      "col": 1,
-     "fila": 4
+     "fila": 4,
+     "es_monstruo": true,
+     "tipo": "orco",
+     "score_verde": 0.469,
+     "conf_ncc": 0.762,
+     "confirmado_usuario": false
     },
     {
      "V": 13,
      "col": 4,
-     "fila": 4
+     "fila": 4,
+     "es_monstruo": false,
+     "tipo": null,
+     "score_verde": 0.032
     },
     {
      "V": 14,
      "col": 2,
-     "fila": 4
+     "fila": 4,
+     "es_monstruo": false,
+     "tipo": null,
+     "score_verde": 0.012
     },
     {
      "V": 15,
      "col": 19,
-     "fila": 4
+     "fila": 4,
+     "es_monstruo": true,
+     "tipo": "esqueleto",
+     "score_verde": 0.418,
+     "conf_ncc": 0.647,
+     "confirmado_usuario": true
     },
     {
      "V": 16,
      "col": 2,
-     "fila": 8
+     "fila": 8,
+     "es_monstruo": false,
+     "tipo": null,
+     "score_verde": 0.034
     },
     {
      "V": 17,
      "col": 10,
-     "fila": 9
+     "fila": 9,
+     "es_monstruo": false,
+     "tipo": null,
+     "score_verde": 0.017
     },
     {
      "V": 18,
      "col": 1,
-     "fila": 9
+     "fila": 9,
+     "es_monstruo": false,
+     "tipo": null,
+     "score_verde": 0.01
     },
     {
      "V": 19,
      "col": 2,
-     "fila": 10
+     "fila": 10,
+     "es_monstruo": true,
+     "tipo": "Gárgola",
+     "score_verde": 0.515,
+     "conf_ncc": 0.58,
+     "confirmado_usuario": true
     },
     {
      "V": 20,
      "col": 10,
-     "fila": 10
+     "fila": 10,
+     "es_monstruo": false,
+     "tipo": null,
+     "score_verde": 0.002
     },
     {
      "V": 21,
      "col": 6,
-     "fila": 11
+     "fila": 11,
+     "es_monstruo": false,
+     "tipo": null,
+     "score_verde": 0.008
     },
     {
      "V": 22,
      "col": 10,
-     "fila": 11
+     "fila": 11,
+     "es_monstruo": true,
+     "tipo": "orco",
+     "score_verde": 0.39,
+     "conf_ncc": 0.785,
+     "confirmado_usuario": false
     },
     {
      "V": 23,
      "col": 1,
-     "fila": 12
+     "fila": 12,
+     "es_monstruo": false,
+     "tipo": null,
+     "score_verde": 0.011
     },
     {
      "V": 24,
      "col": 7,
-     "fila": 12
+     "fila": 12,
+     "es_monstruo": true,
+     "tipo": "momía",
+     "score_verde": 0.403,
+     "conf_ncc": 0.59,
+     "confirmado_usuario": true
     },
     {
      "V": 25,
      "col": 9,
-     "fila": 12
+     "fila": 12,
+     "es_monstruo": true,
+     "tipo": "momía",
+     "score_verde": 0.42,
+     "conf_ncc": 0.506,
+     "confirmado_usuario": true
     },
     {
      "V": 26,
      "col": 12,
-     "fila": 12
+     "fila": 12,
+     "es_monstruo": true,
+     "tipo": "goblin",
+     "score_verde": 0.461,
+     "conf_ncc": 0.793,
+     "confirmado_usuario": false
     },
     {
      "V": 27,
      "col": 10,
-     "fila": 13
+     "fila": 13,
+     "es_monstruo": true,
+     "tipo": "orco",
+     "score_verde": 0.396,
+     "conf_ncc": 0.803,
+     "confirmado_usuario": false
     },
     {
      "V": 28,
      "col": 6,
-     "fila": 14
+     "fila": 14,
+     "es_monstruo": true,
+     "tipo": "orco",
+     "score_verde": 0.377,
+     "conf_ncc": 0.786,
+     "confirmado_usuario": false
     },
     {
      "V": 29,
      "col": 13,
-     "fila": 16
+     "fila": 16,
+     "es_monstruo": true,
+     "tipo": "final",
+     "score_verde": 0.517,
+     "conf_ncc": 0.268,
+     "confirmado_usuario": true
     },
     {
      "V": 30,
      "col": 2,
-     "fila": 16
+     "fila": 16,
+     "es_monstruo": false,
+     "tipo": null,
+     "score_verde": 0.02
     },
     {
      "V": 31,
      "col": 1,
-     "fila": 16
+     "fila": 16,
+     "es_monstruo": true,
+     "tipo": "goblin",
+     "score_verde": 0.487,
+     "conf_ncc": 0.919,
+     "confirmado_usuario": false
     },
     {
      "V": 32,
      "col": 16,
-     "fila": 16
+     "fila": 16,
+     "es_monstruo": true,
+     "tipo": "orco",
+     "score_verde": 0.371,
+     "conf_ncc": 0.712,
+     "confirmado_usuario": false
     },
     {
      "V": 33,
      "col": 15,
-     "fila": 16
+     "fila": 16,
+     "es_monstruo": true,
+     "tipo": "goblin",
+     "score_verde": 0.447,
+     "conf_ncc": 0.734,
+     "confirmado_usuario": false
     },
     {
      "V": 34,
      "col": 19,
-     "fila": 16
+     "fila": 16,
+     "es_monstruo": true,
+     "tipo": "goblin",
+     "score_verde": 0.417,
+     "conf_ncc": 0.704,
+     "confirmado_usuario": false
     },
     {
      "V": 35,
      "col": 5,
-     "fila": 17
+     "fila": 17,
+     "es_monstruo": true,
+     "tipo": "goblin",
+     "score_verde": 0.454,
+     "conf_ncc": 0.815,
+     "confirmado_usuario": false
     },
     {
      "V": 36,
      "col": 12,
-     "fila": 18
+     "fila": 18,
+     "es_monstruo": true,
+     "tipo": "abominacion",
+     "score_verde": 0.501,
+     "conf_ncc": 0.599,
+     "confirmado_usuario": false
     },
     {
      "V": 37,
      "col": 17,
-     "fila": 19
+     "fila": 19,
+     "es_monstruo": true,
+     "tipo": "goblin",
+     "score_verde": 0.45,
+     "conf_ncc": 0.746,
+     "confirmado_usuario": false
     },
     {
      "V": 38,
      "col": 2,
-     "fila": 19
+     "fila": 19,
+     "es_monstruo": true,
+     "tipo": "goblin",
+     "score_verde": 0.441,
+     "conf_ncc": 0.824,
+     "confirmado_usuario": false
     },
     {
      "V": 39,
      "col": 10,
-     "fila": 19
+     "fila": 19,
+     "es_monstruo": true,
+     "tipo": "orco",
+     "score_verde": 0.45,
+     "conf_ncc": 0.374,
+     "confirmado_usuario": false
     }
    ],
    "rojos_portales": [
@@ -1453,7 +1626,138 @@
      "col": 12,
      "fila": 16
     }
-   ]
+   ],
+   "clasificacion": "automatica (firma verde M1 + NCC plantillas M1)"
+  },
+  "ground_truth": {
+   "monstruos": {
+    "goblin": [
+     [
+      3,
+      1
+     ],
+     [
+      5,
+      1
+     ],
+     [
+      14,
+      1
+     ],
+     [
+      5,
+      3
+     ],
+     [
+      12,
+      12
+     ],
+     [
+      1,
+      16
+     ],
+     [
+      15,
+      16
+     ],
+     [
+      19,
+      16
+     ],
+     [
+      5,
+      17
+     ],
+     [
+      17,
+      19
+     ],
+     [
+      2,
+      19
+     ]
+    ],
+    "esqueleto": [
+     [
+      16,
+      2
+     ],
+     [
+      19,
+      4
+     ]
+    ],
+    "zombie": [
+     [
+      17,
+      2
+     ],
+     [
+      19,
+      2
+     ]
+    ],
+    "abominacion": [
+     [
+      10,
+      4
+     ],
+     [
+      12,
+      18
+     ]
+    ],
+    "orco": [
+     [
+      1,
+      4
+     ],
+     [
+      10,
+      11
+     ],
+     [
+      10,
+      13
+     ],
+     [
+      6,
+      14
+     ],
+     [
+      16,
+      16
+     ],
+     [
+      10,
+      19
+     ]
+    ],
+    "Gárgola": [
+     [
+      2,
+      10
+     ]
+    ],
+    "momía": [
+     [
+      7,
+      12
+     ],
+     [
+      9,
+      12
+     ]
+    ],
+    "final": [
+     [
+      13,
+      16
+     ]
+    ],
+    "nota": "V29 = Hechicero del Terror, nombre QWINADRAK (jefe de la misión). Tipo confirmado por usuario.",
+    "estado": "validado"
+   }
   }
  }
 }
