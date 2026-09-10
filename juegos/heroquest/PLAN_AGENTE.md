@@ -393,3 +393,24 @@ Agente:
 - [ ] Revisar el icono "F" / marcadores de exploradores caídos del mapa (señalado en sesiones previas).
 - [ ] Generar los 3 iconos de héroes que faltan (Enana, Elfo, Elfa) en `sources/arte_iconos/`.
 - [ ] Generar plantillas/arte para los 21 hechizos nuevos, tesoros y artefactos (hoy el render falla con `ValueError: ... no declara plantillas.cara.plantilla_padre`).
+
+### 6.2 Generador de misiones "alteradas" (petición del usuario, pendiente)
+
+> **Petición**: a partir de una misión existente, poder generar misiones "alteradas":
+> mismos elementos (monstruos, tesoros, puertas, narrativa, objetivo) pero con
+> **disposición distinta** sobre el tablero (re-permutación espacial).
+
+**Es viable**: las misiones son datos puros (`misiones.json` con `salas[]/monstruos[]/tesoros[]` con coordenadas `{x,y}`) montados sobre un tablero (`tableros.json` con salas y rects). El trabajo de validación ya existe (`tablero.py`: `punto_valido`, `sala_pertenece`, `validar`) y los generadores de mapa/ficha (`mapa.py`, `mision_html.py`) renderizan cualquier misión.
+
+**Diseño propuesto:**
+- Nuevo script `scripts/generar_variantes.py` (o herramienta): lee una misión + su tablero y re-montánea el contenido con semilla determinista (`--semilla N`, `--variantes K`, `--tablero`).
+- **Qué se reubica** (conservando la identidad de la misión):
+  - Monstruos y tesoros → asignados a otras salas, en coordenadas válidas (capacidad por sala ≥ nº de elementos).
+  - Puertas → a otras posiciones de pasillo válidas.
+  - Entrada de héroes → otras casillas de entrada válidas del tablero.
+- **Qué se conserva**: narrativa (introducción/objetivo/recompensa), composición de monstruos por sala (misma dificultad), número de tesoros.
+- **Reglas de despliegue**: mantener la "curva" de dificultad de la misión original (sala con jefe no pierde su jefe; salas pequeñas no sobrecargadas).
+- **Salida**: nuevas entradas en `misiones.json` con `variante_de: "<misión original>"` (o fichero aparte) + validación con `tablero.py validar` + mapas/fichas generables al instante.
+- Reproducibilidad: misma semilla → misma variante (útil para jugar la misma campaña en grupos distintos).
+
+**Listo para implementar cuando el usuario lo pida.**

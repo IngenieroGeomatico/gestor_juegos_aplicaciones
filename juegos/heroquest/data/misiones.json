@@ -1012,5 +1012,651 @@
         "texto": "Del cuello inerte de Vael cuelga la Máscara del Cuervo, intacta salvo por una mancha de sangre. Junto a ella, una nota arrugada: “la Reina Kessandria busca el Huevo Nocturno; informad a Tuel-Vor antes de que sea tarde”. Con la reliquia en vuestro poder, la Misión concluye."
       }
     ]
+  },
+  {
+    "nombre": "La Fortaleza Fronteriza de In-Gulden (Variante #42)",
+    "tablero": "original",
+    "nivel": 1,
+    "introduccion": "Sir Ragnar ha enviado a sus exploradores a la asolada fortaleza fronteriza de In-Gulden y no ha vuelto a saber de ellos. Los Héroes deben viajar hasta allí, seguir el rastro de los caídos y descubrir qué ha sido de la guarnición antes de que sea demasiado tarde.",
+    "objetivo": "Penetrar en la fortaleza de In-Gulden, inspeccionar a los exploradores caídos, abrirse paso hasta el salón del trono, acabar con el Capitán del Terror Sha-Del y recuperar su nota.",
+    "recompensa": "300 Monedas de Oro y la nota que revela que la Reina Kessandria avanza hacia Tuel-Vor en busca de Qwindrak.",
+    "notas": "Sir Ragnar entrega al grupo dos Pociones de Curación al comenzar. Los exploradores caídos (fichas de Calavera) se inspeccionan con una acción y un Dado Rojo (15 Monedas de Oro o menos); tras inspeccionarlo, retira la ficha. Al abrir una de las Puertas del cuerno (letra C) suena el cuerno, se abren de golpe todas las puertas marcadas y los Goblins y Orcos invaden los pasillos. La salida es la escalera en (20,15)-(21,17), que el derrumbe (letra A) puede bloquear.",
+    "entrada_heroes": [
+      {
+        "x": 13,
+        "y": 1
+      },
+      {
+        "x": 14,
+        "y": 1
+      },
+      {
+        "x": 13,
+        "y": 2
+      },
+      {
+        "x": 14,
+        "y": 2
+      }
+    ],
+    "salida_heroes": {
+      "de": [
+        20,
+        15
+      ],
+      "a": [
+        21,
+        16
+      ]
+    },
+    "puertas": [
+      {
+        "de": [
+          16,
+          13
+        ],
+        "a": [
+          16,
+          14
+        ]
+      },
+      {
+        "de": [
+          7,
+          9
+        ],
+        "a": [
+          7,
+          10
+        ]
+      },
+      {
+        "de": [
+          19,
+          9
+        ],
+        "a": [
+          19,
+          10
+        ]
+      },
+      {
+        "de": [
+          17,
+          6
+        ],
+        "a": [
+          18,
+          6
+        ]
+      },
+      {
+        "de": [
+          16,
+          6
+        ],
+        "a": [
+          16,
+          7
+        ]
+      },
+      {
+        "de": [
+          21,
+          10
+        ],
+        "a": [
+          21,
+          11
+        ],
+        "descripcion": "Puerta del cuerno (letra C): al abrirla suena el cuerno y entran los refuerzos.",
+        "estado": "abierta"
+      },
+      {
+        "de": [
+          2,
+          6
+        ],
+        "a": [
+          2,
+          5
+        ],
+        "descripcion": "Acceso derivado para la variante",
+        "estado": "cerrada"
+      },
+      {
+        "de": [
+          6,
+          10
+        ],
+        "a": [
+          6,
+          11
+        ],
+        "descripcion": "Acceso derivado para la variante",
+        "estado": "cerrada"
+      },
+      {
+        "de": [
+          11,
+          7
+        ],
+        "a": [
+          11,
+          8
+        ],
+        "descripcion": "Acceso derivado para la variante",
+        "estado": "cerrada"
+      },
+      {
+        "de": [
+          22,
+          7
+        ],
+        "a": [
+          22,
+          6
+        ],
+        "descripcion": "Acceso derivado para la variante",
+        "estado": "cerrada"
+      }
+    ],
+    "puertas_secretas": [
+      {
+        "de": [
+          18,
+          16
+        ],
+        "a": [
+          19,
+          16
+        ],
+        "descripcion": "Estancia oculta tras el trono"
+      }
+    ],
+    "salas": [
+      {
+        "numero": 10,
+        "nombre": "La Cripta de la Guarnición",
+        "descripcion": "La cripta de la guarnición. En el centro, una gran tumba de piedra espera a que alguien se atreva a abrirla.",
+        "monstruos": [
+          {
+            "nombre": "Zombi",
+            "x": 22,
+            "y": 9
+          },
+          {
+            "nombre": "Zombi",
+            "x": 25,
+            "y": 9
+          },
+          {
+            "nombre": "Zombi",
+            "x": 23,
+            "y": 9
+          }
+        ],
+        "tesoros": [],
+        "trampas": [],
+        "marcadores": [],
+        "muebles": [
+          {
+            "nombre": "Tumba de la guarnición",
+            "tipo": "Tumba",
+            "desde": [
+              23,
+              7
+            ],
+            "hasta": [
+              25,
+              8
+            ],
+            "tesoro": "200 Monedas de Oro y un Bastón del Mago",
+            "arte": {
+              "orientacion": "vertical"
+            }
+          }
+        ],
+        "notas": "Letra B: \"El primer jugador que busque Tesoros encuentra 200 Monedas de Oro y un Bastón del Mago.\" (El tesoro está en la tumba.)"
+      },
+      {
+        "numero": 7,
+        "nombre": "Las Alacenas del Bodeguero",
+        "descripcion": "Las alacenas del bodeguero aún guardan provisiones y, quizá, algo de valor enterrado.",
+        "monstruos": [
+          {
+            "nombre": "Orco",
+            "x": 2,
+            "y": 9
+          },
+          {
+            "nombre": "Orco",
+            "x": 4,
+            "y": 9
+          }
+        ],
+        "tesoros": [],
+        "trampas": [],
+        "marcadores": [],
+        "muebles": [
+          {
+            "nombre": "Alacena del bodeguero",
+            "tipo": "Alacena",
+            "desde": [
+              2,
+              8
+            ],
+            "hasta": [
+              4,
+              8
+            ],
+            "arte": {
+              "orientacion": "horizontal"
+            }
+          }
+        ]
+      },
+      {
+        "numero": 8,
+        "nombre": "La Despensa",
+        "descripcion": "Despensa medio saqueada. Los toneles yacen vacíos en el suelo.",
+        "monstruos": [
+          {
+            "nombre": "Trasgo",
+            "x": 6,
+            "y": 6
+          },
+          {
+            "nombre": "Orco",
+            "x": 6,
+            "y": 7
+          }
+        ],
+        "tesoros": [],
+        "trampas": [],
+        "marcadores": []
+      },
+      {
+        "numero": 13,
+        "nombre": "El Almacén del Sótano",
+        "descripcion": "El almacén del sótano, convertido en nido de las abominaciones que merodean por los pasillos.",
+        "monstruos": [
+          {
+            "nombre": "Abominación",
+            "x": 6,
+            "y": 12
+          },
+          {
+            "nombre": "Abominación",
+            "x": 7,
+            "y": 13
+          }
+        ],
+        "tesoros": [],
+        "trampas": [
+          {
+            "nombre": "Trampa de pozo",
+            "x": 6,
+            "y": 13,
+            "descripcion": "Boca de pozo oculta por una losa desencajada. Quien la pise cae al foso y pierde el turno."
+          }
+        ],
+        "marcadores": [
+          {
+            "nombre": "Explorador caído (ficha de Calavera)",
+            "x": 7,
+            "y": 12,
+            "descripcion": "Un Héroe adyacente puede usar una acción para inspeccionar a un explorador caído. Tira un Dado Rojo: 1-2 no encuentra nada; 3-4 encuentra 15 Monedas de Oro; 5-6 encuentra 40 Monedas de Oro. Tras inspeccionarlo, retira la ficha del tablero."
+          }
+        ]
+      },
+      {
+        "numero": 21,
+        "nombre": "La Armería",
+        "descripcion": "Armería de la fortaleza. Un alacena de madera descansa contra el muro y una boca de pozo se abre junto a la columna.",
+        "monstruos": [
+          {
+            "nombre": "Trasgo",
+            "x": 19,
+            "y": 15
+          },
+          {
+            "nombre": "Trasgo",
+            "x": 20,
+            "y": 17
+          }
+        ],
+        "tesoros": [],
+        "trampas": [
+          {
+            "nombre": "Trampa de pozo",
+            "x": 21,
+            "y": 17,
+            "descripcion": "Boca de pozo oculta por una losa desencajada. Quien la pise cae al foso y pierde el turno."
+          }
+        ],
+        "marcadores": [
+          {
+            "nombre": "Explorador caído (ficha de Calavera)",
+            "x": 19,
+            "y": 17,
+            "descripcion": "Un Héroe adyacente puede usar una acción para inspeccionar a un explorador caído. Tira un Dado Rojo: 1-2 no encuentra nada; 3-4 encuentra 15 Monedas de Oro; 5-6 encuentra 40 Monedas de Oro. Tras inspeccionarlo, retira la ficha del tablero."
+          }
+        ],
+        "muebles": [
+          {
+            "nombre": "Alacena de la armería",
+            "tipo": "Alacena",
+            "desde": [
+              19,
+              18
+            ],
+            "hasta": [
+              21,
+              18
+            ],
+            "arte": {
+              "orientacion": "horizontal",
+              "invertir": true
+            }
+          }
+        ],
+        "notas": "Alacena (regla de casa): el primer Héroe que saque una carta de Tesoro en una habitación con alacena roba dos cartas de Tesoro en su lugar."
+      },
+      {
+        "numero": 15,
+        "nombre": "La Antecámara",
+        "descripcion": "La primera estancia traspasada la puerta: unas cuantas picas apoyadas contra el muro y mesas de castigo donde los soldados se jugaban sus monedas.",
+        "monstruos": [
+          {
+            "nombre": "Trasgo",
+            "x": 19,
+            "y": 13
+          },
+          {
+            "nombre": "Orco",
+            "x": 19,
+            "y": 14
+          }
+        ],
+        "tesoros": [],
+        "trampas": [
+          {
+            "nombre": "El derrumbe",
+            "x": 18,
+            "y": 13,
+            "descripcion": "Se escucha un estruendo ensordecedor cuando el techo se derrumba: que nadie se atreva a cruzar en pie."
+          }
+        ],
+        "marcadores": [
+          {
+            "nombre": "Explorador caído (ficha de Calavera)",
+            "x": 21,
+            "y": 14,
+            "descripcion": "Un Héroe adyacente puede usar una acción para inspeccionar a un explorador caído. Tira un Dado Rojo: 1-2 no encuentra nada; 3-4 encuentra 15 Monedas de Oro; 5-6 encuentra 40 Monedas de Oro. Tras inspeccionarlo, retira la ficha del tablero."
+          }
+        ],
+        "muebles": [
+          {
+            "nombre": "Mesa de castigo",
+            "tipo": "Mesa",
+            "desde": [
+              18,
+              11
+            ],
+            "hasta": [
+              20,
+              12
+            ],
+            "arte": {
+              "orientacion": "horizontal"
+            }
+          }
+        ],
+        "notas": "El primer jugador que busque Tesoros en esta sala encuentra el tesoro del Reto; el resto roban del mazo de Tesoros."
+      },
+      {
+        "numero": 11,
+        "nombre": "Sala 21",
+        "descripcion": "",
+        "monstruos": [],
+        "tesoros": [],
+        "trampas": [],
+        "marcadores": []
+      },
+      {
+        "numero": 4,
+        "nombre": "El Salón del Trono de Sha-Del",
+        "descripcion": "El salón del trono. En su trono de piedra negra se yergue el Capitán del Terror Sha-Del, con la marca pálida de la Reina Bruja en su armadura.",
+        "monstruos": [
+          {
+            "nombre": "Orco",
+            "x": 17,
+            "y": 2
+          },
+          {
+            "nombre": "Orco",
+            "x": 17,
+            "y": 3
+          },
+          {
+            "nombre": "Orco",
+            "x": 15,
+            "y": 3
+          },
+          {
+            "nombre": "Guerrero del Terror",
+            "x": 16,
+            "y": 3,
+            "tesoro": "300 Monedas de Oro y una nota andrajosa con manchas de sangre que dice: \"Los guerreros de la Reina Kessandria avanzan hacia Tuel-Vor en busca de Qwindrak. Tienen espías en todas partes. Estamos en grave peligro por nuestro descubrimiento. No sé cuánto tiempo nos queda.\""
+          }
+        ],
+        "tesoros": [],
+        "trampas": [],
+        "marcadores": [
+          {
+            "nombre": "Explorador caído (ficha de Calavera)",
+            "x": 15,
+            "y": 6,
+            "descripcion": "Un Héroe adyacente puede usar una acción para inspeccionar a un explorador caído. Tira un Dado Rojo: 1-2 no encuentra nada; 3-4 encuentra 15 Monedas de Oro; 5-6 encuentra 40 Monedas de Oro. Tras inspeccionarlo, retira la ficha del tablero."
+          }
+        ],
+        "muebles": [
+          {
+            "nombre": "Cofre de Sha-Del",
+            "tipo": "Cofre",
+            "desde": [
+              16,
+              2
+            ],
+            "hasta": [
+              16,
+              2
+            ],
+            "arte": {
+              "orientacion": "horizontal",
+              "invertir": true
+            }
+          },
+          {
+            "nombre": "Banco de alquimista",
+            "tipo": "Banco de Alquimista",
+            "desde": [
+              15,
+              4
+            ],
+            "hasta": [
+              17,
+              5
+            ],
+            "arte": {
+              "orientacion": "horizontal"
+            }
+          }
+        ],
+        "notas": "Letra D: \"El Capitán del Terror Sha-Del lleva la marca de la Reina Bruja. El primer jugador que busque Tesoros encuentra 300 Monedas de Oro y una nota andrajosa con manchas de sangre.\" (El tesoro está en el cuerpo de Sha-Del.) Con esta información concluye la Misión."
+      },
+      {
+        "numero": 19,
+        "nombre": "La Sala de Armas",
+        "descripcion": "La sala de armas principal, con su gran chimenea apagada. Los rescoldos no se han encendido en semanas, pero algo ronda entre las sombras.",
+        "monstruos": [
+          {
+            "nombre": "Trasgo",
+            "x": 17,
+            "y": 17
+          },
+          {
+            "nombre": "Orco",
+            "x": 16,
+            "y": 18
+          }
+        ],
+        "tesoros": [],
+        "trampas": [
+          {
+            "nombre": "El derrumbe",
+            "x": 18,
+            "y": 17,
+            "descripcion": "Se escucha un estruendo ensordecedor cuando el techo se derrumba: que nadie se atreva a cruzar en pie."
+          }
+        ],
+        "marcadores": [
+          {
+            "nombre": "Explorador caído (ficha de Calavera)",
+            "x": 18,
+            "y": 15,
+            "descripcion": "Un Héroe adyacente puede usar una acción para inspeccionar a un explorador caído. Tira un Dado Rojo: 1-2 no encuentra nada; 3-4 encuentra 15 Monedas de Oro; 5-6 encuentra 40 Monedas de Oro. Tras inspeccionarlo, retira la ficha del tablero."
+          }
+        ],
+        "muebles": [
+          {
+            "nombre": "Gran chimenea",
+            "tipo": "Chimenea",
+            "desde": [
+              15,
+              15
+            ],
+            "hasta": [
+              15,
+              17
+            ],
+            "arte": {
+              "orientacion": "horizontal"
+            }
+          }
+        ],
+        "notas": "Chimenea (regla oficial): cuando un Héroe saca una carta de Tesoro en una habitación con chimenea, puede usarla para curarse un Punto Corporal."
+      },
+      {
+        "numero": 9,
+        "nombre": "El Comedor de la Guarnición",
+        "descripcion": "Comedor de los soldados. Restos de un festín interrumpido y una mesa larga bajo una lanza que cuelga del techo.",
+        "monstruos": [
+          {
+            "nombre": "Trasgo",
+            "x": 18,
+            "y": 7
+          },
+          {
+            "nombre": "Orco",
+            "x": 19,
+            "y": 7
+          }
+        ],
+        "tesoros": [],
+        "trampas": [
+          {
+            "nombre": "Trampa de lanza",
+            "x": 19,
+            "y": 8,
+            "descripcion": "El suelo cede al pisar la baldosa suelta y una lanza brota del muro. Tira un dado de defensa: pierdes un punto de cuerpo por cada escudo que no salga."
+          }
+        ],
+        "marcadores": [],
+        "muebles": [
+          {
+            "nombre": "Mesa de banquetes",
+            "tipo": "Mesa",
+            "desde": [
+              20,
+              7
+            ],
+            "hasta": [
+              21,
+              9
+            ],
+            "arte": {
+              "orientacion": "horizontal"
+            }
+          }
+        ]
+      }
+    ],
+    "pasillos": {
+      "monstruos": [
+        {
+          "nombre": "Trasgo",
+          "x": 13,
+          "y": 7
+        },
+        {
+          "nombre": "Trasgo",
+          "x": 14,
+          "y": 5
+        }
+      ],
+      "tesoros": [],
+      "trampas": [
+        {
+          "nombre": "Trampa de lanza",
+          "x": 13,
+          "y": 15,
+          "descripcion": "El suelo cede al pisar la baldosa suelta y una lanza brota del muro. Tira un dado de defensa: pierdes un punto de cuerpo por cada escudo que no salga."
+        }
+      ],
+      "marcadores": []
+    },
+    "instrucciones_voz_alta": [
+      {
+        "momento": "Al empezar la misión (mensaje del pergamino)",
+        "texto": "Entráis a la Cámara de Guerra y de inmediato escucháis el sonido de murmullos hoscos y preocupados como de ruidosas protestas. “¡No, no y no!”, estalla una voz que se oye con claridad sobre las demás. “Ese camino solo lleva a la muerte. Debemos posicionar el grueso de nuestras fuerzas aquí” —al girar la esquina lo veis golpear con un largo y calloso dedo índice el mapa que se despliega sobre la mesa— “al menos si lo que realmente buscamos es la victoria”. Mentor esboza una ligera sonrisa. Parece levemente entretenido por el discurso del estratega. “Si me permitís interrumpir”, dice en voz alta, anunciando su presencia. “Este, amigos míos, es Sir Ragnar”. “Mentor”, gruñe Ragnar. No aparta la mirada del mapa mientras asiente con la cabeza hacia el Loretome. “Puedo oler ese viejo libro desde aquí. ¿Me has traído refuerzos?”. Al fin, levanta la mirada y os presta atención. “Bienvenidos, Héroes”. Aplaude con estrépito. “No hay tiempo que perder. Enviamos a nuestros exploradores a la asolada fortaleza fronteriza de In-Gulden y no hemos vuelto a saber de ellos. Necesito que viajéis allí de inmediato y descubráis lo que ha pasado”."
+      },
+      {
+        "momento": "Letra A · El derrumbe (cuando el último Héroe pase por esas casillas)",
+        "texto": "“Se escucha un estruendo ensordecedor cuando el techo de repente se desploma y bloquea la salida”. Coloca una ficha de bloqueo doble en las casillas A y retira la ficha de la escalera de la salida del tablero."
+      },
+      {
+        "momento": "Letra B · Tumba de la guarnición",
+        "texto": "El primer jugador que busque Tesoros encuentra 200 Monedas de Oro y un Bastón del Mago."
+      },
+      {
+        "momento": "Letra C · Puerta del cuerno (al abrir una de estas puertas)",
+        "texto": "“El escalofriante sonido de un cuerno penetra el aire. Sentís la tensión cuando todas las Puertas de las ruinas se abren de golpe y los pasillos se inundan con los gritos de guerra de los Goblins y los Orcos”. Abre todas las Puertas marcadas con la letra C y coloca los Monstruos."
+      },
+      {
+        "momento": "Letra D · Salón del trono (final)",
+        "texto": "El Capitán del Terror Sha-Del lleva la marca de la Reina Bruja. El primer jugador que busque Tesoros encuentra 300 Monedas de Oro y una nota andrajosa con manchas de sangre que dice: “Los guerreros de la Reina Kessandria avanzan hacia Tuel-Vor en busca de Qwindrak. Tienen espías en todas partes. Estamos en grave peligro por nuestro descubrimiento. No sé cuánto tiempo nos queda”. Con esta información concluye la Misión."
+      },
+      {
+        "momento": "Primer explorador inspeccionado",
+        "texto": "“Plegada dentro en un bolsillo, hallas una nota rasgada. Dice: nos traicionó y busca el Huevo Nocturno. Eso es todo lo que puedes descifrar”."
+      }
+    ],
+    "variante_de": "La Fortaleza Fronteriza de In-Gulden",
+    "semilla": 42,
+    "alterada": true,
+    "salas_usadas": [
+      21,
+      19,
+      7,
+      13,
+      8,
+      15,
+      11,
+      10,
+      9,
+      4
+    ]
   }
 ]
