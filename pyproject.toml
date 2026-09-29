@@ -32,3 +32,9 @@ rag = [
     "chromadb>=0.5",
     "sentence-transformers>=3.0",
 ]
+
+[dependency-groups]
+dev = [
+    "playwright>=1.63.0",
+    "python-xlib>=0.33",
+]

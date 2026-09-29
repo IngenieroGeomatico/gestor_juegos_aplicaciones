@@ -1,0 +1,1517 @@
+{
+  "regiones": [
+    {
+      "region": "Kanto",
+      "jefes": [
+        {
+          "gimnasio": "Ciudad Plateada",
+          "tipo": "Roca",
+          "niveles": [
+            12,
+            14
+          ],
+          "nivel_max": 14,
+          "nivel_min": 12,
+          "equipo": [
+            "Geodude",
+            "Onix"
+          ],
+          "nombre": "Brock",
+          "tipo_en": "Rock",
+          "tipos_equipo": [
+            "Ground",
+            "Rock"
+          ],
+          "leader": "Brock"
+        },
+        {
+          "gimnasio": "Ciudad Celeste",
+          "tipo": "Agua",
+          "niveles": [
+            18,
+            20
+          ],
+          "nivel_max": 20,
+          "nivel_min": 18,
+          "equipo": [
+            "Staryu",
+            "Starmie"
+          ],
+          "nombre": "Misty",
+          "tipo_en": "Water",
+          "tipos_equipo": [
+            "Psychic",
+            "Water"
+          ],
+          "leader": "Misty"
+        },
+        {
+          "gimnasio": "Ciudad Azafran",
+          "tipo": "Electrico",
+          "niveles": [
+            20,
+            23,
+            25
+          ],
+          "nivel_max": 25,
+          "nivel_min": 20,
+          "equipo": [
+            "Pikachu",
+            "Voltorb",
+            "Raichu"
+          ],
+          "nombre": "Lt. Surge",
+          "tipo_en": "Electric",
+          "tipos_equipo": [
+            "Electric"
+          ],
+          "leader": "Lt. Surge"
+        },
+        {
+          "gimnasio": "Ciudad Canela",
+          "tipo": "Planta",
+          "niveles": [
+            26,
+            31,
+            32
+          ],
+          "nivel_max": 32,
+          "nivel_min": 26,
+          "equipo": [
+            "Tangela",
+            "Victreebel",
+            "Vileplume"
+          ],
+          "nombre": "Erika",
+          "tipo_en": "Grass",
+          "tipos_equipo": [
+            "Grass",
+            "Poison"
+          ],
+          "leader": "Erika"
+        },
+        {
+          "gimnasio": "Ciudad Fucsia",
+          "tipo": "Veneno",
+          "niveles": [
+            38,
+            38,
+            40,
+            44
+          ],
+          "nivel_max": 44,
+          "nivel_min": 38,
+          "equipo": [
+            "Koffing",
+            "Koffing",
+            "Muk",
+            "Weezing"
+          ],
+          "nombre": "Koga",
+          "tipo_en": "Poison",
+          "tipos_equipo": [
+            "Poison"
+          ],
+          "leader": "Koga"
+        },
+        {
+          "gimnasio": "Ciudad Lavanda",
+          "tipo": "Fantasma",
+          "niveles": [
+            40,
+            41,
+            42,
+            44
+          ],
+          "nivel_max": 44,
+          "nivel_min": 40,
+          "equipo": [
+            "Mr. Mime",
+            "Venomoth",
+            "Kadabra",
+            "Alakazam"
+          ],
+          "nombre": "Sabrina",
+          "tipo_en": "Psychic",
+          "tipos_equipo": [
+            "Bug",
+            "Poison",
+            "Psychic"
+          ],
+          "leader": "Sabrina"
+        },
+        {
+          "gimnasio": "Ciudad Cerulea",
+          "tipo": "Fuego",
+          "niveles": [
+            47,
+            47,
+            48,
+            53
+          ],
+          "nivel_max": 53,
+          "nivel_min": 47,
+          "equipo": [
+            "Ponyta",
+            "Growlithe",
+            "Rapidash",
+            "Arcanine"
+          ],
+          "nombre": "Blaine",
+          "tipo_en": "Fire",
+          "tipos_equipo": [
+            "Fire"
+          ],
+          "leader": "Blaine"
+        },
+        {
+          "gimnasio": "Ciudad Verde",
+          "tipo": "Tierra",
+          "niveles": [
+            55,
+            53,
+            54,
+            56,
+            60
+          ],
+          "nivel_max": 60,
+          "nivel_min": 53,
+          "equipo": [
+            "Dugtrio",
+            "Nidoqueen",
+            "Nidoking",
+            "Rhyhorn",
+            "Rhydon"
+          ],
+          "nombre": "Giovanni",
+          "tipo_en": "Ground",
+          "tipos_equipo": [
+            "Ground",
+            "Poison",
+            "Rock"
+          ],
+          "leader": "Giovanni"
+        }
+      ],
+      "elite_four": [
+        "Lorelei",
+        "Bruno",
+        "Agatha",
+        "Lance"
+      ],
+      "campeon": "Gary",
+      "nota": "Región gen 1; Polytechnic tipica en tipos: jefes frágiles a su vez. El tipo psicocial y el terrestre dominan el late game.",
+      "elite_four_datos": [
+        {
+          "nombre": "Lorelei",
+          "equipo": [
+            "Dewgong",
+            "Cloyster",
+            "Slowbro",
+            "Jynx",
+            "Lapras"
+          ],
+          "niveles": [
+            54,
+            53,
+            54,
+            56,
+            56
+          ],
+          "nivel_max": 56,
+          "tipos_equipo": [
+            "Ice",
+            "Psychic",
+            "Water"
+          ]
+        },
+        {
+          "nombre": "Bruno",
+          "equipo": [
+            "Onix",
+            "Hitmonchan",
+            "Hitmonlee",
+            "Onix",
+            "Machamp"
+          ],
+          "niveles": [
+            53,
+            55,
+            55,
+            54,
+            58
+          ],
+          "nivel_max": 58,
+          "tipos_equipo": [
+            "Fighting",
+            "Ground",
+            "Rock"
+          ]
+        },
+        {
+          "nombre": "Agatha",
+          "equipo": [
+            "Gengar",
+            "Golbat",
+            "Haunter",
+            "Golbat",
+            "Gengar"
+          ],
+          "niveles": [
+            54,
+            54,
+            56,
+            56,
+            58
+          ],
+          "nivel_max": 58,
+          "tipos_equipo": [
+            "Flying",
+            "Ghost",
+            "Poison"
+          ]
+        },
+        {
+          "nombre": "Lance",
+          "equipo": [
+            "Gyarados",
+            "Dragonite",
+            "Dragonair",
+            "Dragonair",
+            "Dragonite"
+          ],
+          "niveles": [
+            56,
+            56,
+            58,
+            60,
+            62
+          ],
+          "nivel_max": 62,
+          "tipos_equipo": [
+            "Dragon",
+            "Flying",
+            "Water"
+          ]
+        }
+      ],
+      "campeon_datos": {
+        "nombre": "Gary",
+        "equipo": [
+          "Pidgeot",
+          "Alakazam",
+          "Rhydon",
+          "Exeggutor",
+          "Charizard"
+        ],
+        "niveles": [
+          61,
+          59,
+          61,
+          61,
+          65
+        ],
+        "nivel_max": 65,
+        "tipos_equipo": [
+          "Fire",
+          "Flying",
+          "Grass",
+          "Ground",
+          "Normal",
+          "Psychic",
+          "Rock"
+        ]
+      }
+    },
+    {
+      "region": "Johto",
+      "jefes": [
+        {
+          "gimnasio": "Pueblo Primavera",
+          "tipo": "Volador",
+          "niveles": [
+            9,
+            10
+          ],
+          "nivel_max": 10,
+          "nivel_min": 9,
+          "equipo": [
+            "Pidgey",
+            "Pidgeotto"
+          ],
+          "nombre": "Falkner",
+          "tipo_en": "Flying",
+          "tipos_equipo": [
+            "Flying",
+            "Normal"
+          ]
+        },
+        {
+          "gimnasio": "Ciudad Trigal",
+          "tipo": "Bicho",
+          "niveles": [
+            21,
+            22,
+            23
+          ],
+          "nivel_max": 23,
+          "nivel_min": 21,
+          "equipo": [
+            "Metapod",
+            "Kakuna",
+            "Scyther"
+          ],
+          "nombre": "Bugsy",
+          "tipo_en": "Bug",
+          "tipos_equipo": [
+            "Bug",
+            "Flying",
+            "Poison"
+          ]
+        },
+        {
+          "gimnasio": "Ciudad Malva",
+          "tipo": "Normal",
+          "niveles": [
+            32,
+            35
+          ],
+          "nivel_max": 35,
+          "nivel_min": 32,
+          "equipo": [
+            "Clefairy",
+            "Miltank"
+          ],
+          "nombre": "Whitney",
+          "tipo_en": "Normal",
+          "tipos_equipo": [
+            "Fairy",
+            "Normal"
+          ]
+        },
+        {
+          "gimnasio": "Ciudad Olivo",
+          "tipo": "Fantasma",
+          "niveles": [
+            41,
+            42,
+            43,
+            45
+          ],
+          "nivel_max": 45,
+          "nivel_min": 41,
+          "equipo": [
+            "Gastly",
+            "Haunter",
+            "Haunter",
+            "Gengar"
+          ],
+          "nombre": "Morty",
+          "tipo_en": "Ghost",
+          "tipos_equipo": [
+            "Ghost",
+            "Poison"
+          ]
+        },
+        {
+          "gimnasio": "Ciudad Trio",
+          "tipo": "Lucha",
+          "niveles": [
+            54,
+            59
+          ],
+          "nivel_max": 59,
+          "nivel_min": 54,
+          "equipo": [
+            "Primeape",
+            "Poliwrath"
+          ],
+          "nombre": "Chuck",
+          "tipo_en": "Fighting",
+          "tipos_equipo": [
+            "Fighting",
+            "Water"
+          ]
+        },
+        {
+          "gimnasio": "Pueblo Pintura",
+          "tipo": "Acero",
+          "niveles": [
+            64,
+            64,
+            69
+          ],
+          "nivel_max": 69,
+          "nivel_min": 64,
+          "equipo": [
+            "Magnemite",
+            "Magnemite",
+            "Steelix"
+          ],
+          "nombre": "Jasmine",
+          "tipo_en": "Steel",
+          "tipos_equipo": [
+            "Electric",
+            "Ground",
+            "Steel"
+          ]
+        },
+        {
+          "gimnasio": "Ciudad Lila",
+          "tipo": "Hielo",
+          "niveles": [
+            74,
+            77,
+            79
+          ],
+          "nivel_max": 79,
+          "nivel_min": 74,
+          "equipo": [
+            "Seel",
+            "Dewgong",
+            "Piloswine"
+          ],
+          "nombre": "Pryce",
+          "tipo_en": "Ice",
+          "tipos_equipo": [
+            "Ground",
+            "Ice",
+            "Water"
+          ]
+        },
+        {
+          "gimnasio": "Ciudad Endrino",
+          "tipo": "Dragon",
+          "niveles": [
+            84,
+            84,
+            84,
+            84
+          ],
+          "nivel_max": 84,
+          "nivel_min": 84,
+          "equipo": [
+            "Gyarados",
+            "Dragonair",
+            "Dragonair",
+            "Kingdra"
+          ],
+          "nombre": "Clair",
+          "tipo_en": "Dragon",
+          "tipos_equipo": [
+            "Dragon",
+            "Flying",
+            "Water"
+          ]
+        }
+      ],
+      "elite_four": [
+        "Will",
+        "Koga",
+        "Karen",
+        "Bruno"
+      ],
+      "campeon": "Lance",
+      "nota": "Como Kanto pero con jefes de la primera generación de la nueva. El hierro y el dragón cierran la ruta."
+    },
+    {
+      "region": "Hoenn",
+      "jefes": [
+        {
+          "gimnasio": "Pueblo Piro",
+          "tipo": "Roca",
+          "niveles": [
+            9,
+            12
+          ],
+          "nivel_max": 12,
+          "nivel_min": 9,
+          "equipo": [
+            "Geodude",
+            "Nosepass"
+          ],
+          "nombre": "Roxanne",
+          "tipo_en": "Rock",
+          "tipos_equipo": [
+            "Ground",
+            "Rock"
+          ]
+        },
+        {
+          "gimnasio": "Ciudad Férrica",
+          "tipo": "Lucha",
+          "niveles": [
+            17,
+            18,
+            20
+          ],
+          "nivel_max": 20,
+          "nivel_min": 17,
+          "equipo": [
+            "Machop",
+            "Meditite",
+            "Makuhita"
+          ],
+          "nombre": "Brawly",
+          "tipo_en": "Fighting",
+          "tipos_equipo": [
+            "Fighting",
+            "Psychic"
+          ]
+        },
+        {
+          "gimnasio": "Ciudad Villa Cavo",
+          "tipo": "Electrico",
+          "niveles": [
+            25,
+            27,
+            28,
+            30
+          ],
+          "nivel_max": 30,
+          "nivel_min": 25,
+          "equipo": [
+            "Voltorb",
+            "Magneton",
+            "Electrike",
+            "Manectric"
+          ],
+          "nombre": "Wattson",
+          "tipo_en": "Electric",
+          "tipos_equipo": [
+            "Electric",
+            "Steel"
+          ]
+        },
+        {
+          "gimnasio": "Pueblo Verdegal",
+          "tipo": "Fuego",
+          "niveles": [
+            35,
+            36,
+            38,
+            40
+          ],
+          "nivel_max": 40,
+          "nivel_min": 35,
+          "equipo": [
+            "Numel",
+            "Slugma",
+            "Camerupt",
+            "Torkoal"
+          ],
+          "nombre": "Flannery",
+          "tipo_en": "Fire",
+          "tipos_equipo": [
+            "Fire",
+            "Ground"
+          ]
+        },
+        {
+          "gimnasio": "Ciudad Arborada",
+          "tipo": "Normal",
+          "niveles": [
+            44,
+            46,
+            47,
+            50
+          ],
+          "nivel_max": 50,
+          "nivel_min": 44,
+          "equipo": [
+            "Spinda",
+            "Vigoroth",
+            "Linoone",
+            "Slaking"
+          ],
+          "nombre": "Norman",
+          "tipo_en": "Normal",
+          "tipos_equipo": [
+            "Normal"
+          ]
+        },
+        {
+          "gimnasio": "Ciudad Portual",
+          "tipo": "Fantasma",
+          "niveles": [
+            54,
+            55,
+            56,
+            58,
+            60
+          ],
+          "nivel_max": 60,
+          "nivel_min": 54,
+          "equipo": [
+            "Swablu",
+            "Tropius",
+            "Pelipper",
+            "Skarmory",
+            "Altaria"
+          ],
+          "nombre": "Winona",
+          "tipo_en": "Flying",
+          "tipos_equipo": [
+            "Dragon",
+            "Flying",
+            "Grass",
+            "Normal",
+            "Steel",
+            "Water"
+          ]
+        },
+        {
+          "gimnasio": "Pueblo Calagua",
+          "tipo": "Hielo",
+          "niveles": [
+            68,
+            69,
+            70,
+            72
+          ],
+          "nivel_max": 72,
+          "nivel_min": 68,
+          "equipo": [
+            "Claydol",
+            "Xatu",
+            "Lunatone",
+            "Solrock"
+          ],
+          "nombre": "Tate & Liza",
+          "tipo_en": "Psychic",
+          "tipos_equipo": [
+            "Flying",
+            "Ground",
+            "Psychic",
+            "Rock"
+          ]
+        },
+        {
+          "gimnasio": "Ciudad Algarra",
+          "tipo": "Agua",
+          "niveles": [
+            74,
+            76,
+            77,
+            78,
+            80
+          ],
+          "nivel_max": 80,
+          "nivel_min": 74,
+          "equipo": [
+            "Luvdisc",
+            "Whiscash",
+            "Sealeo",
+            "Crawdaunt",
+            "Kingdra"
+          ],
+          "nombre": "Wallace",
+          "tipo_en": "Water",
+          "tipos_equipo": [
+            "Dark",
+            "Dragon",
+            "Ground",
+            "Ice",
+            "Water"
+          ]
+        }
+      ],
+      "elite_four": [
+        "Sidney",
+        "Phoebe",
+        "Glacia",
+        "Drake"
+      ],
+      "campeon": "Steven",
+      "nota": "El agua y el hielo dominan; conviene portar electricidad o planta. Steven usa Acero.",
+      "elite_four_datos": [
+        {
+          "nombre": "Sidney",
+          "equipo": [
+            "Mightyena",
+            "Cacturne",
+            "Shiftry",
+            "Sharpedo",
+            "Absol"
+          ],
+          "niveles": [
+            78,
+            79,
+            80,
+            80,
+            81
+          ],
+          "nivel_max": 81,
+          "tipos_equipo": [
+            "Dark",
+            "Grass",
+            "Water"
+          ]
+        },
+        {
+          "nombre": "Phoebe",
+          "equipo": [
+            "Dusclops",
+            "Banette",
+            "Banette",
+            "Sableye",
+            "Dusclops"
+          ],
+          "niveles": [
+            81,
+            82,
+            82,
+            83,
+            83
+          ],
+          "nivel_max": 83,
+          "tipos_equipo": [
+            "Dark",
+            "Ghost"
+          ]
+        },
+        {
+          "nombre": "Glacia",
+          "equipo": [
+            "Glalie",
+            "Sealeo",
+            "Glalie",
+            "Sealeo",
+            "Walrein"
+          ],
+          "niveles": [
+            82,
+            83,
+            83,
+            84,
+            85
+          ],
+          "nivel_max": 85,
+          "tipos_equipo": [
+            "Ice",
+            "Water"
+          ]
+        },
+        {
+          "nombre": "Drake",
+          "equipo": [
+            "Shelgon",
+            "Altaria",
+            "Flygon",
+            "Flygon",
+            "Salamence"
+          ],
+          "niveles": [
+            83,
+            83,
+            84,
+            85,
+            86
+          ],
+          "nivel_max": 86,
+          "tipos_equipo": [
+            "Dragon",
+            "Flying",
+            "Ground"
+          ]
+        }
+      ],
+      "campeon_datos": {
+        "nombre": "Steven",
+        "equipo": [
+          "Skarmory",
+          "Cradily",
+          "Claydol",
+          "Armaldo",
+          "Aggron",
+          "Metagross"
+        ],
+        "niveles": [
+          93,
+          94,
+          94,
+          95,
+          96,
+          97
+        ],
+        "nivel_max": 97,
+        "tipos_equipo": [
+          "Bug",
+          "Flying",
+          "Grass",
+          "Ground",
+          "Psychic",
+          "Rock",
+          "Steel"
+        ]
+      }
+    },
+    {
+      "region": "Sinnoh",
+      "jefes": [
+        {
+          "gimnasio": "Pueblo Hojaverde",
+          "tipo": "Roca",
+          "niveles": [
+            10,
+            10,
+            12
+          ],
+          "nivel_max": 12,
+          "nivel_min": 10,
+          "equipo": [
+            "Geodude",
+            "Onix",
+            "Cranidos"
+          ],
+          "nombre": "Roark",
+          "tipo_en": "Rock",
+          "tipos_equipo": [
+            "Ground",
+            "Rock"
+          ]
+        },
+        {
+          "gimnasio": "Ciudad Vetusta",
+          "tipo": "Planta",
+          "niveles": [
+            17,
+            18,
+            19
+          ],
+          "nivel_max": 19,
+          "nivel_min": 17,
+          "equipo": [
+            "Turtwig",
+            "Cherrim",
+            "Roserade"
+          ],
+          "nombre": "Gardenia",
+          "tipo_en": "Grass",
+          "tipos_equipo": [
+            "Grass",
+            "Poison"
+          ]
+        },
+        {
+          "gimnasio": "Pueblo Descansos",
+          "tipo": "Lucha",
+          "niveles": [
+            27,
+            27,
+            30
+          ],
+          "nivel_max": 30,
+          "nivel_min": 27,
+          "equipo": [
+            "Duskull",
+            "Haunter",
+            "Mismagius"
+          ],
+          "nombre": "Fantina",
+          "tipo_en": "Ghost",
+          "tipos_equipo": [
+            "Ghost",
+            "Poison"
+          ]
+        },
+        {
+          "gimnasio": "Ciudad Magnetica",
+          "tipo": "Agua",
+          "niveles": [
+            37,
+            37,
+            40
+          ],
+          "nivel_max": 40,
+          "nivel_min": 37,
+          "equipo": [
+            "Meditite",
+            "Machoke",
+            "Lucario"
+          ],
+          "nombre": "Maylene",
+          "tipo_en": "Fighting",
+          "tipos_equipo": [
+            "Fighting",
+            "Psychic",
+            "Steel"
+          ]
+        },
+        {
+          "gimnasio": "Ciudad Canal",
+          "tipo": "Fantasma",
+          "niveles": [
+            47,
+            47,
+            50
+          ],
+          "nivel_max": 50,
+          "nivel_min": 47,
+          "equipo": [
+            "Gyarados",
+            "Quagsire",
+            "Floatzel"
+          ],
+          "nombre": "Crasher Wake",
+          "tipo_en": "Water",
+          "tipos_equipo": [
+            "Flying",
+            "Ground",
+            "Water"
+          ]
+        },
+        {
+          "gimnasio": "Ciudad Rocavelo",
+          "tipo": "Acero",
+          "niveles": [
+            57,
+            57,
+            60
+          ],
+          "nivel_max": 60,
+          "nivel_min": 57,
+          "equipo": [
+            "Magneton",
+            "Steelix",
+            "Bastiodon"
+          ],
+          "nombre": "Byron",
+          "tipo_en": "Steel",
+          "tipos_equipo": [
+            "Electric",
+            "Ground",
+            "Rock",
+            "Steel"
+          ]
+        },
+        {
+          "gimnasio": "Pueblo Ventolina",
+          "tipo": "Hielo",
+          "niveles": [
+            68,
+            68,
+            70,
+            72
+          ],
+          "nivel_max": 72,
+          "nivel_min": 68,
+          "equipo": [
+            "Sneasel",
+            "Piloswine",
+            "Abomasnow",
+            "Froslass"
+          ],
+          "nombre": "Candice",
+          "tipo_en": "Ice",
+          "tipos_equipo": [
+            "Dark",
+            "Ghost",
+            "Grass",
+            "Ground",
+            "Ice"
+          ]
+        },
+        {
+          "gimnasio": "Ciudad Helada",
+          "tipo": "Electrico",
+          "niveles": [
+            76,
+            76,
+            78,
+            80
+          ],
+          "nivel_max": 80,
+          "nivel_min": 76,
+          "equipo": [
+            "Jolteon",
+            "Raichu",
+            "Luxray",
+            "Electivire"
+          ],
+          "nombre": "Volkner",
+          "tipo_en": "Electric",
+          "tipos_equipo": [
+            "Electric"
+          ]
+        }
+      ],
+      "elite_four": [
+        "Aaron",
+        "Bertha",
+        "Flint",
+        "Lucian"
+      ],
+      "campeon": "Cynthia",
+      "nota": "Cynthia y su Garchomp son la prueba final. El hielo es la respuesta clave ante dragones.",
+      "elite_four_datos": [
+        {
+          "nombre": "Aaron",
+          "equipo": [
+            "Vespiquen",
+            "Yanmega",
+            "Scizor",
+            "Heracross",
+            "Drapion"
+          ],
+          "niveles": [
+            82,
+            83,
+            84,
+            86,
+            88
+          ],
+          "nivel_max": 88,
+          "tipos_equipo": [
+            "Bug",
+            "Dark",
+            "Fighting",
+            "Flying",
+            "Poison",
+            "Steel"
+          ]
+        },
+        {
+          "nombre": "Bertha",
+          "equipo": [
+            "Whiscash",
+            "Golem",
+            "Gliscor",
+            "Rhyperior",
+            "Hippowdon"
+          ],
+          "niveles": [
+            83,
+            84,
+            86,
+            87,
+            89
+          ],
+          "nivel_max": 89,
+          "tipos_equipo": [
+            "Flying",
+            "Ground",
+            "Rock",
+            "Water"
+          ]
+        },
+        {
+          "nombre": "Flint",
+          "equipo": [
+            "Rapidash",
+            "Flareon",
+            "Houndoom",
+            "Magmortar",
+            "Infernape"
+          ],
+          "niveles": [
+            83,
+            84,
+            86,
+            87,
+            89
+          ],
+          "nivel_max": 89,
+          "tipos_equipo": [
+            "Dark",
+            "Fighting",
+            "Fire"
+          ]
+        },
+        {
+          "nombre": "Lucian",
+          "equipo": [
+            "Mr. Mime",
+            "Espeon",
+            "Bronzong",
+            "Alakazam",
+            "Gallade"
+          ],
+          "niveles": [
+            83,
+            84,
+            85,
+            86,
+            90
+          ],
+          "nivel_max": 90,
+          "tipos_equipo": [
+            "Fighting",
+            "Psychic",
+            "Steel"
+          ]
+        }
+      ],
+      "campeon_datos": {
+        "nombre": "Cynthia",
+        "equipo": [
+          "Spiritomb",
+          "Roserade",
+          "Gastrodon",
+          "Milotic",
+          "Lucario",
+          "Garchomp"
+        ],
+        "niveles": [
+          90,
+          91,
+          92,
+          93,
+          95,
+          99
+        ],
+        "nivel_max": 99,
+        "tipos_equipo": [
+          "Dark",
+          "Dragon",
+          "Fighting",
+          "Ghost",
+          "Grass",
+          "Ground",
+          "Poison",
+          "Steel",
+          "Water"
+        ]
+      }
+    },
+    {
+      "region": "Unova",
+      "jefes": [
+        {
+          "gimnasio": "Ciudad Porva",
+          "tipo": "Normal",
+          "niveles": [
+            7,
+            10,
+            10,
+            10
+          ],
+          "nivel_max": 10,
+          "nivel_min": 7,
+          "equipo": [
+            "Lillipup",
+            "Pansage",
+            "Pansear",
+            "Panpour"
+          ],
+          "nombre": "Cilan, Chili & Cress",
+          "tipo_en": "Normal",
+          "tipos_equipo": [
+            "Fire",
+            "Grass",
+            "Normal",
+            "Water"
+          ]
+        },
+        {
+          "gimnasio": "Ciudad Esmalte",
+          "tipo": "Bicho",
+          "niveles": [
+            17,
+            18,
+            20
+          ],
+          "nivel_max": 20,
+          "nivel_min": 17,
+          "equipo": [
+            "Patrat",
+            "Herdier",
+            "Watchog"
+          ],
+          "nombre": "Lenora",
+          "tipo_en": "Normal",
+          "tipos_equipo": [
+            "Normal"
+          ]
+        },
+        {
+          "gimnasio": "Ciudad Mayólica",
+          "tipo": "Electrico",
+          "niveles": [
+            27,
+            28,
+            30
+          ],
+          "nivel_max": 30,
+          "nivel_min": 27,
+          "equipo": [
+            "Dwebble",
+            "Whirlipede",
+            "Leavanny"
+          ],
+          "nombre": "Burgh",
+          "tipo_en": "Bug",
+          "tipos_equipo": [
+            "Bug",
+            "Grass",
+            "Poison",
+            "Rock"
+          ]
+        },
+        {
+          "gimnasio": "Ciudad Faghina",
+          "tipo": "Agua",
+          "niveles": [
+            37,
+            37,
+            38,
+            40
+          ],
+          "nivel_max": 40,
+          "nivel_min": 37,
+          "equipo": [
+            "Emolga",
+            "Emolga",
+            "Galvantula",
+            "Zebstrika"
+          ],
+          "nombre": "Elesa",
+          "tipo_en": "Electric",
+          "tipos_equipo": [
+            "Bug",
+            "Electric",
+            "Flying"
+          ]
+        },
+        {
+          "gimnasio": "Ciudad Tejeda",
+          "tipo": "Planta",
+          "niveles": [
+            46,
+            47,
+            48,
+            50
+          ],
+          "nivel_max": 50,
+          "nivel_min": 46,
+          "equipo": [
+            "Krokorok",
+            "Palpitoad",
+            "Krookodile",
+            "Excadrill"
+          ],
+          "nombre": "Clay",
+          "tipo_en": "Ground",
+          "tipos_equipo": [
+            "Dark",
+            "Ground",
+            "Steel",
+            "Water"
+          ]
+        },
+        {
+          "gimnasio": "Ciudad Fayenza",
+          "tipo": "Volador",
+          "niveles": [
+            56,
+            57,
+            58,
+            60
+          ],
+          "nivel_max": 60,
+          "nivel_min": 56,
+          "equipo": [
+            "Swoobat",
+            "Unfezant",
+            "Sigilyph",
+            "Swanna"
+          ],
+          "nombre": "Skyla",
+          "tipo_en": "Flying",
+          "tipos_equipo": [
+            "Flying",
+            "Normal",
+            "Psychic",
+            "Water"
+          ]
+        },
+        {
+          "gimnasio": "Ciudad Caolín",
+          "tipo": "Hielo",
+          "niveles": [
+            66,
+            67,
+            68,
+            70
+          ],
+          "nivel_max": 70,
+          "nivel_min": 66,
+          "equipo": [
+            "Vanillish",
+            "Cryogonal",
+            "Vanilluxe",
+            "Beartic"
+          ],
+          "nombre": "Brycen",
+          "tipo_en": "Ice",
+          "tipos_equipo": [
+            "Ice"
+          ]
+        },
+        {
+          "gimnasio": "Ciudad Loza",
+          "tipo": "Dragon",
+          "niveles": [
+            75,
+            77,
+            78,
+            80
+          ],
+          "nivel_max": 80,
+          "nivel_min": 75,
+          "equipo": [
+            "Fraxure",
+            "Druddigon",
+            "Zweilous",
+            "Haxorus"
+          ],
+          "nombre": "Iris",
+          "tipo_en": "Dragon",
+          "tipos_equipo": [
+            "Dark",
+            "Dragon"
+          ]
+        }
+      ],
+      "elite_four": [
+        "Shauntal",
+        "Marshal",
+        "Grimsley",
+        "Caitlin"
+      ],
+      "campeon": "N",
+      "nota": "Ruta equilibrada; el dragón cierra. Cobertura de hada/hielo para el jefe final.",
+      "elite_four_datos": [
+        {
+          "nombre": "Shauntal",
+          "equipo": [
+            "Cofagrigus",
+            "Drifblim",
+            "Golurk",
+            "Jellicent",
+            "Chandelure"
+          ],
+          "niveles": [
+            82,
+            83,
+            84,
+            86,
+            89
+          ],
+          "nivel_max": 89,
+          "tipos_equipo": [
+            "Fire",
+            "Flying",
+            "Ghost",
+            "Ground",
+            "Water"
+          ]
+        },
+        {
+          "nombre": "Grimsley",
+          "equipo": [
+            "Liepard",
+            "Mandibuzz",
+            "Scrafty",
+            "Krookodile",
+            "Bisharp"
+          ],
+          "niveles": [
+            82,
+            84,
+            86,
+            87,
+            89
+          ],
+          "nivel_max": 89,
+          "tipos_equipo": [
+            "Dark",
+            "Fighting",
+            "Flying",
+            "Ground",
+            "Steel"
+          ]
+        },
+        {
+          "nombre": "Caitlin",
+          "equipo": [
+            "Musharna",
+            "Sigilyph",
+            "Beheeyem",
+            "Reuniclus",
+            "Gothitelle"
+          ],
+          "niveles": [
+            83,
+            84,
+            85,
+            87,
+            89
+          ],
+          "nivel_max": 89,
+          "tipos_equipo": [
+            "Flying",
+            "Psychic"
+          ]
+        },
+        {
+          "nombre": "Marshal",
+          "equipo": [
+            "Throh",
+            "Sawk",
+            "Emboar",
+            "Conkeldurr",
+            "Mienshao"
+          ],
+          "niveles": [
+            83,
+            84,
+            85,
+            87,
+            89
+          ],
+          "nivel_max": 89,
+          "tipos_equipo": [
+            "Fighting",
+            "Fire"
+          ]
+        }
+      ],
+      "campeon_datos": {
+        "nombre": "N",
+        "equipo": [
+          "Carracosta",
+          "Archeops",
+          "Vanilluxe",
+          "Klinklang",
+          "Reshiram",
+          "Zoroark"
+        ],
+        "niveles": [
+          95,
+          96,
+          96,
+          97,
+          99,
+          100
+        ],
+        "nivel_max": 100,
+        "tipos_equipo": [
+          "Dark",
+          "Dragon",
+          "Fire",
+          "Flying",
+          "Ice",
+          "Rock",
+          "Steel",
+          "Water"
+        ]
+      }
+    }
+  ],
+  "Kanto": {},
+  "Johto": {},
+  "Hoenn": {},
+  "Sinnoh": {},
+  "Unova": {}
+}

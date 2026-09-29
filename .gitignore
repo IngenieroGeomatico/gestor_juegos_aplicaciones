@@ -232,6 +232,17 @@ juegos/heroquest/sources/reversos/
 # Caché de datos descargados de APIs (Pokémon Champions)
 juegos/pokemon-champions/data/cache/
 
+# Logs de las partidas de Pokelike (se regeneran en cada ejecución)
+juegos/pokelike/log/
+
+# Perfiles de navegador del bot de Pokelike: son cachés de hundreds of MB y se
+# regeneran solas. `perfil` es el del bot; `perfil-usuario` es una copia del
+# perfil real de Firefox para jugar con la cuenta guardada.
+juegos/pokelike/data/bot/
+
+# Volcados de la herramienta de navegador (consolas y capturas de página)
+.playwright-mcp/
+
 # Imágenes de calibración de tableros de HeroQuest (artefactos de trabajo)
 juegos/heroquest/_cal/
 

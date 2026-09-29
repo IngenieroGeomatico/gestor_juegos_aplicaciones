@@ -1,0 +1,923 @@
+{
+ "normal_common": {
+  "id": "normal_common",
+  "type": "Normal",
+  "rarity": "common",
+  "name": "Quick Attack",
+  "power": 50,
+  "desc": "Always moves first.",
+  "effects": [
+   {
+    "k": "priority"
+   }
+  ]
+ },
+ "normal_rare": {
+  "id": "normal_rare",
+  "type": "Normal",
+  "rarity": "rare",
+  "name": "Extreme Speed",
+  "power": 80,
+  "desc": "Always moves first. The first hit each battle gives your whole team +1 Speed.",
+  "effects": [
+   {
+    "k": "priority"
+   },
+   {
+    "k": "teamStage",
+    "stats": [
+     "speed"
+    ],
+    "delta": 1
+   }
+  ]
+ },
+ "normal_legendary": {
+  "id": "normal_legendary",
+  "type": "Normal",
+  "rarity": "legendary",
+  "name": "Judgment",
+  "power": 120,
+  "desc": "Becomes whichever type the target is weakest to. +10 power for every different type on your team.",
+  "effects": [
+   {
+    "k": "bestType"
+   },
+   {
+    "k": "perTeamType",
+    "per": 10
+   }
+  ]
+ },
+ "fire_common": {
+  "id": "fire_common",
+  "type": "Fire",
+  "rarity": "common",
+  "name": "Flame Charge",
+  "power": 50,
+  "desc": "+1 Speed to the user on every hit.",
+  "effects": [
+   {
+    "k": "selfStage",
+    "stats": [
+     "speed"
+    ],
+    "delta": 1
+   }
+  ]
+ },
+ "fire_rare": {
+  "id": "fire_rare",
+  "type": "Fire",
+  "rarity": "rare",
+  "name": "Heat Wave",
+  "power": 95,
+  "desc": "Every other enemy takes half damage too. 10% burn.",
+  "effects": [
+   {
+    "k": "spread",
+    "pct": 0.5
+   },
+   {
+    "k": "status",
+    "status": "burn",
+    "chance": 0.1
+   }
+  ]
+ },
+ "fire_legendary": {
+  "id": "fire_legendary",
+  "type": "Fire",
+  "rarity": "legendary",
+  "name": "Sacred Fire",
+  "power": 130,
+  "desc": "50% chance to burn. Always a critical hit against a burned target.",
+  "effects": [
+   {
+    "k": "status",
+    "status": "burn",
+    "chance": 0.5
+   },
+   {
+    "k": "critVsStatus",
+    "status": "burn"
+   }
+  ]
+ },
+ "water_common": {
+  "id": "water_common",
+  "type": "Water",
+  "rarity": "common",
+  "name": "Brine",
+  "power": 65,
+  "desc": "Double damage against a target at half HP or less.",
+  "effects": [
+   {
+    "k": "brine"
+   }
+  ]
+ },
+ "water_rare": {
+  "id": "water_rare",
+  "type": "Water",
+  "rarity": "rare",
+  "name": "Liquidation",
+  "power": 85,
+  "desc": "Every hit lowers the target’s Def by 1.",
+  "effects": [
+   {
+    "k": "targetStage",
+    "stats": [
+     "def"
+    ],
+    "delta": -1
+   }
+  ]
+ },
+ "water_legendary": {
+  "id": "water_legendary",
+  "type": "Water",
+  "rarity": "legendary",
+  "name": "Water Spout",
+  "power": 150,
+  "desc": "Power scales with the user’s remaining HP. Every KO heals the user 25% of its max HP.",
+  "effects": [
+   {
+    "k": "hpScale"
+   },
+   {
+    "k": "koHeal",
+    "pct": 0.25
+   }
+  ]
+ },
+ "electric_common": {
+  "id": "electric_common",
+  "type": "Electric",
+  "rarity": "common",
+  "name": "Spark",
+  "power": 65,
+  "desc": "30% chance to paralyse (halves Speed for the fight).",
+  "effects": [
+   {
+    "k": "status",
+    "status": "paralyze",
+    "chance": 0.3
+   }
+  ]
+ },
+ "electric_rare": {
+  "id": "electric_rare",
+  "type": "Electric",
+  "rarity": "rare",
+  "name": "Thunderbolt",
+  "power": 95,
+  "desc": "20% chance to paralyse. +1 Speed to the user on every hit.",
+  "effects": [
+   {
+    "k": "status",
+    "status": "paralyze",
+    "chance": 0.2
+   },
+   {
+    "k": "selfStage",
+    "stats": [
+     "speed"
+    ],
+    "delta": 1
+   }
+  ]
+ },
+ "electric_legendary": {
+  "id": "electric_legendary",
+  "type": "Electric",
+  "rarity": "legendary",
+  "name": "Bolt Strike",
+  "power": 130,
+  "desc": "30% chance to paralyse. Against a paralysed target it always moves first and deals 1.5×.",
+  "effects": [
+   {
+    "k": "status",
+    "status": "paralyze",
+    "chance": 0.3
+   },
+   {
+    "k": "priorityVs",
+    "status": "paralyze"
+   },
+   {
+    "k": "vsParalyzed",
+    "mult": 1.5
+   }
+  ]
+ },
+ "grass_common": {
+  "id": "grass_common",
+  "type": "Grass",
+  "rarity": "common",
+  "name": "Giga Drain",
+  "power": 75,
+  "desc": "Heals the user for half the damage dealt.",
+  "effects": [
+   {
+    "k": "drain",
+    "pct": 0.5
+   }
+  ]
+ },
+ "grass_rare": {
+  "id": "grass_rare",
+  "type": "Grass",
+  "rarity": "rare",
+  "name": "Petal Blizzard",
+  "power": 90,
+  "desc": "Every other enemy takes half damage too.",
+  "effects": [
+   {
+    "k": "spread",
+    "pct": 0.5
+   }
+  ]
+ },
+ "grass_legendary": {
+  "id": "grass_legendary",
+  "type": "Grass",
+  "rarity": "legendary",
+  "name": "Seed Flare",
+  "power": 120,
+  "desc": "Every hit lowers the target’s Sp.Def by 2. Every KO heals your whole team 20% of its max HP.",
+  "effects": [
+   {
+    "k": "targetStage",
+    "stats": [
+     "spdef"
+    ],
+    "delta": -2
+   },
+   {
+    "k": "teamHealOnKo",
+    "pct": 0.2
+   }
+  ]
+ },
+ "ice_common": {
+  "id": "ice_common",
+  "type": "Ice",
+  "rarity": "common",
+  "name": "Frost Breath",
+  "power": 60,
+  "desc": "Always a critical hit.",
+  "effects": [
+   {
+    "k": "alwaysCrit"
+   }
+  ]
+ },
+ "ice_rare": {
+  "id": "ice_rare",
+  "type": "Ice",
+  "rarity": "rare",
+  "name": "Icicle Crash",
+  "power": 85,
+  "desc": "30% chance to flinch. 10% chance to freeze.",
+  "effects": [
+   {
+    "k": "flinch",
+    "chance": 0.3
+   },
+   {
+    "k": "status",
+    "status": "freeze",
+    "chance": 0.1
+   }
+  ]
+ },
+ "ice_legendary": {
+  "id": "ice_legendary",
+  "type": "Ice",
+  "rarity": "legendary",
+  "name": "Sheer Cold",
+  "power": 120,
+  "desc": "A target left below 25% HP is knocked out outright. 20% chance to freeze.",
+  "effects": [
+   {
+    "k": "execute",
+    "pct": 0.25
+   },
+   {
+    "k": "status",
+    "status": "freeze",
+    "chance": 0.2
+   }
+  ]
+ },
+ "fighting_common": {
+  "id": "fighting_common",
+  "type": "Fighting",
+  "rarity": "common",
+  "name": "Power-Up Punch",
+  "power": 50,
+  "desc": "+1 Attack to the user on every hit.",
+  "effects": [
+   {
+    "k": "selfStage",
+    "stats": [
+     "atk",
+     "special"
+    ],
+    "delta": 1
+   }
+  ]
+ },
+ "fighting_rare": {
+  "id": "fighting_rare",
+  "type": "Fighting",
+  "rarity": "rare",
+  "name": "Sacred Sword",
+  "power": 90,
+  "desc": "Ignores the target’s stat changes.",
+  "effects": [
+   {
+    "k": "ignoreStages"
+   }
+  ]
+ },
+ "fighting_legendary": {
+  "id": "fighting_legendary",
+  "type": "Fighting",
+  "rarity": "legendary",
+  "name": "Secret Sword",
+  "power": 120,
+  "desc": "Hits whichever of the target’s defences is weaker. Every KO gives your whole team +1 Attack and +1 Sp.Atk.",
+  "effects": [
+   {
+    "k": "weakDef"
+   },
+   {
+    "k": "koTeamStage",
+    "stats": [
+     "atk",
+     "special"
+    ],
+    "delta": 1
+   }
+  ]
+ },
+ "poison_common": {
+  "id": "poison_common",
+  "type": "Poison",
+  "rarity": "common",
+  "name": "Venoshock",
+  "power": 65,
+  "desc": "Double damage against a poisoned target.",
+  "effects": [
+   {
+    "k": "vsPoisoned",
+    "mult": 2
+   }
+  ]
+ },
+ "poison_rare": {
+  "id": "poison_rare",
+  "type": "Poison",
+  "rarity": "rare",
+  "name": "Sludge Bomb",
+  "power": 90,
+  "desc": "30% chance to add 2 poison stacks.",
+  "effects": [
+   {
+    "k": "status",
+    "status": "poison",
+    "stacks": 2,
+    "chance": 0.3
+   }
+  ]
+ },
+ "poison_legendary": {
+  "id": "poison_legendary",
+  "type": "Poison",
+  "rarity": "legendary",
+  "name": "Malignant Chain",
+  "power": 130,
+  "desc": "Every hit adds 3 poison stacks to EVERY enemy. Deals 1.5× to poisoned targets.",
+  "effects": [
+   {
+    "k": "poisonAll",
+    "stacks": 3
+   },
+   {
+    "k": "vsPoisoned",
+    "mult": 1.5
+   }
+  ]
+ },
+ "ground_common": {
+  "id": "ground_common",
+  "type": "Ground",
+  "rarity": "common",
+  "name": "Bulldoze",
+  "power": 60,
+  "desc": "Every hit lowers the target’s Speed by 1.",
+  "effects": [
+   {
+    "k": "targetStage",
+    "stats": [
+     "speed"
+    ],
+    "delta": -1
+   }
+  ]
+ },
+ "ground_rare": {
+  "id": "ground_rare",
+  "type": "Ground",
+  "rarity": "rare",
+  "name": "Earthquake",
+  "power": 100,
+  "desc": "Every other enemy takes half damage too.",
+  "effects": [
+   {
+    "k": "spread",
+    "pct": 0.5
+   }
+  ]
+ },
+ "ground_legendary": {
+  "id": "ground_legendary",
+  "type": "Ground",
+  "rarity": "legendary",
+  "name": "Precipice Blades",
+  "power": 120,
+  "desc": "Hits every enemy for full damage, and every enemy hit loses 1 Speed.",
+  "effects": [
+   {
+    "k": "spread",
+    "pct": 1
+   },
+   {
+    "k": "targetStage",
+    "stats": [
+     "speed"
+    ],
+    "delta": -1
+   },
+   {
+    "k": "spreadStage",
+    "stats": [
+     "speed"
+    ],
+    "delta": -1
+   }
+  ]
+ },
+ "flying_common": {
+  "id": "flying_common",
+  "type": "Flying",
+  "rarity": "common",
+  "name": "Acrobatics",
+  "power": 55,
+  "desc": "Double damage while the user holds no item.",
+  "effects": [
+   {
+    "k": "acrobatics"
+   }
+  ]
+ },
+ "flying_rare": {
+  "id": "flying_rare",
+  "type": "Flying",
+  "rarity": "rare",
+  "name": "Brave Bird",
+  "power": 120,
+  "desc": "The user takes a third of the damage dealt as recoil. +1 Attack on a KO.",
+  "effects": [
+   {
+    "k": "recoil",
+    "pct": 0.33
+   },
+   {
+    "k": "koStage",
+    "stats": [
+     "atk",
+     "special"
+    ],
+    "delta": 1
+   }
+  ]
+ },
+ "flying_legendary": {
+  "id": "flying_legendary",
+  "type": "Flying",
+  "rarity": "legendary",
+  "name": "Oblivion Wing",
+  "power": 120,
+  "desc": "Heals your whole team for half the damage dealt.",
+  "effects": [
+   {
+    "k": "teamDrain",
+    "pct": 0.5
+   }
+  ]
+ },
+ "psychic_common": {
+  "id": "psychic_common",
+  "type": "Psychic",
+  "rarity": "common",
+  "name": "Stored Power",
+  "power": 50,
+  "desc": "+20 power for every positive stat stage on the user.",
+  "effects": [
+   {
+    "k": "storedPower",
+    "per": 20
+   }
+  ]
+ },
+ "psychic_rare": {
+  "id": "psychic_rare",
+  "type": "Psychic",
+  "rarity": "rare",
+  "name": "Psychic",
+  "power": 90,
+  "desc": "Every hit lowers the target’s Sp.Def by 1.",
+  "effects": [
+   {
+    "k": "targetStage",
+    "stats": [
+     "spdef"
+    ],
+    "delta": -1
+   }
+  ]
+ },
+ "psychic_legendary": {
+  "id": "psychic_legendary",
+  "type": "Psychic",
+  "rarity": "legendary",
+  "name": "Psystrike",
+  "power": 130,
+  "desc": "Hits whichever of the target’s defences is weaker. +20 power for every positive stat stage on the user.",
+  "effects": [
+   {
+    "k": "weakDef"
+   },
+   {
+    "k": "storedPower",
+    "per": 20
+   }
+  ]
+ },
+ "bug_common": {
+  "id": "bug_common",
+  "type": "Bug",
+  "rarity": "common",
+  "name": "Fell Stinger",
+  "power": 50,
+  "desc": "+3 Attack to the user on a KO.",
+  "effects": [
+   {
+    "k": "koStage",
+    "stats": [
+     "atk",
+     "special"
+    ],
+    "delta": 3
+   }
+  ]
+ },
+ "bug_rare": {
+  "id": "bug_rare",
+  "type": "Bug",
+  "rarity": "rare",
+  "name": "Lunge",
+  "power": 80,
+  "desc": "Every hit lowers the target’s Attack and Sp.Atk by 1.",
+  "effects": [
+   {
+    "k": "targetStage",
+    "stats": [
+     "atk",
+     "special"
+    ],
+    "delta": -1
+   }
+  ]
+ },
+ "bug_legendary": {
+  "id": "bug_legendary",
+  "type": "Bug",
+  "rarity": "legendary",
+  "name": "Techno Blast",
+  "power": 130,
+  "desc": "Never resisted. +15 power for every Bug-type on your team.",
+  "effects": [
+   {
+    "k": "noResist"
+   },
+   {
+    "k": "perTypeAlly",
+    "type": "Bug",
+    "per": 15
+   }
+  ]
+ },
+ "rock_common": {
+  "id": "rock_common",
+  "type": "Rock",
+  "rarity": "common",
+  "name": "Rock Tomb",
+  "power": 60,
+  "desc": "Every hit lowers the target’s Speed by 1.",
+  "effects": [
+   {
+    "k": "targetStage",
+    "stats": [
+     "speed"
+    ],
+    "delta": -1
+   }
+  ]
+ },
+ "rock_rare": {
+  "id": "rock_rare",
+  "type": "Rock",
+  "rarity": "rare",
+  "name": "Stone Edge",
+  "power": 100,
+  "desc": "+50% critical-hit chance.",
+  "effects": [
+   {
+    "k": "critBonus",
+    "pct": 0.5
+   }
+  ]
+ },
+ "rock_legendary": {
+  "id": "rock_legendary",
+  "type": "Rock",
+  "rarity": "legendary",
+  "name": "Diamond Storm",
+  "power": 120,
+  "desc": "Attacks with the user’s Defense instead of its Attack. +2 Def to the user on every hit.",
+  "effects": [
+   {
+    "k": "useDef"
+   },
+   {
+    "k": "selfStage",
+    "stats": [
+     "def"
+    ],
+    "delta": 2
+   }
+  ]
+ },
+ "ghost_common": {
+  "id": "ghost_common",
+  "type": "Ghost",
+  "rarity": "common",
+  "name": "Hex",
+  "power": 65,
+  "desc": "Double damage against a target with a status condition.",
+  "effects": [
+   {
+    "k": "hex"
+   }
+  ]
+ },
+ "ghost_rare": {
+  "id": "ghost_rare",
+  "type": "Ghost",
+  "rarity": "rare",
+  "name": "Poltergeist",
+  "power": 110,
+  "desc": "Deals 1.5× to a target holding an item.",
+  "effects": [
+   {
+    "k": "vsItem",
+    "mult": 1.5
+   }
+  ]
+ },
+ "ghost_legendary": {
+  "id": "ghost_legendary",
+  "type": "Ghost",
+  "rarity": "legendary",
+  "name": "Spectral Thief",
+  "power": 120,
+  "desc": "Steals the target’s stat boosts before hitting. +10 power for every positive stat stage on the user.",
+  "effects": [
+   {
+    "k": "stealStages"
+   },
+   {
+    "k": "storedPower",
+    "per": 10
+   }
+  ]
+ },
+ "dragon_common": {
+  "id": "dragon_common",
+  "type": "Dragon",
+  "rarity": "common",
+  "name": "Dual Chop",
+  "power": 50,
+  "desc": "Hits twice.",
+  "effects": [
+   {
+    "k": "multi",
+    "hits": 2
+   }
+  ]
+ },
+ "dragon_rare": {
+  "id": "dragon_rare",
+  "type": "Dragon",
+  "rarity": "rare",
+  "name": "Dragon Pulse",
+  "power": 85,
+  "desc": "The first hit each battle gives your whole team +1 Attack and +1 Sp.Atk.",
+  "effects": [
+   {
+    "k": "teamStage",
+    "stats": [
+     "atk",
+     "special"
+    ],
+    "delta": 1
+   }
+  ]
+ },
+ "dragon_legendary": {
+  "id": "dragon_legendary",
+  "type": "Dragon",
+  "rarity": "legendary",
+  "name": "Spacial Rend",
+  "power": 120,
+  "desc": "Always a critical hit. Every hit lowers the target’s Def and Sp.Def by 1.",
+  "effects": [
+   {
+    "k": "alwaysCrit"
+   },
+   {
+    "k": "targetStage",
+    "stats": [
+     "def",
+     "spdef"
+    ],
+    "delta": -1
+   }
+  ]
+ },
+ "dark_common": {
+  "id": "dark_common",
+  "type": "Dark",
+  "rarity": "common",
+  "name": "Knock Off",
+  "power": 65,
+  "desc": "Deals 1.5× to a target holding an item.",
+  "effects": [
+   {
+    "k": "vsItem",
+    "mult": 1.5
+   }
+  ]
+ },
+ "dark_rare": {
+  "id": "dark_rare",
+  "type": "Dark",
+  "rarity": "rare",
+  "name": "Foul Play",
+  "power": 95,
+  "desc": "Attacks with the target’s Attack stat instead of the user’s.",
+  "effects": [
+   {
+    "k": "foulPlay"
+   }
+  ]
+ },
+ "dark_legendary": {
+  "id": "dark_legendary",
+  "type": "Dark",
+  "rarity": "legendary",
+  "name": "Dark Void",
+  "power": 120,
+  "desc": "30% chance to put the target to sleep. Deals 2× to a sleeping target.",
+  "effects": [
+   {
+    "k": "status",
+    "status": "sleep",
+    "chance": 0.3
+   },
+   {
+    "k": "vsStatus",
+    "status": "sleep",
+    "mult": 2
+   }
+  ]
+ },
+ "steel_common": {
+  "id": "steel_common",
+  "type": "Steel",
+  "rarity": "common",
+  "name": "Iron Head",
+  "power": 75,
+  "desc": "30% chance to flinch.",
+  "effects": [
+   {
+    "k": "flinch",
+    "chance": 0.3
+   }
+  ]
+ },
+ "steel_rare": {
+  "id": "steel_rare",
+  "type": "Steel",
+  "rarity": "rare",
+  "name": "Meteor Mash",
+  "power": 90,
+  "desc": "50% chance of +1 Attack to the user.",
+  "effects": [
+   {
+    "k": "selfStage",
+    "stats": [
+     "atk",
+     "special"
+    ],
+    "delta": 1,
+    "chance": 0.5
+   }
+  ]
+ },
+ "steel_legendary": {
+  "id": "steel_legendary",
+  "type": "Steel",
+  "rarity": "legendary",
+  "name": "Behemoth Blade",
+  "power": 130,
+  "desc": "Deals 1.5× to a target with any stat boost. After swinging, the user takes half damage until its next move.",
+  "effects": [
+   {
+    "k": "vsBoosted",
+    "mult": 1.5
+   },
+   {
+    "k": "guard",
+    "pct": 0.5
+   }
+  ]
+ },
+ "fairy_common": {
+  "id": "fairy_common",
+  "type": "Fairy",
+  "rarity": "common",
+  "name": "Draining Kiss",
+  "power": 50,
+  "desc": "Heals the user for three quarters of the damage dealt.",
+  "effects": [
+   {
+    "k": "drain",
+    "pct": 0.75
+   }
+  ]
+ },
+ "fairy_rare": {
+  "id": "fairy_rare",
+  "type": "Fairy",
+  "rarity": "rare",
+  "name": "Moonblast",
+  "power": 95,
+  "desc": "30% chance to lower the target’s Attack and Sp.Atk by 1.",
+  "effects": [
+   {
+    "k": "targetStage",
+    "stats": [
+     "atk",
+     "special"
+    ],
+    "delta": -1,
+    "chance": 0.3
+   }
+  ]
+ },
+ "fairy_legendary": {
+  "id": "fairy_legendary",
+  "type": "Fairy",
+  "rarity": "legendary",
+  "name": "Geomancy",
+  "power": 120,
+  "desc": "The first use each battle gathers power instead of hitting: +2 Attack, +2 Sp.Atk, +2 Sp.Def, +2 Speed. Every use after that hits.",
+  "effects": [
+   {
+    "k": "chargeSetup",
+    "stats": [
+     "atk",
+     "special",
+     "spdef",
+     "speed"
+    ],
+    "delta": 2
+   }
+  ]
+ }
+}

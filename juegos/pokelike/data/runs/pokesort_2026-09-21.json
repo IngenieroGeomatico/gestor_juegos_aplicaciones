@@ -1,0 +1,26 @@
+{
+  "fecha": "2026-09-21",
+  "tipo": "pokesort_diario",
+  "premio": 500,
+  "racha": 1,
+  "intentos_usados": 1,
+  "intentos_total": 4,
+  "estado": "resuelto",
+  "pokemon": ["Empoleon", "Aron", "Octillery", "Zangoose", "Monferno", "Zweilous"],
+  "reglas": [
+    "TIPO=",
+    "GEN>",
+    "GEN<",
+    "ETAPA=",
+    "SUPERA>"
+  ],
+  "orden": ["Aron", "Empoleon", "Zangoose", "Zweilous", "Octillery", "Monferno"],
+  "operador_en_vivo": "firefox-devtools-mcp (--connect-existing) sobre el navegador real; reordenado por swaps de Pointer Events simulados via evaluate_script",
+  "notas": {
+    "TIPO=": "Aron comparte tipo Acero con Empoleon",
+    "GEN>": "Empoleon gen4 > Zangoose gen3",
+    "GEN<": "Zangoose gen3 < Zweilous gen5",
+    "ETAPA=": "Zweilous y Octillery, etapa 2 de su linea",
+    "SUPERA>": "Octillery (Agua) supera a Monferno (Fuego)"
+  }
+}

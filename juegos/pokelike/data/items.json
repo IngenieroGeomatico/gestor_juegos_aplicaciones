@@ -1,0 +1,23 @@
+{
+  "consumibles": [
+    {"nombre": "Hiperpoción", "efecto": "restaura 200 PS"},
+    {"nombre": "Superpoción", "efecto": "restaura 50 PS"},
+    {"nombre": "Revivir", "efecto": "revive a un Pokémon debilitado con el 50% de PS"},
+    {"nombre": "Antídoto", "efecto": "cura veneno"},
+    {"nombre": "Antiquemar", "efecto": "cura quemaduras"},
+    {"nombre": "Despertar", "efecto": "cura sueño"},
+    {"nombre": "Cura Total", "efecto": "cura cualquier problema de estado"},
+    {"nombre": "Eter", "efecto": "restaura 10 PP de un movimiento"}
+  ],
+  "pasivos": [
+    {"nombre": "Camiseta Fuerte", "efecto": "los golpes super efectivos infligen menos daño"},
+    {"nombre": "Restos", "efecto": "recupera PS al final de cada ronda"},
+    {"nombre": "Pañuelo Elegido", "efecto": "sube la velocidad"},
+    {"nombre": "Gafas Elegidas", "efecto": "sube el ataque especial"},
+    {"nombre": "Cinturón Negro", "efecto": "potencia movimientos de tipo Lucha"},
+    {"nombre": "Lupa Misteriosa", "efecto": "potencia movimientos de tipo Psiquico"},
+    {"nombre": "Fragmento Acero", "efecto": "potencia movimientos de tipo Acero"},
+    {"nombre": "Baya Estadio", "efecto": "restaura PS una vez en la batalla"}
+  ],
+  "nota": "Los pasivos persisten toda la run en la bolsa; los consumibles se gastan."
+}

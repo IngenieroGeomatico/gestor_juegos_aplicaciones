@@ -5,6 +5,11 @@
       "type": "local",
       "command": ["/home/radi/.local/bin/pdf-mcp"],
       "enabled": true
+    },
+    "firefox": {
+      "type": "local",
+      "command": ["/home/radi/.local/bin/firefox-mcp", "--connect-existing"],
+      "enabled": true
     }
   }
 }

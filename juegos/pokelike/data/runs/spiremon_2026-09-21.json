@@ -1,0 +1,49 @@
+{
+  "fecha": "2026-09-21",
+  "tipo": "spiremon_semanal",
+  "reto": "SpireMon",
+  "rung": "Intro",
+  "dificultad": "Intro (2.000 pokedólares al primer sub-claro)",
+  "estado": "derrota",
+  "premio": 100,
+  "balance_final": 4330,
+  "tiempo": "19m 23s",
+  "puntuacion": 0,
+  "mvp": {
+    "pokemon": "Machop",
+    "danio": 63,
+    "kos": 2
+  },
+  "stats": {
+    "nivel_maximo": 19,
+    "danio_total": 306,
+    "mayor_golpe": 21,
+    "ps_maximos": 50,
+    "golpes_criticos": 2,
+    "danio_recibido": 529
+  },
+  "equipo_final": [
+    { "pokemon": "Charmander", "nivel": 15, "mov": "Lanzallamas", "pot": 90 },
+    { "pokemon": "Krabby", "nivel": 15, "mov": "Aqua Jet", "pot": 50 },
+    { "pokemon": "Sandshrew", "nivel": 15, "mov": "Terratemblor", "pot": 55 },
+    { "pokemon": "Spearow", "nivel": 15, "mov": "Picotazo", "pot": 50 },
+    { "pokemon": "Machop", "nivel": 15, "mov": "Golpe Karate", "pot": 50 },
+    { "pokemon": "Beedrill", "nivel": 15, "mov": "Picadura", "pot": 50 },
+    { "pokemon": "Tentacool", "nivel": 15, "mov": "Burbuja", "pot": 50 }
+  ],
+  "relicas": ["Life Orb (+1 mana por turno)"],
+  "ruta": [
+    "Mapa 1 (Brock): captura Machop -> batalla firebreather (victoria) -> captura Weedle -> batalla firebreather (victoria) -> poke-center (revivir Kakuna) -> BOSS Brock (victoria)",
+    "Mapa 2 (Lt. Surge): captura Tentacool -> bug-catcher (victoria) -> move-tutor (Charmander Lanzallamas 90) -> fisherman (victoria; Machop fainted) -> poke-center (curacion) -> BOSS Lt. Surge (DERROTA)",
+    "Causa de derrota: en turno 3 del boss me quede sin cuerpo en campo (Spearow+Beedrill fulminados) y el campo a 0 = derrota; Sandshrew (AoE limpieza) sin jugar por terminacion prematura del turno"
+  ],
+  "aprendizajes": [
+    "Kakuna/Beedrill cicla y da +4 niveles permanentes a los aliados presentes al ENTRAR (no a los que entran despues)",
+    "Bosses Gen1 aportan numero variable de enemigos: Brock 2 (Geodude+Onix, relic cap 25% por golpe), Lt. Surge 3 (Static: primera carta del turno +1 coste)",
+    "Perder un combate = campo a 0 (todos fainted); el premio es 100 por mapa aunque se pierda",
+    "Life Orb (+1 mana/turno) y Tentacool (primera carta -1 coste) son la base del motor de mana",
+    "Machop genera A+/SA+ permanentes por cada aliado que entra; Spearow ping 20% por entrada de aliado"
+  ],
+  "operador_en_vivo": "firefox-devtools-mcp (--connect-existing); clicks SVG via PointerEvents simulados con evaluate_script",
+  "notas": "Primera corrida de SpireMon (reto semanal, expira 27.09). Derrota en el boss del Mapa 2. Reintento necesario para el sub-claro de 2.000"
+}

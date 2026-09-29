@@ -1,0 +1,50 @@
+{
+  "_nota": "Catalogo real de objetos de pokelike.xyz, segun la guia de la comunidad (pokelike-guide.fr/en/items). Reemplaza a items.json, que tenia objetos inventados. Cada objeto lleva su efecto real y las etiquetas que usa politica.puntuar_objeto para decidir a quien y cuando.",
+  "boost_tipo": {
+    "_nota": "+40% de dano de ese tipo Y hace que el portador ataque con el tipo del objeto cuando coincide con uno de los suyos. Este detalle es la clave: un Bulbasaur con Semilla Milagro ataca como Planta pura, y en el chart DEL JUEGO Planta contra Roca es 2x, mientras que su Veneno es 0.5x.",
+    "silk_scarf": {"tipo": "Normal", "desde": "inicio"},
+    "charcoal": {"tipo": "Fire", "desde": "inicio"},
+    "mystic_water": {"tipo": "Water", "desde": "inicio"},
+    "miracle_seed": {"tipo": "Grass", "desde": "inicio"},
+    "sharp_beak": {"tipo": "Flying", "desde": "inicio"},
+    "magnet": {"tipo": "Electric", "desde": "mapa 4"},
+    "twisted_spoon": {"tipo": "Psychic", "desde": "mapa 4"},
+    "soft_sand": {"tipo": "Ground", "desde": "mapa 4"},
+    "hard_stone": {"tipo": "Rock", "desde": "mapa 4"},
+    "poison_barb": {"tipo": "Poison", "desde": "mapa 4"},
+    "spell_tag": {"tipo": "Ghost", "desde": "mapa 4"},
+    "black_glasses": {"tipo": "Dark", "desde": "mapa 4"},
+    "metal_coat": {"tipo": "Steel", "desde": "mapa 4"},
+    "pixie_plate": {"tipo": "Fairy", "desde": "mapa 4"},
+    "dragon_fang": {"tipo": "Dragon", "desde": "mapa 6"}
+  },
+  "dano": {
+    "expert_belt": {"efecto": "+100% de dano en golpes super efectivos"},
+    "choice_specs": {"efecto": "+30% de dano especial"},
+    "choice_band": {"efecto": "+40% de dano fisico, pero -20% Def"},
+    "wide_lens": {"efecto": "+20% de dano en todos los movimientos"},
+    "metronome": {"efecto": "un portador de dos tipos ataca con el otro; +20% de dano"},
+    "lagging_tail": {"efecto": "siempre actua el ultimo, pero hace el doble de dano"},
+    "scope_lens": {"efecto": "30% de probabilidad de critico"}
+  },
+  "supervivencia": {
+    "assault_vest": {"efecto": "+50% Def especial"},
+    "rocky_helmet": {"efecto": "quien le pega pierde un 12% de su PS maximo por golpe"},
+    "red_card": {"efecto": "recibe un 50% menos de dano de golpes super efectivos"},
+    "leftovers": {"efecto": "recupera un 10% de su PS maximo cada ronda"},
+    "shell_bell": {"efecto": "cura un 15% del dano hecho"},
+    "eviolite": {"efecto": "impide evolucion; si no ha evolucionado, +50% Def y +50% Def esp"}
+  },
+  "utilidad": {
+    "quick_claw": {"efecto": "50% de probabilidad de actuar primero, sin importar la velocidad"},
+    "choice_scarf": {"efecto": "+50% de velocidad"},
+    "kings_rock": {"efecto": "30% de probabilidad de inmovilizar al rival en cada golpe"},
+    "lucky_egg": {"efecto": "30% de probabilidad de subir +1 nivel extra tras cada combate"}
+  },
+  "consumibles": {
+    "sacred_ash": {"efecto": "restaura todos los PS y revive a un pokemon (caido o vivo)", "clave": true},
+    "rare_candy": {"efecto": "da +3 niveles de golpe a un pokemon (PS y stats al instante)", "clave": true},
+    "moon_stone": {"efecto": "fuerza la evolucion de un pokemon sea cual sea su nivel"},
+    "tm": {"efecto": "sube un nivel el tier del movimiento de un pokemon", "clave": true}
+  }
+}

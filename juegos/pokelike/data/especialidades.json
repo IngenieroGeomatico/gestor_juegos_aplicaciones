@@ -1,0 +1,267 @@
+{
+ "TRAINER_SPECIALTIES": {
+  "aceTrainer": {
+   "label": "Various Pokemon",
+   "tipos": null
+  },
+  "bugCatcher": {
+   "label": "Bug Pokemon",
+   "tipos": [
+    "Bug"
+   ]
+  },
+  "fireSpitter": {
+   "label": "Fire Pokemon",
+   "tipos": [
+    "Fire"
+   ]
+  },
+  "fisher": {
+   "label": "Water Pokemon",
+   "tipos": [
+    "Water"
+   ]
+  },
+  "hiker": {
+   "label": "Rock/Ground/Fighting Pokemon",
+   "tipos": [
+    "Rock",
+    "Ground",
+    "Fighting"
+   ]
+  },
+  "oldGuy": {
+   "label": "Various Pokemon",
+   "tipos": null
+  },
+  "policeman": {
+   "label": "Fire Pokemon",
+   "tipos": [
+    "Fire"
+   ]
+  },
+  "Scientist": {
+   "label": "Electric/Poison Pokemon",
+   "tipos": [
+    "Electric",
+    "Poison"
+   ]
+  },
+  "teamRocket": {
+   "label": "Poison/Normal Pokemon",
+   "tipos": [
+    "Poison",
+    "Normal"
+   ]
+  },
+  "birdCatcher": {
+   "label": "Flying Pokemon",
+   "tipos": [
+    "Flying"
+   ]
+  },
+  "biker": {
+   "label": "Poison Pokemon",
+   "tipos": [
+    "Poison"
+   ]
+  },
+  "nerd": {
+   "label": "Electric Pokemon",
+   "tipos": [
+    "Electric"
+   ]
+  },
+  "medium": {
+   "label": "Ghost Pokemon",
+   "tipos": [
+    "Ghost"
+   ]
+  },
+  "schoolBoy": {
+   "label": "Normal Pokemon",
+   "tipos": [
+    "Normal"
+   ]
+  },
+  "captain": {
+   "label": "Water Pokemon",
+   "tipos": [
+    "Water"
+   ]
+  },
+  "fighter": {
+   "label": "Fighting Pokemon",
+   "tipos": [
+    "Fighting"
+   ]
+  },
+  "nurse": {
+   "label": "Normal/Fairy Pokemon",
+   "tipos": [
+    "Normal",
+    "Fairy"
+   ]
+  },
+  "magmaGrunt": {
+   "label": "Fire/Ground/Dark Pokemon",
+   "tipos": [
+    "Fire",
+    "Ground",
+    "Dark"
+   ]
+  },
+  "aquaGrunt": {
+   "label": "Water/Dark Pokemon",
+   "tipos": [
+    "Water",
+    "Dark"
+   ]
+  },
+  "aromaLady": {
+   "label": "Grass Pokemon",
+   "tipos": [
+    "Grass"
+   ]
+  },
+  "ruinManiac": {
+   "label": "Rock Pokemon",
+   "tipos": [
+    "Rock"
+   ]
+  },
+  "hexManiac": {
+   "label": "Psychic/Ghost Pokemon",
+   "tipos": [
+    "Psychic",
+    "Ghost"
+   ]
+  },
+  "artist": {
+   "label": "Psychic/Rock Pokemon",
+   "tipos": [
+    "Psychic",
+    "Rock"
+   ]
+  },
+  "youngster": {
+   "label": "Normal Pokemon",
+   "tipos": [
+    "Normal"
+   ]
+  },
+  "cyclist": {
+   "label": "Electric Pokemon",
+   "tipos": [
+    "Electric"
+   ]
+  },
+  "rancher": {
+   "label": "Normal/Ground Pokemon",
+   "tipos": [
+    "Normal",
+    "Ground"
+   ]
+  },
+  "ninjaBoy": {
+   "label": "Poison Pokemon",
+   "tipos": [
+    "Poison"
+   ]
+  },
+  "parasolLady": {
+   "label": "Water Pokemon",
+   "tipos": [
+    "Water"
+   ]
+  },
+  "tuber": {
+   "label": "Water Pokemon",
+   "tipos": [
+    "Water"
+   ]
+  },
+  "beauty": {
+   "label": "Normal Pokemon",
+   "tipos": [
+    "Normal"
+   ]
+  },
+  "psychic": {
+   "label": "Psychic/Ghost Pokemon",
+   "tipos": [
+    "Psychic",
+    "Ghost"
+   ]
+  },
+  "galacticGrunt": {
+   "label": "Dark/Poison Pokemon",
+   "tipos": [
+    "Dark",
+    "Poison"
+   ]
+  },
+  "skiier": {
+   "label": "Ice Pokemon",
+   "tipos": [
+    "Ice"
+   ]
+  },
+  "battleGirl": {
+   "label": "Fighting Pokemon",
+   "tipos": [
+    "Fighting"
+   ]
+  }
+ },
+ "TRAINER_SPECIALTIES_GEN2": {
+  "aceTrainer": {
+   "label": "Various Pokemon",
+   "tipos": null
+  },
+  "oldGuy": {
+   "label": "Various Pokemon",
+   "tipos": null
+  },
+  "schoolBoy": {
+   "label": "Normal Pokemon",
+   "tipos": [
+    "Normal"
+   ]
+  },
+  "gentleman": {
+   "label": "Various Pokemon",
+   "tipos": null
+  },
+  "teamRocket": {
+   "label": "Poison/Normal Pokemon",
+   "tipos": [
+    "Poison",
+    "Normal"
+   ]
+  }
+ },
+ "TRAINER_SPECIALTIES_GEN3": {
+  "policeman": {
+   "label": "Fire Pokemon",
+   "tipos": [
+    "Fire"
+   ]
+  },
+  "hiker": {
+   "label": "Rock/Ground/Fighting Pokemon",
+   "tipos": [
+    "Rock",
+    "Ground",
+    "Fighting"
+   ]
+  },
+  "teamRocket": {
+   "label": "Poison/Normal Pokemon",
+   "tipos": [
+    "Poison",
+    "Normal"
+   ]
+  }
+ }
+}
