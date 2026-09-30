@@ -379,6 +379,18 @@ class Juego:
             # 1. Clic real en el objeto de la bolsa.
             insignias.nth(indice_item).click(timeout=3000)
             self.page.wait_for_timeout(450)
+            # Se mira que se ha abierto algo: si no, el paso 2 no tiene sobre
+            # que trabajar y elEquip falla sin decir por que. Medido: tras el
+            # clic no habia NINGUN modal abierto.
+            abierto = self.page.evaluate(
+                """() => [...document.querySelectorAll(
+                        '[class*=modal], [class*=overlay], [class*=dialog],'
+                        + ' [class*=popup]')]
+                    .some(e => e.offsetParent !== null)"""
+            )
+            if not abierto:
+                self._dump_tras_clic_item(indice_item, nombre_mons)
+                return False
 
             # 2. Ventana con las 3 opciones del objeto.
             opcion = self.page.locator(
@@ -405,10 +417,22 @@ class Juego:
                     "[class*=modal] button:has-text('Equipar')"
                 ).nth(min(indice_mons, 5))
             if not victimario.count():
+                self._dump_modal_equip(indice_item, indice_mons, nombre_mons)
                 self.cerrar_modal_item()
                 return False
+            antes = self._cuantos_en_bolsa()
             victimario.click(timeout=3000)
-            self.page.wait_for_timeout(500)
+            self.page.wait_for_timeout(600)
+            despues = self._cuantos_en_bolsa()
+
+            # Un clic a un objeto equivocado tambien devuelve True, asi que la
+            # unica senal fiable es que el objeto **desaparecio de la bolsa**.
+            if despues >= antes:
+                print(f"[EQUIP] el clic no sirvio: bolsa {antes}->{despues} "
+                      f"(món={nombre_mons})", flush=True)
+                self._dump_modal_equip(indice_item, indice_mons, nombre_mons)
+                self.cerrar_modal_item()
+                return False
 
             # Se cierra el modal que pueda quedar (el de equipar tiene su propio
             # boton de cancelar y no escucha Escape).
@@ -417,6 +441,113 @@ class Juego:
         except Exception:  # noqa: BLE001
             self.cerrar_modal_item()
             return False
+
+    def _dump_tras_clic_item(self, indice_item: int,
+                             nombre_mons: str | None) -> None:
+        """Qué se ve en pantalla tras clicar un objeto de la bolsa.
+
+        El objetivo es ver los 3 botones de opcion tal y como los escribe el
+        juego, que es lo que faltaba: los selectores que habia eran de
+        suposicion.
+        """
+        try:
+            datos = self.page.evaluate(
+                r"""() => {
+                    const vis = e => e && e.offsetParent !== null;
+                    const out = {capa: document.body.className, cajas: [],
+                                 botones: [], insignias: []};
+                    [...document.querySelectorAll('#elite-prep-items *')]
+                        .filter(vis).forEach(e => out.insignias.push({
+                            tag: e.tagName,
+                            id: e.id || '',
+                            clase: (e.className || '').toString().slice(0, 46),
+                            texto: (e.innerText || '').trim().slice(0, 30),
+                            shortcut: e.dataset ? (e.dataset.shortcut || '') : '',
+                        }));
+                    [...document.querySelectorAll('body *')]
+                        .filter(e => vis(e) && e.children.length <= 3
+                            && ((e.innerText || '').trim().length > 0))
+                        .filter(e => /item|objeto|equip|bolsa/i.test(
+                            (e.id || '') + ' ' + (e.className || '')))
+                        .slice(0, 14)
+                        .forEach(e => out.cajas.push({
+                            tag: e.tagName, id: e.id || '',
+                            clase: (e.className || '').toString().slice(0, 60),
+                            texto: (e.innerText || '').replace(/\s+/g,' ')
+                                .trim().slice(0, 90),
+                        }));
+                    [...document.querySelectorAll('button, [role=button]')]
+                        .filter(vis).slice(0, 22).forEach(b => out.botones.push({
+                            id: b.id || '',
+                            clase: (b.className || '').toString().slice(0, 40),
+                            texto: (b.innerText || '').trim().slice(0, 26),
+                            shortcut: b.dataset ? (b.dataset.shortcut || '') : '',
+                        }));
+                    return out;
+                }"""
+            )
+            import json as _json
+            print(f"[TRAS-CLIC] item={indice_item} món={nombre_mons} "
+                  f"capa={datos.get('capa')}", flush=True)
+            print("[TRAS-CLIC] " + _json.dumps(datos, ensure_ascii=False)[:2200],
+                  flush=True)
+        except Exception as exc:  # noqa: BLE001
+            print(f"[TRAS-CLIC] volcado fallo: {exc}", flush=True)
+
+    def _cuantos_en_bolsa(self) -> int:
+        """Cuántos objetos hay en la bolsa ahora mismo."""
+        try:
+            return int(self.page.evaluate(
+                """() => document.querySelectorAll(
+                    '#elite-prep-items .item-badge').length"""))
+        except Exception:  # noqa: BLE001
+            return -1
+
+    def _dump_modal_equip(self, indice_item: int, indice_mons: int,
+                          nombre_mons: str | None) -> None:
+        """Vuelca a la salida el modal de equipar para leer sus selectores.
+
+        Va a `print` y no a un fichero: un volcado a disco se perdia y hacia
+        perder tiempo adivinando el DOM en vez de mirarlo.
+        """
+        try:
+            datos = self.page.evaluate(
+                r"""() => {
+                    const vis = e => e && e.offsetParent !== null;
+                    const out = {modales: [], slots: []};
+                    [...document.querySelectorAll('[class*=modal], [class*=overlay]')]
+                        .filter(vis).forEach(m => out.modales.push({
+                            id: m.id || '', clase: (m.className || '')
+                                .toString().slice(0, 70),
+                            texto: (m.innerText || '').replace(/\s+/g,' ')
+                                .trim().slice(0, 120),
+                            botones: [...m.querySelectorAll('button, [role=button]')]
+                                .filter(vis).map(b => ({
+                                    id: b.id || '',
+                                    clase: (b.className || '')
+                                        .toString().slice(0, 50),
+                                    texto: (b.innerText || '').trim().slice(0, 26),
+                                })),
+                        }));
+                    [...document.querySelectorAll('.team-slot-reorder')]
+                        .filter(vis).slice(0, 8).forEach(s2 => out.slots.push({
+                            texto: (s2.innerText || '').replace(/\s+/g,' ')
+                                .trim().slice(0, 60),
+                            botones: [...s2.querySelectorAll('button')]
+                                .map(b => ({id: b.id || '',
+                                             texto: (b.innerText || '')
+                                                 .trim().slice(0, 22)})),
+                        }));
+                    return out;
+                }"""
+            )
+            import json as _json
+            print(f"[MODAL-EQUIP] item={indice_item} mons={indice_mons} "
+                  f"nombre={nombre_mons}")
+            print("[MODAL-EQUIP] " + _json.dumps(datos, ensure_ascii=False)[:1800],
+                  flush=True)
+        except Exception as exc:  # noqa: BLE001
+            print(f"[MODAL-EQUIP] volcado fallo: {exc}", flush=True)
 
     def cerrar_modal_item(self) -> None:
         """Cierra el modal de objetos con clics reales, si hay alguno abierto.
