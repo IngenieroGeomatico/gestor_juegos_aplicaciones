@@ -209,6 +209,103 @@ def test_pesos_sin_valores_absurdos() -> None:
               f"-> {v}")
 
 
+def _score(d: P.Decision) -> float:
+    """El planner devuelve el score dentro de `razon`, no en un campo."""
+    import re
+    m = re.search(r"score=(-?[0-9.]+)", d.razon or "")
+    return float(m.group(1)) if m else float("nan")
+
+
+def test_orden_de_prioridades() -> None:
+    """El orden del usuario: **niveles, MT al principal, objetos**.
+
+    El objeto no puede acercarse a un nivel ni a una MT, y la MT se pospone
+    sola si al principal le faltan dos niveles de ruta.
+    """
+    def nodo(tipo):
+        # `clickable` es obligatorio: el planificador descarta los nodos que no
+        # lo llevan, y sin el el score sale vacio y el test mide nada.
+        return [{"id": "n", "tipo": tipo, "clickable": True, "atajo": "1"}]
+    eq = [{"nombre": "Ivysaur", "tipos": ["Grass", "Poison"], "nivel": 18,
+           "ps": 60, "ps_max": 60}]
+    falta1 = PL.elegir(eq, nodo("tutor"), region="Kanto", insignias=0,
+                       ctx_extra={"tutor_listo": True, "liston": 19})
+    objeto = PL.elegir(eq, nodo("item"), region="Kanto", insignias=0,
+                       ctx_extra={"tiene_bolsa": True})
+    check("el objeto no supera a la MT",
+          _score(objeto) < _score(falta1) or _score(objeto) <= 12.0,
+          f"objeto={_score(objeto)} vs MT={_score(falta1)}")
+    check("el objeto es la ultima prioridad", _score(objeto) <= 12.0,
+          f"-> {_score(objeto)}")
+    trainer = PL.elegir(eq, nodo("trainer"), region="Kanto", insignias=0,
+                        ctx_extra={"falta_nivel": 3})
+    check("el nivel no se aplaza por un objeto",
+          _score(trainer) > _score(objeto),
+          f"nivel={_score(trainer)} vs objeto={_score(objeto)}")
+
+
+def test_puerta_del_75() -> None:
+    """La puerta que cierra el grafo, tal cual la fijó el usuario.
+
+    >75% de vida se va al otro nodo (al jefe). Por debajo, se pasa por el centro
+    a curarse y de ahí al jefe.
+
+    Se pasan **los dos nodos a la vez**, porque `hay_cura_disponible` se deduce
+    de los nodos que se están puntuando: si se pasa uno solo, la cura no está
+    "disponible" y la puerta no tiene nada que decidir.
+    """
+    check("el umbral es 75%", PL.UMBRAL_PUERTA_JEFE == 0.75,
+          f"-> {PL.UMBRAL_PUERTA_JEFE}")
+
+    def dos_nodos():
+        # "b" = pelea/nivel, "c" = centro pokemon.
+        return [{"id": "b", "tipo": "battle", "clickable": True, "atajo": "b"},
+                {"id": "c", "tipo": "pokecenter", "clickable": True,
+                 "atajo": "c"}]
+
+    def equipo(ps, ps_max):
+        # Tres móns: con uno solo el plan dice "capturar", que es el paso 1
+        # del grafo del usuario, y la puerta no llega a decidir.
+        return [{"nombre": "Ivysaur", "tipos": ["Grass", "Poison"],
+                 "nivel": 20, "ps": ps, "ps_max": ps_max},
+                {"nombre": "Squirtle", "tipos": ["Water"], "nivel": 19,
+                 "ps": ps, "ps_max": ps_max},
+                {"nombre": "Pidgeotto", "tipos": ["Normal", "Flying"],
+                 "nivel": 19, "ps": ps, "ps_max": ps_max}]
+
+    def elige(ps, extra=None):
+        e = {"hay_cura": True, "tiene_bolsa": True}
+        e.update(extra or {})
+        return PL.elegir(equipo(ps, 100), dos_nodos(), region="Kanto",
+                         insignias=0, ctx_extra=e)
+
+    sano = elige(90)
+    roto = elige(60)
+    check("al 90% se va al otro nodo, no al centro", sano.valor == "b",
+          f"-> {sano.valor}: {sano.razon[:70]}")
+    check("al 60% se pasa por el centro a curarse", roto.valor == "c",
+          f"-> {roto.valor}: {roto.razon[:70]}")
+
+    # El objeto no puede ganar a la cura con el equipo por debajo del liston.
+    def elige_item(ps):
+        nodos = [{"id": "c", "tipo": "pokecenter", "clickable": True,
+                  "atajo": "c"},
+                 {"id": "i", "tipo": "item", "clickable": True, "atajo": "i"}]
+        return PL.elegir(equipo(ps, 100), nodos, region="Kanto", insignias=0,
+                         ctx_extra={"hay_cura": True, "tiene_bolsa": True})
+    check("al 60% la cura gana al objeto", elige_item(60).valor == "c",
+          f"-> {elige_item(60).valor}")
+
+    # Y un món con un rasguño de vida sigue mandando: por debajo del 75% de
+    # media no se juega, aunque la media pase.
+    mixto = equipo(100, 100)
+    mixto[0]["ps"] = 12
+    d = PL.elegir(mixto, dos_nodos(), region="Kanto", insignias=0,
+                  ctx_extra={"hay_cura": True})
+    check("un solo món al 12% fuerza la cura", d.valor == "c",
+          f"-> {d.valor}: {d.razon[:70]}")
+
+
 def main() -> int:
     test_tipos_de_nodo()
     test_los_helpers_de_ruta_ven_los_nodos()
@@ -219,6 +316,8 @@ def main() -> int:
     test_heridos_se_ordenan_por_porcentaje()
     test_delantero_contra_fuego()
     test_pesos_sin_valores_absurdos()
+    test_orden_de_prioridades()
+    test_puerta_del_75()
 
     for o in OKS:
         print(f"  ok   {o}")

@@ -213,6 +213,13 @@ PESO_TUTOR_CON_NIVEL = 9.0
 # igual ("item nodes beat fight nodes early"). El coste real es un paso hacia
 # el jefe, y un +40% de daño o un Lucky Egg lo compensan de sobra.
 PESO_OBJETO = 12.0
+
+# La puerta que cierra el grafo, fijada por el usuario:
+#   "...acabar en el nodo anterior a centro pokemon y si los pokemon tienen mas
+#    del 75% de la vida ir al otro nodo y si no, ir al centro para curarse".
+# Es el unico corte de vida del plan. Antes estaba al 55%, y H1 seguia dando
+# -5 niveles de media: no era falta de nivel sino entrar al jefe gastado.
+UMBRAL_PUERTA_JEFE = 0.75
 # El nodo `?` es aleatorio y trae shiny, pasivo o **trade**. El trade es la
 # mecanica mas fuerte del juego segun la guia: cambias tu peor món por uno
 # aleatorio **con +3 niveles y PS completo**, y las mejoras del Move Tutor se
@@ -303,7 +310,15 @@ def puntuar(tipo: str, ctx: Contexto) -> tuple[float, str]:
         # Ponyta con Bulbasaur a 100 y Spearow a 13 y perdio. El carry estaba
         # sano, asi que mirar solo su vida no disparaba nada. Un món a 13 con
         # otro a 100 es un equipo al borde.
-        if caidos >= 1 or ratio < 0.55 or ctx.carry_ps < 40.0:
+        # El usuario lo fijo de forma explicita: **más del 75% de vida se va al
+        # otro nodo**, por debajo se pasa por el centro a curarse y luego al
+        # jefe. Antes el corte era al 55%, o sea que se entraba al lider con el
+        # equipo al 60% por mucho que hubiera centro a mano. Con el 75% la
+        # puerta decide con la misma regla que la persona.
+        # El carry se mira aparte a proposito: un solo món al 13% se va a morir
+        # aunque la media del equipo pase del 75%, y perder un món es peor que
+        # perder un paso.
+        if caidos >= 1 or ratio <= UMBRAL_PUERTA_JEFE or ctx.carry_ps < 40.0:
             return (-5.0,
                     f"nada que no sea curar: {caidos} caido(s), equipo al "
                     f"{ratio*100:.0f}%, carry al {ctx.carry_ps:.0f}%")
@@ -479,17 +494,29 @@ def puntuar(tipo: str, ctx: Contexto) -> tuple[float, str]:
         return (12.0, "trade: a nivel ya, no hace falta")
 
     if tipo == "tutor":
+        # Segunda prioridad, y **solo para el principal**: una MT a un món que
+        # no va a llevar el combate no vale el paso. El nivel va primero, asi
+        # que con dos niveles de diferencia la MT se pospone sola.
         if falta > 1:
             return (PESO_TUTOR_SIN_NIVEL,
-                    "tutor pospuesto: el nivel va primero")
+                    "MT pospuesta: el nivel va primero (1er criterio)")
+        if not ctx.carry_ps or ctx.carry_ps < 25.0:
+            return (PESO_TUTOR_SIN_NIVEL,
+                    "MT pospuesta: el principal esta demasiado flojo para "
+                    "que le sirva el tier")
         if ctx.tutor_listo:
             return (PESO_TUTOR_CON_NIVEL,
-                    "tutor: el nodo está disponible, sube el tier")
-        return (PESO_TUTOR_CON_NIVEL - 1.0, "tutor: sin nodo accesible ahora")
+                    "MT: 2a prioridad y el nodo esta disponible, sube el "
+                    "tier del principal")
+        return (PESO_TUTOR_CON_NIVEL - 1.0, "MT: sin nodo accesible ahora")
 
     if tipo == "item":
+        # El objeto es **la tercera** prioridad del orden del usuario
+        # (niveles, MT al principal, objetos), asi que no puede acercarse ni a
+        # un nivel ni a una MT: si no, el bot gastaba pasos en la bolsa con el
+        # equipo por debajo del liston.
         if not ctx.tiene_bolsa:
-            return (PESO_OBJETO, "objeto: bolsa vacía")
+            return (PESO_OBJETO, "objeto: bolsa vacía (3a prioridad)")
         return (2.0, "objeto: ya hay objetos, no es prioridad")
 
     if tipo == "incognita":
