@@ -469,8 +469,15 @@ def _mejora_claramente(candidato: dict, m: dict,
     if futuros:
         tipos_m = {T.normalizar(t) for t in (m.get("tipos") or [])}
         if not (set(tipos) & tipos_m):
-            aporta = max((utilidad_contra(tipos, r)[0] for r in futuros),
-                         default=1.0)
+            # Un 2x contra un entrenador **de este mapa** cuenta tanto como
+            # uno contra el proximo jefe: es un combate que va a venir igual y
+            # puede ser el que acaba la run.
+            aporta = max(
+                [max((utilidad_contra(tipos, r)[0] for r in futuros),
+                     default=1.0)]
+                + [max((utilidad_contra(tipos, r)[0] for r in rival_ruta),
+                       default=0.0) * 1.0 if rival_ruta else 0.0],
+                default=1.0)
             # El relleno solo se acepta si el equipo **ya esta a nivel**. Cazando
             # se gasta un nodo, y ese nodo es nivel: medido en la tanda que
             # perdio contra Brock, cazo un Rattata con "2x apertura=0" (ninguna
@@ -487,7 +494,8 @@ def elegir_captura(equipo: list[dict], candidatos: list[dict],
                    max_miembros: int = MAX_EQUIPO,
                    proximos: list[str] | None = None,
                    region: str | None = None,
-                   ignorar_nivel: bool = False) -> Decision:
+                   ignorar_nivel: bool = False,
+                   tipos_entrenadores: list[str] | None = None) -> Decision:
     """Elige con qué salvaje pelear (el bot no puede lanzar la bola aquí).
 
     La captura es la decisión más cara de la partida: cuesta un nodo y un món.
@@ -553,6 +561,15 @@ def elegir_captura(equipo: list[dict], candidatos: list[dict],
     futuros = [T.normalizar(t) for t in (proximos or []) if t]
     ref = list(objetivo)
 
+    # **Especialidades de los entrenadores de este mapa.** Se leen del estado
+    # del juego sin entrar en combate, asi que son informacion gratis, y son el
+    # agujero mas caro: tener 2x contra el jefe no sirve si el mapa esta lleno
+    # de Firebreather y el equipo entero es 0.5x contra Fuego. Medido: el bot
+    # peléo contra un Firebreather con Bulbasaur (0.5x) y Paras (0.5x) porque no
+    # tenia nada contra Fuego.
+    rival_ruta = [T.normalizar(t) for t in (tipos_entrenadores or []) if t]
+    rival_ruta = [t for t in rival_ruta if t and t not in ref]
+
     mejor, mejor_puntaje, detalle = None, -1e9, ""
     for c in candidatos:
         tipos = [T.normalizar(t) for t in (c.get("tipos") or [])]
@@ -606,8 +623,15 @@ def elegir_captura(equipo: list[dict], candidatos: list[dict],
             # un paso de nivel, y una plaza), así que solo se gasta en algo que
             # conteste a un jefe. La guía lo dice igual: "only take a catch if it
             # improves the route you actually have".
-            aporta = max((utilidad_contra(tipos, r)[0] for r in futuros),
-                         default=1.0)
+            # Un 2x contra un entrenador **de este mapa** cuenta tanto como
+            # uno contra el proximo jefe: es un combate que va a venir igual y
+            # puede ser el que acaba la run.
+            aporta = max(
+                [max((utilidad_contra(tipos, r)[0] for r in futuros),
+                     default=1.0)]
+                + [max((utilidad_contra(tipos, r)[0] for r in rival_ruta),
+                       default=0.0) * 1.0 if rival_ruta else 0.0],
+                default=1.0)
             # El relleno solo se acepta si el equipo **ya esta a nivel**. Cazando
             # se gasta un nodo, y ese nodo es nivel: medido en la tanda que
             # perdio contra Brock, cazo un Rattata con "2x apertura=0" (ninguna

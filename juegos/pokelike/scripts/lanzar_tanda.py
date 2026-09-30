@@ -56,20 +56,37 @@ def cerrar_todo(esperar: float = 4.0) -> None:
     time.sleep(esperar)
 
 
-def limpiar_logs(conservar: int = 3) -> int:
+def limpiar_logs(conservar: int = 3, conservar_si_hay_medidas: bool = True) -> int:
     """Borra los logs viejos y deja los `conservar` más recientes.
 
     Petición del usuario: cuando una run termina y su log ya no sirve, se
     fuera. Sin esto el fichero crecía sin límite (una vez llegó a 11 MB y
     120.000 líneas de pruebas antiguas) y había que ir borrando a mano.
+
+    **Pero** con `conservar_si_hay_medidas` no se borra nada que todavía no esté
+    en `data/medidas.json`: las hipótesis se resuelven leyendo logs, así que
+    borrar la evidencia antes de medirla hace que las 100 partidas no valgan.
+    Sin lo que ya se ha medido, el límite de 3 sigue igual.
     """
     carpeta = RAIZ / "juegos" / "pokelike" / "log"
     if not carpeta.is_dir():
         return 0
     logs = sorted(carpeta.glob("log-*.txt"), key=lambda p: p.stat().st_mtime,
                   reverse=True)
+    medidos: set[str] = set()
+    if conservar_si_hay_medidas:
+        try:
+            import json as _json
+            mc = RAIZ / "juegos" / "pokelike" / "data" / "medidas.json"
+            if mc.exists():
+                medidos = set(_json.loads(mc.read_text(encoding="utf-8"))
+                              .get("partidas", {}))
+        except Exception:  # noqa: BLE001
+            medidos = set()
     borrados = 0
     for viejo in logs[conservar:]:
+        if viejo.name in medidos:
+            continue  # todavía no se ha medido: no se borra
         try:
             viejo.unlink()
             borrados += 1

@@ -67,6 +67,8 @@ class Bot:
         # un trade o un mejor camino de exp).
         self._rerolls = 0
         self._rerolls_busqueda = 0
+        # Tipos de los entrenadores del mapa actual (para la captura).
+        self._tipos_ruta: list[str] = []
         # ¿Ya hemos hecho algún trade en esta run?
         self._trade_hecho = False
         # PS real por món, aprendido en la pantalla de combate ("0/19").
@@ -855,7 +857,8 @@ class Bot:
         d = P.elegir_captura(equipo, cands, actual,
                              (proximos[1:2] or [None])[0],
                              P.MAX_EQUIPO, proximos, self.region,
-                             ignorar_nivel=bool(getattr(self, "_catch_ignora_nivel", False)))
+                             ignorar_nivel=bool(getattr(self, "_catch_ignora_nivel", False)),
+                             tipos_entrenadores=list(self._tipos_ruta))
         self._catch_ignora_nivel = False
         self.anotar(d)
         if d.valor:
@@ -1022,6 +1025,35 @@ class Bot:
                 self.log(f"  ⋯ sustituido: sale {objetivo}")
                 return f"swap: fuera {objetivo}"
         return self._opciones_genericas("#swap-choices", "#btn-cancel-swap", "swap")
+
+    def tipos_de_entrenadores_del_mapa(self, mapa: dict) -> list[str]:
+        """Tipos de los entrenadores accesibles en este mapa.
+
+        Es informacion **gratis y Adelante**: la especialidad de cada
+        entrenador se lee del estado del juego, sin entrar en combate. Pasa a
+        ser objetivo de la captura, porque de nada sirve tener un 2x contra el
+        jefe si luego aparece un Firebreather y el equipo entero es 0.5x
+        contra el.
+
+        Medido: el bot peleaba contra un Firebreather con Bulbasaur (0.5x) y
+        Paras (0.5x) porque su equipo no tenia nada contra Fuego. Con esto la
+        captura puede tapar ese agujero.
+        """
+        out: list[str] = []
+        for n in mapa.get("nodos", []):
+            if n.get("tipo") != "entrenador" and n.get("type") != "trainer":
+                continue
+            sprite = n.get("sprite")
+            if not sprite:
+                continue
+            try:
+                for t in (self.j.trainer_tipos(sprite) or []):
+                    t = str(t)
+                    if t and t not in out and t.lower() != "diversos":
+                        out.append(t)
+            except Exception:  # noqa: BLE001
+                continue
+        return out
 
     def _trade(self) -> str:
         """Acepta el trade: +3 niveles y PS completos, el nodo más rentable.
