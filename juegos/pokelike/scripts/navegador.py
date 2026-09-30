@@ -355,104 +355,103 @@ class Juego:
 
     def _equipar_flujo(self, indice_item: int, indice_mons: int,
                        nombre_mons: str | None) -> bool:
+        """Equipa un objeto de la bolsa con **clics reales**.
+
+        El flujo que describe el usuario mirando la pantalla es de tres pasos:
+
+            1. Clic en el objeto de la bolsa -> ventana con **3 opciones**.
+            2. Clic en una de las 3 -> ventana con **nuestro equipo** y un botón
+               **"equipar"** al lado de cada món (más otro para dejarlo en la
+               mochila).
+            3. Clic en "equipar" del món que lo quiere.
+
+        **Lo importante es que los clics son reales.** La versión anterior
+        usaba `el.click()` dentro de `page.evaluate`, o sea un clic sintético, y
+        este juego **no** los atiende: es el mismo motivo por el que el MCP y el
+        BiDi no conseguan ni abrir el juego. Con `locator.click()`, que sí
+        despacha eventos de confianza, el flujo funciona. Por eso estaba el
+        contador en 43 intentos y 0 equips.
+        """
         try:
             insignias = self.page.locator("#elite-prep-items .item-badge")
             if insignias.count() <= indice_item:
                 return False
-            # 1. Clic en el objeto de la bolsa.
-            insignias.nth(indice_item).click()
-            self.page.wait_for_timeout(400)
+            # 1. Clic real en el objeto de la bolsa.
+            insignias.nth(indice_item).click(timeout=3000)
+            self.page.wait_for_timeout(450)
 
-            # 2. Ventana con las 3 opciones. Es un paso que faltaba por completo.
-            opciones = self._opciones_modal()
-            if not opciones:
-                # Puede que el modal de móns ya esté abierto (objeto ya
-                # seleccionado antes): se sigue al paso 3 igualmente.
-                opciones = []
-            if opciones:
-                self.page.evaluate(
-                    """(n) => {
-                        const vis = e => e && e.offsetParent !== null;
-                        const cands = [...document.querySelectorAll(
-                            '[class*=modal] .item-card, [class*=modal] [data-shortcut],'
-                            + ' [class*=modal] .choice, [class*=modal] button')]
-                            .filter(vis).filter(e => !/equipar|mochila|bag/i.test(
-                                e.innerText || ''));
-                        const el = cands[n] || cands[0];
-                        if (!el) return false;
-                        if (el.dataset && el.dataset.shortcut) {
-                            document.dispatchEvent(new KeyboardEvent('keydown', {key: el.dataset.shortcut}));
-                            el.click();
-                        } else { el.click(); }
-                        return true;
-                    }""", 0)
+            # 2. Ventana con las 3 opciones del objeto.
+            opcion = self.page.locator(
+                "[class*=modal] .item-card, [class*=modal] [data-shortcut],"
+                " [class*=modal] .choice"
+            ).first
+            if opcion.count() and opcion.is_visible():
+                opcion.click(timeout=3000)
                 self.page.wait_for_timeout(500)
 
-            # 3. Botón "equipar" del món elegido.
-            ok = self.page.evaluate(
-                """(nombre) => {
-                    const vis = e => e && e.offsetParent !== null;
-                    const modales = [...document.querySelectorAll(
-                        '[class*=modal], [class*=overlay]')].filter(vis);
-                    const capa = modales[modales.length - 1] || document;
-                    // Se busca el botón "equipar" que esté junto al món pedido.
-                    const filas = [...capa.querySelectorAll('*')].filter(e => vis(e)
-                        && /equipar/i.test(e.innerText || '')
-                        && e.children.length <= 2
-                        && e.tagName !== 'BODY');
-                    if (!filas.length) return false;
-                    let destino = filas[Math.min(indice, filas.length - 1)];
-                    if (nombre) {
-                        for (const f of filas) {
-                            const txt = (f.parentElement?.innerText || '')
-                                .toLowerCase();
-                            if (txt.includes(nombre.toLowerCase())) { destino = f; break; }
-                        }
-                    }
-                    destino.click();
-                    return true;
-                }""", nombre_mons or "")
-            self.page.wait_for_timeout(400)
+            # 3. Botón "equipar" del món elegido, con clic real.
+            victimario = None
+            if nombre_mons:
+                victimario = self.page.locator(
+                    f".team-slot-reorder:has-text('{nombre_mons}') "
+                    f"button:has-text('Equipar')"
+                ).first
+                if not victimario.count():
+                    victimario = self.page.locator(
+                        f".team-slot-reorder:has-text('{nombre_mons}') button"
+                    ).first
+            if not victimario or not victimario.count():
+                victimario = self.page.locator(
+                    "[class*=modal] button:has-text('Equipar')"
+                ).nth(min(indice_mons, 5))
+            if not victimario.count():
+                self.cerrar_modal_item()
+                return False
+            victimario.click(timeout=3000)
+            self.page.wait_for_timeout(500)
+
+            # Se cierra el modal que pueda quedar (el de equipar tiene su propio
+            # boton de cancelar y no escucha Escape).
             self.cerrar_modal_item()
-            return bool(ok)
+            return True
         except Exception:  # noqa: BLE001
+            self.cerrar_modal_item()
             return False
 
     def cerrar_modal_item(self) -> None:
-        """Cierra el modal de objetos si ha quedado abierto.
+        """Cierra el modal de objetos con clics reales, si hay alguno abierto.
 
-        Sin esto la pantalla de preparacion se quedaba **atascada**: el overlay
-        tapaba el boton FIGHT y el bot lo intentaba 13 veces sin avanzar, hasta
-        declararse ATASCADO. Medido en una partida tras equipar un objeto.
+        Sin esto la pantalla de preparación se quedaba **atascada**: el overlay
+        tapaba el botón de FIGHT y el bot lo intentaba 13 veces sin avanzar,
+        hasta declararse ATASCADO y perder la run con insignias en el bolsillo.
 
-        Se cierra **pulsando el boton de cancelar del propio modal**
-        (`#btn-equip-cancel`), no solo con teclas: el modal de equipar no
-        escucha Escape, y por eso el metodo anterior de verdad no lo cerraba y
-        la run se colgaba en `elite-prep-screen` con las dos insignias.
+        Dos cosas que costaron una partida cada una:
+        - el modal de equipar **no escucha Escape**, hay que pulsar su botón
+          (`#btn-equip-cancel`);
+        - cerrar con un clic **sintético** (`.click()` desde JS) no hace nada
+          en este juego.
         """
-        try:
-            for sel in ("#btn-equip-cancel", "#btn-equip-to-bag",
-                        "#btn-cancel-equip"):
-                if self.visible(sel):
-                    self.activar(sel)
-                    self.page.wait_for_timeout(350)
-                    if not self.page.evaluate(
-                        """() => [...document.querySelectorAll(
-                                '[class*=modal], [class*=overlay]')]
-                            .some(e => e.offsetParent !== null)"""
-                    ):
-                        return
-        except Exception:  # noqa: BLE001
-            pass
+        for sel in ("#btn-equip-cancel", "#btn-cancel-equip",
+                    "#btn-equip-to-bag"):
+            try:
+                loc = self.page.locator(sel).first
+                if loc.count() and loc.is_visible():
+                    loc.click(timeout=2000)
+                    self.page.wait_for_timeout(300)
+            except Exception:  # noqa: BLE001
+                pass
         try:
             abierto = self.page.evaluate(
                 """() => [...document.querySelectorAll(
                         '[class*=modal], [class*=overlay]')]
                     .some(e => e.offsetParent !== null)"""
             )
-            if not abierto:
-                return
-            for via in ("Escape", "Enter", "Space"):
+        except Exception:  # noqa: BLE001
+            return
+        if not abierto:
+            return
+        for via in ("Escape", "Enter"):
+            try:
                 self.page.keyboard.press(via)
                 self.page.wait_for_timeout(250)
                 if not self.page.evaluate(
@@ -461,8 +460,8 @@ class Juego:
                         .some(e => e.offsetParent !== null)"""
                 ):
                     return
-        except Exception:  # noqa: BLE001
-            pass
+            except Exception:  # noqa: BLE001
+                pass
 
     def _opciones_modal(self) -> list[str]:
         """Etiquetas de las opciones abiertas en un modal, para la traza."""
