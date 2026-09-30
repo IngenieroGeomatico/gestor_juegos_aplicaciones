@@ -58,6 +58,31 @@ uv run --group dev python juegos/pokelike/scripts/jugar_pokelike.py --region Kan
 
 Perder **no** es un bug del bot. Casi siempre es nivel o composición de equipo.
 
+## La tabla de tipos va aparte, y es lo primero que hay que abrir
+
+**`TABLA-TIPOS.md`** (en esta misma skill) tiene el chart **real del juego**, las
+dos mitades —con quién pega y quién le pega— y las tres desviaciones que tiene
+respecto al Gen 6 oficial. Se lee antes de elegir el delantero, siempre.
+
+La regla que más se ha olvidado: **elegir delantero es mirar el otro lado**. Delante
+va el món que **pega x2** al rival **y no recibe x2**, y las dos mitades se leen
+por separado.
+
+**El ejemplo del error, porque es facil de repetir — Bulbasaur contra Fuego:**
+
+- `Planta -> Fuego` = **x1/2**: pega la mitad.
+- `Fuego -> Planta` = **x2**: recibe el doble.
+
+**Bulbasaur es el peor emparejamiento posible contra un Charmander.** Se llego a
+afirmar lo contrario ("Bulbasaur es x2 contra Fuego") leyendo al reves la fila:
+el 2 que aparece junto a Planta en la fila de Fuego significa que **Fuego** le
+pega el doble a Planta, no que Planta pegue el doble a Fuego. Contra Fuego al
+frente van **Agua, Roca o Acero**.
+
+Y para no extremear: contra un rival de **Planta**, Bulbasaur aguanta bien
+(Planta -> Planta es x1/2 por los dos lados), así que **sí** debe abrir ahí. El
+delantero se decide con la aritmetica de la tabla, no con "este món es bueno".
+
 ## Libro de jugadas (el mismo que usa el humano)
 
 En este orden, en cada nodo:
