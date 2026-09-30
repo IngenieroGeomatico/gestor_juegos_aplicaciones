@@ -1023,7 +1023,13 @@ def entrenadores_por_delante(nodos: list[dict], edges: list,
         if prof > tope or nid in memo:
             return memo.get(nid, 0)
         n = por_id.get(nid)
-        propio = 1 if (n and n.get("type") == "trainer") else 0
+        # La clave es `tipo`, no `type`: en los nodos del mapa el tipo va en
+        # `tipo` (en inglés) y `type` no existe. Con `type` esta función
+        # devolvía 0 en todas las ramas, o sea que la preferencia de ruta por
+        # trainers **nunca se ejecutó**. Es la misma clase de fallo que
+        # `cura` vs `pokecenter`: comparar contra un nombre que no está.
+        propio = 1 if (n and tipo_de_estado(n.get("tipo") or n.get("type"))
+                       == "entrenador") else 0
         total = propio + sum(valor(h, prof + 1) for h in hijos.get(nid, []))
         memo[nid] = total
         return total

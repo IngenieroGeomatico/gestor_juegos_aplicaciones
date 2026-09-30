@@ -26,7 +26,8 @@ import time
 from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parent.parent.parent.parent
-SCRIPT = RAIZ / "juegos" / "pokelike" / "scripts" / "jugar_pokelike.py"
+SCRIPTS = RAIZ / "juegos" / "pokelike" / "scripts"
+SCRIPT = SCRIPTS / "jugar_pokelike.py"
 MAXIMO = 2  # no negociable: más de dos se queda sin memoria
 
 
@@ -158,6 +159,28 @@ def main() -> int:
     # aparece un error de código, no se lanza nada. Esto viene de perder varias
     # tandas seguidas por un `NameError` en un manejador: la partida se
     # arrastraba sin avanzar y no había forma de verlo hasta el resumen.
+    # --------------------------------------------------- integridad del código
+    # Antes de gastar ni un minuto de juego, se comprueba que el bot no tiene
+    # código muerto. Un `except` mudo puede dejar una rama entera sin ejecutar
+    # (ha pasado siete veces: `cura` vs `pokecenter`, `PL` vs `P`, `type` vs
+    # `tipo`, `trade` -> `incognita`...) y la partida se juega enteramente mal
+    # sin que se note hasta el resumen.
+    if not args.sin_humo:
+        print("integridad del código...")
+        integ = subprocess.run(
+            [sys.executable, str(SCRIPTS / "test_integridad.py")],
+            capture_output=True, text=True, timeout=180)
+        if integ.returncode != 0:
+            print("!! la batería de integridad ha fallado. NO se lanza "
+                  "ninguna run:")
+            for linea in (integ.stdout or "").splitlines():
+                if linea.strip().startswith("FALLA"):
+                    print("   ", linea.strip())
+            print("\nCorrige el bot y vuelve a intentarlo.")
+            return 2
+        resumen_i = (integ.stdout or "").strip().splitlines()[-1]
+        print(f"  integridad correcta ({resumen_i})")
+
     if not args.sin_humo:
         print("prueba de humo (12 pasos) antes de gastar la tanda...")
         humo = subprocess.run(
