@@ -563,7 +563,13 @@ class Bot:
             orden = PL.orden_para_jefe(con_tipos, PL.plan_para(self.region, insignias))
             if orden:
                 self.log(f"  ⋯ orden contra {d.tipo}: {orden}")
-        if d.tipo == "centro":
+        # El tipo que emite el juego es `pokecenter`. Con `centro` el
+        # contador se quedaba en 0 en todas las partidas, y como el resumen
+        # "centros : N" era la unica prueba de que se pasaba por la curacion,
+        # daba igual curar o no: parecia que nunca se curaba. Octavo caso de la
+        # misma clase: comparar contra un nombre que no esta en el vocabulario
+        # del juego.
+        if d.tipo in ("centro", "pokecenter"):
             self.centros += 1
         elif d.tipo == "tutor":
             self.tutores += 1

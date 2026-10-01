@@ -330,6 +330,33 @@ def test_centros_por_delante_ven_la_rama() -> None:
           f"centro={cur.get('c')*12.0} vs trainers={ent.get('b')*4.0}")
 
 
+def test_vocabulario_del_juego() -> None:
+    """Que el bot hable el idioma del juego.
+
+    Ocho veces el bot ha comparado contra un nombre que el juego no emite
+    (`cura` vs `pokecenter`, `centro` vs `pokecenter`, `jefe` vs `boss`,
+    `trade` descartado...). Todas fallaron en silencio. Aqui se recorre todo el
+    codigo buscando comparaciones literales de tipo y se comprueba que el otro
+    lado sea un tipo real del juego.
+    """
+    # Tipos que emite el juego, con su equivalencia interna.
+    reales = {"start", "catch", "battle", "trainer", "item", "question",
+              "trade", "pokecenter", "move_tutor", "boss", "empty",
+              "heal", "shop", "exit", "event"}
+    internos = {"desconocido", "batalla", "entrenador", "item", "incognita",
+                "trade", "cura", "tutor", "jefe", "ninguno"}
+    permitidos = reales | internos | {"nodo", "centro"}  # 'centro' tolerated
+    # 'centro' es incorrecto pero historico; se marca aparte.
+    import re
+    fuente = (SCRIPTS / "jugar_pokelike.py").read_text(encoding="utf-8")
+    # Busca d.tipo == "x" y d.tipo in (...) para d.tipo
+    literales = set(re.findall(r'd\.tipo\s*==\s*"([a-z_]+)"', fuente))
+    literales |= set(re.findall(r'"([a-z_]+)"\s*in\s*\(\s*d\.tipo', fuente))
+    malos = {x for x in literales if x not in permitidos}
+    check("d.tipo solo se compara contra tipos reales del juego", not malos,
+          f"-> {sorted(malos)}")
+
+
 def main() -> int:
     test_tipos_de_nodo()
     test_los_helpers_de_ruta_ven_los_nodos()
@@ -343,6 +370,7 @@ def main() -> int:
     test_orden_de_prioridades()
     test_puerta_del_75()
     test_centros_por_delante_ven_la_rama()
+    test_vocabulario_del_juego()
 
     for o in OKS:
         print(f"  ok   {o}")
