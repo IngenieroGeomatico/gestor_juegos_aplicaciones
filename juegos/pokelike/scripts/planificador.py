@@ -257,6 +257,11 @@ class Contexto:
     # ¿El equipo está por debajo del listón del jefe que toca? Decide que la
     # ruta pese mucho: es la única palanca de exp que queda.
     corto_de_nivel: bool = False
+    # Nivel real del rival del nodo (`trainerFightLevel`). Solo tiene sentido en
+    # nodos de entrenador; 0 cuando el juego no lo expone. Antes no lo pasaba
+    # nadie, y sin él la política no puede distinguir a un `youth` de nivel 9
+    # de un `ace-trainer` de nivel 14+.
+    nivel_rival: int = 0
     # ¿Ya se ha cazado en esta pantalla? El libro de jugadas es
     # "captura uno al principio y luego a por nivel", asi que la primera captura
     # tiene prioridad sobre cualquier otra cosa, incluso sobre el entrenador.
@@ -318,7 +323,12 @@ def puntuar(tipo: str, ctx: Contexto) -> tuple[float, str]:
         # El carry se mira aparte a proposito: un solo món al 13% se va a morir
         # aunque la media del equipo pase del 75%, y perder un món es peor que
         # perder un paso.
-        if caidos >= 1 or ratio <= UMBRAL_PUERTA_JEFE or ctx.carry_ps < 40.0:
+        # El umbral es el **50%**, no el 40%: es la regla del usuario ("el carry
+        # esta < 50%") y la asimetría lo hace más seguro: con 40, un carry al 45%
+        # entraba a pelear y se le terminaba la vida antes de decidir; con 50 se
+        # cura antes. Entrar al pokecenter cuesta **un paso**, y perder un món
+        # cuesta la run.
+        if caidos >= 1 or ratio <= UMBRAL_PUERTA_JEFE or ctx.carry_ps < 50.0:
             return (-5.0,
                     f"nada que no sea curar: {caidos} caido(s), equipo al "
                     f"{ratio*100:.0f}%, carry al {ctx.carry_ps:.0f}%")
@@ -458,19 +468,48 @@ def puntuar(tipo: str, ctx: Contexto) -> tuple[float, str]:
         return (PESO_BATALLA_A_NIVEL, "cazar: ya en pie y a nivel")
 
     if tipo == "entrenador":
+        # **Veto por nivel del rival, y la referencia es el EQUIPO.**
+        # `trainerFightLevel` ya decía el nivel del entrenador y ese dato no
+        # llegaba a la política. Lo que además estaba mal era la referencia:
+        # se comparaba contra el nivel del **jefe**, así que un Ace Trainer
+        # Nv15 no se vetaba con el listón en Nv14 (margen de uno) y el bot
+        # entraba con el equipo en Nv11 y dos caídos. Medido en la tanda que
+        # perdió: `Ace Trainer wants to battle!` con `[Mankey 12, Rattata 12,
+        # Staryu 17, Ivysaur 16]` y nivel enemigo 13.
+        # Lo que decide si una pelea se gana es el **equipo que la pelea**:
+        # mejor món del equipo + 2 de margen, para no ser tan estricto que
+        # bloquee la única fuente de exp.
+        tope_equipo = max(niveles) if niveles else 0
+        if ctx.nivel_rival > 0 and tope_equipo and ctx.nivel_rival > tope_equipo + 2:
+            return (-4.0,
+                    f"entrenador vetado: rival Nv{ctx.nivel_rival} supera al "
+                    f"mejor del equipo (Nv{tope_equipo:.0f}+2) — no es exp, "
+                    f"es riesgo")
+        # **Veto por caídos sin cura.** La rama de abajo juega al entrenador
+        # "con caídos porque es la única fuente de exp", y es cierto: pero
+        # solo si no hay cura accesible. Con un único món en pie y sin pokecenter
+        # a mano, pelear es la última opción, no la primera.
+        if caidos and not ctx.hay_cura_disponible and vivos <= 1:
+            return (1.0,
+                    f"entrenador vetado: {vivos} món en pie, {caidos} caído(s) "
+                    f"y sin cura accesible")
         # Antes se aplazaba con el equipo al 58% de PS. Medido en la tanda que
         # perdió contra Brock: con 4 niveles de diferencia, bloquear al
         # entrenador le quitaba la unica fuente de exp, se quedaba sin nodos y
         # se plantaba en la puerta del gimnasio. Ahora solo se aplaza si hay
         # caidos de verdad, o si el equipo esta muy bajo y no hay cura a mano.
-        if caidos and not ctx.carry_debil:
-            # Con caidos se puede pelear: el entrenador es la unica fuente de
-            # experiencia que sube a **todo** el equipo, y sin el no hay
-            # ascension. Un món caido vuelve al centro; perder la partida
-            # porque no quedo nadie en pie es peor decision.
-            return (PESO_ENTRENADOR_SANO - 12.0,
-                    f"entrenador con {caidos} caído(s): se juega igual, es la "
-                    f"única fuente de exp")
+        # La regla del usuario es que el pokecenter es **obligatorio** si hay
+        # caídos, así que este trainer ya está vetado arriba por el corte de
+        # emergencia en cuanto hay cura a mano. Esta rama solo aplica cuando no
+        # hay cura disponible: sin centro delante, pelear es la única opción.
+        if caidos and not ctx.carry_debil and not ctx.hay_cura_disponible:
+            # Sin cura delante no hay nada mejor: el entrenador es la única
+            # fuente de exp que sube a **todo** el equipo. Antes valía
+            # `PESO_ENTRENADOR_SANO - 12` (o sea 22), tan bajo que el bot no lo
+            # elegía ni sin cura: se quedaba sin nodos y sin nivel.
+            return (PESO_ENTRENADOR_SANO,
+                    f"entrenador con {caidos} caído(s) y sin cura a mano: se "
+                    f"juega igual, es la única fuente de exp")
         if ratio < 0.25:
             return (3.0, f"entrenador aplazado: equipo al {ratio*100:.0f}%, "
                          f"demasiado expuesto")
@@ -601,7 +640,7 @@ def elegir(equipo: list[dict], nodos: list[dict], ctx_extra: dict | None = None,
     ctx = Contexto(
         equipo=equipo, plan=plan,
         carry_ps=carry_ps,
-        carry_debil=bool(plan.tipos and carry_ps < 40.0),
+        carry_debil=bool(plan.tipos and carry_ps < 50.0),
         corto_de_nivel=(medio_eq < nivel_min_para(plan, equipo) - 1),
         capturas_pantalla=int(extra.get("capturas_pantalla", 0) or 0),
         hay_cura=bool(hay_cura),
@@ -632,6 +671,18 @@ def elegir(equipo: list[dict], nodos: list[dict], ctx_extra: dict | None = None,
             # un waypoint obligatorio (el pokecenter de en medio) y curar sale
             # gratis de paso.
             ctx_n = ctx
+            # El nivel del rival es **por nodo**: un mismo mapa puede tener un
+            # `youth` de nivel 9 y un `ace-trainer` de nivel 15, y se puntúan
+            # distinto. Antes `nivel_rival` no llegaba a la política y ambos
+            # puntuaban exactamente igual.
+            if tipo == "entrenador":
+                niv_rival = n.get("nivel") or 0
+                try:
+                    niv_rival = int(niv_rival)
+                except (TypeError, ValueError):
+                    niv_rival = 0
+                if niv_rival > 0 and niv_rival != ctx.nivel_rival:
+                    ctx_n = replace(ctx_n, nivel_rival=niv_rival)
             if jefe_alcanzable and edges:
                 # OJO: la política se importa como `P`, no como `PL`. Con `PL`
                 # esto lanzaba AttributeError y el `except` lo converting en
@@ -647,8 +698,14 @@ def elegir(equipo: list[dict], nodos: list[dict], ctx_extra: dict | None = None,
                     if __import__("os").environ.get("PL_DEBUG"):
                         import sys as _sys
                         print(f"[PL] {self_debug}", file=_sys.stderr)
-                if en_camino != ctx.en_camino_al_jefe:
-                    ctx_n = replace(ctx, en_camino_al_jefe=en_camino)
+                if en_camino != ctx_n.en_camino_al_jefe:
+                    # `replace(ctx_n, ...)`, no `replace(ctx, ...)`: partir de
+                    # `ctx` reconstruye el contexto desde cero y **descarta** el
+                    # `nivel_rival` puesto arriba. Como `llega_a` da True a
+                    # todo nodo de la rama del jefe (no solo al pokecenter),
+                    # el veto de entrenador por nivel se desactivaba justo en
+                    # los nodos donde hacía falta, sin ningún error visible.
+                    ctx_n = replace(ctx_n, en_camino_al_jefe=en_camino)
             s, razon = puntuar(tipo, ctx_n)
             # Cuántos combates deja la rama hacia el jefe. El mapa es un DAG y
             # solo se recorre un camino, así que **elegir la rama con más
@@ -734,7 +791,13 @@ def orden_para_jefe(equipo: list[dict], plan: Plan) -> list[str]:
         if not tipos or (m.get("ps") or 0) <= 0:
             continue
         atk = max((mult(t, r) for t in tipos for r in plan.tipos), default=1.0)
-        aguante = min((mult(t, r) for t in tipos for r in plan.tipos), default=1.0)
+        # El aguante se mide con el eje **del rival contra nosotros**, o sea
+        # `mult(r, t)`: lo que nos pegan. Estaba como `mult(t, r)`, que es el
+        # eje ofensivo, y con eso un món inmune a Veneno puntuaba 2.0 de
+        # "aguante" cuando en realidad no le pueden tocar. Como el orden se
+        # decide por `(atk, aguante, vida)`, un error en el aguante colocaba al
+        # delantero equivocado justo contra los jefes de tipo único.
+        aguante = min((mult(r, t) for t in tipos for r in plan.tipos), default=1.0)
         vida = (m.get("ps") or 0)
         con_poder.append((atk, aguante, vida, m.get("nombre")))
     if not con_poder:

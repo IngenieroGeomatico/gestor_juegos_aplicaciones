@@ -23,6 +23,7 @@ ES_A_EN = {
     "Agua": "Water",
     "Planta": "Grass",
     "Electrico": "Electric",
+    "Eléctrico": "Electric",
     "Hielo": "Ice",
     "Lucha": "Fighting",
     "Veneno": "Poison",
@@ -33,6 +34,12 @@ ES_A_EN = {
     "Roca": "Rock",
     "Fantasma": "Ghost",
     "Dragon": "Dragon",
+    # Sinestro y Oscuro son el mismo tipo. El nombre canónico en español de
+    # Pokémon es "Siniestro", pero en la tabla del repo y en el fichero de
+    # regiones aparecía "Oscuro", y `normalizar` no lo traducía: devolvía la
+    # palabra tal cual, que no está en el chart, así que **todo** el cálculo de
+    # tipos contra un jefe Siniestro salía como multiplicador neutro (1.0).
+    "Siniestro": "Dark",
     "Oscuro": "Dark",
     "Acero": "Steel",
     "Hada": "Fairy",

@@ -48,7 +48,31 @@ INCOGNITA = {"question-mark"}
 # El resto de sprites con nombre propio (brock, scientist, hiker, old-guy,
 # ace-trainer, grass, fire-spitter…) son combates de entrenador.
 JEFES_CONOCIDOS = {
-    "brock", "misty", "lt-surge", "erika", "koga", "blaine", "giovanni", "lance",
+    "brock", "misty", "lt-surge", "ltsurge", "erika", "koga", "blaine",
+    "giovanni", "lance",
+}
+
+# Tipo del líder por sprite, en el **nombre canónico en español** del tipo.
+# Hace falta porque el nodo de gimnasio solo trae la categoría (`"boss"`), que
+# no dice nada contra el chart. Las claves van YA normalizadas: los sprites
+# llevan guion (`lt-surge`) y `_norm_sprite` los quita, así que la comparación
+# tiene que hacerse sobre las dos formas.
+#
+# Estos son los líderes de Kanto, en el mismo orden que `regiones.json`
+# (Roca, Agua, Eléctrico, Planta, Veneno, *Fantasma*, Fuego, Tierra). El
+# sexto no aparece en la lista de sprites del bot, y no se inventa: si el juego
+# lo dibuja con otro nombre, `tipo_lider_del_mapa` devuelve `None` y quien
+# llama usa `regiones.json`.
+TIPO_POR_LIDER = {
+    "brock": "Roca",
+    "misty": "Agua",
+    "ltsurge": "Electrico",
+    "lt-surge": "Electrico",
+    "erika": "Planta",
+    "koga": "Veneno",
+    "blaine": "Fuego",
+    "giovanni": "Tierra",
+    "lance": "Dragon",
 }
 
 # Los tipos del estado del juego tienen otros nombres que los internos. El
@@ -69,6 +93,23 @@ TIPO_ESTADO = {
     "pokecenter": "cura",
     "move_tutor": "tutor",
     "boss": "jefe",
+    # El nodo `legendary` (Wegener) sí aparece en los mapas del juego y no
+    # estaba mapeado: caía en `"otro"` y el planificador lo puntuaba con 2.0, la
+    # nota más baja de todas. Es un combate gratis contra un món fuerte.
+    "legendary": "legendario",
+    # Los que salen en los estados de la Elite Four y el campeón. Antes caían
+    # en `"otro"` y se trataban como nodos sin puntuación conocida.
+    "rival": "jefe",
+    "evilteam": "entrenador",
+    "silver": "entrenador",
+    "moonstone": "item",
+    "levelup": "batalla",
+    "magma": "entrenador",
+    "mutation": "incognita",
+    "reward": "item",
+    "underground": "otro",
+    "distortion": "incognita",
+    "subexit": "otro",
 }
 
 # Tamaño máximo del equipo. Sube solo al capturar: `state.maxTeamSize` crece
@@ -112,10 +153,6 @@ def proximos_jefes(region: str, insignias: int, cuantos: int = 2) -> list[str]:
     return [t for t in out if t]
 
 
-def sumar_stats(d: dict | None) -> int:
-    return suma_stats(d)
-
-
 def tipos_conocidos() -> list[str]:
     """Los 18 tipos del chart del juego, para reconocerlos en un texto."""
     from pkl_movimientos import tabla_chart
@@ -141,7 +178,9 @@ def tipo_de_nodo(sprite: str) -> str:
         return "tutor"
     if s in INCOGNITA:
         return "incognita"
-    if s in JEFES_CONOCIDOS:
+    # Normalizado: los sprites de jefe llevan guion (`lt-surge`) y sin
+    # normalizar nunca se habría encontrado con los jefes de la lista.
+    if s in JEFES_CONOCIDOS or _norm_sprite(s) in JEFES_CONOCIDOS:
         return "jefe"
     return "entrenador" if s else "desconocido"
 
@@ -149,13 +188,23 @@ def tipo_de_nodo(sprite: str) -> str:
 def tipo_lider_del_mapa(nodos: list[dict]) -> str | None:
     """El tipo del líder que aparece en este mapa.
 
-    Sale del sprite del nodo de gimnasio (`brock`, `misty`…) y del tipo que da
-    el estado del juego. El tipo de `@map-info` no siempre está, así que se
-    aceptan los dos.
+    Sale del sprite del nodo de gimnasio (`brock`, `misty`, `lt-surge`…). Si el
+    sprite no está en la tabla se devuelve `None`, **nunca la categoría del
+    nodo**: antes aquí se hacía `n.get("tipo")`, y para un gimnasio eso es
+    literalmente `"boss"`. Con `"boss"` como "tipo" el chart no dice nada
+    (`utilidad_contra(["Fuego"], "boss")` devuelve `(1.0, 1.0)`), así que el
+    filtro de no ser 0.5x contra el gimnasio que tocaba **no se ejecutaba** y el
+    bot cazaba un Charmander con Brock detrás.
+
+    Un `None` es la respuesta honesta: el llamador recurre a los datos de
+    `regiones.json`, que son la fuente autoritativa.
     """
     for n in nodos:
-        if _norm_sprite(n.get("sprite")) in JEFES_CONOCIDOS:
-            return n.get("tipo") or n.get("tipo_lider") or n.get("tipo_estado")
+        sprite = _norm_sprite(n.get("sprite"))
+        if sprite in JEFES_CONOCIDOS:
+            tipo = TIPO_POR_LIDER.get(sprite)
+            if tipo:
+                return T.normalizar(tipo)
     return None
 
 
@@ -268,14 +317,6 @@ def ventaja(tipos: list[str], objetivo: str) -> float:
     return of * aguante_bueno(de) if of > 0 else 0.0
 
 
-def diluye(equipo: list[dict], tipos: list[str]) -> float:
-    """Cuánto repetiría los tipos del equipo este candidato."""
-    cuenta: dict[str, int] = {}
-    for m in equipo:
-        for t in m.get("tipos") or []:
-            cuenta[T.normalizar(t)] = cuenta.get(T.normalizar(t), 0) + 1
-    return sum(cuenta.get(T.normalizar(t), 0) for t in tipos) / max(len(tipos), 1)
-
 
 def suma_stats(d: dict | None) -> int:
     return sum((d or {}).values()) if d else 0
@@ -369,25 +410,6 @@ def _mejora_a(c: dict, equipo: list[dict]) -> dict | None:
     return None
 
 
-def referencia_captura(equipo: list[dict],
-                       tipos_venideros: list[str]) -> tuple[str | None, float]:
-    """Contra qué tipo tiene que servir la captura, y con qué listón.
-
-    Se recorre la lista de rival que viene y se para en el primero para el que
-    el equipo no tiene ya un 2x. Si todos están cubiertos se exige 2x contra el
-    último, que es cuando la captura solo entra si aporta de verdad.
-    """
-    for t in tipos_venideros:
-        if not t:
-            continue
-        cubierto = any(
-            utilidad_contra([T.normalizar(x) for x in (m.get("tipos") or [])],
-                             t)[0] >= 2.0
-            for m in equipo)
-        if not cubierto:
-            return t, 1.0
-    return (tipos_venideros[-1] if tipos_venideros else None), 2.0
-
 
 def elegir_starter(candidatos: list[dict], region: str,
                    n_gimnasios: int = 5) -> Decision:
@@ -448,12 +470,20 @@ def elegir_starter(candidatos: list[dict], region: str,
 
 
 def _mejora_claramente(candidato: dict, m: dict,
-                       futuros: list[str] | None = None) -> bool:
+                       futuros: list[str] | None = None,
+                       rival_ruta: list[str] | None = None,
+                       nivel_minimo: int | None = None,
+                       nivel_equipo: int = 0) -> bool:
     """¿Este salvaje merece la plaza del món `m`?
 
     Tres formas de ser mejor, y todas importan: mejor nivel (que es lo que gana
     gimnasios), más estadísticas, o cubrir un tipo que el equipo no tiene para un
     gimnasio que viene.
+
+    `rival_ruta` son los tipos de los **entrenadores del mapa actual**. Antes
+    esta función los usaba sin recibirlos por parámetro: era un `NameError`
+    esperando a ocurrir en cuanto un candidato sin ventaja contra el gimnasio
+    que viene llegaba a esta línea, y eso cortaba la run entera.
     """
     tipos = [T.normalizar(t) for t in (candidato.get("tipos") or [])]
     if not tipos:
@@ -475,15 +505,15 @@ def _mejora_claramente(candidato: dict, m: dict,
             aporta = max(
                 [max((utilidad_contra(tipos, r)[0] for r in futuros),
                      default=1.0)]
-                + [max((utilidad_contra(tipos, r)[0] for r in rival_ruta),
-                       default=0.0) * 1.0 if rival_ruta else 0.0],
+                + [max((utilidad_contra(tipos, r)[0] for r in (rival_ruta or [])),
+                       default=0.0) if rival_ruta else 0.0],
                 default=1.0)
             # El relleno solo se acepta si el equipo **ya esta a nivel**. Cazando
             # se gasta un nodo, y ese nodo es nivel: medido en la tanda que
             # perdio contra Brock, cazo un Rattata con "2x apertura=0" (ninguna
             # ventaja) cuando le faltaban 4 niveles para el lider.
-            if aporta < 2.0 and len(vivos) >= 3:
-                pass
+            if nivel_minimo and nivel_equipo < nivel_minimo:
+                return False
             return aporta >= 2.0
     return False
 
@@ -495,7 +525,8 @@ def elegir_captura(equipo: list[dict], candidatos: list[dict],
                    proximos: list[str] | None = None,
                    region: str | None = None,
                    ignorar_nivel: bool = False,
-                   tipos_entrenadores: list[str] | None = None) -> Decision:
+                   tipos_entrenadores: list[str] | None = None,
+                   nivel_minimo: int | None = None) -> Decision:
     """Elige con qué salvaje pelear (el bot no puede lanzar la bola aquí).
 
     La captura es la decisión más cara de la partida: cuesta un nodo y un món.
@@ -511,31 +542,15 @@ def elegir_captura(equipo: list[dict], candidatos: list[dict],
     Se cuenta lo que está **en pie**, no lo que ocupa plaza: un món caído es un
     hueco que hay que rellenar, porque los salvajes de las rutas siguientes
     traen mejores ataques que el que se ha perdido.
+
+    `nivel_minimo` es el nivel que el equipo necesita para el próximo jefe. Sin
+    él no se puede decidir si un món neutro es relleno barato o nivel que se
+    está tirando: antes esa comprobación era un `pass` y no filtraba nada.
     """
     if not candidatos:
         return Decision("capturar", None, "sin candidatos: huyo")
 
     vivos = [m for m in equipo if (m.get("ps") or 0) > 0]
-    equipo_lleno = len(vivos) >= max_miembros
-    if equipo_lleno:
-        # Con el equipo lleno **no se deja de cazar**: lo que hay en las rutas
-        # siguientes trae móns con más nivel y mejores ataques, y un bicho que ya
-        # no aporta se puede cambiar por uno mejor. Es lo que dice la guía
-        # ("replace weak picks; keeping underperforming Pokémon can block
-        # stronger catches") y lo que pidió el usuario: tener un Rattata y salir
-        # un Dragonite, se cambia el Rattata.
-        #
-        # Se compara el candidato con el **peor** del equipo y solo entra si es
-        # claramente mejor. Si no, se huye: cambiar por cambio gastaría el nodo
-        # para nada.
-        flojo = min(vivos, key=lambda m: (
-            -(sum((m.get("baseStats") or {}).values()) if (m.get("baseStats"))
-              else 0) * 0.02 - (m.get("nivel") or 0), m.get("nombre") or ""))
-        if not _mejora_claramente(c, flojo, futuros or ref):
-            return Decision(
-                "capturar", None,
-                f"equipo lleno ({len(vivos)}/{max_miembros}) y este món no supera"
-                f" a {flojo.get('nombre')}: huyo")
 
     # Para la diversidad se cuenta TODO el roster, también los caídos: si no,
     # al caer un Geodude se podía volver a capturar otro y acabar con
@@ -543,8 +558,17 @@ def elegir_captura(equipo: list[dict], candidatos: list[dict],
     tipos_equipo = {T.normalizar(t) for m in equipo for t in (m.get("tipos") or [])}
     ya_capturados = {(m.get("nombre") or "").strip().lower() for m in equipo}
     arranque = len(vivos) < 2
-    nivel_equipo = min((m.get("nivel") or 0) for m in vivos
-                       if (m.get("nivel") or 0) > 0) if vivos else 0
+    # OJO: el `if vivos else 0` de antes solo cubría el equipo vacío. Con el
+    # equipo lleno de móns **vivos pero con `nivel == 0`** (el selector
+    # `.team-slot-lv` ausente o sin dígitos deja `nivel: 0`) el generador se
+    # queda vacío y `min()` revienta con
+    # `ValueError: min() iterable argument is empty`. `ValueError` no está en
+    # `ERRORES_DE_CODIGO`, así que no cortaba la run: reintentaba 3 veces y
+    # acababa en `ATASCADO`, o sea se perdía la partida en la pantalla de
+    # captura. Se calcula la lista primero y se cae a 0 si no hay niveles.
+    _niveles_vivos = [(m.get("nivel") or 0) for m in vivos
+                      if (m.get("nivel") or 0) > 0]
+    nivel_equipo = min(_niveles_vivos) if _niveles_vivos else 0
 
     # **Un rival a la vez.** Antes el filtro exigía no ser 0.5x contra los tres
     # próximos gimnasios *a la vez*, y eso descartaba justo al món que hacía
@@ -570,6 +594,36 @@ def elegir_captura(equipo: list[dict], candidatos: list[dict],
     rival_ruta = [T.normalizar(t) for t in (tipos_entrenadores or []) if t]
     rival_ruta = [t for t in rival_ruta if t and t not in ref]
 
+    # Con el equipo lleno **no se deja de cazar**: lo que hay en las rutas
+    # siguientes trae móns con más nivel y mejores ataques, y un bicho que ya
+    # no aporta se puede cambiar por uno mejor. Es lo que dice la guía
+    # ("replace weak picks; keeping underperforming Pokémon can block
+    # stronger catches") y lo que pidió el usuario: tener un Rattata y salir
+    # un Dragonite, se cambia el Rattata.
+    #
+    # El candidato se compara con el **peor** del equipo y solo entra si es
+    # claramente mejor. Si no, se huye: cambiar por cambio gastaría el nodo
+    # para nada. Esto se resuelve DENTRO del bucle de candidatos, que es donde
+    # se sabe cuál es `c`: antes era una puerta antes del bucle que usaba una
+    # variable que aún no existía.
+    equipo_lleno = len(vivos) >= max_miembros
+    # El "flojo" es el miembro **más débil**, y aquí estaba al revés: la clave
+    # era `-0.02*stats - nivel`, y tomar el `min` de eso devuelve el **mejor**
+    # del equipo (maximiza `stats` y nivel). Comprobado ejecutándolo con
+    # Bulbasaur Nv20 (318 stats) y Staryu Nv8 (245): devolvía Bulbasaur.
+    # Consecuencia medida: con el equipo lleno la puerta `_mejora_claramente`
+    # se comparaba contra el mejor miembro, exigía `nivel+3` o `stats*1.15`, y
+    # el bot **huía de todas las capturas** para siempre: el equipo nunca se
+    # renovaba. Aquí se puntúa al revés y se toma el mínimo de verdad, que es
+    # el peor. Los móns sin `baseStats` no se pueden comparar, así que se
+    # se apartan para que no salgan elegidos como "flojos" por un 0 ficticio.
+    def _fuerza_flojo(m: dict) -> tuple[int, int, str]:
+        st = sum((m.get("baseStats") or {}).values()) if (m.get("baseStats")) else 0
+        return (0 if st else 1, st, m.get("nombre") or "")
+
+    flojo = (min(vivos, key=_fuerza_flojo)
+             if vivos else None)
+
     mejor, mejor_puntaje, detalle = None, -1e9, ""
     for c in candidatos:
         tipos = [T.normalizar(t) for t in (c.get("tipos") or [])]
@@ -580,6 +634,9 @@ def elegir_captura(equipo: list[dict], candidatos: list[dict],
             continue
         # Nunca dos del mismo bicho: repetir especie es perder la plaza.
         if (c.get("nombre") or "").strip().lower() in ya_capturados:
+            continue
+        if equipo_lleno and flojo is not None and not _mejora_claramente(
+                c, flojo, futuros or ref, rival_ruta, nivel_minimo, nivel_equipo):
             continue
         nuevos = {x for x in tipos} - tipos_equipo
         if not nuevos and not _mejora_a(c, equipo):
@@ -632,12 +689,6 @@ def elegir_captura(equipo: list[dict], candidatos: list[dict],
                 + [max((utilidad_contra(tipos, r)[0] for r in rival_ruta),
                        default=0.0) * 1.0 if rival_ruta else 0.0],
                 default=1.0)
-            # El relleno solo se acepta si el equipo **ya esta a nivel**. Cazando
-            # se gasta un nodo, y ese nodo es nivel: medido en la tanda que
-            # perdio contra Brock, cazo un Rattata con "2x apertura=0" (ninguna
-            # ventaja) cuando le faltaban 4 niveles para el lider.
-            if aporta < 2.0 and len(vivos) >= 3:
-                pass
             # Exigir un 2x siempre deja al equipo en 2-3 móns, y con dos no se
             # gana un gimnasio: medido, la mejor run capturó un Goldeen
             # (contragolpe de Brock, y lo venció) y arrived a Misty con solo
@@ -651,13 +702,22 @@ def elegir_captura(equipo: list[dict], candidatos: list[dict],
             # Dragonite de nivel 26 es mejor Nash Though a Rattata, aunque no
             # tenga un 2x contra el rival de ahora. Sin esta excepción se
             # rechazaba la sustitución y el equipo se quedaba congelado.
+            #
+            # El relleno solo se acepta si el equipo **ya esta a nivel**: cazar
+            # gasta un nodo, y ese nodo es el nivel que falta. Antes esto era un
+            # `pass`, o sea un filtro que no filtraba nada, y por eso se cazaba
+            # un Rattata sin ninguna ventaja con 4 niveles de deuda.
             if aporta < 2.0 and len(vivos) >= 3 and not ignorar_nivel:
+                if nivel_minimo and nivel_equipo < nivel_minimo:
+                    continue
                 flojo_para_cambio = min(
                     vivos,
                     key=lambda m: (m.get("nivel") or 0,
                                    -sum((m.get("baseStats") or {}).values()),
                                    m.get("nombre") or ""))
-                if not _mejora_claramente(c, flojo_para_cambio, futuros):
+                if not _mejora_claramente(c, flojo_para_cambio, futuros,
+                                          rival_ruta, nivel_minimo,
+                                          nivel_equipo):
                     continue
         region_score = 0.0
         if region:
@@ -1194,195 +1254,7 @@ def combates_por_delante(nodos: list[dict], edges: list,
     return {nid: min(v, tope) for nid, v in memo.items()}
 
 
-def listo_para_jefe(equipo: list[dict], insignias: int = 0,
-                   min_miembros: int = 0, nivel_min: int | None = None,
-                   ps_min: int = 70, region: str = "Kanto") -> tuple[bool, str]:
-    """¿Se entra al gimnasio con el equipo en condiciones?
-
-    Con **cualquier** món caído no se entra, ni aunque los que quedan en pie
-    basten por número. El filtro antiguo solo miraba cuántos vivos había
-    (2 de 3 contaban como equipo entero) y el bot se plantaba en la puerta del
-    líder con un caído: un caído no pelea y encima ocupa plaza.
-    """
-    if not min_miembros:
-        min_miembros = MIN_NUCLEO
-    if nivel_min is None:
-        nivel_min = nivel_del_jefe(region, insignias)[0]
-    if not equipo:
-        return False, "equipo vacío"
-    tuneros = [m for m in equipo if (m.get("ps") or 0) <= 0]
-    if tuneros:
-        nombres = ", ".join(str(m.get("nombre")) for m in tuneros)
-        return False, f"{len(tuneros)} caído(s) sin curar ({nombres})"
-    vivos = [m for m in equipo if (m.get("ps") or 0) > 0]
-    if len(vivos) < min_miembros:
-        return False, f"solo {len(vivos)}/{min_miembros} en pie"
-    flojos = [m for m in vivos if (m.get("ps") or 0) < ps_min]
-    if flojos:
-        return False, f"{len(flojos)} por debajo del {ps_min}% PS"
-    bajos = [m for m in vivos if (m.get("nivel") or 0) < nivel_min]
-    if bajos:
-        return False, f"{len(bajos)} por debajo del nivel {nivel_min}"
-    return True, f"{len(vivos)} móns, nivel {min(m.get('nivel') or 0 for m in vivos)}+"
-
-
-def elegir_nodo(equipo: list[dict], nodos: list[dict], info_mapa: str,
-                insignias: int, bolsa_vacia: bool,
-                nivel_enemigo_max: int = 0, enemigos_max_vistos: int = 1,
-                tutor_hacia: str | None = None, region: str = "Kanto",
-                mapa_actual: str | None = None,
-                edges: list | None = None) -> Decision:
-    """Qué nodo del mapa_visitar.
-
-    `tipo` viene del estado del juego, que es la fuente fiable; el sprite solo
-    es la pista. Confundían trainers con nodos de batalla: el sprite "grass" es
-    un `battle` (salvaje) y el bot lo contaba como entrenador, que además de
-    perder la exp es una pelea que puede costar la run.
-    """
-    vivos = [m for m in equipo if (m.get("ps") or 0) > 0]
-    # Umbral a la mitad: por debajo de eso el món se cura solo subiendo de
-    # nivel si se le delega al final del equipo, y no merece gastar el único
-    # centro del mapa. Por encima, tampoco.
-    heridos = [m for m in vivos if (m.get("ps") or 100) < 50]
-    tuneros = [m for m in equipo if (m.get("ps") or 0) <= 0]
-    nivel_equipo = min((m.get("nivel") or 0) for m in vivos) if vivos else 0
-    nivel_objetivo = nivel_del_jefe(region, insignias)[0]
-    corto_de_nivel = nivel_equipo < nivel_objetivo
-
-    por_delante = (combates_por_delante(nodos, edges)
-                   if edges and mapa_actual else {})
-
-    puntuaciones: list[tuple[float, dict, str]] = []
-    for n in nodos:
-        if not n.get("clickable"):
-            continue
-        t = (tipo_de_estado(n.get("tipo")) if n.get("tipo")
-             else tipo_de_nodo(n.get("sprite", "")))
-        base, razon = 0.0, ""
-        if t == "cura":
-            # Hay UN centro por mapa, así que la oportunidad se pierde si no se
-            # aprovecha. Con alguien caído el centro se va por encima de todo,
-            # incluido el tutor: un caído no pelea, y un líder con el equipo a
-            # medias es perder la run. Por debajo de la mitad de vida también
-            # gana al tutor, que es lo que hace falta para llegar entero al
-            # líder. Por encima de la mitad no se molesta: ese món se cura solo
-            # subiendo de nivel si se queda atrás.
-            if tuneros:
-                base = 30.0
-                razon = (f"{len(tuneros)} caído(s): curar antes de que no queden "
-                         "más centros")
-            elif heridos:
-                base = 22.0
-                razon = f"equipo por debajo de la mitad de vida ({len(heridos)}): curar"
-            else:
-                base, razon = 1.0, "equipo sano"
-        elif t == "item":
-            base, razon = (7.0 if bolsa_vacia else 3.0,
-                           "bolsa vacía" if bolsa_vacia else "bolsa con objetos")
-        elif t == "batalla":
-            # Cazar sirve para llenar el equipo, y el juego hace crecer
-            # `maxTeamSize` (1 -> 2 -> 3) al capturar, así que un equipo que no
-            # se llena se queda pequeño el resto de la partida. Pero mientras
-            # falte nivel, pelear es lo que gana: cada combate es ~+1 nivel.
-            if len(vivos) < MAX_EQUIPO:
-                base = 14.0 if corto_de_nivel else 8.0
-                razon = (f"equipo incompleto ({len(vivos)}/{MAX_EQUIPO}): cazar "
-                          "para tener variedad")
-            elif corto_de_nivel:
-                base, razon = 4.0, "equipo completo, pero sin nivel: hay que subir"
-            else:
-                base, razon = 3.0, "equipo completo"
-        elif t == "jefe":
-            # Contra un líder se juega la run: solo con el equipo en condiciones.
-            listo, por_que = listo_para_jefe(equipo, insignias, MIN_NUCLEO,
-                                             region=region)
-            base = 6.0 if listo else -5.0
-            razon = f"jefe ({por_que})" if listo else f"jefe aplazado: {por_que}"
-        elif t == "tutor":
-            # Los discos suben el tier de los ataques, pero si falta nivel una
-            # pelea vale más: cada combate es aproximadamente +1 nivel y los
-            # líderes piden 14, 20, 25, 32, 44, 44, 53 y 60.
-            if corto_de_nivel:
-                base = 8.0
-                razon = "tutor, pero el nivel va primero"
-            else:
-                base = 20.0
-                razon = "tutor de movimientos: sube el tier de los ataques"
-        elif t == "incognita":
-            # Por debajo de batalla y entrenador: casi siempre es un trade o un
-            # pasivo, y un trade vacío no da ni una gota de exp.
-            base, razon = 2.5, "nodo sin identificar (suele ser pasivo o trade)"
-        elif t == "entrenador":
-            # Es la mayor fuente de exp, pero es letal con el equipo corto de
-            # nivel, y perderlo termina la run. Solo se entra con el equipo
-            # sano y por encima de lo más fuerte que se ha visto, contando
-            # cuántos móns trae.
-            margen = max(0, enemigos_max_vistos - 1)
-            nivel_min = (nivel_enemigo_max + margen) if nivel_enemigo_max else 0
-            critico = bool(vivos) and min(m.get("ps") or 0 for m in vivos) < 30
-            seguro = (not heridos and not critico
-                      and (not nivel_min or nivel_equipo >= nivel_min))
-            base = 9.0 if seguro else 2.0
-            if critico:
-                base = 1.0
-                min_ps = min((m.get("ps") or 0) for m in vivos) if vivos else 0
-                razon = f"entrenador aplazado: PS crítico (líder a {min_ps}%)"
-            elif heridos:
-                base = 1.0
-                razon = "entrenador aplazado: equipo herido (perder = run perdida)"
-            elif not seguro:
-                razon = (f"entrenador aplazado: nivel {nivel_equipo} < rival "
-                         f"{nivel_enemigo_max} de {enemigos_max_vistos} món(s)")
-            else:
-                razon = "entrenador: mucha exp y el equipo está sano y a nivel"
-        else:
-            base, razon = 3.0, f"tipo desconocido: {n.get('sprite')!r}"
-
-        # Bonus por ruta: 0.5 por combate que deja la rama, con tope. Es poco
-        # peso a propósito: rompe empates sin llegar a beating una pelea o una
-        # cura, que valen 9 y 12.
-        delante = por_delante.get(n.get("id"))
-        if delante:
-            base += min(delante, 6) * 0.5
-            razon += f"; deja {delante} combate(s) por delante"
-        if tutor_hacia and n.get("id") == tutor_hacia and t in {
-                "batalla", "entrenador", "item", "incognita"}:
-            base += 2.0
-            razon += "; en ruta al tutor de movimientos"
-        # Nunca pelear a destajo: los caídos no pueden combatir.
-        if tuneros and t in {"batalla", "entrenador", "jefe"}:
-            base -= 2.0
-            razon += f"; {len(tuneros)} caído(s) en el equipo"
-        puntuaciones.append((base, n, razon))
-
-    if not puntuaciones:
-        return Decision("nodo", None, "no hay nodos disponibles (¿mapa atascado?)")
-    puntuaciones.sort(key=lambda x: -x[0])
-    mejor_base, mejor, razon = puntuaciones[0]
-    # Sin nada mejor a la vista, el jefe es la única salida: pelear antes de
-    # tiempo y rendirse tampoco progresa. Se permite como último recurso.
-    if mejor_base < 0:
-        alternativas = [p for p in puntuaciones if p[0] >= 0]
-        if alternativas:
-            mejor_base, mejor, razon = max(alternativas, key=lambda x: x[0])
-        else:
-            mejor_base, mejor, razon = puntuaciones[0]
-            razon = f"forzado, única salida ({razon})"
-    return Decision("nodo", mejor.get("atajo"),
-                    f"{tipo_de_estado(mejor.get('tipo')) if mejor.get('tipo') else tipo_de_nodo(mejor.get('sprite',''))}"
-                    f" score={mejor_base:.1f} ({razon})"
-                    + (f" | mapa: {info_mapa}" if info_mapa else ""),
-                    tipo=(tipo_de_estado(mejor.get("tipo")) if mejor.get("tipo")
-                          else tipo_de_nodo(mejor.get("sprite", ""))))
-
-
 # ---------------------------------------------------------------- decisiones triviales
-def decidir_item(ps_bajo: float, antes_de_jefe: bool) -> Decision:
-    """Si conviene gastarse un objeto: curar antes de pelear a un jefe."""
-    if antes_de_jefe:
-        return Decision("usar_item", True, f"PS {ps_bajo:.0f}%: momento de curar")
-    return Decision("usar_item", False, "no es momento de gastar un objeto")
-
 
 def decidir_batalla(tiene_auto: bool) -> Decision:
     """El juego se auto-resuelve solo; no se puede elegir movimiento."""

@@ -58,6 +58,11 @@ uv run --group dev python juegos/pokelike/scripts/jugar_pokelike.py --region Kan
 
 Perder **no** es un bug del bot. Casi siempre es nivel o composición de equipo.
 
+Cuando sí suele ser bug, y conviene mirar `CAMINO-POR-PANTALLA.md` antes de
+suponer otra cosa: entrar a un entrenador por encima del equipo, capturar sin
+avantage de tipos, curar sin invalidar los PS reales, o un nodo que se repite
+mucho sin que nada cambie. Los cuatro han pasado.
+
 ## La tabla de tipos va aparte, y es lo primero que hay que abrir
 
 **`TABLA-TIPOS.md`** (en esta misma skill) tiene el chart **real del juego**, las
@@ -84,6 +89,12 @@ Y para no extremear: contra un rival de **Planta**, Bulbasaur aguanta bien
 delantero se decide con la aritmetica de la tabla, no con "este món es bueno".
 
 ## Libro de jugadas (el mismo que usa el humano)
+
+**`pokelike-camino`** es la skill hermana: tiene las **8 reglas de juego** (norma
+del usuario, mandan sobre el código) y, en `CAMINO-POR-PANTALLA.md`, el camino
+completo pantalla por pantalla con los pesos exactos. Se abre **antes de tocar
+`planificador.py` o `politica.py`**, porque cambiar un peso puede invertir una
+decisión sin que nada falle.
 
 En este orden, en cada nodo:
 

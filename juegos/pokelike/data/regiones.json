@@ -512,7 +512,131 @@
         "Bruno"
       ],
       "campeon": "Lance",
-      "nota": "Como Kanto pero con jefes de la primera generación de la nueva. El hierro y el dragón cierran la ruta."
+      "nota": "Como Kanto pero con jefes de la primera generación de la nueva. El hierro y el dragón cierran la ruta. AVISO: los niveles del Alta Mando y del campeon estan DERIVADOS del nivel del ultimo gimnasio (84), no leidos del juego; los equipos y tipos si son los canonicos de HeartGold. A confirmar con una run real.",
+      "elite_four_datos": [
+        {
+          "nombre": "Will",
+          "equipo": [
+            "Butterfree",
+            "Pidgeot",
+            "Porygon",
+            "Venonat",
+            "Venomoth"
+          ],
+          "niveles": [
+            81,
+            81,
+            81,
+            84,
+            84
+          ],
+          "nivel_max": 84,
+          "tipos_equipo": [
+            "Bicho",
+            "Volador",
+            "Normal",
+            "Veneno"
+          ]
+        },
+        {
+          "nombre": "Koga",
+          "equipo": [
+            "Crobat",
+            "Gloom",
+            "Muk",
+            "Venonat",
+            "Arbok"
+          ],
+          "niveles": [
+            84,
+            82,
+            84,
+            86,
+            86
+          ],
+          "nivel_max": 86,
+          "tipos_equipo": [
+            "Veneno",
+            "Volador",
+            "Planta",
+            "Bicho"
+          ]
+        },
+        {
+          "nombre": "Karen",
+          "equipo": [
+            "Umbreon",
+            "Vileplume",
+            "Meganium",
+            "Rhydon",
+            "Gengar"
+          ],
+          "niveles": [
+            90,
+            89,
+            90,
+            92,
+            92
+          ],
+          "nivel_max": 92,
+          "tipos_equipo": [
+            "Siniestro",
+            "Planta",
+            "Veneno",
+            "Tierra",
+            "Roca",
+            "Fantasma"
+          ]
+        },
+        {
+          "nombre": "Bruno",
+          "equipo": [
+            "Hitmonlee",
+            "Hitmonchan",
+            "Machamp",
+            "Rockmart",
+            "Steelix"
+          ],
+          "niveles": [
+            89,
+            89,
+            92,
+            89,
+            90
+          ],
+          "nivel_max": 92,
+          "tipos_equipo": [
+            "Lucha",
+            "Roca",
+            "Acero",
+            "Tierra"
+          ]
+        }
+      ],
+      "campeon_datos": {
+        "nombre": "Lance",
+        "equipo": [
+          "Dragonite",
+          "Gyarados",
+          "Aerodactyl",
+          "Dragonite",
+          "Dragonite"
+        ],
+        "niveles": [
+          95,
+          95,
+          95,
+          95,
+          98
+        ],
+        "nivel_max": 98,
+        "tipos_equipo": [
+          "Dragon",
+          "Volador",
+          "Agua",
+          "Roca"
+        ]
+      }
     },
     {
       "region": "Hoenn",

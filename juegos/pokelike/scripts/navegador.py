@@ -86,9 +86,16 @@ class Juego:
               // El nivel no tiene elemento propio: viene incrustado en el
               // nombre ("Geodude Lv12"). Se extrae de ahí para poder comparar
               // el nivel del equipo con el de los rivales.
+              // El nivel sale como TEXTO ("12") y el bot lo compara con
+              // enteros para saber si un rival es mas fuerte que el equipo.
+              // Antes se devolvia la cadena y el `max(nivel_max, nivel)` del
+              // bot reventaba con "TypeError: '>' not supported between
+              // instances of 'str' and 'int'" en el primer combate, que es lo
+              // que paraba la run. Aqui se devuelve un numero, y 0 cuando no
+              // hay nivel legible, para que comparar siempre sea seguro.
               const lvl = (n) => {
                 const m = n.match(/[Ll]v\.?\s*(\d{1,3})/);
-                return m ? m[1] : '';
+                return m ? parseInt(m[1], 10) : 0;
               };
               // Los tipos NO están en el DOM del rival: el bloque solo trae
               // nombre, nivel y PS ("Zubat Lv12 31/31"). Antes se intentaba
@@ -99,8 +106,13 @@ class Juego:
                 .map((e) => {
                   const nombre = (e.querySelector('[class*=name]')?.textContent || '').trim();
                   const ps = (e.querySelector('[class*=hp]')?.textContent || '').trim();
-                  const nivel = (e.querySelector('[class*=lvl],[class*=level]')?.textContent || '').trim();
-                  return { nombre, ps, nivel: nivel || lvl(nombre), tipos: [] };
+                  const nivelTxt = (e.querySelector('[class*=lvl],[class*=level]')?.textContent || '').trim();
+                  // `nivel` era un string cuando venía del elemento y un
+                  // string cuando venía del nombre: en los dos casos texto.
+                  // Ahora siempre es un entero.
+                  const nivel = parseInt((nivelTxt.match(/\d+/) || [])[0]
+                                          || (lvl(nombre) || 0), 10) || 0;
+                  return { nombre, ps, nivel, tipos: [] };
                 });
               // Movimientos del bicho activo: "div.poke-move" con el texto
               // "Karate Chop Fighting 50 PWR". No son botones ni tienen
@@ -889,9 +901,24 @@ class Juego:
                     clickable: g.classList.contains('map-node--clickable'),
                     atajo: sc ? sc.textContent.trim() : null,
                     sprite: sprite.split('/').pop().replace('.png', ''),
-                    id: delEstado ? delEstado.id : null,
-                    tipo: delEstado ? delEstado.type : null,
-                    capa: delEstado ? delEstado.layer : null,
+id: delEstado ? delEstado.id : null,
+                  tipo: delEstado ? delEstado.type : null,
+                  capa: delEstado ? delEstado.layer : null,
+                  // Nivel real del rival. Sin esto la puerta de entrenador
+                  // no puede distinguir a un `youth` de nivel 9 de un
+                  // `ace-trainer` de nivel 14+, y el bot entra al segundo
+                  // creyendo que es la unica fuente de exp que queda.
+                  nivel: (function () {
+                    if (!delEstado || delEstado.type !== 'trainer') return null;
+                    try {
+                      const nv = trainerFightLevel(delEstado);
+                      // `trainerFightLevel` devuelve `null` si no sabe
+                      // resolver el nodo, no lanza. Se marca con -1 para que
+                      // el bot distinga "no lo sé" de "nivel 0", que es un
+                      // dato válido y no un fallo.
+                      return (typeof nv === 'number' && isFinite(nv)) ? nv : -1;
+                    } catch (e) { return -1; }
+                  })(),
                 };
             });
             return {
