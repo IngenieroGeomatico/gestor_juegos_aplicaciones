@@ -271,8 +271,15 @@ class Bot:
     # y con la comparación exacta se colaban. Eso costaba una run entera: el
     # `UnboundLocalError` de `elegir_captura` se reintentaba 5 veces y la partida
     # acababa en ATASCADO, cuando la respuesta correcta era cortar y arreglar.
-    ERRORES_DE_CODIGO = (NameError, AttributeError, TypeError, IndentationError,
-                         KeyError, IndexError)
+    # Excepciones que **siempre** son un bug del bot, nunca un fallo del juego o
+    # del navegador. Cortan la run y hay que corregir el código.
+    # OJO: `IndentationError` estuvo aquí y sobra: es un error de compilación,
+    # Python ni siquiera llega a importar el módulo, así que no puede saltar en
+    # runtime. Una entrada que no puede dispararse da una falsa sensación de
+    # cobertura. `UnboundLocalError` sí va, y va como tal, porque hereda de
+    # `NameError` pero `type(exc) in (...)` no lo habría pillado.
+    ERRORES_DE_CODIGO = (NameError, AttributeError, TypeError,
+                         KeyError, IndexError, ValueError)
 
     def bolsa_vacia(self) -> bool:
         """¿Sigue mereciendo la pena ir a por objetos?
@@ -691,6 +698,39 @@ class Bot:
         return "|".join(
             f"{e['nombre']}:{e['ps']}" for e in eb["enemigos"]
         ) + "#" + "|".join(f"{m['nombre']}:{m['ps']}" for m in eb["mios"] if m["ps"])
+
+    def _volcar_crash(self, exc: BaseException, lugar: str) -> None:
+        """Deja el error de código en un fichero **que no se limpia**.
+
+        `lanzar_tanda.py` conserva solo los 3 logs más recientes, así que un
+        crash de hace tres runs puede desaparecer antes de arreglarlo. Este
+        volcado va a `crash-<fecha>.txt` y se **sobrescribe** en cada crash:
+        interesa el último, que es el que sigue roto.
+
+        Lleva la traza entera, no solo la última línea, porque un
+        `AttributeError` en un método puede venir de un `None` puesto tres
+        niveles más arriba.
+        """
+        try:
+            destino = DIR_BOT / f"crash-{_MOMENTO}.txt"
+            lineas = [
+                f"=== error de codigo: {type(exc).__name__} ===",
+                f"mensaje : {exc}",
+                f"lugar   : {lugar or '?'}",
+                f"region  : {self.region}",
+                f"paso    : {self.pasos}",
+                f"insignias: {self._insignias_final}",
+                f"log     : {LOG_BOT.name}",
+                "",
+                "traza completa:",
+                "".join(traceback.format_exception(type(exc), exc,
+                                                  exc.__traceback__)),
+            ]
+            destino.write_text("\n".join(lineas), encoding="utf-8")
+            self.log(f"  !! volcado del crash -> {destino}")
+        except Exception as exc2:  # noqa: BLE001
+            # Si ni esto se puede escribir, no se debe tapar el error original.
+            self.log(f"  (no se pudo volcar el crash: {exc2})")
 
     def volcar_atasco(self, pantalla: str) -> None:
         """Guarda el HTML de la pantalla atascada para poder diagnosticarla.
@@ -1893,9 +1933,27 @@ class Bot:
                 # registrado se arregla en el código; un proceso colgado solo se
                 # mata a mano.
                 if isinstance(exc, self.ERRORES_DE_CODIGO):
+                    # La regla del usuario: **este error corta la run y hay que
+                    # arreglarlo**. El bot no puede arreglar código, así que lo
+                    # que le toca es dejar el error **localizado**: tipo,
+                    # mensaje, archivo, línea y dónde en el bot se múltiple. Sin
+                    # archivo y línea hay que leer 2000 líneas de traza para
+                    # encontrar un `NameError`, y eso es lo que hacia que un
+                    # bug pasara sin arreglar durante varias runs.
+                    tb = traceback.extract_tb(exc.__traceback__)
+                    lugar = ""
+                    if tb:
+                        ultimo = tb[-1]
+                        lugar = f"{ultimo.filename}:{ultimo.lineno}"
                     self.log(f"  !! error de CÓDIGO ({type(exc).__name__}): {exc}")
+                    self.log(f"  !! en: {lugar or '?'} | "
+                             f"pantalla: {self.j.pantalla()} | paso: {self.pasos}")
                     self.log("  !! la run se corta: el bot está roto, no la "
                              f"partida. Arreglar en el código.")
+                    # Se escribe aparte porque el log se conserva 3 runs
+                    # (`lanzar_tanda.py` limpia los viejos): si el crash está
+                    # en el log y el log se borra, el bug se pierde.
+                    self._volcar_crash(exc, lugar)
                     self.resultado = "ERROR_DE_CODIGO"
                     return
                 clave_err = f"{self.j.pantalla()}|{type(exc).__name__}:{exc}"

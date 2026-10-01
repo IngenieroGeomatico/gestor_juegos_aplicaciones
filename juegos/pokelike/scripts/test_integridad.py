@@ -728,6 +728,91 @@ def test_el_veto_de_entrenador_llega_a_puntuar() -> None:
           "-> el veto por nivel se pierde en la rama del jefe")
 
 
+def test_el_volcado_del_crash_ea_ejecutable() -> None:
+    """El volcado tiene que funcionar de verdad, no solo existir.
+
+    Se escribió con `traceback.format_exception(type(exc), exc, tb)` pasando el
+    resultado de `extract_tb()`, que es un `StackSummary` y **no** una lista de
+    frames. Explotaba con `AttributeError: 'StackSummary' object has no
+    attribute 'tb_frame'`... dentro del manejador de errores, o sea el crash se
+    perdía justo cuando más hacía falta. El volcado ahora usa
+    `exc.__traceback__`. Este test provoca un error de verdad y comprueba que el
+    fichero sale con la ubicación dentro.
+    """
+    import tempfile
+    import pathlib
+    import jugar_pokelike as J
+
+    with tempfile.TemporaryDirectory() as tmp:
+        original = J.DIR_BOT
+        J.DIR_BOT = pathlib.Path(tmp)
+        try:
+            bot = J.Bot.__new__(J.Bot)   # sin __init__: no hace falta navegador
+            bot.region = "Kanto"
+            bot.pasos = 3
+            bot._insignias_final = 1
+            escritos: list[str] = []
+            bot.log = escritos.append      # type: ignore[method-assign]
+
+            try:
+                raise AttributeError("'NoneType' object has no attribute 'get'")
+            except AttributeError as exc:
+                bot._volcar_crash(exc, "jugar_pokelike.py:1234")
+
+            crashes = list(pathlib.Path(tmp).glob("crash-*.txt"))
+            check("el volcado escribe un fichero", len(crashes) == 1,
+                  f"-> {len(crashes)} ficheros")
+            if crashes:
+                txt = crashes[0].read_text(encoding="utf-8")
+                check("el volcado no falla al formatear la traza",
+                      "StackSummary" not in escritos
+                      and "no se pudo volcar" not in " ".join(escritos),
+                      f"-> {escritos}")
+                check("el volcado dice donde esta el error",
+                      "jugar_pokelike.py:1234" in txt
+                      and "AttributeError" in txt,
+                      "-> el error no queda localizado")
+                check("el volcado lleva la traza",
+                      "Traceback (most recent call last)" in txt,
+                      "-> sin traza no se sabe de donde viene")
+        finally:
+            J.DIR_BOT = original
+
+
+def test_el_error_de_codigo_deja_el_error_localizado() -> None:
+    """`ERROR_DE_CODIGO` tiene que decir **dónde**, no solo qué pasó.
+
+    La regla del usuario es que este error corta la run y se arregla. El
+    "se arregla" lo hace la persona, no el bot: para eso el corte tiene que
+    dejar el error localizado. Antes solo registró el tipo de excepción y el
+    mensaje, que obligaba a leer 2000 líneas de traza para encontrar un
+    `NameError`.
+    """
+    jug = (SCRIPTS / "jugar_pokelike.py").read_text(encoding="utf-8")
+
+    check("el corte indica archivo y linea",
+          "traceback.extract_tb(exc.__traceback__)" in jug
+          and "ultimo.lineno" in jug,
+          "-> el error se registra sin localizar, no se puede arreglar")
+    check("el corte vuelca la traza a un fichero",
+          "_volcar_crash" in jug and "crash-" in jug,
+          "-> el crash se pierde cuando lanzar_tanda limpia los logs viejos")
+    check("el volcado lleva la traza completa",
+          "traceback.format_exception" in jug,
+          "-> con la ultima linea no se sabe de donde venia el fallo")
+
+    # Y que la lista de errores sea real: `IndentationError` no puede saltar en
+    # runtime, y `ValueError` si, y antes no cortaba la run.
+    import jugar_pokelike as J
+    errores = J.Bot.ERRORES_DE_CODIGO
+    check("los errores de codigo cortan la run",
+          ValueError in errores and KeyError in errores,
+          "-> ValueError no corta: reintentaba y acababa en ATASCADO")
+    check("la lista no tiene errores de compilacion",
+          IndentationError not in errores,
+          "-> IndentationError no puede saltar en runtime")
+
+
 def test_las_ocho_reglas_se_cumplen() -> None:
     """Las reglas del usuario son norma: si el código no las hace, hay bug.
 
@@ -932,6 +1017,8 @@ def main() -> int:
     test_todas_las_regiones_tienen_liga()
     test_ps_real_se_invalida()
     test_los_niveles_vienen_numericos()
+    test_el_volcado_del_crash_ea_ejecutable()
+    test_el_error_de_codigo_deja_el_error_localizado()
     test_las_ocho_reglas_se_cumplen()
     test_la_skill_del_camino_no_se_desincroniza()
     test_mapa_lee_el_nivel_del_rival()

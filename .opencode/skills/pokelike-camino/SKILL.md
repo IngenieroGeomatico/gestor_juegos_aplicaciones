@@ -24,8 +24,17 @@ pasos cortan una partida.
 - **Única excepción: `ERROR_DE_CODIGO`**. Si el bot lanza un `NameError`,
   `TypeError` o similar, **el bot está roto, no la partida**. Reintentar daría
   un proceso colgado sin resultado ni victoria ni derrota, que es peor que
-  cortar: un `ERROR_DE_CODIGO` registrado se arregla en el código. Cuando salga
-  ese resultado, hay que leer el log y corregir, no reintentar.
+  cortar. La regla es: **corta y se arregla**, y el corte tiene que dejar el
+  error **localizado** — tipo, mensaje, `archivo:línea`, región, paso y traza
+  completa — porque arreglarlo es trabajo de quien lee, no del bot.
+
+  El volcado va a `log/crash-<fecha>.txt`, que `lanzar_tanda.py` **no** borra
+  (a diferencia de los logs, de los que solo conserva 3). Por eso el error
+  sobrevive a las runs siguientes.
+
+  Cuando salga ese resultado, el orden es: leer `crash-*.txt` → `grep` del
+  `archivo:línea` que indica → corregir → probar con una partida corta. Nunca
+  reintentar.
 
 `--max-pasos` con un número positivo **sí** corta, pero es una decisión
 explícita de quien lo lanza, no un corte automático.
