@@ -667,6 +667,19 @@ def elegir(equipo: list[dict], nodos: list[dict], ctx_extra: dict | None = None,
                 n_ent = ent.get(str(n.get("id")), 0)
                 if n_ent:
                     extra += n_ent * 4.0
+                # **La cura va por delante de los levels cuando el equipo esta
+                # por debajo de la puerta del 75%.** Es la instruccion del
+                # usuario (pasar por el centro antes del lider) y medido era
+                # justo lo que no se cumplia: el peso de trainers (4x) se
+                # llevaba al bot a las ramas sin pokecenter, y 26 equipos
+                # morian contra Brock sin haber pasado por uno. Por encima del
+                # 75% manda el nivel, que es la otra mitad de la regla.
+                _ratio_actual, _caidos_actual, _ = _estado(equipo)
+                if _ratio_actual <= UMBRAL_PUERTA_JEFE or _caidos_actual:
+                    n_cur = P.centros_por_delante(nodos, edges, limpio)
+                    n_centro = n_cur.get(str(n.get("id")), 0)
+                    if n_centro:
+                        extra += n_centro * 12.0
                 if extra:
                     # El peso de la ruta tiene que **dominar** cuando falta
                     # nivel, no solo sumar. Con 1.2 por combate noembly: un

@@ -1037,6 +1037,50 @@ def entrenadores_por_delante(nodos: list[dict], edges: list,
     return {str(nid): valor(str(nid)) for nid in por_id}
 
 
+def centros_por_delante(nodos: list[dict], edges: list,
+                       limpio: int = 8) -> dict[str, int]:
+    """Cuántos pokecenters hay en la ruta que sale de cada nodo.
+
+    Existe porque faltaba el otro lado de la puerta del 75%. El bot solo
+    curaba cuando el centro le salia ya entre los nodos clicables: medido,
+    **solo 68 de 192 logs llegaron a ver un centro**, y 26 equipos murieron
+    contra Brock sin haber pasado por ninguno. La rama con el pokecenter
+    existe, pero hay que **elegirla**: `entrenadores_por_delante` pesaba 4x y
+    arrastraba al bot a las ramas sin cura, con lo cual la Instruccion de
+    "pasar por el centro antes del lider" no se cumplia en la mitad de las
+    partidas.
+    """
+    por_id = {str(n.get("id")): n for n in nodos if n.get("id") is not None}
+    hijos: dict[str, list[str]] = {}
+    for e in edges:
+        if isinstance(e, dict):
+            o, d = e.get("from"), e.get("to")
+        else:
+            o = e[0] if len(e) > 0 else None
+            d = e[1] if len(e) > 1 else None
+        if o is None or d is None:
+            continue
+        # `edges` va de padre a hijo.
+        hijos.setdefault(str(o), []).append(str(d))
+
+    memo: dict[str, int] = {}
+
+    def valor(nid: str, prof: int) -> int:
+        if prof > limpio:
+            return 0
+        if nid in memo:
+            return memo[nid]
+        memo[nid] = 0
+        n = por_id.get(nid)
+        propio = 1 if (n and tipo_de_estado(n.get("tipo") or n.get("type"))
+                       == "cura") else 0
+        total = propio + sum(valor(h, prof + 1) for h in hijos.get(nid, []))
+        memo[nid] = total
+        return total
+
+    return {nid: valor(nid, 0) for nid in por_id}
+
+
 def camino_al_jefe(nodos: list[dict], edges: list,
                    jefe_id: str | None) -> set[str]:
     """Nodos que están **en el camino** al jefe (BFS inverso desde el jefe).

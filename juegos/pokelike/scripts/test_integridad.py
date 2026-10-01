@@ -306,6 +306,30 @@ def test_puerta_del_75() -> None:
           f"-> {d.valor}: {d.razon[:70]}")
 
 
+def test_centros_por_delante_ven_la_rama() -> None:
+    """El otro lado de la puerta del 75%: elegir la rama que lleva a la cura.
+
+    Medido: 68 de 192 logs llegaron a ver un centro y 26 equipos murieron
+    contra Brock sin pasar por ninguno, porque el peso de trainers (4x) se
+    llevaba al bot a las ramas sin pokecenter.
+    """
+    nodos = [{"id": "a", "tipo": "battle"},
+             {"id": "b", "tipo": "trainer"},
+             {"id": "c", "tipo": "battle"},
+             {"id": "cur", "tipo": "pokecenter"},
+             {"id": "b2", "tipo": "trainer"}]
+    edges = [["a", "b"], ["a", "c"], ["b", "b2"], ["c", "cur"]]
+    cur = P.centros_por_delante(nodos, edges)
+    ent = P.entrenadores_por_delante(nodos, edges)
+    check("la rama del centro se ve", cur.get("c") == 1, f"-> {cur.get('c')}")
+    check("la rama sin centro da 0", cur.get("b") == 0, f"-> {cur.get('b')}")
+    check("la rama sin centro tiene mas trainers", ent.get("b") == 2,
+          f"-> {ent.get('b')}")
+    check("el peso de la cura (12x) gana a los trainers (4x) estando Low",
+          cur.get("c") * 12.0 > ent.get("b") * 4.0,
+          f"centro={cur.get('c')*12.0} vs trainers={ent.get('b')*4.0}")
+
+
 def main() -> int:
     test_tipos_de_nodo()
     test_los_helpers_de_ruta_ven_los_nodos()
@@ -318,6 +342,7 @@ def main() -> int:
     test_pesos_sin_valores_absurdos()
     test_orden_de_prioridades()
     test_puerta_del_75()
+    test_centros_por_delante_ven_la_rama()
 
     for o in OKS:
         print(f"  ok   {o}")
