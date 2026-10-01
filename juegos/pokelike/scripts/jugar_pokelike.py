@@ -518,6 +518,14 @@ class Bot:
                               "jefe" in tipos_alcanzables
                               and not any(t in ("batalla", "entrenador")
                                           for t in tipos_alcanzables)),
+                          # **Waypoint del pokecenter.** El planificador tiene la
+                          # rama que da 50-58 al centro cuando esta en camino al
+                          # jefe, pero `en_camino_al_jefe` **nunca se pasaba desde
+                          # aqui**: el flag se quedaba en False y esa rama estaba
+                          # tan muerta como las otras siete. Se calcula con el
+                          # grafo real (BFS inverso desde el jefe) y no con una
+                          # suposicion.
+                          "en_camino_al_jefe": self.en_camino_al_jefe(m),
                       },
                       region=self.region, insignias=insignias,
                       ids_disponibles=alcanzables,
@@ -823,6 +831,27 @@ class Bot:
             return max(0.0, plan.nivel_min - (sum(niveles) / len(niveles)))
         except Exception:  # noqa: BLE001
             return 0.0
+
+    def en_camino_al_jefe(self, mapa: dict) -> bool:
+        """¿Estamos en un nodo que lleva al jefe? (y por tanto a su centro).
+
+        El grafo siempre mete un pokecenter antes del lider, asi que "estar en
+        camino al jefe" y "tener la cura en el tramo obligatorio" son la misma
+        cosa. Se responde con el BFS inverso de `camino_al_jefe` sobre los
+        nodos reales del mapa.
+        """
+        nodos = mapa.get("nodos") or []
+        edges = mapa.get("edges") or []
+        jefe = None
+        for n in nodos:
+            if P.tipo_de_estado(n.get("tipo") or n.get("type")) == "jefe":
+                jefe = n.get("id")
+                break
+        if jefe is None:
+            return False
+        camino = P.camino_al_jefe(nodos, edges, jefe)
+        actual = mapa.get("actual")
+        return str(actual) in camino if actual is not None else False
 
     def _catch(self) -> str:
         # La captura no se resuelve aquí: se pelea, y el equipo crece una
