@@ -11,6 +11,7 @@ hipotesis al terminar.
 from __future__ import annotations
 
 import argparse
+import os
 import subprocess
 import sys
 import time
@@ -36,13 +37,47 @@ def anotar(msg: str) -> None:
 
 
 def bots_vivos() -> int:
-    """Cuántos bots de partida hay corriendo ahora mismo."""
+    """Cuántos bots de partida hay corriendo ahora mismo.
+
+    **Nada de pgrep -f**: se cuenta a si mismo, asi que nunca baja de 1 y el
+    orquestador se queda esperando para siempre a bots que ya no existen. Paso
+    real de esta Sessie: la tanda 4 se quedo colgada horas diciendo "2 bots
+    jugando" con cero bots vivos. Se lee /proc y se excluyen los PIDs propios y
+    los procesos que no sean python.
+    """
+    yo = os.getpid()
+    mios = {yo}
+    # El padre tambien es un python nuestro (uv run) y no cuenta como bot.
     try:
-        r = subprocess.run(["pgrep", "-fc", "jugar_pokelike.py"],
-                           capture_output=True, text=True, timeout=20)
-        return int((r.stdout or "0").strip() or 0)
+        with open(f"/proc/{yo}/stat", encoding="utf-8") as fh:
+            mios.add(int(fh.read().split(") ", 1)[1].split()[1]))
     except Exception:  # noqa: BLE001
-        return 0
+        pass
+    n = 0
+    try:
+        for d in os.listdir("/proc"):
+            if not d.isdigit():
+                continue
+            pid = int(d)
+            if pid in mios:
+                continue
+            try:
+                with open(f"/proc/{d}/cmdline", "rb") as fh:
+                    argv = fh.read().split(b"\x00")
+            except Exception:  # noqa: BLE001
+                continue
+            if not argv or not argv[0]:
+                continue
+            exe = os.path.basename(argv[0].decode("utf-8", "replace"))
+            if "python" not in exe:
+                continue
+            # El hijo real de `uv run` es el unico que lleva la ruta al script.
+            if any(a.decode("utf-8", "replace").endswith("jugar_pokelike.py")
+                   for a in argv[1:]):
+                n += 1
+    except Exception:  # noqa: BLE001
+        return n
+    return n
 
 
 def esperar_a_las_runs(minutos: float = 45.0) -> None:

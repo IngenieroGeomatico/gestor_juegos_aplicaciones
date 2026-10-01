@@ -38399,6 +38399,1404 @@
      "insignias": 1
     }
    ]
+  },
+  "log-2026-10-01_15-09-17_p200481.txt": {
+   "log": "log-2026-10-01_15-09-17_p200481.txt",
+   "resultado": "EN_CURSO",
+   "pasos": 12,
+   "insignias": 0,
+   "victorias_gimnasio": 0,
+   "derrotas": [],
+   "objetos_ok": 0,
+   "objetos_fallo": 0,
+   "trades": 0,
+   "niveles_entrada": [
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 1,
+     "vivos": 1,
+     "lo": 5,
+     "hi": 5,
+     "insignias": 0
+    },
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 1,
+     "vivos": 1,
+     "lo": 6,
+     "hi": 6,
+     "insignias": 0
+    }
+   ]
+  },
+  "log-2026-10-01_15-09-45_p201026.txt": {
+   "log": "log-2026-10-01_15-09-45_p201026.txt",
+   "resultado": "GAME_OVER",
+   "pasos": 15,
+   "insignias": 0,
+   "victorias_gimnasio": 0,
+   "derrotas": [
+    {
+     "rival": "Wild Doduo appeared!",
+     "nivel": {
+      "ruta": "Route 1",
+      "lider": "Brock",
+      "tipo": "Rock",
+      "n": 1,
+      "vivos": 1,
+      "lo": 6,
+      "hi": 6,
+      "insignias": 0
+     }
+    }
+   ],
+   "objetos_ok": 0,
+   "objetos_fallo": 0,
+   "trades": 0,
+   "niveles_entrada": [
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 1,
+     "vivos": 1,
+     "lo": 5,
+     "hi": 5,
+     "insignias": 0
+    },
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 1,
+     "vivos": 1,
+     "lo": 6,
+     "hi": 6,
+     "insignias": 0
+    }
+   ]
+  },
+  "log-2026-10-01_15-09-48_p201239.txt": {
+   "log": "log-2026-10-01_15-09-48_p201239.txt",
+   "resultado": "GAME_OVER",
+   "pasos": 67,
+   "insignias": 1,
+   "victorias_gimnasio": 0,
+   "derrotas": [
+    {
+     "rival": "Gym Battle vs Misty!",
+     "nivel": {
+      "ruta": "Mt Moon",
+      "lider": "Misty",
+      "tipo": "Water",
+      "n": 3,
+      "vivos": 3,
+      "lo": 12,
+      "hi": 19,
+      "insignias": 1
+     }
+    }
+   ],
+   "objetos_ok": 0,
+   "objetos_fallo": 0,
+   "trades": 1,
+   "niveles_entrada": [
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 1,
+     "vivos": 1,
+     "lo": 5,
+     "hi": 5,
+     "insignias": 0
+    },
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 2,
+     "vivos": 2,
+     "lo": 4,
+     "hi": 5,
+     "insignias": 0
+    },
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 2,
+     "vivos": 2,
+     "lo": 5,
+     "hi": 6,
+     "insignias": 0
+    },
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 2,
+     "vivos": 2,
+     "lo": 5,
+     "hi": 6,
+     "insignias": 0
+    },
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 2,
+     "vivos": 2,
+     "lo": 7,
+     "hi": 8,
+     "insignias": 0
+    },
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 2,
+     "vivos": 2,
+     "lo": 9,
+     "hi": 10,
+     "insignias": 0
+    },
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 2,
+     "vivos": 2,
+     "lo": 10,
+     "hi": 11,
+     "insignias": 0
+    },
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 2,
+     "vivos": 2,
+     "lo": 10,
+     "hi": 11,
+     "insignias": 0
+    },
+    {
+     "ruta": "Mt Moon",
+     "lider": "Misty",
+     "tipo": "Water",
+     "n": 2,
+     "vivos": 2,
+     "lo": 12,
+     "hi": 13,
+     "insignias": 1
+    },
+    {
+     "ruta": "Mt Moon",
+     "lider": "Misty",
+     "tipo": "Water",
+     "n": 2,
+     "vivos": 2,
+     "lo": 13,
+     "hi": 14,
+     "insignias": 1
+    },
+    {
+     "ruta": "Mt Moon",
+     "lider": "Misty",
+     "tipo": "Water",
+     "n": 3,
+     "vivos": 3,
+     "lo": 9,
+     "hi": 14,
+     "insignias": 1
+    },
+    {
+     "ruta": "Mt Moon",
+     "lider": "Misty",
+     "tipo": "Water",
+     "n": 3,
+     "vivos": 3,
+     "lo": 10,
+     "hi": 15,
+     "insignias": 1
+    },
+    {
+     "ruta": "Mt Moon",
+     "lider": "Misty",
+     "tipo": "Water",
+     "n": 3,
+     "vivos": 3,
+     "lo": 10,
+     "hi": 17,
+     "insignias": 1
+    },
+    {
+     "ruta": "Mt Moon",
+     "lider": "Misty",
+     "tipo": "Water",
+     "n": 3,
+     "vivos": 3,
+     "lo": 10,
+     "hi": 17,
+     "insignias": 1
+    },
+    {
+     "ruta": "Mt Moon",
+     "lider": "Misty",
+     "tipo": "Water",
+     "n": 3,
+     "vivos": 3,
+     "lo": 10,
+     "hi": 17,
+     "insignias": 1
+    },
+    {
+     "ruta": "Mt Moon",
+     "lider": "Misty",
+     "tipo": "Water",
+     "n": 3,
+     "vivos": 3,
+     "lo": 12,
+     "hi": 19,
+     "insignias": 1
+    },
+    {
+     "ruta": "Mt Moon",
+     "lider": "Misty",
+     "tipo": "Water",
+     "n": 3,
+     "vivos": 3,
+     "lo": 12,
+     "hi": 19,
+     "insignias": 1
+    }
+   ]
+  },
+  "log-2026-10-01_15-14-22_p202544.txt": {
+   "log": "log-2026-10-01_15-14-22_p202544.txt",
+   "resultado": "EN_CURSO",
+   "pasos": 12,
+   "insignias": 0,
+   "victorias_gimnasio": 0,
+   "derrotas": [],
+   "objetos_ok": 0,
+   "objetos_fallo": 0,
+   "trades": 0,
+   "niveles_entrada": [
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 1,
+     "vivos": 1,
+     "lo": 5,
+     "hi": 5,
+     "insignias": 0
+    },
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 2,
+     "vivos": 2,
+     "lo": 4,
+     "hi": 5,
+     "insignias": 0
+    },
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 2,
+     "vivos": 2,
+     "lo": 4,
+     "hi": 5,
+     "insignias": 0
+    }
+   ]
+  },
+  "log-2026-10-01_15-14-42_p202800.txt": {
+   "log": "log-2026-10-01_15-14-42_p202800.txt",
+   "resultado": "GAME_OVER",
+   "pasos": 60,
+   "insignias": 1,
+   "victorias_gimnasio": 0,
+   "derrotas": [
+    {
+     "rival": "Officer wants to battle!",
+     "nivel": {
+      "ruta": "Mt Moon",
+      "lider": "Misty",
+      "tipo": "Water",
+      "n": 3,
+      "vivos": 3,
+      "lo": 8,
+      "hi": 14,
+      "insignias": 1
+     }
+    }
+   ],
+   "objetos_ok": 0,
+   "objetos_fallo": 0,
+   "trades": 0,
+   "niveles_entrada": [
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 1,
+     "vivos": 1,
+     "lo": 5,
+     "hi": 5,
+     "insignias": 0
+    },
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 2,
+     "vivos": 2,
+     "lo": 4,
+     "hi": 5,
+     "insignias": 0
+    },
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 2,
+     "vivos": 2,
+     "lo": 6,
+     "hi": 7,
+     "insignias": 0
+    },
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 2,
+     "vivos": 2,
+     "lo": 6,
+     "hi": 7,
+     "insignias": 0
+    },
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 2,
+     "vivos": 2,
+     "lo": 6,
+     "hi": 7,
+     "insignias": 0
+    },
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 2,
+     "vivos": 2,
+     "lo": 8,
+     "hi": 9,
+     "insignias": 0
+    },
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 2,
+     "vivos": 2,
+     "lo": 9,
+     "hi": 10,
+     "insignias": 0
+    },
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 2,
+     "vivos": 2,
+     "lo": 11,
+     "hi": 12,
+     "insignias": 0
+    },
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 2,
+     "vivos": 2,
+     "lo": 11,
+     "hi": 12,
+     "insignias": 0
+    },
+    {
+     "ruta": "Mt Moon",
+     "lider": "Misty",
+     "tipo": "Water",
+     "n": 2,
+     "vivos": 2,
+     "lo": 13,
+     "hi": 14,
+     "insignias": 1
+    },
+    {
+     "ruta": "Mt Moon",
+     "lider": "Misty",
+     "tipo": "Water",
+     "n": 3,
+     "vivos": 3,
+     "lo": 8,
+     "hi": 14,
+     "insignias": 1
+    },
+    {
+     "ruta": "Mt Moon",
+     "lider": "Misty",
+     "tipo": "Water",
+     "n": 3,
+     "vivos": 3,
+     "lo": 8,
+     "hi": 14,
+     "insignias": 1
+    },
+    {
+     "ruta": "Mt Moon",
+     "lider": "Misty",
+     "tipo": "Water",
+     "n": 3,
+     "vivos": 3,
+     "lo": 8,
+     "hi": 14,
+     "insignias": 1
+    },
+    {
+     "ruta": "Mt Moon",
+     "lider": "Misty",
+     "tipo": "Water",
+     "n": 3,
+     "vivos": 3,
+     "lo": 8,
+     "hi": 14,
+     "insignias": 1
+    },
+    {
+     "ruta": "Mt Moon",
+     "lider": "Misty",
+     "tipo": "Water",
+     "n": 3,
+     "vivos": 3,
+     "lo": 8,
+     "hi": 14,
+     "insignias": 1
+    }
+   ]
+  },
+  "log-2026-10-01_15-14-46_p203018.txt": {
+   "log": "log-2026-10-01_15-14-46_p203018.txt",
+   "resultado": "GAME_OVER",
+   "pasos": 59,
+   "insignias": 1,
+   "victorias_gimnasio": 0,
+   "derrotas": [
+    {
+     "rival": "Gentleman wants to battle!",
+     "nivel": {
+      "ruta": "Mt Moon",
+      "lider": "Misty",
+      "tipo": "Water",
+      "n": 3,
+      "vivos": 3,
+      "lo": 8,
+      "hi": 14,
+      "insignias": 1
+     }
+    }
+   ],
+   "objetos_ok": 0,
+   "objetos_fallo": 0,
+   "trades": 1,
+   "niveles_entrada": [
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 1,
+     "vivos": 1,
+     "lo": 5,
+     "hi": 5,
+     "insignias": 0
+    },
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 1,
+     "vivos": 1,
+     "lo": 6,
+     "hi": 6,
+     "insignias": 0
+    },
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 2,
+     "vivos": 2,
+     "lo": 4,
+     "hi": 6,
+     "insignias": 0
+    },
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 2,
+     "vivos": 2,
+     "lo": 6,
+     "hi": 8,
+     "insignias": 0
+    },
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 2,
+     "vivos": 2,
+     "lo": 6,
+     "hi": 8,
+     "insignias": 0
+    },
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 2,
+     "vivos": 2,
+     "lo": 8,
+     "hi": 10,
+     "insignias": 0
+    },
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 2,
+     "vivos": 2,
+     "lo": 10,
+     "hi": 11,
+     "insignias": 0
+    },
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 2,
+     "vivos": 2,
+     "lo": 11,
+     "hi": 12,
+     "insignias": 0
+    },
+    {
+     "ruta": "Mt Moon",
+     "lider": "Misty",
+     "tipo": "Water",
+     "n": 2,
+     "vivos": 2,
+     "lo": 13,
+     "hi": 14,
+     "insignias": 1
+    },
+    {
+     "ruta": "Mt Moon",
+     "lider": "Misty",
+     "tipo": "Water",
+     "n": 3,
+     "vivos": 3,
+     "lo": 8,
+     "hi": 14,
+     "insignias": 1
+    },
+    {
+     "ruta": "Mt Moon",
+     "lider": "Misty",
+     "tipo": "Water",
+     "n": 3,
+     "vivos": 3,
+     "lo": 8,
+     "hi": 14,
+     "insignias": 1
+    }
+   ]
+  },
+  "log-2026-10-01_15-18-18_p203432.txt": {
+   "log": "log-2026-10-01_15-18-18_p203432.txt",
+   "resultado": "EN_CURSO",
+   "pasos": 12,
+   "insignias": 0,
+   "victorias_gimnasio": 0,
+   "derrotas": [],
+   "objetos_ok": 0,
+   "objetos_fallo": 0,
+   "trades": 0,
+   "niveles_entrada": [
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 1,
+     "vivos": 1,
+     "lo": 5,
+     "hi": 5,
+     "insignias": 0
+    },
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 2,
+     "vivos": 2,
+     "lo": 4,
+     "hi": 5,
+     "insignias": 0
+    },
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 2,
+     "vivos": 2,
+     "lo": 6,
+     "hi": 7,
+     "insignias": 0
+    }
+   ]
+  },
+  "log-2026-10-01_15-18-50_p203720.txt": {
+   "log": "log-2026-10-01_15-18-50_p203720.txt",
+   "resultado": "GAME_OVER",
+   "pasos": 22,
+   "insignias": 0,
+   "victorias_gimnasio": 0,
+   "derrotas": [
+    {
+     "rival": "Wild Doduo appeared!",
+     "nivel": {
+      "ruta": "Route 1",
+      "lider": "Brock",
+      "tipo": "Rock",
+      "n": 2,
+      "vivos": 2,
+      "lo": 4,
+      "hi": 6,
+      "insignias": 0
+     }
+    }
+   ],
+   "objetos_ok": 0,
+   "objetos_fallo": 0,
+   "trades": 0,
+   "niveles_entrada": [
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 1,
+     "vivos": 1,
+     "lo": 5,
+     "hi": 5,
+     "insignias": 0
+    },
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 1,
+     "vivos": 1,
+     "lo": 6,
+     "hi": 6,
+     "insignias": 0
+    },
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 1,
+     "vivos": 1,
+     "lo": 6,
+     "hi": 6,
+     "insignias": 0
+    },
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 2,
+     "vivos": 2,
+     "lo": 4,
+     "hi": 6,
+     "insignias": 0
+    },
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 2,
+     "vivos": 2,
+     "lo": 4,
+     "hi": 6,
+     "insignias": 0
+    },
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 2,
+     "vivos": 2,
+     "lo": 4,
+     "hi": 6,
+     "insignias": 0
+    }
+   ]
+  },
+  "log-2026-10-01_15-18-54_p203942.txt": {
+   "log": "log-2026-10-01_15-18-54_p203942.txt",
+   "resultado": "GAME_OVER",
+   "pasos": 110,
+   "insignias": 2,
+   "victorias_gimnasio": 0,
+   "derrotas": [
+    {
+     "rival": "Officer wants to battle!",
+     "nivel": {
+      "ruta": "Nugget Bridge",
+      "lider": "Lt. Surge",
+      "tipo": "Electric",
+      "n": 3,
+      "vivos": 2,
+      "lo": 18,
+      "hi": 29,
+      "insignias": 2
+     }
+    }
+   ],
+   "objetos_ok": 0,
+   "objetos_fallo": 0,
+   "trades": 0,
+   "niveles_entrada": [
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 1,
+     "vivos": 1,
+     "lo": 5,
+     "hi": 5,
+     "insignias": 0
+    },
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 1,
+     "vivos": 1,
+     "lo": 6,
+     "hi": 6,
+     "insignias": 0
+    },
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 1,
+     "vivos": 1,
+     "lo": 7,
+     "hi": 7,
+     "insignias": 0
+    },
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 1,
+     "vivos": 1,
+     "lo": 9,
+     "hi": 9,
+     "insignias": 0
+    },
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 2,
+     "vivos": 2,
+     "lo": 4,
+     "hi": 9,
+     "insignias": 0
+    },
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 2,
+     "vivos": 2,
+     "lo": 6,
+     "hi": 11,
+     "insignias": 0
+    },
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 2,
+     "vivos": 2,
+     "lo": 8,
+     "hi": 13,
+     "insignias": 0
+    },
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 2,
+     "vivos": 2,
+     "lo": 8,
+     "hi": 13,
+     "insignias": 0
+    },
+    {
+     "ruta": "Mt Moon",
+     "lider": "Misty",
+     "tipo": "Water",
+     "n": 2,
+     "vivos": 2,
+     "lo": 10,
+     "hi": 15,
+     "insignias": 1
+    },
+    {
+     "ruta": "Mt Moon",
+     "lider": "Misty",
+     "tipo": "Water",
+     "n": 2,
+     "vivos": 2,
+     "lo": 10,
+     "hi": 15,
+     "insignias": 1
+    },
+    {
+     "ruta": "Mt Moon",
+     "lider": "Misty",
+     "tipo": "Water",
+     "n": 3,
+     "vivos": 3,
+     "lo": 9,
+     "hi": 15,
+     "insignias": 1
+    },
+    {
+     "ruta": "Mt Moon",
+     "lider": "Misty",
+     "tipo": "Water",
+     "n": 3,
+     "vivos": 2,
+     "lo": 11,
+     "hi": 17,
+     "insignias": 1
+    },
+    {
+     "ruta": "Mt Moon",
+     "lider": "Misty",
+     "tipo": "Water",
+     "n": 3,
+     "vivos": 2,
+     "lo": 12,
+     "hi": 19,
+     "insignias": 1
+    },
+    {
+     "ruta": "Mt Moon",
+     "lider": "Misty",
+     "tipo": "Water",
+     "n": 3,
+     "vivos": 2,
+     "lo": 12,
+     "hi": 21,
+     "insignias": 1
+    },
+    {
+     "ruta": "Mt Moon",
+     "lider": "Misty",
+     "tipo": "Water",
+     "n": 3,
+     "vivos": 2,
+     "lo": 12,
+     "hi": 23,
+     "insignias": 1
+    },
+    {
+     "ruta": "Mt Moon",
+     "lider": "Misty",
+     "tipo": "Water",
+     "n": 3,
+     "vivos": 3,
+     "lo": 12,
+     "hi": 23,
+     "insignias": 1
+    },
+    {
+     "ruta": "Nugget Bridge",
+     "lider": "Lt. Surge",
+     "tipo": "Electric",
+     "n": 3,
+     "vivos": 3,
+     "lo": 14,
+     "hi": 25,
+     "insignias": 2
+    },
+    {
+     "ruta": "Nugget Bridge",
+     "lider": "Lt. Surge",
+     "tipo": "Electric",
+     "n": 3,
+     "vivos": 3,
+     "lo": 15,
+     "hi": 26,
+     "insignias": 2
+    },
+    {
+     "ruta": "Nugget Bridge",
+     "lider": "Lt. Surge",
+     "tipo": "Electric",
+     "n": 3,
+     "vivos": 3,
+     "lo": 16,
+     "hi": 27,
+     "insignias": 2
+    },
+    {
+     "ruta": "Nugget Bridge",
+     "lider": "Lt. Surge",
+     "tipo": "Electric",
+     "n": 3,
+     "vivos": 2,
+     "lo": 18,
+     "hi": 29,
+     "insignias": 2
+    }
+   ]
+  },
+  "log-2026-10-01_15-24-57_p204448.txt": {
+   "log": "log-2026-10-01_15-24-57_p204448.txt",
+   "resultado": "EN_CURSO",
+   "pasos": 12,
+   "insignias": 0,
+   "victorias_gimnasio": 0,
+   "derrotas": [],
+   "objetos_ok": 0,
+   "objetos_fallo": 0,
+   "trades": 0,
+   "niveles_entrada": [
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 1,
+     "vivos": 1,
+     "lo": 5,
+     "hi": 5,
+     "insignias": 0
+    },
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 1,
+     "vivos": 1,
+     "lo": 6,
+     "hi": 6,
+     "insignias": 0
+    }
+   ]
+  },
+  "log-2026-10-01_15-25-23_p204713.txt": {
+   "log": "log-2026-10-01_15-25-23_p204713.txt",
+   "resultado": "GAME_OVER",
+   "pasos": 88,
+   "insignias": 2,
+   "victorias_gimnasio": 0,
+   "derrotas": [
+    {
+     "rival": "Wild Farfetchd appeared!",
+     "nivel": {
+      "ruta": "Nugget Bridge",
+      "lider": "Lt. Surge",
+      "tipo": "Electric",
+      "n": 3,
+      "vivos": 2,
+      "lo": 18,
+      "hi": 27,
+      "insignias": 2
+     }
+    }
+   ],
+   "objetos_ok": 0,
+   "objetos_fallo": 0,
+   "trades": 2,
+   "niveles_entrada": [
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 1,
+     "vivos": 1,
+     "lo": 5,
+     "hi": 5,
+     "insignias": 0
+    },
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 2,
+     "vivos": 2,
+     "lo": 4,
+     "hi": 5,
+     "insignias": 0
+    },
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 2,
+     "vivos": 2,
+     "lo": 6,
+     "hi": 7,
+     "insignias": 0
+    },
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 2,
+     "vivos": 2,
+     "lo": 7,
+     "hi": 8,
+     "insignias": 0
+    },
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 2,
+     "vivos": 2,
+     "lo": 9,
+     "hi": 10,
+     "insignias": 0
+    },
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 2,
+     "vivos": 2,
+     "lo": 11,
+     "hi": 12,
+     "insignias": 0
+    },
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 2,
+     "vivos": 2,
+     "lo": 11,
+     "hi": 12,
+     "insignias": 0
+    },
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 2,
+     "vivos": 2,
+     "lo": 11,
+     "hi": 12,
+     "insignias": 0
+    },
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 2,
+     "vivos": 2,
+     "lo": 11,
+     "hi": 12,
+     "insignias": 0
+    },
+    {
+     "ruta": "Mt Moon",
+     "lider": "Misty",
+     "tipo": "Water",
+     "n": 2,
+     "vivos": 2,
+     "lo": 13,
+     "hi": 14,
+     "insignias": 1
+    },
+    {
+     "ruta": "Mt Moon",
+     "lider": "Misty",
+     "tipo": "Water",
+     "n": 3,
+     "vivos": 3,
+     "lo": 8,
+     "hi": 14,
+     "insignias": 1
+    },
+    {
+     "ruta": "Mt Moon",
+     "lider": "Misty",
+     "tipo": "Water",
+     "n": 3,
+     "vivos": 3,
+     "lo": 8,
+     "hi": 14,
+     "insignias": 1
+    },
+    {
+     "ruta": "Mt Moon",
+     "lider": "Misty",
+     "tipo": "Water",
+     "n": 3,
+     "vivos": 3,
+     "lo": 8,
+     "hi": 16,
+     "insignias": 1
+    },
+    {
+     "ruta": "Mt Moon",
+     "lider": "Misty",
+     "tipo": "Water",
+     "n": 3,
+     "vivos": 3,
+     "lo": 8,
+     "hi": 16,
+     "insignias": 1
+    },
+    {
+     "ruta": "Mt Moon",
+     "lider": "Misty",
+     "tipo": "Water",
+     "n": 3,
+     "vivos": 3,
+     "lo": 10,
+     "hi": 18,
+     "insignias": 1
+    },
+    {
+     "ruta": "Mt Moon",
+     "lider": "Misty",
+     "tipo": "Water",
+     "n": 3,
+     "vivos": 3,
+     "lo": 12,
+     "hi": 20,
+     "insignias": 1
+    },
+    {
+     "ruta": "Mt Moon",
+     "lider": "Misty",
+     "tipo": "Water",
+     "n": 3,
+     "vivos": 3,
+     "lo": 12,
+     "hi": 20,
+     "insignias": 1
+    },
+    {
+     "ruta": "Nugget Bridge",
+     "lider": "Lt. Surge",
+     "tipo": "Electric",
+     "n": 3,
+     "vivos": 3,
+     "lo": 14,
+     "hi": 22,
+     "insignias": 2
+    },
+    {
+     "ruta": "Nugget Bridge",
+     "lider": "Lt. Surge",
+     "tipo": "Electric",
+     "n": 3,
+     "vivos": 3,
+     "lo": 15,
+     "hi": 23,
+     "insignias": 2
+    },
+    {
+     "ruta": "Nugget Bridge",
+     "lider": "Lt. Surge",
+     "tipo": "Electric",
+     "n": 3,
+     "vivos": 3,
+     "lo": 17,
+     "hi": 25,
+     "insignias": 2
+    },
+    {
+     "ruta": "Nugget Bridge",
+     "lider": "Lt. Surge",
+     "tipo": "Electric",
+     "n": 3,
+     "vivos": 2,
+     "lo": 18,
+     "hi": 26,
+     "insignias": 2
+    },
+    {
+     "ruta": "Nugget Bridge",
+     "lider": "Lt. Surge",
+     "tipo": "Electric",
+     "n": 3,
+     "vivos": 2,
+     "lo": 18,
+     "hi": 27,
+     "insignias": 2
+    }
+   ]
+  },
+  "log-2026-10-01_15-25-26_p204922.txt": {
+   "log": "log-2026-10-01_15-25-26_p204922.txt",
+   "resultado": "GAME_OVER",
+   "pasos": 48,
+   "insignias": 1,
+   "victorias_gimnasio": 0,
+   "derrotas": [
+    {
+     "rival": "Scientist wants to battle!",
+     "nivel": {
+      "ruta": "Mt Moon",
+      "lider": "Misty",
+      "tipo": "Water",
+      "n": 2,
+      "vivos": 1,
+      "lo": 7,
+      "hi": 14,
+      "insignias": 1
+     }
+    }
+   ],
+   "objetos_ok": 0,
+   "objetos_fallo": 0,
+   "trades": 0,
+   "niveles_entrada": [
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 1,
+     "vivos": 1,
+     "lo": 5,
+     "hi": 5,
+     "insignias": 0
+    },
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 1,
+     "vivos": 1,
+     "lo": 5,
+     "hi": 5,
+     "insignias": 0
+    },
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 1,
+     "vivos": 1,
+     "lo": 7,
+     "hi": 7,
+     "insignias": 0
+    },
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 1,
+     "vivos": 1,
+     "lo": 9,
+     "hi": 9,
+     "insignias": 0
+    },
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 1,
+     "vivos": 1,
+     "lo": 11,
+     "hi": 11,
+     "insignias": 0
+    },
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 2,
+     "vivos": 2,
+     "lo": 4,
+     "hi": 11,
+     "insignias": 0
+    },
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 2,
+     "vivos": 2,
+     "lo": 4,
+     "hi": 11,
+     "insignias": 0
+    },
+    {
+     "ruta": "Route 1",
+     "lider": "Brock",
+     "tipo": "Rock",
+     "n": 2,
+     "vivos": 2,
+     "lo": 4,
+     "hi": 11,
+     "insignias": 0
+    },
+    {
+     "ruta": "Mt Moon",
+     "lider": "Misty",
+     "tipo": "Water",
+     "n": 2,
+     "vivos": 2,
+     "lo": 6,
+     "hi": 13,
+     "insignias": 1
+    },
+    {
+     "ruta": "Mt Moon",
+     "lider": "Misty",
+     "tipo": "Water",
+     "n": 2,
+     "vivos": 1,
+     "lo": 7,
+     "hi": 14,
+     "insignias": 1
+    }
+   ]
   }
  }
 }
