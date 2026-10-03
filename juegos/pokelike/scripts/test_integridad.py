@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import ast
 import json
+import os
 import sys
 from dataclasses import replace
 from pathlib import Path
@@ -33,6 +34,7 @@ sys.path.insert(0, str(SCRIPTS))
 import planificador as PL  # noqa: E402
 import politica as P  # noqa: E402
 import pkl_tipos as T  # noqa: E402
+import jugar_pokelike as J  # noqa: E402
 
 FALLOS: list[str] = []
 OKS: list[str] = []
@@ -1877,6 +1879,257 @@ def test_el_brazo_de_control_no_hereda_la_escalera() -> None:
           f"-> control {sin_flag} vs escalera {con_flag}")
 
 
+class _PaginaFalsa:
+    """Navegador minimo para probar `_trade` sin abrir el juego.
+
+    Reproduce lo que se midio en vivo contra pokelike.xyz: al llegar a
+    `#trade-screen` solo hay DECLINE, y las opciones con atajo aparecen al
+    pulsar la fila. `pulsos` guarda las teclas que se han enviado, que es lo
+    que decide si el bot cierra el trato o lo declina.
+    """
+
+    def __init__(self, opciones: list[dict], cierra_con_atajo: bool = True) -> None:
+        self.opciones = opciones
+        self.cerra_con_atajo = cierra_con_atajo
+        self.pulsos: list[str] = []
+        self.clics: list[int] = []
+        self.pantalla_actual = "trade-screen"
+
+        class _Teclado:
+            def __init__(self, fuera: _PaginaFalsa) -> None:
+                self.fuera = fuera
+
+            def press(self, tecla: str) -> None:
+                self.fuera.pulsos.append(tecla)
+                if self.fuera.cerra_con_atajo:
+                    self.fuera.pantalla_actual = "map-screen"
+
+        class _Espera:
+            def wait_for_timeout(self, _ms: int) -> None:
+                return None
+
+        self.keyboard = _Teclado(self)
+        self._espera = _Espera()
+
+    def wait_for_timeout(self, ms: int) -> None:
+        return self._espera.wait_for_timeout(ms)
+
+    def evaluate(self, js: str, *args: object) -> object:
+        # La primera llamada es la carta misteriosa (no existe en el juego
+        # real), la segunda el clic en la fila, y despues las opciones.
+        if "trade-mystery-card" in js:
+            return None
+        if "trade-member-row" in js:
+            return True
+        if "data-shortcut" in js and "getElementById" in js:
+            if self.pantalla_actual != "trade-screen":
+                return []
+            return self.opciones
+        if "trade-member-row" in js and "click" in js:
+            self.clics.append(1)
+            return True
+        return None
+
+
+class _JuegoFalso:
+    def __init__(self, page: _PaginaFalsa) -> None:
+        self.page = page
+
+    def pantalla(self) -> str:
+        return self.page.pantalla_actual
+
+    def visible(self, _sel: str) -> bool:
+        return False
+
+
+class _BotFalso(J.Bot):
+    """Solo lo que `_trade` toca, heredando la clase real.
+
+    Hereda de `Bot` (sin llamar a `__init__`) en vez de ser una clase suelta:
+    si `_trade` necesita un atributo de clase que el falso no tiene, con esto
+    el atributo sale de verdad y el fallo se ve, en lugar de aparecer como un
+    `AttributeError` tragado por el `except` de `_trade` que se va por otro
+    camino. Los metodos reales van enganchados, no reimplementados.
+    """
+
+    def __init__(self, opciones: list[dict], rival: str = "Water",
+                 cierra: bool = True) -> None:
+        self.page = _PaginaFalsa(opciones, cierra_con_atajo=cierra)
+        self.j = _JuegoFalso(self.page)
+        self.tipo_lider = rival
+        self._trade_hecho = False
+        self.ps_invalidados: list[str] = []
+        self.lineas: list[str] = []
+        self.nombre_starter = "Ivysaur"
+
+    def log(self, linea: str) -> None:
+        self.lineas.append(linea)
+
+    def _volcar_trade(self) -> None:
+        self.lineas.append("volcado")
+
+    def _invalidar_ps(self, motivo: str) -> None:
+        self.ps_invalidados.append(motivo)
+
+    def _opciones_genericas(self, *args: object) -> str:
+        """El camino viejo, que va a por DOM: aqui solo se anota que se llego.
+
+        El brazo de control tiene que acabar aqui (es el bug que se quiere
+        medir), pero el metodo real trabaja contra el navegador. Se sustituye
+        **solo** para no abrir el juego en un test, y el test comprueba que se
+        llego, que es justamente lo que demuestra que el flag manda.
+        """
+        self.lineas.append("opciones genericas")
+        return "opciones genericas (camino viejo)"
+
+    def equipo_con_tipos(self) -> list[dict]:
+        # El peor es Spearow (Nv16, 50 de suma de stats), que es a quien el bot
+        # debe sacrificar: nunca al starter.
+        return [{"nombre": "Ivysaur", "nivel": 18, "ps": 100, "ps_max": 100,
+                 "tipos": ["Planta", "Veneno"],
+                 "baseStats": {"hp": 60, "atq": 62, "def": 63, "vel": 80,
+                               "spa": 80, "spd": 80}},
+                {"nombre": "Spearow", "nivel": 16, "ps": 40, "ps_max": 40,
+                 "tipos": ["Normal", "Volador"],
+                 "baseStats": {"hp": 40, "atq": 60, "def": 30, "vel": 70,
+                               "spa": 31, "spd": 31}},
+                {"nombre": "Tentacool", "nivel": 11, "ps": 90, "ps_max": 90,
+                 "tipos": ["Agua", "Veneno"],
+                 "baseStats": {"hp": 65, "atq": 40, "def": 44, "vel": 70,
+                               "spa": 50, "spd": 50}}]
+
+
+OPCIONES_3 = [{"atajo": "1", "texto": "? NORMAL Lv 19"},
+              {"atajo": "2", "texto": "? WATER Lv 19"},
+              {"atajo": "3", "texto": "? FIRE Lv 19"}]
+
+
+def test_el_trade_se_cierra_con_el_atajo() -> None:
+    """El bug: el bot buscaba un boton de continuar que no existe y declinaba.
+
+    Medido: **0 trades aceptados en 319 runs**, con 334 pantallas que ofrecian
+    el nodo. El unico `<button>` de `#trade-screen` es `#btn-skip-trade`
+    (DECLINE): la unica forma de cerrar el trato es pulsar `1`, `2` o `3` sobre
+    `div[data-shortcut]`, y esas opciones **solo aparecen** despues de elegir a
+    quien se sacrifica. Comprobado en vivo: Doduo Lv16 -> Rattata Lv19.
+    """
+    bot = _BotFalso(OPCIONES_3, rival="Fire")
+    res = J.Bot._trade(bot)
+
+    check("el trade pulsa un atajo para cerrarse", bot.page.pulsos == ["2"],
+          f"-> teclas pulsadas: {bot.page.pulsos}")
+    check("el trade se marca como hecho", bot._trade_hecho is True,
+          f"-> _trade_hecho={bot._trade_hecho}")
+    check("el trade accepted devuelve algo aceptado",
+          str(res).startswith("trade aceptado"),
+          f"-> devolvio {res!r}: el bot habria declinado el nodo mas fuerte")
+    check("el trade invalida los PS leidos antes",
+          bot.ps_invalidados == ["trade"],
+          f"-> {bot.ps_invalidados}: el PS cacheado no se refresca y el "
+          f"reordenado usa vida vieja")
+
+
+def test_el_trade_elige_el_atajo_por_tipo() -> None:
+    """El atajo no es cualquiera: se pide el tipo que pega al jefe que toca.
+
+    Sin esto se aceptaria siempre la opcion 1 y se perderia media partida de
+    tipos, que es justo lo que el trade da gratis ademas de los +3 niveles.
+    """
+    b_fuego = _BotFalso(OPCIONES_3, rival="Fire")
+    J.Bot._trade(b_fuego)
+    check("contra un jefe de Fuego pide el Agua", b_fuego.page.pulsos == ["2"],
+          f"-> pidio {b_fuego.page.pulsos} (2 es Water, 2x contra Fire)")
+
+    b_agua = _BotFalso(OPCIONES_3, rival="Water")
+    J.Bot._trade(b_agua)
+    check("contra un jefe de Agua no pide el Water", b_agua.page.pulsos == ["1"],
+          f"-> pidio {b_agua.page.pulsos}: Water->Water es 0.5x, 1 (Normal) es "
+          f"mejor de las tres")
+
+    b_normal = _BotFalso(OPCIONES_3, rival="Normal")
+    J.Bot._trade(b_normal)
+    check("sin jefe conocido pide la primera", b_normal.page.pulsos == ["1"],
+          f"-> pidio {b_normal.page.pulsos}")
+
+
+def test_el_brazo_de_control_del_trade_sigue_declinando() -> None:
+    """`PKL_TRADE=0` debe reproducir el bug, para poder medir cuanto vale.
+
+    El flag no es un adorno: sin el, la comparacion A/B del trade no se puede
+    hacer, porque el otro brazo seria el mismo bot.
+    """
+    original = os.environ.get("PKL_TRADE")
+    try:
+        os.environ["PKL_TRADE"] = "0"
+        check("el flag apagado desactiva el camino bueno",
+              J._trade_activo() is False, "-> el flag no hace nada")
+        bot = _BotFalso(OPCIONES_3, rival="Fire")
+        J.Bot._trade(bot)
+        check("el brazo de control no pulsa ningun atajo",
+              bot.page.pulsos == [],
+              f"-> teclas pulsadas: {bot.page.pulsos}")
+        check("el brazo de control se va por el camino viejo",
+              "opciones genericas" in bot.lineas,
+              f"-> el flag no esta cortando el atajo: {bot.lineas}")
+        os.environ["PKL_TRADE"] = "1"
+        bot2 = _BotFalso(OPCIONES_3, rival="Fire")
+        res2 = J.Bot._trade(bot2)
+        check("el flag encendido cierra el trade", bot2.page.pulsos == ["2"]
+              and "aceptado" in str(res2),
+              f"-> pulsos {bot2.page.pulsos}, devolvio {res2!r}")
+    finally:
+        if original is None:
+            os.environ.pop("PKL_TRADE", None)
+        else:
+            os.environ["PKL_TRADE"] = original
+    check("por defecto el trade esta activado", J._trade_activo() is True,
+          "-> el arreglo no puede depender de que alguien exporte la variable")
+
+
+def test_el_trade_nunca_cambia_al_starter() -> None:
+    """El starter no se toca: es la apertura de la run, y +3 niveles no lo tapa.
+
+    La guía manda cambiar "tu peor món **no-starter**". El bot elegía el más
+    débil sin mirar quién era, y con el equipo en un solo món ese món **era**
+    el starter. Medido en juego al arreglar el trade: `Route 1: equipo 1
+    (vivos 1) niv 8-8` → `trade: se ofrece Bulbasaur` → se quedó con un
+    Sandshrew Lv11 y el 2x contra Brock se fue con el món cambiado.
+    """
+    class _SoloStarter(_BotFalso):
+        def equipo_con_tipos(self) -> list[dict]:
+            return [{"nombre": "Bulbasaur", "nivel": 8, "ps": 100,
+                     "ps_max": 100, "tipos": ["Planta"],
+                     "baseStats": {"hp": 45, "atq": 49, "def": 49, "vel": 45,
+                                   "spa": 65, "spd": 65}}]
+
+    bot = _SoloStarter(OPCIONES_3, rival="Fire")
+    bot.nombre_starter = "Bulbasaur"
+    res = J.Bot._trade(bot)
+    check("con el equipo en solo el starter no se pulsa ningun atajo",
+          bot.page.pulsos == [], f"-> teclas pulsadas: {bot.page.pulsos}")
+    check("con el equipo en solo el starter el trade se declina",
+          "declinado" in str(res), f"-> devolvio {res!r}")
+
+    # Y con el starter en el equipo pero no solo: se cambia el peor de verdad.
+    b2 = _BotFalso(OPCIONES_3, rival="Fire")
+    J.Bot._trade(b2)
+    check("el starter presente no impide cambiar al peor",
+          b2.page.pulsos == ["2"],
+          f"-> pidio {b2.page.pulsos}: con el Ivysaur a salvo el Spearow "
+          f"(Nv16) es el sacrificiado correcto")
+
+
+def test_el_trade_no_acepta_a_ciegas() -> None:
+    bot = _BotFalso([], rival="Fire")
+    bot.opciones = []
+    res = J.Bot._trade(bot)
+    check("sin opciones no pulsa ninguna tecla", bot.page.pulsos == [],
+          f"-> teclas pulsadas: {bot.page.pulsos}")
+    check("sin opciones no se marca el trade como hecho",
+          bot._trade_hecho is False or "aceptado" not in str(res),
+          f"-> devolvio {res!r}: se ha inventado un trade que no ha ocurrido")
+
+
 def main() -> int:
     test_la_etiqueta_de_version_va_en_el_log()
     test_sacar_el_tipo_repetido()
@@ -1938,6 +2191,11 @@ def main() -> int:
     test_la_riesgo_de_exp_con_caidos_ya_no_existe()
     test_la_escalera_gana_al_bono_de_ruta()
     test_el_brazo_de_control_no_hereda_la_escalera()
+    test_el_trade_se_cierra_con_el_atajo()
+    test_el_trade_elige_el_atajo_por_tipo()
+    test_el_brazo_de_control_del_trade_sigue_declinando()
+    test_el_trade_no_acepta_a_ciegas()
+    test_el_trade_nunca_cambia_al_starter()
     test_no_hay_codigo_muerto()
 
     for o in OKS:

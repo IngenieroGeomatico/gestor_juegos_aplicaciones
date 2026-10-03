@@ -75,13 +75,47 @@ Cómo leer una línea:
 - **Si sale X**: la diferencia es apreciable → el reparto de objetos es la palanca.
 - **Si sale Y**: no se distingue → el objeto de tipo no compensa al mal matchup.
 
-### H6 · El trade es el atajo de nivel que falta
+### H6 · El trade es el atajo de nivel que falta — **CERRADA, y no era una hipótesis: era un bug**
 - **Medida**: nivel del equipo en el paso **después** de un trade, comparado con
   el de antes.
 - **Si sale X**: el salto es de **+3** → confirmada, y hay que Perseguir trades
   con más ahínco (más rerolls, más peso).
 - **Si sale Y**: el salto es menor o el trade no se completa → el flujo sigue
   roto y hay que terminarlo.
+
+**Resultado: el flujo estaba roto, y era un bug de DOM.** Medido sobre 319 runs:
+- **334 pantallas** ofrecían nodo de trade; el bot eligió el nodo **46 veces**
+  (14%) y **se completaron 0 trades**. Cero. En toda la historia.
+- El bot elegía el nodo, sacrificaba al món más débil, y luego buscaba
+  `#btn-trade-continue` / `#trade-continue` / `#btn-confirm-trade`. **Ninguno
+  existe.** El único `<button>` de `#trade-screen` es `#btn-skip-trade`
+  (DECLINE), y como la comprobación final `pantalla() != "trade-screen"` no se
+  cumplía, caía al volcado y **declinaba siempre**.
+
+Comprobado en vivo contra pokelike.xyz (no leyendo código):
+1. Al llegar a `#trade-screen` **solo hay DECLINE**. Las opciones no existen.
+2. Al hacer clic en la fila del món a sacrificar, la fila se marca con
+   `data-busy="1"` y **aparecen** tres `div[data-shortcut]` con atajos `1`/`2`/`3`
+   y texto `? TIPO Lv N`. El tipo sí se ve.
+3. **Pulsar el atajo cierra el trato.** Doduo Lv16 → Rattata Lv19 (los +3 de la
+   guía), y el equipo quedó `[Rattata, Ivysaur, Tentacool]`.
+
+**Arreglo**: `_trade` pulsa el atajo de la opción elegida (`_mejor_opcion_trade`:
+primero el tipo que pega al jefe que toca, después el nivel) y, si el atajo no
+cierra, hace clic en la opción. `PKL_TRADE=0` conserva el camino viejo para
+medir cuánto vale.
+
+**Segundo bug que destapó**: al aceptar el primer trade en vivo, el bot cambió
+al **starter**. `Route 1: equipo 1 (vivos 1) niv 8-8` → `se ofrece Bulbasaur`
+→ se quedó con un Sandshrew Lv11. La guía dice "tu peor món **no-starter**", y
+en Kanto el starter se elige por ser 2x contra los tres primeros gimnasios, así
+que cambiarlo es perder la apertura entera. Ahora `Decision` lleva `nombre`
+(antes `valor` era el atajo a pulsar, no lo elegido), `_starter` lo guarda y
+`_trade` excluye al starter; si solo queda él, el trade se declina.
+
+**Trampa de método**: las 11.735 líneas que contienen "TRADE" o "intercambio" en
+los logs no son 11.735 trades: el grep casa con texto de otro contexto. La
+cifra buena es `grep -c "trade aceptado"`: **0**.
 
 ### H7 · El Lucky Egg compensa y hay que cogerlo de inmediato
 - **Medida**: ritmo de subida de nivel en las runs **con** Lucky Egg frente a las

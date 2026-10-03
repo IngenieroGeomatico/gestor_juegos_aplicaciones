@@ -59,6 +59,18 @@ REGIONES_DOM = {
 }
 
 
+def _trade_activo() -> bool:
+    """Brazo de control del experimento del trade.
+
+    `PKL_TRADE=0` deja el camino viejo (buscar un boton de continuar que no
+    existe y declinar), que es lo que ha hecho el bot **siempre**: 0 trades
+    en 319 runs. Se conserva solo para poder medir cuanto vale el arreglo;
+    cuando se tenga veredicto, este flag y el camino viejo se borran juntos.
+    """
+    return os.environ.get("PKL_TRADE", "1").strip().lower() in (
+        "1", "true", "si", "yes")
+
+
 class Bot:
     # Intentos de recuperar un atasco **antes** de aceptar que la partida está
     # muerta. La run no se corta por un atasco: se escala el desbloqueo (teclas,
@@ -75,6 +87,11 @@ class Bot:
         self.j = juego
         self.reset = reset
         self.tipo_lider: str | None = None
+        # Nombre del starter elegido. Vacío hasta que se elija. El trade nunca
+        # debe llevárselo: la guía lo dice ("tu peor món **no-starter**") y en
+        # Kanto el starter se elige por ser 2x contra los tres primeros
+        # gimnasios, así que cambiarlo es perder la apertura de la run.
+        self.nombre_starter: str = ""
         # Rerolls de mapa usados en la run (la guía los recomienda para buscar
         # un trade o un mejor camino de exp).
         self._rerolls = 0
@@ -339,6 +356,11 @@ class Bot:
         cands = self.cartas_con_datos("#starter-choices")
         d = P.elegir_starter(cands, self.region)
         self.anotar(d)
+        # El nombre del starter se guarda aparte porque `valor` es el atajo que
+        # hay que pulsar, no lo elegido. Lo necesita el trade: la guía manda
+        # cambiar "tu peor món **no-starter**", y sin este nombre el bot no
+        # puede saber a quién no tocar.
+        self.nombre_starter = str(d.nombre or "")
         # Traza de los candidatos: la lista de starters que ofrece la región es
         # corta y decide el techo de la run entera, así que conviene verla.
         self.log(f"  starters: {[(c['nombre'], c.get('tipos')) for c in cands]}")
@@ -1511,6 +1533,20 @@ class Bot:
             # método inexistente aquí reventaba el trade entero.
             equipo = self.equipo_con_tipos()
             vivos = [m for m in equipo if (m.get("ps") or 0) > 0]
+            # El starter **no** se cambia nunca. La guía lo dice ("tu peor món
+            # no-starter") y en Kanto el starter se elige por ser 2x contra los
+            # tres primeros gimnasios, así que el trade se lo llevaría y con él
+            # la apertura de la run entera. Medido: con el equipo en 1 solo món
+            # el trade cambiaba al starter y la run seguía con un Nv+3 cualquiera.
+            no_starter = [m for m in vivos
+                          if (m.get("nombre") or "") != self.nombre_starter]
+            if not no_starter:
+                self.log(f"  trade: solo queda el starter ({self.nombre_starter or '?'})"
+                         f" o esta caido; no se cambia el starter")
+                if self.j.visible("#btn-skip-trade"):
+                    self.j.activar("#btn-skip-trade")
+                return "trade declinado (el starter no se cambia)"
+            vivos = no_starter
             if vivos:
                 # **El món sin `baseStats` resuelto NO puede ser el sacrificiado.**
                 # Antes la clave era `sum(baseStats) if baseStats else 0`, así
@@ -1557,6 +1593,48 @@ class Bot:
                         return "trade declinado (fila no encontrada)"
                 self.j.page.wait_for_timeout(350)
 
+            # ---- Aceptar de verdad: el atajo, no un boton ----------------
+            # Las opciones **solo existen despues** de elegir a quien se
+            # sacrifica (al llegar solo hay DECLINE), y no hay ningun boton de
+            # continuar: la unica forma de cerrar el trato es pulsar `1`, `2` o
+            # `3` sobre `div[data-shortcut]`. Comprobado en vivo: con la fila
+            # marcada aparece "? NORMAL Lv 19 / ? FAIRY Lv 19 / ? FIRE Lv 19"
+            # y pulsar 1 cambia el equipo.
+            if _trade_activo():
+                elegido = self._opciones_trade()
+                if elegido:
+                    atajo, texto = elegido
+                    self.j.page.keyboard.press(str(atajo))
+                    self.j.page.wait_for_timeout(900)
+                    if self.j.pantalla() != "trade-screen":
+                        self._trade_hecho = True
+                        self._invalidar_ps("trade")
+                        self.log(f"  ✓ trade aceptado con el atajo {atajo} "
+                                 f"({texto}): +3 niveles y PS completos")
+                        return f"trade aceptado ({texto}) con atajo {atajo}"
+                    # Ni con atajo ni con clic: no se insista, que insistir
+                    # sobre una pantalla que no cambia es el atasco clasico.
+                    self.log("  trade: el atajo no cerro el trato; se "
+                             "intenta con clic")
+                    self.j.page.evaluate(
+                        r"""(atajo) => {
+                            const t = document.getElementById('trade-screen');
+                            if (!t) return false;
+                            const o = [...t.querySelectorAll('[data-shortcut]')]
+                                .filter(e => e.offsetParent !== null &&
+                                             e.dataset.shortcut === atajo)[0];
+                            if (o) { o.click(); return true; }
+                            return false;
+                        }""",
+                        str(atajo))
+                    self.j.page.wait_for_timeout(900)
+                    if self.j.pantalla() != "trade-screen":
+                        self._trade_hecho = True
+                        self._invalidar_ps("trade")
+                        self.log(f"  ✓ trade aceptado con clic en la opción "
+                                 f"{atajo}")
+                        return f"trade aceptado ({texto}) con clic"
+
             for sel in ("#btn-trade-continue", "#trade-continue",
                         "#btn-confirm-trade"):
                 if self.j.visible(sel):
@@ -1584,6 +1662,97 @@ class Bot:
             self.j.activar("#btn-skip-trade")
             return "trade declinado (no se pudo completar)"
         return self._opciones_genericas("#trade-choices", "#btn-skip-trade", "trade")
+
+    # Al llegar a la pantalla solo hay DECLINE: las opciones **se dibujan al
+    # vuelo** cuando se elige a quién se sacrifica, así que se relee una vez
+    # tras una espera corta por si el DOM iba tarde (pintura, no lógica).
+    JS_OPCIONES_TRADE = r"""() => {
+        const t = document.getElementById('trade-screen');
+        if (!t) return [];
+        return [...t.querySelectorAll('[data-shortcut]')]
+            .filter(e => e.offsetParent !== null
+                         && e.dataset.shortcut !== 'Space')
+            .map(e => ({
+                atajo: e.dataset.shortcut,
+                texto: (e.innerText || '').replace(/\s+/g, ' ').trim(),
+            }));
+    }"""
+
+    def _opciones_trade(self) -> tuple[str, str] | None:
+        """Qué opción del trade aceptar: `(atajo, texto)`, o `None`.
+
+        Se leen las tres que aparecen tras elegir a quién se sacrifica y decide
+        `_mejor_opcion_trade`, que es donde vive el criterio (por tipo contra el
+        jefe que toca, después por nivel).
+        """
+        opciones: list[dict] = []
+        for intento in range(2):
+            try:
+                opciones = self.j.page.evaluate(self.JS_OPCIONES_TRADE)
+            except Exception as exc:  # noqa: BLE001
+                self.log(f"  trade: no se pudieron leer las opciones: {exc}")
+                return None
+            if opciones:
+                break
+            if intento == 0:
+                self.j.page.wait_for_timeout(500)
+        if not opciones:
+            self.log("  trade: no hay opciones a la vista; el nodo es "
+                     "inesperado y no se acepta a ciegas")
+            return None
+
+        elegido = self._mejor_opcion_trade(opciones, self.tipo_lider or "")
+        if elegido is None:
+            return None
+        self.log(f"  trade: opciones {[(o['atajo'], o['texto'][:18]) for o in opciones]}"
+                 f" -> se pide la {elegido['atajo']} ({elegido['texto'][:30]})")
+        return (str(elegido["atajo"]), elegido["texto"][:40])
+
+    def _mejor_opcion_trade(self, opciones: list[dict],
+                            rival: str) -> dict | None:
+        """Cuál de las tres opciones pedir, o `None` si no hay ninguna.
+
+        Función **pura**, sin DOM: las tres opciones enseñan el tipo y el nivel
+        (`? Fairy Lv 19`), y el criterio es el mismo que usa la captura: primero
+        un tipo que pegue al jefe que toca, después el de más nivel, y si
+        ninguna convence, la primera (que es lo que haría un jugador sin
+        criterio).
+
+        Sin esto se aceptaría siempre la opción 1 y se perdería media partida
+        de tipos: el trade es +3 niveles **y** un tipo nuevo, y el tipo es justo
+        lo que sale gratis.
+        """
+        if not opciones:
+            return None
+        tipo_rival = T.normalizar(rival.strip()) if rival and rival.strip() else ""
+
+        def _tipo_de(texto: str) -> str:
+            for t in ("Bug", "Dark", "Dragon", "Electric", "Fairy", "Fighting",
+                      "Fire", "Flying", "Ghost", "Grass", "Ground", "Ice",
+                      "Normal", "Poison", "Psychic", "Rock", "Steel", "Water"):
+                if t.lower() in texto.lower():
+                    return t
+            return "Normal"
+
+        def _nivel_de(texto: str) -> int:
+            m = re.search(r"Lv\s*(\d+)", texto)
+            return int(m.group(1)) if m else 0
+
+        def _puntuacion(o: dict) -> tuple:
+            tipo = T.normalizar(_tipo_de(o.get("texto") or ""))
+            nv = _nivel_de(o.get("texto") or "")
+            mult = 1.0
+            if tipo_rival:
+                try:
+                    mult = T.multiplicador(tipo, tipo_rival)
+                except Exception:  # noqa: BLE001
+                    mult = 1.0
+            # Un 2x al jefe que toca vale mucho más que dos niveles: es la
+            # diferencia entre pelear y perder contra el líder. Un 0.5 es lo
+            # peor que puede pasar, así que baja por debajo de cualquier neutro.
+            return (mult, nv)
+
+        return max(opciones, key=_puntuacion)
 
     def _volcar_trade(self) -> None:
         """Vuelca `#trade-screen` a disco para leer su DOM de verdad."""

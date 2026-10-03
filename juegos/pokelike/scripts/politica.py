@@ -217,6 +217,10 @@ class Decision:
     # dentro de `razon` y `accion` era siempre "nodo", así que el bot nunca
     # sabía con qué se enfrentaba y las ramas por tipo no se activaban nunca.
     tipo: str = ""
+    # El **nombre** de lo elegido, cuando hay nombre. `valor` guarda lo que hay
+    # que pulsar (un atajo), que no siempre es lo que se eligió: la guía manda
+    # no cambiar el starter nunca, y sin su nombre el bot no puede cumplirlo.
+    nombre: str = ""
 
     def __str__(self) -> str:
         v = "" if self.valor is None else f" -> {self.valor}"
@@ -465,8 +469,11 @@ def elegir_starter(candidatos: list[dict], region: str,
                 detalle = (f"{c['nombre']} {tipos} (sin filtro duro) "
                            f"media={media:.2f}")
     if mejor is None:
-        return Decision("starter", 1, "sin candidatos: elijo el primero")
-    return Decision("starter", mejor.get("atajo", 1), detalle)
+        c = (candidatos or [{}])[0]
+        return Decision("starter", 1, "sin candidatos: elijo el primero",
+                        nombre=c.get("nombre", ""))
+    return Decision("starter", mejor.get("atajo", 1), detalle,
+                    nombre=mejor.get("nombre", ""))
 
 
 def _mejora_claramente(candidato: dict, m: dict,
