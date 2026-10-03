@@ -251,6 +251,72 @@ del equipo al decidir es `equipo N (vivos V)`, no `mios=`.**
   catálogo del repo es ficción respecto al juego real y `elegir_objetos`
   decide sobre objetos que no existen.
 
+## H10 · Ninguna penalización de `puntuar` funcionaba (nueva, y es la de fondo)
+
+Este es el hallazgo que explica por qué H8 no se movía, y es **arquitectónico**:
+no un peso mal puesto, sino un orden de sumas.
+
+En el bucle de puntuación de `elegir` el score se compone en dos pasos:
+
+```python
+s, razon = puntuar(tipo, ctx_n)      # <- aquí entran TODOS los vetos
+...
+s += extra * peso_ruta               # <- y aquí el bono de ruta, 60-300
+```
+
+El bono de ruta es `n_ent*4` (entrenadores por delante) y `n_centro*12`
+(pokecenters por delante), multiplicado por `peso_ruta = 3.5` mientras falte
+nivel. O sea que vale **entre 60 y 300**, y se suma **después**. Un veto que
+devuelve `-4.0` no pierde nunca contra eso.
+
+**Medido en 24 runs reales**, no supuesto: la escalera de riesgo marcó
+"entrenador de riesgo" **13 veces** y el bot eligió ese entrenador **13 de 13**,
+exactamente igual que el brazo de control (12 de 12). El flag no cambiaba
+nada. El lote se paró a los 24 runs: gastar cuatro horas midiendo un no-op ya
+conocido no es una inversión, es un error.
+
+Las cinco ramas negativas de `puntuar` (`-5, -1, -3, -3, -4`) tienen el mismo
+defecto. La más grave es el **veto por nivel**: marcó 8 pantallas en 24 runs y
+el bot eligió al entrenador las 8 veces. En el test de regresión se ve el
+número crudo: el veto devuelve `-4.0` y el nodo gana con `160.5`.
+
+- **Arreglo aplicado (solo a la escalera)**: `riesgo_entrenador()` devuelve
+  `(peso, penalización, motivo)` y la penalización **se suma al final**, con el
+  bono de ruta ya dentro. La escalera pasa a restar 110-400 puntos, que sí
+  pierden contra un bono de 210.
+- **Lo que queda sin arreglar a proposito**: el veto por nivel sigue siendo un
+  no-op. Arreglarlo en el mismo commit mezclaría dos intervenciones y el
+  experimento dejaría de medir una sola cosa. Es la siguiente hipótesis (H11).
+- **Test de regresión**: `test_la_escalera_gana_al_bono_de_ruta` monta la
+  pantalla exacta del fallo (entrenador con 10 entrenadores y 20 combates por
+  delante) y comprueba que A elige `batalla` y B elige `entrenador`.
+
+### Trampa de método: dos errores al medir lo mismo
+
+1. **`[nodo -> N] tipo score=…` es una decisión, no un candidato.** Se
+   agruparon por "líneas de puntuación consecutivas" para saber cuántos nodos
+   había en pantalla, y salió "el 94% de las pantallas tiene un solo nodo", lo
+   que parece una propiedad del juego. Era mentira: cada línea es **una
+   decisión tomada**, una por pantalla. La verdad de qué había en pantalla está
+   en el campo `disponibles` de la línea de estado
+   (`disponibles ['batalla', 'batalla']`).
+2. **La secundaria que parecía medir la escalera no podía medirla.** Contaba
+   "peleas de entrenador con ≤2 móns en pie" después de cada muerte. Como la
+   escalera **no es un veto**, cuando el entrenador es el nodo único se pelea
+   igual y la cifra no baja nunca. La métrica útil es otra: de las pantallas
+   marcadas como de riesgo **que tenían alternativa en pantalla**, cuantas se
+   pelearon igual. Con la métrica vieja el brazo escalera salía *peor* (41% vs
+   33%) y parecía que el flag empeoraba al bot; no era eso, era que la métrica
+   no discrimina.
+
+### Y el techo sí existe: no eran peleas forzadas
+
+Con `disponibles` como fuente: de 130 peleas de entrenador, **92 (71%) tenían
+alternativa**; de las 72 peleas con el equipo a ≤2 móns en pie, **50 tenían
+alternativa** (27 eran tutor, 8 item, 8 batalla). Y de las 17 pantallas que
+marcó la escalera, 15 tenían alternativa. La escalera **puede** cambiar la
+decisión en dos de cada tres casos. El ERROR fue el sitio donde se aplicaba.
+
 ## Lo que queda cerrado en esta tanda
 
 | Cuestión | Respuesta | Cómo |

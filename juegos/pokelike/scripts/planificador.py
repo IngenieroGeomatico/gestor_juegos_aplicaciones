@@ -243,12 +243,20 @@ UMBRAL_PUERTA_JEFE = 0.75
 # pantallas el entrenador es el único nodo y el veto lo dejaba sin opciones.
 # Con la escalera, si no hay nada mejor pelea igual, pero con alternativa la
 # gana.
-ESCALERA_RIESGO_ENTRENADOR = (
-    (1, 0.5),    # 1 món en pie: pelear es morir
-    (2, 2.0),    # 2 en pie: se gana de milagro
-)
 UMBRAL_RIESGO_ALTO = 0.50    # equipo por debajo: ni cazar ni objeto
 UMBRAL_RIESGO_MEDIO = 0.75
+# (móns en pie como máximo, peso del nodo, penalización sobre el score final)
+ESCALERA_RIESGO_ENTRENADOR = (
+    (1, 0.5, -400.0),   # 1 món en pie: pelear es perder la run
+    (2, 2.0, -140.0),   # 2 en pie: se gana de milagro
+)
+# Lo mismo por PS: (umbral de ratio del equipo, peso, penalización). Los
+# umbrales van **primero** que la tabla que los usa: al revés, NameError al
+# importar y los 24 runs de test no lo pillan porque el fallo es al arrancar.
+ESCALERA_RIESGO_EQUIPO = (
+    (UMBRAL_RIESGO_ALTO, 3.0, -300.0),
+    (UMBRAL_RIESGO_MEDIO, 6.0, -110.0),
+)
 # El nodo `?` es aleatorio y trae shiny, pasivo o **trade**. El trade es la
 # mecanica mas fuerte del juego segun la guia: cambias tu peor món por uno
 # aleatorio **con +3 niveles y PS completo**, y las mejoras del Move Tutor se
@@ -317,6 +325,59 @@ def _estado(equipo: list[dict]) -> tuple[float, int, int]:
     caidos = sum(1 for m in equipo if (m.get("ps") or 0) <= 0)
     vivos = sum(1 for m in equipo if (m.get("ps") or 0) > 0)
     return (sum(ratios) / len(ratios) if ratios else 0.0, caidos, vivos)
+
+
+def riesgo_entrenador(ctx: Contexto) -> tuple[float | None, float, str]:
+    """Peldaños de la escalera de riesgo de un nodo de entrenador.
+
+    Devuelve `(peso_del_nodo, penalización, motivo)`. Peso y penalizacion son 0
+    o `None` cuando el riesgo no aplica. Solo tiene sentido pedirla para nodos
+    de tipo `entrenador`: los jefes de gimnasio son tipo `jefe` y quedan fuera,
+    que es justo donde el diagnostico dice que no hay que tocar nada (68% de las
+    muertes son fuera de gimnasio).
+
+    **Por qué dos cantidades y no una.** La primera versión solo bajaba el peso
+    del nodo a 0.5 o 2.0, y fue un no-op medido, no hipotético: en 24 runs la
+    escalera marcó "entrenador de riesgo" 13 veces y el bot lo eligió **13 de
+    13**, igual que el brazo de control. La causa es el orden de las sumas en el
+    bucle de puntuación:
+
+        s = peso * multiplicadores
+        s += extra * peso_ruta     # bono de ruta: n_ent*4 y n_centro*12,
+                                   # por 3.5 mientras falte nivel
+
+    El bono se suma **después** y vale 60-300, de modo que un peso de 0.5 no
+    pierde nunca contra él. La penalizacion se suma al final, con el bono ya
+    dentro, y ahí sí puede ganar.
+
+    Sigue sin ser un veto duro: si el entrenador es el nodo único de la
+    pantalla se pelea igual. Lo único que cambia es el orden cuando hay
+    alternativa, que es lo que se quería medir.
+    """
+    if ctx.hay_cura_disponible:
+        # Con pokecenter delante, el corte de emergencia de R8 ya obliga a
+        # curar y penalizar el entrenador solo taparía la cura.
+        return None, 0.0, ""
+    ratio, caidos, vivos = _estado(ctx.equipo)
+    if caidos >= 1:
+        # El `caidos >= 1` no es cosmetico: un equipo de **un solo món sano**
+        # es el inicio normal de la partida y ahí pelear es justo lo que hay
+        # que hacer. Lo que mata es perder móns, así que la escalera por móns
+        # en pie solo aplica cuando ya se ha perdido alguno. El `ratio` de
+        # abajo recoge el caso "entero pero gastado": los caidos cuentan como 0
+        # en la media.
+        for min_vivos, peso, pen in ESCALERA_RIESGO_ENTRENADOR:
+            if vivos <= min_vivos:
+                return (peso, pen,
+                        f"entrenador de riesgo: {vivos} món(s) en pie, "
+                        f"{caidos} caído(s) y sin cura a mano")
+    for umbral, peso, pen in ESCALERA_RIESGO_EQUIPO:
+        if ratio < umbral:
+            etiqueta = ("aplazado" if peso <= 3.0 else "de riesgo")
+            return (peso, pen,
+                    f"entrenador {etiqueta}: equipo al {ratio*100:.0f}% "
+                    f"y sin cura delante")
+    return None, 0.0, ""
 
 
 def _equipo_responde_a(equipo: list[dict], tipo: str) -> bool:
@@ -658,25 +719,14 @@ def puntuar(tipo: str, ctx: Contexto) -> tuple[float, str]:
             if ratio < 0.25:
                 return (3.0, f"entrenador aplazado: equipo al {ratio*100:.0f}%, "
                              f"demasiado expuesto")
-        if not ctx.hay_cura_disponible:
-            # El `caidos >= 1` no es cosmetico: un equipo de **un solo món
-            # sano** es el inicio normal de la partida y ahi pelear es
-            # justo lo que hay que hacer. Lo que mata es perder móns, asi que
-            # la escalera por móns en pie solo aplica cuando ya se ha perdido
-            # alguno. El `ratio` de abajo ya recoge el caso "entero pero
-            # gastado", porque los caidos cuentan como 0 en la media.
-            if caidos >= 1:
-                for min_vivos, peso in ESCALERA_RIESGO_ENTRENADOR:
-                    if vivos <= min_vivos:
-                        return (peso,
-                                f"entrenador de riesgo: {vivos} món(s) en "
-                                f"pie, {caidos} caído(s) y sin cura a mano")
-            if ratio < UMBRAL_RIESGO_ALTO:
-                return (3.0, f"entrenador aplazado: equipo al {ratio*100:.0f}% "
-                             f"y sin cura delante")
-            if ratio < UMBRAL_RIESGO_MEDIO:
-                return (6.0, f"entrenador de riesgo: equipo al "
-                             f"{ratio*100:.0f}% y sin cura delante")
+        else:
+            # El peso de la escalera es solo el suelo: entra en `s` antes del
+            # bono de ruta y por eso no decide casi nunca. La parte que
+            # decide se aplica despues, en el bucle de puntuacion, con
+            # `riesgo_entrenador(ctx)[1]`.
+            riesgo = riesgo_entrenador(ctx)
+            if riesgo[0] is not None:
+                return (riesgo[0], riesgo[2])
         if falta > 1:
             return (PESO_ENTRENADOR_SANO + 2.0,
                     f"entrenador: mucha exp, faltan ~{falta:.0f} de nivel")
@@ -933,6 +983,21 @@ def elegir(equipo: list[dict], nodos: list[dict], ctx_extra: dict | None = None,
                     peso_ruta = 3.5 if ctx.corto_de_nivel else 1.0
                     s += extra * peso_ruta
                     razon += f"; deja {extra} combate(s) al jefe"
+            # Escalera de riesgo sobre el score **final**, ya con el bono de
+            # ruta dentro. Sin esto el unico efecto era bajar un peso de
+            # 0.5-2.0 que el bono de 60-300 tapaba siempre: medido en 24 runs,
+            # el bot elegia el entrenador de riesgo 13 de 13 veces, igual que
+            # el control. Los jefes son tipo `jefe`, no `entrenador`, asi que
+            # esto no toca los gimnasio.
+            if EXP["escalera_riesgo"] and tipo == "entrenador":
+                _peso_ri, pen_ri, _motivo_ri = riesgo_entrenador(ctx_n)
+                if pen_ri:
+                    s += pen_ri
+                    # Solo la cifra: el **por que** ya esta en el motivo de
+                    # `puntuar`, y escribirlo otra vez salia duplicado en el log
+                    # ("... deja 34.0 combate(s) al jefe; entrenador de riesgo:
+                    # 2 món(s) en pie -140; entrenador de riesgo: 2 món(s) ...").
+                    razon += f"; -{abs(pen_ri):.0f} de penalización por riesgo"
             punt.append((s, n, razon))
         if punt:
             break

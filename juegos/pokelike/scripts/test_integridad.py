@@ -952,9 +952,24 @@ def test_las_ocho_reglas_se_cumplen() -> None:
     # Regla 8 con caidos solo es valida si no hay cura delante (la 9 manda).
     # La escalera de riesgo sustituyo a la rama anterior, pero la intencion es
     # la misma y no puede relajarse: con pokecenter delante se cura, no se pelea.
+    # Se comprueba **comportamiento** y no la cadena `if not ctx.hay_cura_...`:
+    # esa literal se movio dentro de `riesgo_entrenador` al arreglar el fallo
+    # del bono de ruta, y un test de regla del usuario no puede depender de
+    # donde este escrito el `if`. Lo que no puede pasar es que la escalera
+    # entre con cura delante.
+    _ctx_cura = PLAN.Contexto(
+        equipo=[{"nombre": "A", "nivel": 6, "ps": 100, "ps_max": 100,
+                 "tipos": ["Planta"], "baseStats": {"hp": 100}},
+                {"nombre": "B", "nivel": 5, "ps": 0, "ps_max": 50,
+                 "tipos": ["Normal"], "baseStats": {"hp": 100}},
+                {"nombre": "C", "nivel": 4, "ps": 0, "ps_max": 45,
+                 "tipos": ["Planta"], "baseStats": {"hp": 100}}],
+        plan=PLAN.plan_para("Kanto", 0), nivel_rival=12,
+        hay_cura_disponible=True)
+    _riesgo_con_cura = PLAN.riesgo_entrenador(_ctx_cura)
     check("regla 8: entrenador con caidos exige que no haya cura",
-          "if not ctx.hay_cura_disponible:" in pl,
-          "-> pelea con caidos aunque haya pokecenter delante")
+          _riesgo_con_cura[0] is None and _riesgo_con_cura[1] == 0.0,
+          f"-> la escalera entra con cura delante: {_riesgo_con_cura}")
 
     # Regla 1: la run no se corta por un atasco, escala la recuperacion.
     check("regla 1: el atasco escala la recuperacion",
@@ -1742,6 +1757,126 @@ def test_la_etiqueta_de_version_va_en_el_log() -> None:
               "-> el plan y la realidad se separan sin avisar")
 
 
+def test_la_escalera_gana_al_bono_de_ruta() -> None:
+    """La escalera tiene que poder perder contra un nodo con ruta.
+
+    **Este es el fallo que hacia pointless el experimento entero.** La escalera
+    bajaba el *peso* del nodo a 0.5-2.0, pero ese peso entra en el score antes
+    que el bono de ruta:
+
+        s = peso * multiplicadores
+        s += extra * peso_ruta      # n_ent*4 y n_centro*12, por 3.5
+
+    El bono se suma despues y vale 60-300, asi que 0.5 no perdia nunca. Medido
+    en 24 runs reales: la escalera marco "entrenador de riesgo" 13 veces y el
+    bot eligio el entrenador **13 de 13**, igual que el control. Por eso la
+    penalizacion se suma al final, con el bono ya dentro.
+
+    Aqui se monta una pantalla con esa forma exacta: un nodo de entrenador con
+    10 entrenadores y 20 combates por delante (+210 de bono) y una alternativa
+    de batalla silvestre.
+    """
+    def _pantalla() -> tuple[list[dict], list]:
+        nodos = [{"id": "t", "tipo": "trainer", "clickable": True,
+                   "sprite": "youth", "nivel": 12},
+                  {"id": "b", "tipo": "battle", "clickable": True, "nivel": 8}]
+        for i in range(10):
+            nodos.append({"id": f"et{i}", "tipo": "trainer"})
+        for i in range(20):
+            nodos.append({"id": f"co{i}", "tipo": "battle"})
+        edges: list = []
+        for i in range(10):
+            edges.append(["t", f"et{i}"])
+            for j in range(20):
+                edges.append([f"et{i}", f"co{j}"])
+        return nodos, edges
+
+    def _roto() -> list[dict]:
+        """3 móns, 1 en pie, 2 caidos, y muy por debajo del jefe."""
+        return [{"nombre": "Bulbasaur", "nivel": 6, "ps": 100, "ps_max": 100,
+                 "tipos": ["Planta"], "baseStats": {"hp": 100}},
+                {"nombre": "Pidgey", "nivel": 5, "ps": 0, "ps_max": 50,
+                 "tipos": ["Normal"], "baseStats": {"hp": 100}},
+                {"nombre": "Caterpie", "nivel": 4, "ps": 0, "ps_max": 45,
+                 "tipos": ["Planta"], "baseStats": {"hp": 100}}]
+
+    nodos, edges = _pantalla()
+    original = PL.EXP["escalera_riesgo"]
+    try:
+        PL.EXP["escalera_riesgo"] = False
+        d_b = PL.elegir(_roto(), nodos, {"hay_cura": False}, region="Kanto",
+                        insignias=0, edges=edges)
+        PL.EXP["escalera_riesgo"] = True
+        d_a = PL.elegir(_roto(), nodos, {"hay_cura": False}, region="Kanto",
+                        insignias=0, edges=edges)
+    finally:
+        PL.EXP["escalera_riesgo"] = original
+
+    check("sin escalera el bot elige al entrenador por el bono de ruta",
+          d_b.tipo == "entrenador",
+          f"-> el control deberia seguir eligiendo al entrenador, "
+          f"eligio {d_b.tipo}")
+    check("con escalera el entrenador de riesgo pierde el nodo",
+          d_a.tipo != "entrenador",
+          f"-> el bono de ruta (+210) sigue tapando la penalizacion; "
+          f"eligio {d_a.tipo}")
+    check("la escalera cambia de verdad la decision",
+          d_b.tipo != d_a.tipo,
+          f"-> los dos brazos acaban igual ({d_b.tipo}): el flag no hace nada")
+
+    # Y lo que la hizo segura antes: sin alternativa se pelea igual, para no
+    # dejar al bot sin nada que pulsar.
+    PL.EXP["escalera_riesgo"] = True
+    try:
+        solo = [{"id": "t", "tipo": "trainer", "clickable": True,
+                 "sprite": "youth", "nivel": 12}]
+        d_solo = PL.elegir(_roto(), solo, {"hay_cura": False}, region="Kanto",
+                           insignias=0, edges=[])
+    finally:
+        PL.EXP["escalera_riesgo"] = original
+    check("la escalera no ata al bot cuando el entrenador es lo unico",
+          d_solo.tipo == "entrenador",
+          f"-> eligio {d_solo.tipo}: el bot se quedaria sin nada que pulsar")
+
+
+def test_el_brazo_de_control_no_hereda_la_escalera() -> None:
+    """Con el flag apagado la escalera no puede aparecer: si aparece, miden igual.
+
+    El bloque de la escalera se escribio **fuera** del `if not EXP[...]`, asi
+    que el brazo de control tambien la ejecutaba en todos los estados donde la
+    rama vieja no disparaba. Medido: el control marco "entrenador de riesgo" 2
+    veces. Con eso los dos brazos son casi el mismo bot y la comparacion no dice
+    nada, aunque el informe no avise.
+    """
+    plan = PL.plan_para("Kanto", 0)
+    roto = [{"nombre": "A", "nivel": 6, "ps": 100, "ps_max": 100,
+             "tipos": ["Planta"], "baseStats": {"hp": 100}},
+            {"nombre": "B", "nivel": 5, "ps": 0, "ps_max": 50,
+             "tipos": ["Normal"], "baseStats": {"hp": 100}},
+            {"nombre": "C", "nivel": 4, "ps": 0, "ps_max": 45,
+             "tipos": ["Planta"], "baseStats": {"hp": 100}}]
+    ctx = PL.Contexto(equipo=roto, plan=plan, nivel_rival=5,
+                      hay_cura_disponible=False)
+
+    original = PL.EXP["escalera_riesgo"]
+    try:
+        PL.EXP["escalera_riesgo"] = True
+        con_flag, raz_a = PL.puntuar("entrenador", ctx)
+        PL.EXP["escalera_riesgo"] = False
+        sin_flag, raz_b = PL.puntuar("entrenador", ctx)
+    finally:
+        PL.EXP["escalera_riesgo"] = original
+
+    check("con el flag la escalera marca el riesgo", "riesgo" in raz_a,
+          f"-> {raz_a}")
+    check("sin el flag la escalera no aparece", "de riesgo" not in raz_b,
+          f"-> el control hereda la escalera: los dos brazos miden lo mismo "
+          f"({raz_b})")
+    check("sin el flag el trainer se juega igual por ser la unica exp",
+          sin_flag > con_flag,
+          f"-> control {sin_flag} vs escalera {con_flag}")
+
+
 def main() -> int:
     test_la_etiqueta_de_version_va_en_el_log()
     test_sacar_el_tipo_repetido()
@@ -1801,6 +1936,8 @@ def main() -> int:
     test_la_escalera_de_riesgo_no_puede_atar_al_bot()
     test_el_riesgo_no_se_dispara_si_hay_cura()
     test_la_riesgo_de_exp_con_caidos_ya_no_existe()
+    test_la_escalera_gana_al_bono_de_ruta()
+    test_el_brazo_de_control_no_hereda_la_escalera()
     test_no_hay_codigo_muerto()
 
     for o in OKS:

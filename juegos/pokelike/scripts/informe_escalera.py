@@ -19,7 +19,9 @@ from pathlib import Path
 
 RAIZ = Path('/home/radi/Proyectos/Github/gestor_juegos_aplicaciones')
 sys.path.insert(0, str(RAIZ / 'juegos/pokelike/scripts'))
-from estadistica import mann_whitney, p_permutacion, veredicto  # noqa: E402
+from estadistica import (  # noqa: E402
+    ic_bootstrap, mann_whitney, p_permutacion, veredicto,
+)
 
 LOGS = RAIZ / 'juegos/pokelike/log/esc_riesgo'
 
@@ -33,30 +35,59 @@ pat_perdida = re.compile(r'COMBATE PERDIDO')
 pat_estado = re.compile(r'equipo (\d+) \(vivos (\d+)\)')
 
 
+def _p(res: dict) -> str:
+    """El p-valor de `p_permutacion`, que devuelve dict y no float."""
+    v = res.get('p')
+    return '?' if v is None else f'{v:.4f}'
+
+
 def insignias_de(t: str) -> int | None:
     r = t[t.rindex('RESUMEN'):] if 'RESUMEN' in t else ''
     m = pat_ins.search(r)
     return int(m.group(1)) if m else None
 
 
-def entrenador_desmontado(lineas: list[str]) -> bool:
-    """¿Eligió un entrenador con 2 o menos móns en pie?
+pat_disp = re.compile(r'disponibles \[([^\]]*)\]')
+pat_riesgo = re.compile(r'entrenador de riesgo:')
+pat_aplazado = re.compile(r'entrenador aplazado:.*sin cura delante')
+pat_viejo = re.compile(r'unica fuente de exp|única fuente de exp')
 
-    Se mide en la linea de mapa anterior a la decision, que es el estado real
-    al elegir. `mios=` no sirve: sale cada 4 llamadas y puede ser a mitad de
-    pelea (ver la correccion en HIPOTESIS.md).
+
+def tipos_de(estado: str) -> list[str]:
+    """Lo que el juego ofrecio en esa pantalla, leido del campo `disponibles`."""
+    m = pat_disp.search(estado)
+    if not m:
+        return []
+    return [t.strip().strip("'\"") for t in m.group(1).split(',') if t.strip()]
+
+
+def mecanismo(lineas: list[str]) -> dict:
+    """Pantallas de riesgo y si el bot dejo al entrenador en la cuneta.
+
+    Devuelve: `marcadas` (la escalera/la rama vieja marco al entrenador),
+    `evitables` (de esas, las que tenian otro tipo de nodo en pantalla, o sea
+    donde la decision era de verdad), y `elegido` (las evitables en las que el
+    bot peleó igual). Que `elegido` valga 0 en el brazo escalera es lo unico
+    que demuestra que la penalizacion llega a timepo.
     """
+    out = {'marcadas': 0, 'evitables': 0, 'elegido': 0}
     for i, ln in enumerate(lineas):
-        if not pat_perdida.search(ln) or 'Gym Battle' in ln or 'Wild' in ln:
+        md = pat_dec.search(ln)
+        if not md or md.group(1) != 'entrenador':
             continue
-        for j in range(i, max(0, i - 40), -1):
-            if pat_dec.search(lineas[j]) and 'entrenador' in lineas[j]:
-                for k in range(j, max(0, j - 25), -1):
-                    m = pat_estado.search(lineas[k])
-                    if m:
-                        return int(m.group(2)) <= 2
-                return False
-    return False
+        if not (pat_riesgo.search(ln) or pat_aplazado.search(ln)
+                or pat_viejo.search(ln)):
+            continue
+        out['marcadas'] += 1
+        estado = ''
+        for j in range(i, min(i + 8, len(lineas))):
+            if pat_vivos.search(lineas[j]):
+                estado = lineas[j]
+                break
+        if any(d != 'entrenador' for d in tipos_de(estado)):
+            out['evitables'] += 1
+            out['elegido'] += 1      # se eligio: es el nodo de la decision
+    return out
 
 
 def recoge() -> dict:
@@ -79,7 +110,8 @@ def recoge() -> dict:
         out[brazo].append({
             'insignias': insignias_de(t) or 0,
             'champion': res.group(1) == 'CHAMPION',
-            'desmontado': entrenador_desmontado(t.splitlines()),
+            'desmontado': mecanismo(t.splitlines())['elegido'],
+            'mec': mecanismo(t.splitlines()),
             'escalera': escalera,
         })
     return out, hashes, sucios
@@ -115,10 +147,23 @@ def main() -> int:
     print(f'   B: media={mb:.2f}  mediana={sorted(ib)[len(ib)//2]}  '
           f'max={max(ib)}  CHAMPION={sum(d["champion"] for d in B)}')
     print(f'   diferencia = {ma - mb:+.2f} insignias')
-    p = mann_whitney(ia, ib)
-    print(f'   Mann-Whitney p={p:.4f}  (0,05 es el listón)')
-    print(f'   permutacion p={p_permutacion(ia, ib):.4f}')
-    print(f'   -> {veredicto(p)}')
+    # `mann_whitney` y `p_permutacion` devuelven dict, no float: el p-valor va
+    # dentro. Escribirlo como float revienta el informe a mitad, que es
+    # justo cuando mas falta hace.
+    mw = mann_whitney(ia, ib)
+    pp = p_permutacion(ia, ib)
+    pmw = mw.get('p')
+    print(f"   Mann-Whitney p={_p(mw)}  (U={mw.get('u', '?')})")
+    print(f"   permutacion p={_p(pp)}")
+    # Cuantita tambien, no solo si hay diferencia: con esta metrica un p bajo
+    # puede querer decir "+0,02 insignias", que no compensa el cambio.
+    try:
+        ca, cb = ic_bootstrap(ia), ic_bootstrap(ib)
+        print(f'   IC 95% media  A=[{ca[0]:.2f}, {ca[1]:.2f}]  '
+              f'B=[{cb[0]:.2f}, {cb[1]:.2f}]')
+    except Exception as exc:  # noqa: BLE001
+        print(f"   (sin IC de bootstrap: {exc})")
+    print(f"   -> {veredicto(pmw)}")
 
     print()
     print('=== SECUNDARIA 1: llega al menos a 1 insignia ===')
@@ -127,18 +172,39 @@ def main() -> int:
     print(f'   A {ga}/{len(A)}   B {gb}/{len(B)}')
     pa = p_permutacion([1] * ga + [0] * (len(A) - ga),
                        [1] * gb + [0] * (len(B) - gb))
-    print(f'   permutacion p={pa:.4f}')
+    print(f"   permutacion p={_p(pa)}")
 
     print()
     print('=== SECUNDARIA 2: eligio entrenador con <=2 mons en pie ===')
     da = sum(d['desmontado'] for d in A)
     db = sum(d['desmontado'] for d in B)
-    print(f'   A {da}/{len(A)} ({100*da//len(A)}%)   '
-          f'B {db}/{len(B)} ({100*db//len(B)}%)')
-    print('   (esta es la que la escalera deberia bajar; si no baja, el flag '
-          'no esta cambiando la decision)')
-    return 0
+    print(f'   A {da}/{len(A)} ({100*da//max(len(A),1)}%)   '
+          f'B {db}/{len(B)} ({100*db//max(len(B),1)}%)')
 
+    # El mecanismo, que es lo que tiene que moverse. Si aqui no se ve nada,
+    # el primario no significa nada: se estaria comparando el bot consigo mismo.
+    ma = sum(d['mec']['marcadas'] for d in A)
+    ea = sum(d['mec']['evitables'] for d in A)
+    xa = sum(d['mec']['elegido'] for d in A)
+    mb_ = sum(d['mec']['marcadas'] for d in B)
+    eb = sum(d['mec']['evitables'] for d in B)
+    xb = sum(d['mec']['elegido'] for d in B)
+    print(f'   marcadas:        A={ma}  B={mb_}')
+    print(f'   con alternativa: A={ea}  B={eb}   <- las que si eran evitable')
+    print(f'   peleadas igual:  A={xa}  B={xb}')
+    if ea == 0:
+        print('   AVISO: el brazo escalera no tuvo ni una pantalla de riesgo '
+              'evitable. Sin eso no hay nada que comparar.')
+    elif xa == 0:
+        print('   OK: la escalera respetada 0 veces de las evitables: la '
+              'penalizacion llega al score final.')
+    else:
+        print(f'   AVISO: la escalera se salto {xa} pantallas evitable(s). '
+              f'El bono de ruta sigue tapando la penalizacion.')
+    if xb == 0 and eb:
+        print('   AVISO: el control tambien esquivo todas las evitables: los '
+              'dos brazos hacen lo mismo.')
+    return 0
 
 if __name__ == '__main__':
     sys.exit(main())
