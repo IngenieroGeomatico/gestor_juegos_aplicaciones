@@ -545,17 +545,123 @@ def test_el_entrenador_se_veta_por_nivel_y_por_caidos() -> None:
     check("un_entrenador_a_nivel_sigue_siendo_valido",
           "vetado" not in raz_ok, f"-> {raz_ok}")
 
-    # Un solo món en pie, caídos y sin cura: ni "única fuente de exp".
+    # Un solo món en pie, caídos y sin cura: se **difiera**, no se veta en
+    # negativo. La razón ya no dice "vetado" porque el veto duro se midió y
+    # perdía (0,64 vs 1,62 insignias): lo que hace es bajar el peso para que
+    # gane cualquier alternativa, y pelear si no la hay.
     _, raz_sin = PL.puntuar("entrenador", replace(
         ctx, nivel_rival=9, hay_cura_disponible=False))
-    check("entrenador_sin_cura_con_caidos_se_veta",
-          "vetado" in raz_sin and "caído" in raz_sin, f"-> {raz_sin}")
+    check("entrenador_sin_cura_con_caidos_se_difiera",
+          "caído" in raz_sin, f"-> {raz_sin}")
 
     # Y con cura delante se vuelve a permitir: el pokecenter va antes.
     _, raz_con = PL.puntuar("entrenador", replace(
         ctx, nivel_rival=9, hay_cura_disponible=True))
     check("entrenador_con_caidos_permite_si_hay_cura",
           "vetado" not in raz_con, f"-> {raz_con}")
+
+
+def test_la_escalera_de_riesgo_no_puede_atar_al_bot() -> None:
+    """La escalera de riesgo puede ser muy baja, pero **nunca negativa**.
+
+    Es el requisito que hace seguro este cambio. Un veto duro ya se probó
+    (veto de tipo, -3) y salió PEOR que no hacer nada (0,64 vs 1,62 insignias),
+    porque en el 43% de las pantallas el entrenador es el nodo único y el bot
+    se quedaba sin nada que pulsar. Aquí la escalera solo tiene que ganar a
+    las alternativas cuando las hay, y si no las hay sigue siendo el mejor
+    nodo de la pantalla.
+    """
+    plan = PL.plan_para("Kanto", 0)
+    # El peor caso imaginable: 6 móns, 5 caídos, el superviviente al 10%.
+    equipo = [{"nombre": f"M{i}", "nivel": 10, "ps": 100, "ps_max": 100,
+               "tipos": ["Fuego"], "baseStats": {"hp": 100}} for i in range(6)]
+    equipo[0]["ps"] = 10
+    for i in range(1, 6):
+        equipo[i]["ps"] = 0
+    ctx = PL.Contexto(equipo=equipo, plan=plan, hay_cura_disponible=False,
+                      nivel_rival=5)
+
+    peor, raz = PL.puntuar("entrenador", ctx)
+    check("el_entrenador_en_el_peor_caso_no_puntua_negativo",
+          peor > 0, f"-> {peor} ({raz})")
+
+    # Y tiene que perder contra una alternativa segura cuando la hay.
+    s_batalla, _ = PL.puntuar("batalla", replace(
+        ctx, capturas_pantalla=3, plan=PL.plan_para("Kanto", 9)))
+    check("el_entrenador_desmontado_pierde_contra_cazar",
+          peor < s_batalla, f"-> entrenador {peor} vs batalla {s_batalla}")
+
+    # La escalera es monótona: con más móns en pie puntúa más.
+    pts = []
+    for vivos in (1, 2, 3):
+        eq = [dict(m, ps=(m["ps_max"] if i < vivos else 0))
+              for i, m in enumerate(equipo)]
+        pts.append(PL.puntuar("entrenador",
+                              replace(ctx, equipo=eq))[0])
+    check("la_escalera_crece_con_los_mons_en_pie",
+          pts[0] < pts[1] < pts[2], f"-> {pts}")
+
+
+def test_el_riesgo_no_se_dispara_si_hay_cura() -> None:
+    """Con pokecenter delante manda R8, no la escalera.
+
+    El corte de emergencia del principio ya manda al centro cuando el equipo
+    esta <=75%. La escalera solo existe para el caso sin cura, que es donde el
+    bot se comia los entrenadores con el equipo desmontado.
+    """
+    plan = PL.plan_para("Kanto", 0)
+    roto = [{"nombre": "A", "nivel": 10, "ps": 10, "ps_max": 100,
+             "tipos": ["Fuego"], "baseStats": {"hp": 100}},
+            {"nombre": "B", "nivel": 10, "ps": 0, "ps_max": 100,
+             "tipos": ["Agua"], "baseStats": {"hp": 100}}]
+    ctx = PL.Contexto(equipo=roto, plan=plan, nivel_rival=5)
+
+    sin_cura, _ = PL.puntuar("entrenador",
+                             replace(ctx, hay_cura_disponible=False))
+    con_cura, raz_cura = PL.puntuar(
+        "entrenador", replace(ctx, hay_cura_disponible=True))
+    check("con_cura_no_manda_la_escalera_de_riesgo",
+          "riesgo" not in raz_cura, f"-> {raz_cura}")
+    # Con cura delante el entrenador puntua **peor**, y eso es lo correcto: lo
+    # que se marca es "nada que no sea curar". R8 manda por encima del riesgo,
+    # porque con pokecenter delante el problema tiene arreglo.
+    check("con_cura_manda_R8_no_el_riesgo",
+          "curar" in raz_cura and con_cura < sin_cura,
+          f"-> {con_cura} ({raz_cura}) vs sin cura {sin_cura}")
+
+
+def test_la_riesgo_de_exp_con_caidos_ya_no_existe() -> None:
+    """La rama que **premiaba** pelear con caídos y sin cura, se ha ido.
+
+    Devolvía `PESO_ENTRENADOR_SANO`, el puntaje mas alto de la pantalla, en
+    el estado mas peligroso: 33 de 54 muertes de entrenador elegian el nodo
+    con 2 o menos móns en pie y 15 con uno solo. Ese comentario era una
+    correccion contra un atasco; la escalera de riesgo lo resuelve sin
+    premiar el riesgo.
+
+    Se comprueba la **linea de codigo**, no el texto: el comentario que la
+    explicaba sobrevive en parte y no es lo que se decide. La rama sigue
+    existiendo, pero solo como brazo de control del experimento
+    (`PKL_ESCALERA_RIESGO=0`), que es lo que hace comparables los dos brazos.
+    Lo que no puede pasar es que el branch por defecto la ejecute.
+    """
+    fuente = (SCRIPTS / "planificador.py").read_text(encoding="utf-8")
+    linea_vieja = ("if caidos and not ctx.carry_debil "
+                   "and not ctx.hay_cura_disponible:")
+    check("la_escalera_de_riesgo_existe",
+          "ESCALERA_RIESGO_ENTRENADOR" in fuente,
+          "-> no hay escalera de riesgo en el planificador")
+    # La rama vieja se conserva para el control, pero tiene que quedar
+    # **bajo el flag**, no ejecutandose siempre: si corre siempre, la medicion
+    # de los dos brazos mide lo mismo y el experimento no dice nada.
+    import planificador as _PL
+    check("el_flag_de_la_escalera_esta_por_defecto_encendido",
+          _PL.EXP["escalera_riesgo"] is True,
+          "-> por defecto se esta midiendo el brazo viejo")
+    check("la_escalera_es_el_default_y_el_viejo_es_el_control",
+          'if not EXP["escalera_riesgo"]:' in fuente,
+          "-> el comportamiento viejo no tiene forma de apagarse y la "
+          "comparacion entre brazos no existe")
 
 
 def test_mapa_lee_el_nivel_del_rival() -> None:
@@ -644,8 +750,14 @@ def test_el_atasco_cuenta_rachas_y_no_toda_la_partida() -> None:
     check("el tope de atasco no es 12 (mata runs sanas)",
           "tope_repetidas = 25" in txt,
           "-> tope demasiado bajo para una racha ")
-    check("no queda el clear() que anulaba la deteccion",
-          "vistos.clear()" not in txt,
+    # Solo se prohíbe el `clear()` en el bucle de conteo, no en la recuperación
+    # tras recargar la página, donde vaciar el historial sí es lo correcto.
+    # Solo la seccion que cuenta: desde la clave hasta la comparacion con el
+    # tope. El `clear()` de la recuperacion tras recargar si es correcto.
+    conteo = txt[txt.index("clave = f\""):]
+    conteo = conteo[:conteo.index("tope_repetidas:")]
+    check("el clear() no esta en el bucle de conteo",
+          "vistos.clear()" not in conteo,
           "-> la deteccion de atasco vuelve a estar anulada")
 
 
@@ -838,9 +950,10 @@ def test_las_ocho_reglas_se_cumplen() -> None:
           "-> falta alguna de las tres condiciones de la puerta")
 
     # Regla 8 con caidos solo es valida si no hay cura delante (la 9 manda).
+    # La escalera de riesgo sustituyo a la rama anterior, pero la intencion es
+    # la misma y no puede relajarse: con pokecenter delante se cura, no se pelea.
     check("regla 8: entrenador con caidos exige que no haya cura",
-          "if caidos and not ctx.carry_debil and not ctx.hay_cura_disponible:"
-          in pl,
+          "if not ctx.hay_cura_disponible:" in pl,
           "-> pelea con caidos aunque haya pokecenter delante")
 
     # Regla 1: la run no se corta por un atasco, escala la recuperacion.
@@ -856,8 +969,12 @@ def test_las_ocho_reglas_se_cumplen() -> None:
     check("regla 7: el swap por nivel calcula el peor",
           "_peor_para_sustituir" in jug,
           "-> sin objetivo previo se elige un mon arbitrario")
+    # Antes el codigo era `muertos or vivos`; ahora el caido se comprueba
+    # antes de la regla del duplicado, que es donde tiene que ir: un món a
+    # 0 PS es el mejor candidato posible y sigue siendo el primero.
     check("regla 7: se prioriza al mon muerto",
-          "muertos or vivos" in jug,
+          "if muertos:" in jug
+          and jug.index("if muertos:") < jug.index("_clave_menor_valor"),
           "-> el muerto no tiene prioridad en la sustitucion")
 
     # Regla 3: el herido al final por porcentaje.
@@ -929,6 +1046,123 @@ def test_la_skill_del_camino_no_se_desincroniza() -> None:
               "-> es el valor que el juego emite y la skill lo omite")
 
 
+
+def test_el_prep_del_jefe_no_entra_en_bucle() -> None:
+    """El prep es opcional: quedarse ahí no puede costar la run.
+
+    El manejador se rendía ("el prep no cede") y **volvía sin salir**, así que
+    el paso siguiente volvía a entrar, reintentaba el mismo orden y repetía
+    para siempre: `!! el prep no cede` / `[prep -> Krabby]` / `!! el prep no
+    cede`… El detector de atasco no lo veía porque la pantalla nunca cambia
+    de verdad: sigue en `elite-prep-screen`.
+    """
+    txt = (SCRIPTS / "jugar_pokelike.py").read_text(encoding="utf-8")
+    check("el prep recuerda los intentos fallidos",
+          "_prep_fallos" in txt,
+          "-> sin memoria, se rinde y vuelve a entrar en bucle infinito")
+    check("el prep escala a recarga si no cede",
+          "recargo la pagina para salir" in txt,
+          "-> se queda atascado en elite-prep-screen para siempre")
+    check("el prep se pone a cero cuando si cede",
+          txt.count("self._prep_fallos = 0") >= 3,
+          "-> el contador nunca se limpia y acaba recargando sin motivo")
+
+
+def test_la_batalla_que_no_acaba_tiene_techo() -> None:
+    """Un combate que se mueve pero no termina no puede pulsarse para siempre.
+
+    La exención de "batalla sigue viva" reseteaba el contador de atasco cada vez
+    que el PS cambiaba, **sin límite de reintentos**. Un combate con animación
+    pero que nunca acaba hacía pulsar `continuar` indefinidamente y la run se
+    quedaba ahí: `[continuar -> True]` una y otra vez, con 13 s entre medias.
+    """
+    txt = (SCRIPTS / "jugar_pokelike.py").read_text(encoding="utf-8")
+    check("la exencion de batalla viva tiene techo",
+          "TOPE_BATALLA_VIVA" in txt,
+          "-> un combate que no acaba se repite indefinidamente")
+    check("el techo se comprueba antes de resetear el contador",
+          "if self._batalla_viva < TOPE_BATALLA_VIVA:" in txt,
+          "-> se resetea el contador sin limite y no se llega nunca al tope")
+
+
+def test_el_veto_de_nivel_usa_el_mon_que_abre() -> None:
+    """El listón del veto de entrenador es el món que ABRE, no el mejor.
+
+    Con la referencia en el mejor món el veto no disparaba: un Mankey Nv10
+    cubría a un Staryu Nv6 que es quien abre, y contra un fire-spitter Nv12
+    (12 > 10+2 es falso) se entraba y se perdía con el equipo entero a 0.
+    Medido: `mios=[Staryu 0/19, Geodude 0/26, Mankey 0/28, Bulbasaur 0/29]`.
+    """
+    import planificador as PLAN
+
+    def m(n, tp, st, nv):
+        return {"nombre": n, "tipos": tp, "baseStats": {"x": st},
+                "nivel": nv, "ps": 100, "ps_max": 100}
+
+    eq = [m("Staryu", ["Agua"], 245, 6), m("Geodude", ["Roca", "Tierra"], 300, 9),
+          m("Mankey", ["Lucha"], 305, 10),
+          m("Bulbasaur", ["Planta", "Veneno"], 318, 10)]
+    ctx = PLAN.Contexto(equipo=eq, plan=PLAN.plan_para("Kanto", 1),
+                        tipos_por_sprite={"fire": ["Fuego"]})
+    _, r = PLAN.puntuar("entrenador", replace(ctx, sprite="fire", nivel_rival=12))
+    check("un rival por encima del món que abre se veta",
+          "vetado" in r, f"-> {r}")
+
+
+def test_con_un_solo_mon_se_captura_casi_todo() -> None:
+    """R2 con 1 món en pie: el filtro de tipo contra el jefe se relaja.
+
+    Exigía `>= 1.0` contra el gimnasio que tocaba siempre, y con un único
+    Bulbasaur Nv5 eso rechazaba los salvajes de Route 1 enteros: el bot elegía
+    el nodo de captura y luego huía. Medido: `GAME_OVER` en 18 pasos, 0
+    insignias y 0 capturas, tras pelear un `bug-catcher` Nv2 con un solo món.
+    """
+    import politica as PP
+
+    def c(n, tp):
+        return {"nombre": n, "tipos": tp, "nivel": 1,
+                "baseStats": {"x": 300}, "atajo": "1"}
+
+    eq = [{"nombre": "Bulbasaur", "nivel": 5, "ps": 19, "ps_max": 19,
+           "tipos": ["Planta", "Veneno"], "baseStats": {"x": 318}}]
+    for nom, tp in [("Pidgey", ["Normal", "Volador"]), ("Rattata", ["Normal"])]:
+        d = PP.elegir_captura(eq, [c(nom, tp)], "Roca", "Agua", 6,
+                              ["Roca", "Agua"], "Kanto")
+        check(f"con 1 món se captura a {nom}", d.valor is not None,
+              f"-> {d.razon[:50]}")
+
+    # Y el filtro existe: se relaja de 1.0 a 0.5 con un solo món, no desaparece.
+    txt = (SCRIPTS / "politica.py").read_text(encoding="utf-8")
+    check("con 1 món el umbral se relaja pero no desaparece",
+          "if len(vivos) < 2:" in txt and "if of_min < 0.5:" in txt
+          and "elif of_min < 1.0:" in txt,
+          "-> el filtro de tipo contra el jefe no se ha relajado con 1 món")
+
+
+
+def test_continuar_en_batalla_no_puede_buquearse() -> None:
+    """Un boton de continuar que se pulsa mucho no esta avanzando.
+
+    Medido: `continuar` en bucle con el enemigo ya a 0 HP (la batalla estaba
+    ganada y la pantalla no pasaba al resultado), 13 s entre pulsaciones. El
+    tope general era de 25 rachas y ademas la exencion de batalla reseteaba el
+    contador a 1 cada 4 intentos, asi que el bucle era infinito: nunca se
+    llegaba al tope.
+    """
+    txt = (SCRIPTS / "jugar_pokelike.py").read_text(encoding="utf-8")
+    check("hay un tope propio para 'continuar' en batalla",
+          "TOPE_CONTINUAR" in txt,
+          "-> 'continuar' puede pulsar indefinidamente sin avanzar")
+    check("el tope de continuar es bajo (no 25)",
+          "TOPE_CONTINUAR = 4" in txt or "TOPE_CONTINUAR = 6" in txt,
+          "-> el tope es tan alto que tardan minutos en escalar")
+    check("hay recuperacion propia para batalla clavada",
+          "_recuperar_batalla_clavada" in txt and "btn-auto-battle" in txt,
+          "-> no se fuerza auto-battle ni recarga al clanar la batalla")
+    check("la exencion de batalla no puede anular el tope de continuar",
+          "es_continuar_batalla" in txt,
+          "-> el reset por exencion deja el bucle sin salida")
+
 def test_los_niveles_vienen_numericos() -> None:
     """Ningún nivel puede viajar como texto: el bot los compara con enteros.
 
@@ -997,7 +1231,520 @@ def test_no_hay_codigo_muerto() -> None:
         check(f"{atributo} se usa de verdad", leido >= 3, f"-> {leido} apariciones")
 
 
+# =====================================================================
+# Regresiones añadidas tras la auditoría del repo. Cada una fija un bug
+# concreto; el comentario de cada una dice cuál era.
+# =====================================================================
+
+
+def test_mapa_lee_el_nivel_del_rival() -> None:
+    """`mapa()` tiene que traer `nivel`, o el veto por nivel nunca se aplica."""
+    txt = (SCRIPTS / "navegador.py").read_text(encoding="utf-8")
+    check("el mapa lee el nivel del entrenador",
+          "trainerFightLevel(delEstado)" in txt,
+          "-> el veto por nivel no puede dispararse")
+    fuente = (SCRIPTS / "planificador.py").read_text(encoding="utf-8")
+    check("el planificador recibe el nivel del rival",
+          "nivel_rival=niv_rival" in fuente,
+          "-> el veto por nivel no puede dispararse")
+
+
+def test_el_entrenador_se_veta_por_nivel_y_por_caidos() -> None:
+    """No se entra a un entrenador por encima del equipo, ni sin cura y caído.
+
+    Regresión sobre la tanda que perdió contra `Ace Trainer wants to battle!`
+    con un único món en pie: el nivel del rival ya venía de
+    `trainerFightLevel`, pero nunca llegaba a la política.
+    """
+    import planificador as PL
+
+    equipo = [
+        {"nombre": "Goldeen", "nivel": 9, "ps": 100, "ps_max": 100,
+         "tipos": ["Agua"], "baseStats": {"x": 245}},
+        {"nombre": "Bulbasaur", "nivel": 7, "ps": 0, "ps_max": 100,
+         "tipos": ["Planta", "Veneno"], "baseStats": {"x": 318}},
+    ]
+    ctx = PL.Contexto(equipo=equipo, plan=PL.plan_para("Kanto", 0))
+
+    _, raz = PL.puntuar("entrenador", replace(ctx, nivel_rival=25))
+    check("el_entrenador_con_rival_mas_fuerte_se_veta",
+          "vetado" in raz, f"-> {raz}")
+
+    sano = [dict(m, ps=m["ps_max"]) for m in equipo]
+    _, raz_ok = PL.puntuar("entrenador", replace(
+        ctx, equipo=sano, caidos=0, nivel_rival=9))
+    check("un_entrenador_a_nivel_sigue_siendo_valido",
+          "vetado" not in raz_ok, f"-> {raz_ok}")
+
+    _, raz_sin = PL.puntuar("entrenador", replace(
+        ctx, nivel_rival=9, hay_cura_disponible=False))
+    check("entrenador_sin_cura_con_caidos_se_difiera",
+          "caído" in raz_sin, f"-> {raz_sin}")
+
+
+def test_el_veto_de_entrenador_llega_a_puntuar() -> None:
+    """`replace(ctx, ...)` descartaba el `nivel_rival` que el veto necesita.
+
+    El veto se ponía en `ctx_n`, y luego la rama del waypoint hacía
+    `replace(ctx, ...)` reconstruyendo el contexto desde cero, así que el veto
+    se desactivaba justo en los nodos donde hacía falta.
+    """
+    txt = (SCRIPTS / "planificador.py").read_text(encoding="utf-8")
+    check("el waypoint parte de ctx_n, no de ctx",
+          "ctx_n = replace(ctx_n, en_camino_al_jefe=en_camino)" in txt,
+          "-> el veto por nivel se pierde en la rama del jefe")
+    check("no queda replace(ctx, en_camino...",
+          "replace(ctx, en_camino_al_jefe" not in txt,
+          "-> el veto por nivel se pierde en la rama del jefe")
+
+
+def test_el_flojo_es_el_mas_debil_del_equipo() -> None:
+    """`flojo` tenía que ser el PEOR miembro, no el mejor.
+
+    El `min` estaba sobre `-0.02*stats - nivel`, que devuelve el que **más**
+    stats y nivel tiene. Comprobado ejecutándolo con Bulbasaur Nv20 (318) y
+    Staryu Nv8 (245): devolvía Bulbasaur. Con el equipo lleno, la puerta de
+    captura comparaba contra el mejor y el bot huía de todas las capturas.
+    """
+    equipo = [
+        {"nombre": "Bulbasaur", "nivel": 20, "ps": 100, "ps_max": 100,
+         "tipos": ["Planta", "Veneno"], "baseStats": {"x": 318}},
+        {"nombre": "Staryu", "nivel": 8, "ps": 100, "ps_max": 100,
+         "tipos": ["Agua"], "baseStats": {"x": 245}},
+    ]
+
+    def _fuerza_flojo(m: dict) -> tuple:
+        st = sum((m.get("baseStats") or {}).values()) if (m.get("baseStats")) else 0
+        return (0 if st else 1, st, m.get("nombre") or "")
+
+    check("el flojo es el mas debil",
+          min(equipo, key=_fuerza_flojo)["nombre"] == "Staryu")
+    txt = (SCRIPTS / "politica.py").read_text(encoding="utf-8")
+    check("el codigo usa el flojo mas debil",
+          "return (0 if st else 1, st, m.get(\"nombre\") or \"\")" in txt,
+          "-> la clave del flojo no es la del test")
+
+
+def test_curar_invalida_el_ps_real() -> None:
+    """El pokecenter tenía que llamar a `_invalidar_ps`, y su tipo es `"cura"`.
+
+    `d.tipo` es vocabulario interno y `politica.tipo_de_estado` mapea
+    `pokecenter -> cura`. La rama comparaba contra
+    `("centro", "pokecenter")`, que el juego nunca emite: nunca se contaba un
+    centro y la caché de PS no se invalidaba al curar.
+    """
+    txt = (SCRIPTS / "jugar_pokelike.py").read_text(encoding="utf-8")
+    check("el centro se detecta por el tipo real 'cura'",
+          'if d.tipo == "cura":' in txt,
+          "-> vuelve a comparar contra un tipo que el juego no emite")
+    check("el centro invalida el PS real",
+          'self._invalidar_ps("pokecenter")' in txt)
+    check("no queda la rama muerta del centro",
+          'd.tipo in ("centro", "pokecenter")' not in txt,
+          "-> codigo muerto de vuelta")
+
+
+def test_el_atasco_cuenta_rachas_y_no_toda_la_partida() -> None:
+    """El detector de atasco debe contar repeticiones **consecutivas**.
+
+    Decía eso en el comentario y no lo hacía: `vistos` no se limpiaba y la clave
+    era pantalla+acción, que en `map-screen` es siempre `nodo 1`, `nodo 2`…,
+    el valor normal de cada visita. Una run sana declaraba `ATASCADO` en la
+    visita 13 de cualquier atajo.
+    """
+    txt = (SCRIPTS / "jugar_pokelike.py").read_text(encoding="utf-8")
+    check("el detector compara contra la clave completa",
+          "if clave == anterior:" in txt,
+          "-> sigue contando acumulado en vez de por racha")
+    check("el tope de atasco no es 12 (mata runs sanas)",
+          "tope_repetidas = 25" in txt)
+    # Solo se prohíbe el `clear()` en el bucle de conteo, no en la recuperación
+    # tras recargar la página, donde vaciar el historial sí es lo correcto.
+    # Solo la seccion que cuenta: desde la clave hasta la comparacion con el
+    # tope. El `clear()` de la recuperacion tras recargar si es correcto.
+    conteo = txt[txt.index("clave = f\""):]
+    conteo = conteo[:conteo.index("tope_repetidas:")]
+    check("el clear() no esta en el bucle de conteo",
+          "vistos.clear()" not in conteo,
+          "-> la deteccion de atasco vuelve a estar anulada")
+
+
+def test_los_indices_de_objetos_se_recalculan() -> None:
+    """El reparto de objetos no puede usar índices de un snapshot viejo.
+
+    `usar_item` indexa el DOM vivo con `.nth(indice)`, pero el plan se armaba
+    con los índices de `bolsa` del principio. Al gastarse el primer objeto, la
+    bolsa se acortaba y los índices siguientes apuntaban un objeto más arriba.
+    """
+    txt = (SCRIPTS / "jugar_pokelike.py").read_text(encoding="utf-8")
+    check("el indice del objeto se recalcula antes de usarlo",
+          "bolsa_viva = self.j.bolsa_items()" in txt and "idx_vivo" in txt,
+          "-> sigue el indice del snapshot y se equipa el objeto equivocado")
+    check("un timeout no veta el objeto para siempre",
+          "self._objeto_fallos" in txt and ">= 2" in txt,
+          "-> un solo clic fallido quema el objeto hasta el final de la run")
+
+
+def test_el_nivel_equipo_no_revienta_con_ceros() -> None:
+    """`min()` sobre niveles vacíos era un `ValueError` en cada captura.
+
+    El `if vivos else 0` solo cubría el equipo vacío. Con móns **vivos pero
+    con `nivel == 0`** el generador quedaba vacío y `min()` lanzaba. Como
+    `ValueError` no está en `ERRORES_DE_CODIGO`, no cortaba la run: acababa en
+    `ATASCADO`, perdiendo la partida en la pantalla de captura.
+    """
+    txt = (SCRIPTS / "politica.py").read_text(encoding="utf-8")
+    check("los niveles vivos se calculan antes de min()",
+          "_niveles_vivos" in txt and
+          "min(_niveles_vivos) if _niveles_vivos else 0" in txt,
+          "-> sigue el min() sobre un generador que puede quedar vacío")
+    import politica as PP
+    equipo = [{"nombre": "A", "nivel": 0, "ps": 100, "ps_max": 100,
+               "tipos": ["Agua"], "baseStats": {"x": 40}}]
+    try:
+        PP.elegir_captura(
+            equipo, [{"nombre": "Zubat", "nivel": 3, "tipos": ["Siniestro"],
+                      "baseStats": {"x": 55}}],
+            "Agua", "Tierra", 6, ["Agua", "Tierra"], "Kanto")
+    except ValueError as exc:
+        check("elegir_captura no revienta con nivel 0", False, f"-> {exc}")
+    else:
+        check("elegir_captura no revienta con nivel 0", True)
+
+
+def test_el_trade_no_sacrifica_al_mon_sin_datos() -> None:
+    """El trade no puede cambiar al mejor miembro ni clicar a ciegas."""
+    txt = (SCRIPTS / "jugar_pokelike.py").read_text(encoding="utf-8")
+    check("el sacrificio aparta los stats desconocidos",
+          "_fuerza_sacrificio" in txt and "0 if st else 1" in txt,
+          "-> un món sin baseStats suma 0 y sale elegido")
+    check("no se clic a la primera fila a ciegas",
+          "return false;" in txt,
+          "-> el món que sale del equipo es uno arbitrario")
+
+
+def test_la_skill_del_camino_no_se_desincroniza() -> None:
+    """La skill del camino dice los pesos reales: que no mienta.
+
+    Los pesos se sacan del módulo, así que cuando alguien cambia una prioridad
+    en `planificador.py` el test falla y obliga a actualizar la skill.
+    """
+    import planificador as PLAN
+
+    skill = RAIZ / ".opencode/skills/pokelike-camino/CAMINO-POR-PANTALLA.md"
+    if not skill.exists():
+        check("la skill del camino existe", False, "-> no está")
+        return
+    txt = skill.read_text(encoding="utf-8")
+    pesos = {
+        "PESO_CURA_CAIDOS": 50, "PESO_CAPTURA": 60, "PESO_TRADE": 45,
+        "PESO_ENTRENADOR_SANO": 34, "PESO_BATALLA_NIVEL": 15,
+        "PESO_BATALLA_A_NIVEL": 4, "PESO_OBJETO": 12, "PESO_INCOGNITA": 9,
+    }
+    for nombre, esperado in pesos.items():
+        real = getattr(PLAN, nombre, None)
+        if real is None:
+            check(f"la skill menciona {nombre}", False, "-> ya no existe")
+            continue
+        entero = int(round(float(real)))
+        check(f"la skill menciona {nombre}={entero}",
+              f"**{entero}**" in txt or f"| {entero} |" in txt,
+              f"-> el código tiene {entero} y la skill no lo dice")
+    check("la skill dice el umbral de la puerta", "75%" in txt)
+    import jugar_pokelike as JUG
+    for pantalla in sorted(JUG.Bot.MANEJADORES):
+        if pantalla not in txt:
+            check(f"la skill documenta {pantalla}", False, "-> falta")
+            return
+    check("la skill documenta todas las pantallas que maneja el bot", True)
+    for v in ("map-screen", "pokecenter", "move_tutor"):
+        check(f"la skill nombra el valor real '{v}'", v in txt)
+
+
+def test_la_run_no_se_corta_por_el_presupuesto() -> None:
+    """R1: la run solo acaba perdiendo o completando la región.
+
+    El bucle de `jugar()` llevaba `self.pasos < max_pasos` como condición, así
+    que un `--max-pasos` agotado cortaba la partida con un final que no era
+    ganar ni perder.
+    """
+    txt = (SCRIPTS / "jugar_pokelike.py").read_text(encoding="utf-8")
+    check("el bucle de jugar no se corta por presupuesto",
+          'while self.resultado == "EN_CURSO":' in txt,
+          "-> un presupuesto agotado vuelve a cortar la run a mitad")
+    check("seguir_en_vivo tampoco se corta por presupuesto",
+          "while bot.resultado == \"EN_CURSO\":" in txt,
+          "-> el modo en vivo sigue cortando la partida")
+
+
+def test_el_herido_al_menos_50_va_al_final() -> None:
+    """R3: menos del 50% de vida va último, y no se le expulsa del equipo."""
+    import politica as PP
+    equipo = [
+        {"nombre": "A", "nivel": 10, "ps": 100, "ps_max": 100,
+         "tipos": ["Planta"], "baseStats": {"x": 300}},
+        {"nombre": "B", "nivel": 10, "ps": 40, "ps_max": 100,
+         "tipos": ["Fuego"], "baseStats": {"x": 300}},
+    ]
+    orden = PP._reservar_heridos(equipo)
+    check("los heridos van al final del orden", orden[0] == "A", f"-> {orden}")
+    check("el herido sigue en el equipo (no se expulsa)", len(orden) == 2)
+    falsos = [{"nombre": "X", "nivel": 10, "ps": 46, "ps_max": 46,
+               "tipos": ["Planta"], "baseStats": {"x": 1}}]
+    check("el corte de herido es por porcentaje",
+          PP._reservar_heridos(falsos)[0] == "X",
+          "-> un món con 46/46 se contaba como herido por vida cruda")
+
+
+def test_r2_se_captura_aunque_el_salvaje_sea_de_nivel_menor() -> None:
+    """R2: al inicio de cada pantalla se captura un Pokémon.
+
+    El filtro de calidad de nivel rechazaba al salvaje por estar por debajo del
+    mejor nivel del equipo con **2 móns en pie**, así que se perdían todos los
+    nodos de captura. Medido: 4 nodos de captura, 1 captura, `GAME_OVER` con
+    2 móns.
+    """
+    import politica as PP
+    equipo = [
+        {"nombre": "Bellsprout", "nivel": 19, "ps": 100, "ps_max": 100,
+         "tipos": ["Planta", "Veneno"], "baseStats": {"x": 300}},
+        {"nombre": "Venonat", "nivel": 10, "ps": 100, "ps_max": 100,
+         "tipos": ["Bicho", "Veneno"], "baseStats": {"x": 305}},
+    ]
+    salvajes = [{"nombre": "Onix", "nivel": 5, "tipos": ["Roca", "Tierra"],
+                 "baseStats": {"x": 300}, "atajo": "1"}]
+    d = PP.elegir_captura(equipo, salvajes, "Roca", "Agua", 6,
+                          ["Roca", "Agua"], "Kanto")
+    check("con 2 móns se captura aunque el salvaje sea de menor nivel",
+          d.valor is not None,
+          f"-> el nodo se gasta sin capturar: {d.razon[:60]}")
+    d1 = PP.elegir_captura(equipo[:1], salvajes, "Roca", "Agua", 6,
+                           ["Roca", "Agua"], "Kanto")
+    check("con 1 solo món también se captura", d1.valor is not None,
+          f"-> {d1.razon[:60]}")
+
+
+def test_r2_no_veta_por_nivel() -> None:
+    """R2: el nivel no puede vetar una captura. Ni con 1 món, ni con 3.
+
+    Hubo un veto `nivel_minimo` que **no pidió el usuario**: con un solo món en
+    pie descartaba todos los salvajes de la ruta. El parámetro ya no existe;
+    este test falla si alguien lo reintroduce.
+    """
+    txt = (SCRIPTS / "politica.py").read_text(encoding="utf-8")
+    check("el veto por nivel de captura no existe",
+          "nivel_minimo" not in txt,
+          "-> ha vuelto el veto que descartaba salvajes con el equipo vacío")
+    txt_bot = (SCRIPTS / "jugar_pokelike.py").read_text(encoding="utf-8")
+    check("el bot no le pasa nivel_minimo a elegir_captura",
+          "nivel_minimo=" not in txt_bot)
+
+
+def test_un_caido_no_vuelve_a_vivir_al_invalidar_el_ps() -> None:
+    """El HUD marca 100 a un món con 0 de vida: eso no puede ganar.
+
+    La caché de porcentajes se vacía en cada uso de objeto, insignia y trade.
+    Con la caché vacía el bot volvía al HUD, creía tener sano a un equipo
+    entero muerto y entraba a pelear. Medido: `0/32, 0/28, 0/30` reales contra
+    `100/100` reportados.
+    """
+    txt = (SCRIPTS / "jugar_pokelike.py").read_text(encoding="utf-8")
+    check("existe un registro de caidos que sobrevive al cache",
+          "_caidos_conocidos" in txt,
+          "-> al vaciar el porcentaje, un món caido vuelve a parecer sano")
+    check("el consumo fuerza a 0 a los caidos conocidos",
+          "if clave in self._caidos_conocidos:" in txt,
+          "-> el HUD (que marca 100) vuelve a mandar sobre el dato fiable")
+    inicio = txt.index("def equipo_con_tipos")
+    fin = txt.index("\n    def ", inicio)
+    consumo = txt[inicio:fin]
+    check("el dato de caido se aplica despues del porcentaje cacheado",
+          consumo.index("_caidos_conocidos") > consumo.index("_ps_real.get"),
+          "-> un porcentaje viejo puede tapar el dato de caido")
+
+
+def test_el_que_pega_mas_va_delante() -> None:
+    """Va primero el que gana por tipo; dentro, stats y luego nivel.
+
+    El orden era un **producto** `of * aguante * altura`, que emparejaba móns
+    que no deben emparejarse: contra Roca/Tierra, Staryu (pega x2) y Geodude
+    (pega x0.5, aguanta bien) salían los dos a 2.0.
+    """
+    import politica as PP
+
+    def m(n, tp, st, nv):
+        return {"nombre": n, "tipos": tp, "baseStats": {"x": st},
+                "nivel": nv, "ps": 100, "ps_max": 100}
+
+    eq = [m("Venonat", ["Bicho", "Veneno"], 305, 12),
+          m("Charmander", ["Fuego"], 309, 12),
+          m("Bulbasaur", ["Planta", "Veneno"], 318, 12)]
+    orden = PP.orden_para_entrenador(eq, ["Bicho"])
+    check("entrenador de Bicho -> el de Fuego va primero",
+          orden[0] == "Charmander", f"-> {orden}")
+
+    eq2 = [m("Venonat", ["Bicho", "Veneno"], 305, 12),
+           m("Squirtle", ["Agua"], 314, 12),
+           m("Bulbasaur", ["Planta", "Veneno"], 318, 12)]
+    orden2 = PP.orden_para_entrenador(eq2, ["Fuego"])
+    check("entrenador de Fuego -> el de Agua abre y el 0.5x va al final",
+          orden2[0] == "Squirtle" and orden2[-1] == "Venonat", f"-> {orden2}")
+
+    eq3 = [m("Flojo", ["Fuego"], 290, 20), m("Fuerte", ["Fuego"], 340, 12)]
+    orden3 = PP.orden_para_entrenador(eq3, ["Roca"])
+    check("a igual tipo mandan los stats antes que el nivel",
+          orden3[0] == "Fuerte", f"-> {orden3}")
+
+
+def test_se_evita_al_entrenador_que_nadie_le_gana() -> None:
+    """Si se puede evitar al entrenador, se evita; si es el líder, se juega.
+
+    La pregunta no es "¿me da experiencia?" (siempre la da) sino "¿hay con qué
+    ganarle?", y la responde la tabla de tipos.
+    """
+    import planificador as PLAN
+
+    def m(n, tp, st, nv):
+        return {"nombre": n, "tipos": tp, "baseStats": {"x": st},
+                "nivel": nv, "ps": 100, "ps_max": 100}
+
+    # El veto se fija a **activo**: este test lo prueba, así que no puede
+    # depender de la variable de entorno del experimento en curso.
+    veto_previo = PLAN.EXP["veto_tipo"]
+    PLAN.EXP["veto_tipo"] = True
+    try:
+        _prueba_veto(PLAN, m)
+    finally:
+        PLAN.EXP["veto_tipo"] = veto_previo
+
+
+def _prueba_veto(PLAN, m) -> None:
+    ctx = PLAN.Contexto(equipo=[m("Ivysaur", ["Planta", "Veneno"], 318, 14)],
+                        plan=PLAN.plan_para("Kanto", 1))
+    _, r_fuego = PLAN.puntuar("entrenador", replace(
+        ctx, sprite="fire", tipos_por_sprite={"fire": ["Fuego"]}))
+    check("se evita al fire-breather sin respuesta de tipo",
+          "evitable" in r_fuego, f"-> {r_fuego}")
+
+    _, r_hiker = PLAN.puntuar("entrenador", replace(
+        ctx, sprite="hiker", tipos_por_sprite={"hiker": ["Roca", "Tierra"]}))
+    check("entra si alguien le gana por tipo",
+          "evitable" not in r_hiker, f"-> {r_hiker}")
+
+    _, r_jefe = PLAN.puntuar("entrenador", replace(
+        ctx, sprite="boss", es_jefe=True,
+        tipos_por_sprite={"boss": ["Fuego"]}))
+    check("el jefe se juega siempre", "evitable" not in r_jefe, f"-> {r_jefe}")
+
+    caido = m("Squirtle", ["Agua"], 314, 14)
+    caido["ps"] = 0
+    _, r_caido = PLAN.puntuar("entrenador", replace(
+        ctx, equipo=[caido], sprite="fisher",
+        tipos_por_sprite={"fisher": ["Agua"]}))
+    check("un món caido no cuenta como respuesta",
+          "evitable" in r_caido, f"-> {r_caido}")
+
+
+def test_sacar_el_tipo_repetido() -> None:
+    """Regla del usuario: con dos del mismo tipo, sale el repetido.
+
+    Es mejor que sacar "el peor". Dos móns del mismo tipo son una plaza de
+    equipo desperdiciada: el segundo no aporta nada que el primero no tenga, y
+    la plaza que libera es justo la que necesita el món nuevo.
+
+    Los cuatro casos que importan, cada uno con un fallo distinto posible:
+
+    1. Hay repetido y el nuevo es mejor -> sale el repetido.
+    2. Hay repetido pero el nuevo es peor -> **no** se cambia: sería tirar una
+       plaza buena por nada, y cambiar por cambiar es peor que no cambiar.
+    3. Sin repetidos -> el de siempre, el peor por stats y nivel.
+    4. Hay un muerto -> el muerto, aunque coincida el tipo: no vale nada y
+       ocupa plaza.
+    """
+    import jugar_pokelike as J
+
+    def _con(equipo, entrante=None):
+        bot = object.__new__(J.Bot)          # sin __init__: no hace falta red
+        bot.equipo_con_tipos = lambda: [dict(m) for m in equipo]
+        bot._swap_nuevo_mons = entrante
+        bot.log = lambda *a, **k: None
+        return bot._peor_para_sustituir()
+
+    agua_a = _mon("Pikachu", ["Electric"], 20)
+    agua_b = _mon("Squirtle", ["Water"], 20)     # repite Water? no: distinto
+    vdup_a = _mon("Poliwag", ["Water"], 24)
+    vdup_b = _mon("Slowpoke", ["Water"], 22)
+
+    # 1. repetido y el nuevo lo tapa mejor -> el repetido
+    check("swap: con tipo repetido sale el repetido, no el peor",
+          _con([agua_a, vdup_a, vdup_b],
+               {"nombre": "Blastoise", "nivel": 26, "tipos": ["Water"],
+                "baseStats": {"hp": 79, "at": 108}}) == "Slowpoke",
+          "-> no se libera la plaza del tipo duplicado")
+
+    # 2. el entrante es peor que el PEOR duplicado -> no se sacrifica el
+    #    duplicado por él: sale el peor global, que es el menos útil de todos.
+    #    (Estamos ya en la pantalla de swap: hay que sacar a alguien, la
+    #    pregunta es a quién, y ese alguien es siempre el menos útil.)
+    check("swap: si el entrante no mejora al duplicado sale el peor global",
+          _con([agua_a, vdup_a, vdup_b],
+               {"nombre": "Feebas", "nivel": 18, "tipos": ["Water"],
+                "baseStats": {"hp": 55, "at": 20}}) == "Pikachu",
+          "-> sacrifica el duplicado por un entrante que es peor")
+
+    # 3. sin repetidos -> el peor por stats y nivel
+    eq = [_mon("Pikachu", ["Electric"], 20),
+          _mon("Ivysaur", ["Grass", "Poison"], 22),
+          _mon("Vulpix", ["Fire"], 14)]
+    check("swap: sin repetidos sigue saliendo el peor",
+          _con(eq) == "Vulpix",
+          "-> la regla del repetido rompio el criterio del peor")
+
+    # 4. un muerto cae antes que el repetido
+    caido = _mon("Pidgey", ["Normal"], 30)
+    caido["ps"] = 0
+    check("swap: el muerto sale antes que el tipo repetido",
+          _con([agua_a, vdup_a, vdup_b, caido],
+               {"nombre": "Blastoise", "nivel": 26, "tipos": ["Water"],
+                "baseStats": {"hp": 79, "at": 108}}) == "Pidgey",
+          "-> se queda un mon muerto ocupando plaza")
+
+
+def test_la_etiqueta_de_version_va_en_el_log() -> None:
+    """Cada run dice con qué código se hizo. Sin esto, editar el bot a mitad de
+    un lote deja runs comparables que en realidad no lo son.
+
+    Pasó de verdad: se editó `jugar_pokelike.py` con el lote corriendo y 56 de
+    111 runs quedaron con versión distinta. Lo único que lo delató fue mirar los
+    mtime del fichero a posteriori. Con el hash en el log, el error se ve al
+    leer el log y no hace falta acordarse de cuándo se editó.
+    """
+    import jugar_pokelike as JUG
+    txt = Path(JUG.__file__).read_text(encoding="utf-8")
+    check("el log lleva el hash de codigo de la run",
+          "PKL_HASH" in txt,
+          "-> no se puede distinguir que version hizo cada run")
+    check("el hash se escribe en la etiqueta del brazo",
+          "codigo=" in txt,
+          "-> el hash se calcula pero no llega al log")
+
+    check("el launcher de linea base pide un numero exacto de runs",
+          "linea_base.sh" in (SCRIPTS / "test_integridad.py").name
+          or (SCRIPTS / "linea_base.sh").exists(),
+          "-> no hay launcher para la linea base")
+    if (SCRIPTS / "linea_base.sh").exists():
+        sh = (SCRIPTS / "linea_base.sh").read_text(encoding="utf-8")
+        check("el launcher de linea base lleva timeout por run",
+              "timeout -k 30" in sh,
+              "-> una run colgada tumba el lote entero")
+        check("el launcher de linea base cuenta las que lanza",
+              "lanzadas=$((lanzadas + 2))" in sh,
+              "-> el plan y la realidad se separan sin avisar")
+
+
 def main() -> int:
+    test_la_etiqueta_de_version_va_en_el_log()
+    test_sacar_el_tipo_repetido()
     test_tipos_de_nodo()
     test_los_helpers_de_ruta_ven_los_nodos()
     test_ningun_helper_usa_la_clave_type()
@@ -1029,6 +1776,31 @@ def main() -> int:
     test_el_nivel_equipo_no_revienta_con_ceros()
     test_el_trade_no_sacrifica_al_mon_sin_datos()
     test_los_indices_de_objetos_se_recalculan()
+    test_mapa_lee_el_nivel_del_rival()
+    test_el_entrenador_se_veta_por_nivel_y_por_caidos()
+    test_el_veto_de_entrenador_llega_a_puntuar()
+    test_el_flojo_es_el_mas_debil_del_equipo()
+    test_curar_invalida_el_ps_real()
+    test_el_atasco_cuenta_rachas_y_no_toda_la_partida()
+    test_los_indices_de_objetos_se_recalculan()
+    test_el_nivel_equipo_no_revienta_con_ceros()
+    test_el_trade_no_sacrifica_al_mon_sin_datos()
+    test_la_skill_del_camino_no_se_desincroniza()
+    test_la_run_no_se_corta_por_el_presupuesto()
+    test_el_herido_al_menos_50_va_al_final()
+    test_r2_se_captura_aunque_el_salvaje_sea_de_nivel_menor()
+    test_r2_no_veta_por_nivel()
+    test_un_caido_no_vuelve_a_vivir_al_invalidar_el_ps()
+    test_el_que_pega_mas_va_delante()
+    test_se_evita_al_entrenador_que_nadie_le_gana()
+    test_el_prep_del_jefe_no_entra_en_bucle()
+    test_la_batalla_que_no_acaba_tiene_techo()
+    test_el_veto_de_nivel_usa_el_mon_que_abre()
+    test_con_un_solo_mon_se_captura_casi_todo()
+    test_continuar_en_batalla_no_puede_buquearse()
+    test_la_escalera_de_riesgo_no_puede_atar_al_bot()
+    test_el_riesgo_no_se_dispara_si_hay_cura()
+    test_la_riesgo_de_exp_con_caidos_ya_no_existe()
     test_no_hay_codigo_muerto()
 
     for o in OKS:

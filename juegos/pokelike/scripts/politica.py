@@ -472,7 +472,6 @@ def elegir_starter(candidatos: list[dict], region: str,
 def _mejora_claramente(candidato: dict, m: dict,
                        futuros: list[str] | None = None,
                        rival_ruta: list[str] | None = None,
-                       nivel_minimo: int | None = None,
                        nivel_equipo: int = 0) -> bool:
     """¿Este salvaje merece la plaza del món `m`?
 
@@ -508,12 +507,10 @@ def _mejora_claramente(candidato: dict, m: dict,
                 + [max((utilidad_contra(tipos, r)[0] for r in (rival_ruta or [])),
                        default=0.0) if rival_ruta else 0.0],
                 default=1.0)
-            # El relleno solo se acepta si el equipo **ya esta a nivel**. Cazando
-            # se gasta un nodo, y ese nodo es nivel: medido en la tanda que
-            # perdio contra Brock, cazo un Rattata con "2x apertura=0" (ninguna
-            # ventaja) cuando le faltaban 4 niveles para el lider.
-            if nivel_minimo and nivel_equipo < nivel_minimo:
-                return False
+            # **R2: el nivel no veta la captura.** Solo hace falta que aporte
+            # una ventaja contra algún jefe o entrenador. Antes esta función
+            # también rechazaba por nivel, que era una regla inventada
+            # inventada; con un solo món en pie descartaba todos los salvajes.
             return aporta >= 2.0
     return False
 
@@ -526,7 +523,7 @@ def elegir_captura(equipo: list[dict], candidatos: list[dict],
                    region: str | None = None,
                    ignorar_nivel: bool = False,
                    tipos_entrenadores: list[str] | None = None,
-                   nivel_minimo: int | None = None) -> Decision:
+                 ) -> Decision:
     """Elige con qué salvaje pelear (el bot no puede lanzar la bola aquí).
 
     La captura es la decisión más cara de la partida: cuesta un nodo y un món.
@@ -543,9 +540,10 @@ def elegir_captura(equipo: list[dict], candidatos: list[dict],
     hueco que hay que rellenar, porque los salvajes de las rutas siguientes
     traen mejores ataques que el que se ha perdido.
 
-    `nivel_minimo` es el nivel que el equipo necesita para el próximo jefe. Sin
-    él no se puede decidir si un món neutro es relleno barato o nivel que se
-    está tirando: antes esa comprobación era un `pass` y no filtraba nada.
+    **R2: siempre se captura uno al inicio de la pantalla.** La comparación
+    "completar el equipo o tener mejores ataques" es solo para cuando ya hay
+    `max_miembros`; con menos, entra el primer candidato con ventaja. El nivel
+    no veta la captura en ningún caso.
     """
     if not candidatos:
         return Decision("capturar", None, "sin candidatos: huyo")
@@ -636,7 +634,7 @@ def elegir_captura(equipo: list[dict], candidatos: list[dict],
         if (c.get("nombre") or "").strip().lower() in ya_capturados:
             continue
         if equipo_lleno and flojo is not None and not _mejora_claramente(
-                c, flojo, futuros or ref, rival_ruta, nivel_minimo, nivel_equipo):
+                c, flojo, futuros or ref, rival_ruta, nivel_equipo):
             continue
         nuevos = {x for x in tipos} - tipos_equipo
         if not nuevos and not _mejora_a(c, equipo):
@@ -649,7 +647,15 @@ def elegir_captura(equipo: list[dict], candidatos: list[dict],
         # aporta un tipo que el equipo no tiene; si no, se huye y el nodo se
         # gasta en nivel, que es lo que urge.
         mejor_nivel = max((m.get("nivel") or 0) for m in vivos) if vivos else 0
-        if (len(vivos) >= 2 and (c.get("nivel") or 0) < mejor_nivel
+        # **R2: al inicio de cada pantalla se captura.** Este filtro solo
+        # aplica con un equipo ya formado: rechazaba al salvaje por estar por
+        # debajo del mejor nivel del equipo, y con un equipo de 1-2 móns eso
+        # tiraba **todos** los salvajes de la ruta (nivel 1 contra un Nv5). El
+        # planificador elegía el nodo ("equipo de 1, hacen falta cuerpos") y
+        # luego aquí se rechazaba en silencio: se perdían 3 nodos seguidos y se
+        # llegaba al primer gimnasio con un solo món. Medido: GAME_OVER con
+        # equipo de 2.
+        if (len(vivos) >= 3 and (c.get("nivel") or 0) < mejor_nivel
                 and not nuevos):
             continue
         if objetivo:
@@ -659,9 +665,21 @@ def elegir_captura(equipo: list[dict], candidatos: list[dict],
             # rival, y contra Misty (Agua/Psíquico) eso solo lo cumple un tipo
             # imposible: por eso se acababa cazando Pidgeys. Lo que se busca es
             # "aplasta al más peligroso y no lo pierde ninguno".
+            #
+            # **Con un solo món en pie este filtro se relaja.** Antes exigía
+            # `>= 1.0` siempre, y con 1Bulbasaur Nv5 eso rechazaba a los
+            # salvajes de Route 1 enteros: el bot elegía el nodo ("hacen
+            # falta cuerpos") y luego huía, dos nodos seguidos, y acababa
+            # peleando un `bug-catcher` Nv2 con el único món del equipo. Medido:
+            # `GAME_OVER` en 18 pasos, 0 insignias, 0 capturas. R2 dice que con
+            # menos de 6 no se veta nada: con un món, cualquier candidato que
+            # no sea actively malo se coge.
             of_min = min((utilidad_contra(tipos, r)[0] for r in objetivo),
                           default=1.0)
-            if of_min < 1.0:
+            if len(vivos) < 2:
+                if of_min < 0.5:
+                    continue
+            elif of_min < 1.0:
                 continue
         if futuros:
             # Los futuros solo penalizan si el món es actively malo contra
@@ -703,20 +721,22 @@ def elegir_captura(equipo: list[dict], candidatos: list[dict],
             # tenga un 2x contra el rival de ahora. Sin esta excepción se
             # rechazaba la sustitución y el equipo se quedaba congelado.
             #
-            # El relleno solo se acepta si el equipo **ya esta a nivel**: cazar
-            # gasta un nodo, y ese nodo es el nivel que falta. Antes esto era un
-            # `pass`, o sea un filtro que no filtraba nada, y por eso se cazaba
-            # un Rattata sin ninguna ventaja con 4 niveles de deuda.
+            # **R2: no se veta por tener pocos móns.** La comprobación de
+            # "completar el equipo o tener mejores ataques" es para cuando ya
+            # hay 6; con menos, se captura y ya está. El veto por nivel
+            # por nivel que había aquí era una regla inventada que
+            # descartaba al salvaje cuando el equipo iba por debajo del listón
+            # del líder, y con un solo món en pie eso descartaba **todos** los
+            # salvajes de la ruta. Ahora el nivel no veta: solo decide a quién
+            # se sustituye cuando el equipo está lleno.
             if aporta < 2.0 and len(vivos) >= 3 and not ignorar_nivel:
-                if nivel_minimo and nivel_equipo < nivel_minimo:
-                    continue
                 flojo_para_cambio = min(
                     vivos,
                     key=lambda m: (m.get("nivel") or 0,
                                    -sum((m.get("baseStats") or {}).values()),
                                    m.get("nombre") or ""))
                 if not _mejora_claramente(c, flojo_para_cambio, futuros,
-                                          rival_ruta, nivel_minimo,
+                                          rival_ruta,
                                           nivel_equipo):
                     continue
         region_score = 0.0
@@ -848,7 +868,18 @@ def valor_contra_entrenador(m: dict, tipos_rival: list[str],
         altura = 1.0 if delta >= 0 else max(0.3, 1.0 + delta * 0.1)
     else:
         altura = 1.0
-    return (of * aguante * altura, vida)
+    # **El ataque NO se multiplica con la defensa.** Se devuelven por separado
+    # y el orden los usa como claves sucesivas. El producto se cancelaba solo:
+    # un Bicho/Veneno contra Fuego pega 0.5x y recibe 2x, y `0.5 * 2 = 1.0`,
+    # exactamente igual que un món neutro. O sea, el peor contragolpe posible
+    # puntuaba como uno neutro y se colaba por el desempate. Medido: contra un
+    # `fire-spitter` el bot puso a Venonat (pega 0.5, recibe 2) **delante** de
+    # Bellsprout.
+    # La regla es la del usuario, literal: "si te sale un entrenador tipo bicho
+    # y nosotros tenemos un pokemon tipo fuego, lo pones primero". O sea, lo
+    # que decide quién abre es **cuánto pega**, y `aguante` solo desempata
+    # entre dos que pegan igual.
+    return (of, -aguante, altura, vida)
 
 
 def orden_para_entrenador(equipo: list[dict], tipos_rival: list[str],
@@ -864,18 +895,40 @@ def orden_para_entrenador(equipo: list[dict], tipos_rival: list[str],
         return []
     con_puntos = []
     for m in equipo:
-        puntos, vida = valor_contra_entrenador(m, tipos_rival, nivel_enemigo)
+        of, neg_aguante, altura, vida = valor_contra_entrenador(
+            m, tipos_rival, nivel_enemigo)
+        stats = sum((m.get("baseStats") or {}).values())
+        nivel = m.get("nivel") or 0
         # Un caído no puede pelear: vale -infinito para que quede el último.
         if (m.get("ps") or 0) <= 0:
-            puntos = float("-inf")
-        con_puntos.append((puntos, vida, m.get("nivel") or 0,
+            of = float("-inf")
+        con_puntos.append((of, stats, nivel, neg_aguante, altura, vida,
                            m.get("nombre") or "", m))
-    # El desempate **no** puede ser el nombre: a igual puntuación (que pasa, por
-    # ejemplo, cuando varios móns son 1x contra el rival) el alfabeto decidía
-    # cuál pegaba primero, y así Bulbasaur se plantaba delante de Eevee contra
-    # Fuego. Ahora decide el nivel y luego la vida: el más curtido al frente.
-    con_puntos.sort(key=lambda x: (x[0], x[1], x[2]), reverse=True)
-    return [x[4].get("nombre") or "" for x in con_puntos if x[4].get("nombre")]
+    # **El ataque manda, y dentro de él stats y luego nivel.**
+    #
+    # Orden de claves, según la regla del usuario ("si te sale un entrenador
+    # tipo bicho y tenemos un pokemon tipo fuego, lo pones primero", y "en la
+    # ponderación primero stats y luego nivel"):
+    #
+    # 1. `of`      cuánto pega contra el rival. Es lo que decide.
+    # 2. `stats`   sus estadísticas base: a igual tipo, el más fuerte.
+    # 3. `nivel`   y el nivel, que es lo que el món pierde contra el rival.
+    # 4. `aguante` (va negado) solo desempata entre dos que pegan igual.
+    # 5. `vida`    llegar entero.
+    #
+    # Antes era un **producto** `of * aguante * altura`, y eso emparejaba casos
+    # que no deben emparejarse: contra un entrenador de Roca/Tierra, Staryu
+    # (Agua, pega x2, encaja mal) y Geodude (Roca, pega x0.5, aguanta bien)
+    # salían los dos a 2.0, y el desempate los ponía casi al azar. Con el
+    # producto, un món que mata el doble de rápido pierde la vez contra uno
+    # que aguanta más.
+    #
+    # El nombre **no** desempata nunca: el alfabeto yadecisionó que Bulbasaur
+    # (2x de Fuego) se plantara delante de Eevee (1x).
+    con_puntos.sort(
+        key=lambda x: (x[0], x[1], x[2], x[3], x[4], x[5], x[6]),
+        reverse=True)
+    return [x[7].get("nombre") or "" for x in con_puntos if x[7].get("nombre")]
 
 
 def _reservar_heridos(candidatos: list[dict]) -> list[str]:
@@ -997,9 +1050,6 @@ def orden_deseado(equipo: list[dict], insignias: int, region: str,
     # rápido que gastar el único centro del mapa en ello. Los caídos no cuentan:
     # no ganan experiencia, así que no son ni buenos ni malos para esto.
     return _reservar_heridos(candidatos)
-
-
-# ---------------------------------------------------------------- ruta
 def siguiente_hacia(actual: str | None, nodos: list[dict], edges: list,
                     tipo_destino: str = "tutor") -> str | None:
     """Id del primer nodo al que hay que moverse para llegar a `tipo_destino`.

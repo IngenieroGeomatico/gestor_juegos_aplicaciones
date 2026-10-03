@@ -818,6 +818,34 @@ class Juego:
         except Exception:  # noqa: BLE001
             return False
 
+    def mons_en_swap(self) -> dict | None:
+        """El món que `swap-screen` ofrece **entrar**, con sus tipos.
+
+        Es para la regla "si hay dos del mismo tipo, sale el repetido": sin
+        saber qué món entra no se puede saber a qué tipo duplicado libera. Se
+        lee del texto de la pantalla, que es lo único fiable sin conocer el
+        HTML exacto, y devuelve `None` si no se reconoce, para que el llamante
+        caiga al "peor de siempre".
+        """
+        return self.page.evaluate(
+            r"""() => {
+              const s = document.getElementById('swap-screen');
+              if (!s) return null;
+              // El món nuevo suele venir en un `.poke-card` o en un bloque con
+              // su nombre en grande, separado del equipo.
+              const texto = (s.innerText || '').trim();
+              const mNivel = texto.match(/([A-Z][A-Za-z0-9' -]{2,})\s*Lv\.?\s*(\d+)/);
+              const nombre = mNivel ? mNivel[1].trim() : null;
+              const nivel = mNivel ? parseInt(mNivel[2], 10) : 0;
+              // Tipos: se buscan los badges de tipo que acompanan al nombre.
+              const badges = [...s.querySelectorAll(
+                '[class*=type],[class*=badge],[class*=tag]')]
+                .map(e => (e.innerText || '').trim())
+                .filter(t => t && t.length <= 12 && !/^Lv/i.test(t));
+              return nombre ? {nombre, nivel, tipos: [...new Set(badges)]} : null;
+            }"""
+        )
+
     def opciones(self, contenedor: str) -> list[dict]:
         """Opciones clicables de una pantalla (catch/item/swap/trade/stat-buff)."""
         return self.page.evaluate(

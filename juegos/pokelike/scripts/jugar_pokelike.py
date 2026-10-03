@@ -88,10 +88,20 @@ class Bot:
         self._atasco_intentos = 0
         # Tipos de los entrenadores del mapa actual (para la captura).
         self._tipos_ruta: list[str] = []
+        # Sprite -> tipos de cada entrenador del mapa (para el veto de evitar).
+        self._tipos_por_sprite: dict[str, list[str]] = {}
+        # Intentos fallidos de salir del prep del jefe (ver _elite_prep): sin
+        # memoria, el manejador se rendia y Volvia a entrar en bucle infinito.
+        self._prep_fallos = 0
+        # Intentos de "la batalla sigue viva" antes de rendirse.
+        self._batalla_viva = 0
         # ¿Ya hemos hecho algún trade en esta run?
         self._trade_hecho = False
         # PS real por món, aprendido en la pantalla de combate ("0/19").
         self._ps_real: dict[str, tuple[int, int]] = {}
+        # Quién se ha visto CAÍDO. Sobrevive a la invalidación del
+        # porcentaje: un món a 0 sigue a 0 hasta que lo curan.
+        self._caidos_conocidos: set[str] = set()
         self.items_tomados = 0
         # Nivel más alto de enemigo que se ha visto en la ruta.
         self.nivel_enemigo_max = 0
@@ -173,12 +183,17 @@ class Bot:
         creía estar sano con 0/19 y no iba a curar.
         """
         eq = self._equipo_con_tipos_base()
-        if not self._ps_real:
-            return eq
         for m in eq:
-            real = self._ps_real.get((m.get("nombre") or "").strip().lower())
+            clave = (m.get("nombre") or "").strip().lower()
+            real = self._ps_real.get(clave)
             if real:
                 m["ps"], m["ps_max"] = real
+            # Un món que se vio caído sigue a 0 aunque no sepamos el
+            # porcentaje. **Va después** del `real` a propósito: si la caché
+            # se acaba de llenar con un valor viejo, el dato de caído es el
+            # más reciente y fiable.
+            if clave in self._caidos_conocidos:
+                m["ps"] = 0
         return eq
 
     def _equipo_con_tipos_base(self) -> list[dict]:
@@ -504,6 +519,13 @@ class Bot:
         # describía el comentario era inerte. El bot seguía cazando sin mirar
         # contra qué se iba a pelear dos nodos después.
         self._tipos_ruta = self.tipos_de_entrenadores_del_mapa(m)
+        # **Índice sprite -> tipos de cada entrenador del mapa.** Hace falta
+        # por nodo, no en bloque: la regla del usuario es "si podemos evitar
+        # al entrenador, lo evitamos; si es el líder, jugamos", y para saber si
+        # se puede evitar hay que mirar **ese** entrenador concreto contra
+        # **este** equipo. Con el conjunto de la ruta no se puede decidir, y
+        # el veto queda sin datos.
+        self._tipos_por_sprite = self.tipos_entrenadores_por_sprite(m)
         tipos_alcanzables = [
             (P.tipo_de_estado(n.get("tipo")) if n.get("tipo")
              else P.tipo_de_nodo(n.get("sprite", "")))
@@ -574,6 +596,7 @@ class Bot:
                           "hay_cura": self.hay_cura_disponible(m),
                           "tiene_bolsa": not self.bolsa_vacia(),
                           "tutor_listo": bool(tutor_hacia),
+                          "tipos_por_sprite": self._tipos_por_sprite,
                           "capturas_pantalla": self.capturas_pantalla,
                           # El jefe es inevitable solo cuando no queda nada que
                           # dé experiencia. Es el caso que mataba las runs:
@@ -833,8 +856,17 @@ class Bot:
             t = str(m.get("ps") or "")
             mm = _RE_PS.match(t)
             if mm:
-                self._ps_real[(m.get("nombre") or "").strip().lower()] = (
-                    int(mm.group(1)), int(mm.group(2)))
+                clave = (m.get("nombre") or "").strip().lower()
+                actual, maximo = int(mm.group(1)), int(mm.group(2))
+                self._ps_real[clave] = (actual, maximo)
+                # **Quién está caído, aparte del porcentaje.** Ver
+                # `_caidos_conocidos`: un món a 0 sigue a 0 hasta que lo curan,
+                # y eso hay que recordarlo aunque se vacíe la caché de
+                # porcentajes.
+                if actual <= 0:
+                    self._caidos_conocidos.add(clave)
+                else:
+                    self._caidos_conocidos.discard(clave)
 
     def _invalidar_ps(self, motivo: str = "") -> None:
         """Olvida el PS real cacheado.
@@ -859,6 +891,20 @@ class Bot:
             self._ps_aviso = getattr(self, "_ps_aviso", 0) + 1
             self.log(f"  · PS real invalidado ({motivo})")
         self._ps_real = {}
+        # **Los caídos NO se olvidan al invalidar el porcentaje.** El bug: la
+        # caché de porcentajes se vacía en cada uso de objeto, insignia y
+        # trade, y al vaciarse `equipo_con_tipos()` volvía al HUD, que marca
+        # 100 a un món con 0 de vida. Con la caché vacía el bot creía tener el
+        # equipo entero sano, la puerta de curación no se disparaba, y se
+        # entraba a pelear con el equipo **entero muerto**. Medido:
+        # `mios=[Sandshrew 0/32, Eevee 0/28, Bulbasaur 0/30]` y a la vez
+        # `nos quedan: 87/100, 100/100, 100/100`; se perdió ese combate.
+        # Un món a 0 sigue a 0 hasta que alguien lo cura, así que ese dato
+        # sobrevive a la invalidación del porcentaje. Solo lo borra una cura
+        # real (pokecenter) o un cambio de equipo (swap), que son los dos
+        # casos en los que puede volver a estar vivo.
+        if motivo in ("pokecenter", "swap"):
+            self._caidos_conocidos.clear()
 
     def _batalla(self) -> str:
         d = P.decidir_batalla(self.j.visible("#btn-auto-battle"))
@@ -959,25 +1005,6 @@ class Bot:
         m = _re.search(r"\(([A-Za-zÁÉÍÓÚáéíóúñ /]+)\)\s*$", self.j.texto("#map-info") or "")
         return m.group(1).strip() if m else None
 
-    def _nivel_minimo_para_lider(self, insignias: int) -> float:
-        """Nivel absoluto que el equipo debería tener para el líder que toca.
-
-        Es el listón que `plan_para` usa para el jefe siguiente. Se pasa a
-        `elegir_captura` como `nivel_minimo` para que un món de relleno no
-        entre mientras el equipo va por debajo. Devuelve 0.0 cuando no se sabe
-        el listón, que deja el veto desactivado (mejor cazar de más que no
-        cazar nunca).
-
-        Sustituye a `_falta_nivel_para_jefe`, que no se llamaba desde ningún
-        sitio: devolvía la **diferencia** de nivel, mientras que el parámetro
-        que tiene que consumir `elegir_captura` es un **mínimo absoluto**.
-        """
-        try:
-            plan = PL.plan_para(self.region, insignias)
-            return float(plan.nivel_min or 0.0)
-        except Exception:  # noqa: BLE001
-            return 0.0
-
     def en_camino_al_jefe(self, mapa: dict) -> bool:
         """¿Estamos en un nodo que lleva al jefe? (y por tanto a su centro).
 
@@ -1035,20 +1062,18 @@ class Bot:
         # primer gimnasio que el equipo no cubra ya con un 2x, que no siempre es
         # el actual ni el siguiente.
         proximos = P.proximos_jefes(self.region, insignias, 3)
-        # **El veto por nivel de captura estaba muerto.** `elegir_captura`
-        # acepta `nivel_minimo` y con esa guarda rechaza al món de relleno
-        # cuando el equipo va por debajo del listón, pero nadie lo pasaba: se
-        # quedaba en `None` y las dos guardas de `politica` no se ejecutaban
-        # nunca, pese a que su docstring las daba por activas. O sea, el bot
-        # gastaba un nodo de captura en un món inútil mientras estaba en deuda
-        # de nivel, que es justo lo que el comentario de `politica` dice
-        # haber corregido. Aquí se pasa el listón **absoluto** del líder que
-        # toca (no la diferencia), que es lo que compara `nivel_equipo`.
-        nivel_minimo = self._nivel_minimo_para_lider(insignias)
+        # **R2, tal y como la fijó el usuario: siempre se captura uno
+        # al inicio de la pantalla; la comprobación (completar el equipo o
+        # mejores ataques) es solo para cuando ya hay 6.** No se veta nada por
+        # tener pocos móns. Aquí no se pasa `nivel_minimo` a propósito: había
+        # un veto por nivel que descartaba al salvaje cuando el equipo iba por
+        # debajo del listón del líder, y con un solo món en pie eso descartaba
+        # **todos** los salvajes de la ruta. Medido: se elegía el nodo de
+        # captura ("hacen falta cuerpos") y luego se rechazaba en silencio,
+        # con 0 capturas y `GAME_OVER` con un único Pokémon.
         d = P.elegir_captura(equipo, cands, actual,
                              (proximos[1:2] or [None])[0],
                              P.MAX_EQUIPO, proximos, self.region,
-                             nivel_minimo=nivel_minimo,
                              ignorar_nivel=bool(getattr(self, "_catch_ignora_nivel", False)),
                              tipos_entrenadores=list(self._tipos_ruta))
         self._catch_ignora_nivel = False
@@ -1246,6 +1271,27 @@ class Bot:
         """
         objetivo = getattr(self, "_swap_objetivo", None)
         if not objetivo:
+            # Qué món ofrece el juego. Va **antes** de elegir a quién sacar:
+            # sin saberlo no se puede aplicar la regla del tipo repetido.
+            try:
+                entrante = self.j.mons_en_swap()
+                if entrante and entrante.get("nombre"):
+                    info = self._pokedex_por_nombre().get(
+                        str(entrante["nombre"]).strip()) or {}
+                    entrante = {
+                        "nombre": entrante["nombre"],
+                        "nivel": entrante.get("nivel") or 0,
+                        "tipos": (info or {}).get("types")
+                                 or entrante.get("tipos") or [],
+                        "baseStats": (info or {}).get("baseStats") or {},
+                    }
+                    self.log(f"  ⋯ swap ofrece: {entrante['nombre']} "
+                             f"Nv{entrante['nivel']} "
+                             f"{'/'.join(entrante['tipos'])}")
+                    self._swap_nuevo_mons = entrante
+            except Exception as exc:  # noqa: BLE001
+                self.log(f"  !! no se pudo leer el món del swap: {exc}")
+        if not objetivo:
             # Sin objetivo previo: lo calcula aquí. Prioriza al **muerto**
             # (no aporta nada y ocupa plaza) y, si no hay caídos, al peor por
             # nivel y estadísticas. Es la regla de "se cambia el peor, el que
@@ -1284,16 +1330,115 @@ class Bot:
         equipo = self.equipo_con_tipos()
         vivos = [m for m in equipo if (m.get("ps") or 0) > 0]
         muertos = [m for m in equipo if (m.get("ps") or 0) <= 0]
-        candidatos = muertos or vivos
-        if not candidatos:
+
+        # El **caído** va primero, y por encima de la regla del duplicado. Un
+        # món a 0 PS no aporta nada y ocupa plaza, así que es el mejor
+        # candidato posible. Y liberar su plaza no pierde cobertura: su tipo
+        # sigue estando en el món vivo del mismo tipo.
+        if muertos:
+            return min(muertos, key=self._clave_menor_valor).get("nombre")
+
+        # **Regla del usuario: si hay dos del mismo tipo, sale el repetido.**
+        # Dos móns del mismo tipo son una plaza desperdiciada: el segundo no
+        # aporta nada que el primero no tenga, y la plaza que libera es justo
+        # la que necesita el món que entra.
+        #
+        # Dos detalles que importan y que se hicieron mal a la primera:
+        #
+        # 1. De los duplicados hay que sacar al **peor**, no al primero que
+        #    aparece en la lista. Si hay dos Agua y uno es Nv24 y el otro Nv22,
+        #    sale el Nv22: sacar el Nv24 perdería el món bueno del tipo.
+        # 2. Solo se sustituye si el entrante es **mejor que el peor
+        #    duplicado**. Si ni siquiera lo mejora, el cambio no aporta nada y
+        #    se cae al peor global, que siempre es el menos útil de todos.
+        nuevo = getattr(self, "_swap_nuevo", None) or self._món_que_entra()
+        if nuevo:
+            tipos_nuevo = {str(t).lower() for t in (nuevo.get("tipos") or [])}
+            poder_nuevo = self._clave_poder(nuevo)
+            duplicados = [
+                m for m in vivos
+                if tipos_nuevo & {str(t).lower() for t in (m.get("tipos") or [])}
+            ]
+            if duplicados:
+                peor_dup = min(duplicados, key=self._clave_menor_valor)
+                if poder_nuevo > self._clave_poder(peor_dup):
+                    tipos = "/".join(sorted(
+                        str(t).lower() for t in (peor_dup.get("tipos") or [])))
+                    self.log(f"  ⋯ tipo repetido ({tipos}): sale "
+                             f"{peor_dup.get('nombre')} (Nv"
+                             f"{peor_dup.get('nivel')}) y entra "
+                             f"{nuevo.get('nombre')} (Nv"
+                             f"{nuevo.get('nivel')})")
+                    return peor_dup.get("nombre")
+
+        if not vivos:
             return None
-        return min(
-            candidatos,
-            key=lambda m: (
-                sum((m.get("baseStats") or {}).values()) if (m.get("baseStats")) else 0,
-                (m.get("nivel") or 0),
-                m.get("nombre") or ""),
-        ).get("nombre")
+        return min(vivos, key=self._clave_menor_valor).get("nombre")
+
+    @staticmethod
+    def _clave_menor_valor(m: dict) -> tuple:
+        """Orden para quedarse con el **menos** útil: menos stats, menos nivel.
+
+        El desempate por nombre solo hace la orden determinista, que si no el
+        `min` dependería del orden del HUD y la misma run decidiría distinto
+        dos veces seguidas.
+        """
+        return (
+            sum((m.get("baseStats") or {}).values()),
+            (m.get("nivel") or 0),
+            m.get("nombre") or "",
+        )
+
+    @staticmethod
+    def _clave_poder(m: dict) -> tuple:
+        """Poder simple: (nivel, stats). Para comparar entrante con el equipo."""
+        return (
+            (m.get("nivel") or 0),
+            sum((m.get("baseStats") or {}).values()),
+        )
+
+    def _món_que_entra(self) -> dict | None:
+        """El món que el juego ofrece para entrar, si se puede saber.
+
+        Solo se usa para la regla del duplicado de tipo: si no lo conocemos,
+        `_peor_para_sustituir` cae al "peor" de siempre, que es el
+        comportamiento correcto cuando no hay información.
+        """
+        return getattr(self, "_swap_nuevo_mons", None)
+
+    def tipos_entrenadores_por_sprite(self, mapa: dict) -> dict[str, list[str]]:
+        """Sprite -> tipos de cada entrenador del mapa, **por nodo**.
+
+        Lo necesita la regla "si podemos evitar al entrenador, lo evitamos; si
+        es el líder, jugamos": para saber si se puede evitar hay que comparar
+        **ese** entrenador con **este** equipo, no el conjunto de la ruta. Un
+        equipo puede ganarle a un hiker y perder contra un fire-spitter, y con
+        la lista plana esa distinción no existe.
+
+        Se guarda con varias claves por sprite (`bug-catcher`, `bugCatcher`,
+        `bugcatcher`) porque el SVG y el estado no coinciden en el formato, que
+        es la misma trampa de `_mismo_sprite`.
+        """
+        out: dict[str, list[str]] = {}
+        for n in mapa.get("nodos", []):
+            if n.get("tipo") != "entrenador" and n.get("type") != "trainer":
+                continue
+            sprite = n.get("sprite")
+            if not sprite:
+                continue
+            try:
+                tipos = [str(t) for t in (self.j.trainer_tipos(sprite) or [])
+                         if str(t) and str(t).lower() != "diversos"]
+            except Exception:  # noqa: BLE001
+                continue
+            if not tipos:
+                continue
+            # Tres claves por sprite, porque el SVG y el estado no coinciden en
+            # el formato: `bug-catcher` contra `bugCatcher`.
+            out.setdefault(str(sprite), tipos)
+            out.setdefault(str(sprite).lower(), tipos)
+            out.setdefault(str(sprite).replace("-", "").lower(), tipos)
+        return out
 
     def tipos_de_entrenadores_del_mapa(self, mapa: dict) -> list[str]:
         """Tipos de los entrenadores accesibles en este mapa.
@@ -1526,25 +1671,96 @@ class Bot:
                     via = self.j.activar(sel)
                     self.j.page.wait_for_timeout(500)
                     if self.j.pantalla() != "elite-prep-screen":
+                        self._prep_fallos = 0
                         return (f"elite prep [{info}] -> {self.j.pantalla()} "
                                 f"({via})")
             # Último recurso: si sigue aquí, se manda Enter y Escape.
             self.j.page.keyboard.press("Enter")
             self.j.page.wait_for_timeout(400)
             if self.j.pantalla() != "elite-prep-screen":
+                self._prep_fallos = 0
                 return f"elite prep [{info}] -> {self.j.pantalla()} (Enter)"
 
         self.log("  !! el prep no cede: se fuerza la salida")
+        self._prep_fallos = getattr(self, "_prep_fallos", 0) + 1
+        self._volcar_prep()
         for sel in ("#btn-elite-prep-fight", "#btn-elite-prep-continue",
                     "#elite-prep-screen button"):
             try:
                 self.j.clic(sel, 1.5)
                 self.j.page.wait_for_timeout(400)
                 if self.j.pantalla() != "elite-prep-screen":
+                    self._prep_fallos = 0
                     return f"elite prep [{info}] -> {self.j.pantalla()} (forzado)"
             except Exception:  # noqa: BLE001
                 pass
+        # **Bucle infinito corregido.** Este manejador se rendía y **volvía
+        # sin salir**, así que el paso siguiente volvía a entrar, reintentaba
+        # el mismo orden, fallaba igual y repetía para siempre:
+        #   `!! el prep no cede` / `[prep -> Krabby]` / `!! el prep no cede` …
+        # El detector de atasco no lo veía porque la pantalla no cambia de
+        # verdad: se queda en `elite-prep-screen` todo el rato.
+        # El prep es **opcional** (es solo preparar el equipo antes del jefe),
+        # así que quedarse ahí no puede ser una razón para perder la run.
+        # Segundo fallo: se salta directamente a la recarga, que devuelve la
+        # partida al mapa sin perder progreso.
+        if self._prep_fallos >= 2:
+            self.log(f"  !! el prep no cede tras {self._prep_fallos} intentos: "
+                     f"recargo la pagina para salir de aqui (es opcional)")
+            try:
+                self.j.page.reload(wait_until="domcontentloaded")
+                self.j.page.wait_for_timeout(2500)
+                self._leer_mapa_cache = None
+                self._ps_real.clear()
+                self._activar_ajustes()
+                self._prep_fallos = 0
+                return (f"elite prep [{info}] -> recarga para salir "
+                        f"-> {self.j.pantalla()}")
+            except Exception as exc:  # noqa: BLE001
+                self.log(f"  !! la recarga no funciono: {exc}")
         return f"elite prep [{info}] (no se pudo salir)"
+
+    def _volcar_prep(self) -> None:
+        """Vuelca los controles reales de `elite-prep-screen`.
+
+        Los selectores del bot están adivinados y no funcionan: la pantalla se
+        queda ahí sin poder salir. En vez de seguir adivinando, se escribe lo
+        que **de verdad** hay —botones, enlaces y su `id`/`class`/texto— para
+        ajustar el selector con datos y no con suposiciones.
+        """
+        try:
+            datos = self.j.page.evaluate(
+                r"""() => {
+                  const s = document.getElementById('elite-prep-screen');
+                  if (!s) return { error: 'no existe #elite-prep-screen' };
+                  const vis = e => e && e.offsetParent !== null;
+                  const info = (e) => ({
+                    tag: e.tagName.toLowerCase(),
+                    id: e.id || null,
+                    cls: e.className || null,
+                    texto: (e.innerText || e.textContent || '').trim().slice(0, 40),
+                    shortcut: e.getAttribute('data-shortcut'),
+                    visible: vis(e),
+                  });
+                  return {
+                    botones: [...s.querySelectorAll('button')].map(info),
+                    enlaces: [...s.querySelectorAll('a,[role=button]')].map(info),
+                    hijos_tocables: [...s.querySelectorAll(
+                      '[data-shortcut],[onclick],[class*=btn],[class*=choice]')]
+                      .map(info).slice(0, 30),
+                    texto_pantalla: (s.innerText || '').trim().slice(0, 400),
+                  };
+                }"""
+            )
+            destino = Path("/tmp/opencode/prep.json")
+            destino.write_text(json.dumps(datos, ensure_ascii=False, indent=2),
+                               encoding="utf-8")
+            nb = len(datos.get("botones", []) or [])
+            self.log(f"  ⟂ volcado del prep -> {destino} "
+                     f"({nb} boton(es), "
+                     f"{len(datos.get('hijos_tocables', []) or [])} tocable(s))")
+        except Exception as exc:  # noqa: BLE001
+            self.log(f"  !! no se pudo volcar el prep: {exc}")
 
     def _tipos_del_rival_en_prep(self) -> list[str]:
         """Los tipos del equipo enemigo que el prep enseña, vía el Pokédex."""
@@ -1761,6 +1977,10 @@ class Bot:
     # Centinela para "aun no hay nada que pulsar" (el juego anima). No cuenta
     # como paso ni dispara el detector de atasco, pero consume presupuesto.
     ESPERA = "\x00espera\x00"
+    # Lo que devuelve el manejador de batalla cuando solo hay que seguir
+    # pulsando continuar. Se compara literal porque es lo que detecta el
+    # bucle de "continuar" sin avanzar.
+    CONTINUAR_BATALLA = "[continuar -> True] pulso continuar hasta el final"
 
     MANEJADORES = {
         "title-screen": "_title",
@@ -1886,19 +2106,72 @@ class Bot:
         except Exception as exc:  # noqa: BLE001
             self.log(f"  !! no se pudieron activar los ajustes: {exc}")
 
+    def _recuperar_batalla_clavada(self) -> bool:
+        """Saca al bot de una batalla que no avanza. Devuelve si lo consegue.
+
+        El caso medido: `continuar` con el enemigo ya a 0 HP, o sea la batalla
+        esta ganada pero la pantalla no pasa al resultado. Pulsar continuar no
+        sirve; hay que forzar **auto-battle** y, si tampoco, recargar la pagina.
+        """
+        self._batalla_clavada = getattr(self, "_batalla_clavada", 0) + 1
+        for _ in range(3):
+            try:
+                self.j.activar("#btn-auto-battle")
+                self.j.page.wait_for_timeout(900)
+                if self.j.pantalla() != "battle-screen":
+                    self.log(f"  batalla desbloqueada con auto-battle -> "
+                             f"{self.j.pantalla()}")
+                    self._batalla_clavada = 0
+                    return True
+                self.j.activar("#btn-continue")
+                self.j.page.wait_for_timeout(900)
+                if self.j.pantalla() != "battle-screen":
+                    self.log(f"  batalla desbloqueada con continue -> "
+                             f"{self.j.pantalla()}")
+                    self._batalla_clavada = 0
+                    return True
+            except Exception as exc:  # noqa: BLE001
+                self.log(f"  !! recuperar batalla fallo: {exc}")
+        # Ultimo recurso: recargar. La partida se guarda sola en el navegador.
+        if self._batalla_clavada >= 2:
+            self.log("  batalla realmente clavada: recargo la pagina")
+            try:
+                self.j.page.reload(wait_until="domcontentloaded")
+                self.j.page.wait_for_timeout(2500)
+                self._leer_mapa_cache = None
+                self._ps_real.clear()
+                self._activar_ajustes()
+                self._batalla_clavada = 0
+                return True
+            except Exception as exc:  # noqa: BLE001
+                self.log(f"  !! recarga fallo: {exc}")
+        return False
+
     def jugar(self, max_pasos: int, pausa: float = 0.5) -> None:
-        # `max_pasos <= 0` significa **sin presupuesto**: la partida se juega
-        # hasta que acabe de verdad (victoria, derrota o atasco real). Antes
-        # ponia un limite de pasos y salia `PRESUPUESTO_AGOTADO`, que no es
-        # ganar ni perder: es la partida cortada por mi, y su unico efecto era
-        # tirar runs que iban bien. El limite de verdad ya existe y es el
-        # detectors de atasco (pantalla repetida muchas veces -> ATASCADO).
+        # **R1 (regla del usuario): la run nunca se corta automaticamente.**
+        # Solo termina por perdida (`GAME_OVER`) o por completar la region
+        # (`CHAMPION`). Ni el presupuesto de pasos ni un atasco la cortan: un
+        # presupuesto agotado es solo una prueba corta, y un atasco se intenta
+        # **recuperar** (desbloquear, recargar la pagina) antes de rendirse.
         self._activar_ajustes()
+        # **Rama del experimento.** Si hay un brazo asignado, se escribe en el
+        # log ANTES de jugar. Es lo unico que permite despues agrupar las
+        # partidas por brazo y sacar un p-valor: sin la etiqueta en el log, los
+        # 100 runs son 100 numeros sin grupo de control. Ver `experimento.py`.
+        brazo = os.environ.get("PKL_BRAZO")
+        if brazo:
+            self.log(f"== brazo={brazo} | "
+                     f"PKL_MARGEN_BASE={os.environ.get('PKL_MARGEN_BASE', '?')} | "
+                     f"PKL_ESCALERA_RIESGO={os.environ.get('PKL_ESCALERA_RIESGO', '1')} | "
+                     f"codigo={os.environ.get('PKL_HASH', '?')} ==")
         if max_pasos and max_pasos > 0:
-            self.log(f"== run {self.region} | presupuesto {max_pasos} pasos ==")
+            # R1: el presupuesto es solo informativo y para las pruebas cortas.
+            # Agotado **no** termina la run: se avisa una vez y se sigue jugando
+            # sin límite, hasta ganar o perder.
+            self.log(f"== run {self.region} | presupuesto {max_pasos} pasos "
+                     f"(solo para pruebas: agotado NO corta la run) ==")
         else:
-            self.log(f"== run {self.region} | sin presupuesto de pasos "
-                     f"(corta solo si acaba o si se atasca) ==")
+            self.log(f"== run {self.region} | sin presupuesto de pasos ==")
         # Guardia anti-bucle: si la misma pantalla se repite muchas veces sin que
         # cambie nada, el clic no está surtiendo efecto y seguir es tirar CPU.
         vistos: dict[str, int] = {}
@@ -1908,9 +2181,18 @@ class Bot:
         # pantalla, 25 veces sin avanzar) y margen de sobra para las
         # animaciones y las transiciones lentas.
         tope_repetidas = 25
+        # Techo de intentos de batalla "viva": sin el, un combate que se
+        # mueve pero no acaba pulsaba continuar indefinidamente.
+        TOPE_BATALLA_VIVA = 4
+        # Tope de "continuar" seguidos en batalla (ver mas abajo).
+        TOPE_CONTINUAR = 4
         anterior = None
-        while ((self.pasos < max_pasos or max_pasos <= 0)
-               and self.resultado == "EN_CURSO"):
+        # **R1: la run nunca se corta sola.** Solo termina por `GAME_OVER`
+        # (perdida) o por `CHAMPION` (region completada). El presupuesto de
+        # pasos, si se pasa, **no** termina la partida: deja de contar pasos y
+        # sigue jugando. Antes `--max-pasos` cortaba la partida a mitad con
+        # `PRESUPUESTO_AGOTADO`, que no es ganar ni perder.
+        while self.resultado == "EN_CURSO":
             try:
                 hecho = self.paso()
             except Exception as exc:  # noqa: BLE001
@@ -1996,22 +2278,43 @@ class Bot:
             else:
                 anterior = clave
                 vistos[clave] = 1
-            if vistos[clave] > tope_repetidas:
+            # **Tope especifico para 'continuar' en batalla.** Un boton de
+            # continuar que se pulsa muchas veces no esta avanzando: el log
+            # mostraba `continuar` con el enemigo a 0 HP, o sea la batalla ya
+            # estaba ganada y el bot seguia pulsando sin que la pantalla
+            # cambiara. Antes el tope era 25 para todo y ademas la exencion de
+            # batalla reseteaba el contador a 1 cada 4 intentos, con lo que el
+            # bucle era infinito. Aqui un tope de 4, sin exencion.
+            es_continuar_batalla = (hecho == self.CONTINUAR_BATALLA
+                                    and donde == "battle-screen")
+            if es_continuar_batalla:
+                if vistos[clave] > TOPE_CONTINUAR:
+                    self.log(f"  !! 'continuar' en batalla x{vistos[clave]}: "
+                             f"la pantalla no avanza, recupero")
+                    vistos.pop(clave, None)
+                    anterior = None
+                    if self._recuperar_batalla_clavada():
+                        continue
+            elif vistos[clave] > tope_repetidas:
                 # En batalla, muchas pulsaciones de SKIP son normales: antes de
                 # declarar atasco se comprueba que el estado de verdad no cambia.
                 if donde == "battle-screen":
-                    f1 = self.firma_batalla()
-                    self.j.activar("#btn-auto-battle")
-                    self.j.page.wait_for_timeout(1800)
-                    f2 = self.firma_batalla()
-                    if f1 and f1 != f2:
-                        self.log("  batalla sigue viva (cambio de PS), continúo")
-                        # La racha se reinicia a 1 y `anterior` se deja como
-                        # está: es la misma clave, así que el paso siguiente
-                        # cuenta 2. Antes ponía `vistos[clave] = 0` y el
-                        # siguiente paso lo subía a 1, o sea que la racha
-                        # avanzaba de a dos en dos y el tope se alcanzaba con la
-                        # mitad de pulsaciones reales.
+                    # **Con techo.** Esta exencion reseteaba el contador cada
+                    # vez que el PS cambiaba, sin limite de reintentos, asi que
+                    # un combate que se mueve pero no acaba pulsaba `continuar`
+                    # para siempre y la run se quedaba ahi. Ahora hay tope.
+                    self._batalla_viva = getattr(self, "_batalla_viva", 0) + 1
+                    if self._batalla_viva < TOPE_BATALLA_VIVA:
+                      f1 = self.firma_batalla()
+                      self.j.activar("#btn-auto-battle")
+                      self.j.page.wait_for_timeout(1800)
+                      f2 = self.firma_batalla()
+                      if f1 and f1 != f2:
+                        self.log("  batalla sigue viva (cambio de PS), "
+                                 f"intento {self._batalla_viva}/"
+                                 f"{TOPE_BATALLA_VIVA}, continúo")
+                        # La racha se reinicia a 1: es la misma clave, asi que
+                        # el paso siguiente cuenta 2.
                         vistos[clave] = 1
                         continue
                 self.log(f"  !! atascado en {clave} x{vistos[clave]}: "
@@ -2064,12 +2367,9 @@ class Bot:
                 break
             if pausa:
                 self.j.page.wait_for_timeout(int(pausa * 1000))
-        # `PRESUPUESTO_AGOTADO` ya no se usa: solo queda si alguien pasa un
-        # presupuesto explicito, y en ese caso avisa en vez de fingir un final.
-        if self.resultado == "EN_CURSO" and max_pasos > 0 \
-                and self.pasos >= max_pasos:
-            self.log(f"  !! partida cortada por el presupuesto de "
-                     f"{max_pasos} pasos (no es una derrota)")
+        # R1: aqui ya solo se sale por perdida o por region completada. Un
+        # presupuesto agotado **no** corta la partida: el bucle de arriba no
+        # tiene ese tope, asi que este `if` es solo un aviso por si acaso.
         # Se cachea el estado final: la tabla se pinta aunque la página ya haya
         # caído, y `resumen()` sigue siendo la fuente de verdad para el JSON.
         try:
@@ -2110,8 +2410,8 @@ def seguir_en_vivo(bot, max_pasos: int, pausa: float, cada: int) -> None:
     import subprocess
 
     visto = 0
-    while (bot.resultado == "EN_CURSO"
-           and (bot.pasos < max_pasos or max_pasos <= 0)):
+    # R1: en vivo tampoco se corta por presupuesto, igual que `jugar()`.
+    while bot.resultado == "EN_CURSO":
         bot.paso()
         if bot.pasos % max(1, cada) != 0 and bot.resultado == "EN_CURSO":
             time.sleep(pausa)

@@ -27,8 +27,9 @@ jefe, tipos del rival, chart). Solo decide **qué nodo del mapa visitar** y con
 from __future__ import annotations
 
 import json
+import os
 import sys
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 
 DATA = Path(__file__).resolve().parent.parent / "data"
@@ -107,11 +108,25 @@ class Plan:
 # La paridad estricta sin margen (lo que hubo antes) era inalcanzable en la
 # practica: el bot llegaba a la puerta del jefe 4 niveles corto y, como el jefe
 # es salida forzada, o entraba y perdia o se quedaba atascado.
-MARGEN_TIPO_BONUS = 2
 MARGEN_BASE = 0
 
+# Flags de experimento, leidos del entorno. Van en un diccionario y no en
+# variables sueltas porque sobreescribir `globals()[nombre]` desde un bucle
+# era fragil (un nombre mal escrito creaba un atributo fantasma en vez de
+# fallar). Ver `experimento.py`.
+def _flags_entorno() -> dict:
+    out = {"veto_tipo": False, "cobertura": False, "escalera_riesgo": True}
+    for k in out:
+        v = os.environ.get(f"PKL_{k.upper()}")
+        if v is None:
+            continue
+        if isinstance(out[k], bool):
+            out[k] = v.strip().lower() in ("1", "true", "si", "yes")
+        else:
+            out[k] = float(v)
+    return out
 
-
+EXP = _flags_entorno()
 def plan_para(region: str, insignias: int) -> Plan:
     """Construye el plan para el líder siguiente."""
     nivel_max, niveles = P.nivel_del_jefe(region, insignias)
@@ -163,7 +178,7 @@ def nivel_min_para(plan: Plan, equipo: list[dict]) -> int:
                  for c in combos), default=1.0)
     if mejor >= 2.0:
         # Con un 2x claro se puede pelear por debajo del nivel del rival.
-        return max(1, plan.nivel_min - MARGEN_TIPO_BONUS)
+        return max(1, plan.nivel_min - MARGEN_BASE)
     if mejor <= 0.5:
         # Todo el equipo a 0.5x o menos: sin atajo de tipo hace falta MAS nivel
         # que la paridad, que es lo unico que puede compensar.
@@ -220,6 +235,20 @@ PESO_OBJETO = 12.0
 # Es el unico corte de vida del plan. Antes estaba al 55%, y H1 seguia dando
 # -5 niveles de media: no era falta de nivel sino entrar al jefe gastado.
 UMBRAL_PUERTA_JEFE = 0.75
+# Escalera de riesgo del entrenador **sin cura delante**. La cura del juego es
+# solo el pokecenter: en 100 runs el bot no vio ni una poción, así que entrar
+# weakening sin cura a mano no se recupera, se pierde la run. Cada peldaño
+# puntúa **por encima de cero a propósito**: un veto duro ya se probó (veto de
+# tipo, -3) y salió PEOR, 0,64 frente a 1,62 insignias, porque en el 43% de las
+# pantallas el entrenador es el único nodo y el veto lo dejaba sin opciones.
+# Con la escalera, si no hay nada mejor pelea igual, pero con alternativa la
+# gana.
+ESCALERA_RIESGO_ENTRENADOR = (
+    (1, 0.5),    # 1 món en pie: pelear es morir
+    (2, 2.0),    # 2 en pie: se gana de milagro
+)
+UMBRAL_RIESGO_ALTO = 0.50    # equipo por debajo: ni cazar ni objeto
+UMBRAL_RIESGO_MEDIO = 0.75
 # El nodo `?` es aleatorio y trae shiny, pasivo o **trade**. El trade es la
 # mecanica mas fuerte del juego segun la guia: cambias tu peor món por uno
 # aleatorio **con +3 niveles y PS completo**, y las mejoras del Move Tutor se
@@ -262,10 +291,20 @@ class Contexto:
     # nadie, y sin él la política no puede distinguir a un `youth` de nivel 9
     # de un `ace-trainer` de nivel 14+.
     nivel_rival: int = 0
+    # Sprite -> tipos de los entrenadores del mapa. Es lo que permite el veto
+    # "si se puede evitar a este entrenador, se evita".
+    tipos_por_sprite: dict = field(default_factory=dict)
+    # Sprite del nodo que se está puntuando.
+    sprite: str = ""
+    # ¿El nodo es un jefe? El jefe no entra en el veto de evitar.
+    es_jefe: bool = False
     # ¿Ya se ha cazado en esta pantalla? El libro de jugadas es
     # "captura uno al principio y luego a por nivel", asi que la primera captura
     # tiene prioridad sobre cualquier otra cosa, incluso sobre el entrenador.
     capturas_pantalla: int = 0
+    # Tipos del mapa a los que el equipo NO tiene respuesta (brazo C). Vive en
+    # el Contexto porque lo consume `puntuar`, que no ve las locals de `elegir`.
+    sin_respuesta: list = field(default_factory=list)
 
 
 def _niveles(equipo: list[dict]) -> list[int]:
@@ -278,6 +317,66 @@ def _estado(equipo: list[dict]) -> tuple[float, int, int]:
     caidos = sum(1 for m in equipo if (m.get("ps") or 0) <= 0)
     vivos = sum(1 for m in equipo if (m.get("ps") or 0) > 0)
     return (sum(ratios) / len(ratios) if ratios else 0.0, caidos, vivos)
+
+
+def _equipo_responde_a(equipo: list[dict], tipo: str) -> bool:
+    """¿Algún món vivo tiene respuesta de tipo a ese tipo? `>= 1.0` cuenta.
+
+    Se mira el **tipo principal** de cada món, que es el tipo de su único
+    ataque. Un món caído no cuenta: no puede pelear.
+    """
+    from pkl_movimientos import multiplicador as _mult
+
+    for m in equipo or []:
+        if (m.get("ps") or 0) <= 0:
+            continue
+        tipos = [T.normalizar(t) for t in (m.get("tipos") or []) if t]
+        if not tipos:
+            continue
+        if _mult(tipos[0], tipo) >= 1.0:
+            return True
+    return False
+
+
+def _tipos_del_entrenador(ctx: Contexto) -> list[str]:
+    """Tipos del entrenador de **este** nodo, si se conocen.
+
+    Vienen en `Contexto.tipos_por_sprite`, indexado por sprite, porque el
+    veto es "si se puede evitar a **este** entrenador": un equipo puede
+    ganarle a un hiker y perder contra un fire-spitter, y con el conjunto de
+    la ruta esa distinción no existe.
+    """
+    sprite = (getattr(ctx, "sprite", "") or "").lower().replace("-", "")
+    tabla = getattr(ctx, "tipos_por_sprite", None) or {}
+    for clave in (ctx.sprite, sprite, ctx.sprite.lower() if ctx.sprite else ""):
+        if clave and clave in tabla:
+            return list(tabla[clave])
+    return []
+
+
+def _alguien_le_gana(ctx: Contexto, tipos_rival: list[str]) -> bool:
+    """¿Hay algún món vivo que le gane a este entrenador por tipo?
+
+    Se mira el **tipo principal** de cada món, que es el tipo de su único
+    ataque (el Move Tutor sube el tier de ese ataque, no le añade un segundo
+    tipo). Se considera que "le gana" con x1 o mejor: por debajo de x1 es
+    perderlo de todas formas.
+
+    Se ignoran los caídos: no pueden pelear, así que no cuentan como
+    respuesta.
+    """
+    from pkl_movimientos import multiplicador as _mult
+
+    for m in ctx.equipo or []:
+        if (m.get("ps") or 0) <= 0:
+            continue
+        tipos = [T.normalizar(t) for t in (m.get("tipos") or []) if t]
+        if not tipos:
+            continue
+        peor = min((_mult(tipos[0], r) for r in tipos_rival if r), default=0.0)
+        if peor >= 1.0:
+            return True
+    return False
 
 
 def puntuar(tipo: str, ctx: Contexto) -> tuple[float, str]:
@@ -452,6 +551,16 @@ def puntuar(tipo: str, ctx: Contexto) -> tuple[float, str]:
                 return (PESO_CAPTURA,
                         f"capturar: equipo de {len(equipo)}, hacen falta "
                         f"cuerpos antes que nivel")
+            # **La cobertura de tipos va POR DELANTE del nivel.** Con un
+            # equipo al nivel correcto pero sin respuesta de tipo, cazar es la
+            # unica palanca: es lo que evita pelear a x0.5. El veto de
+            # entrenador por tipo ya quedo probado insuficiente, porque el
+            # problema no es elegir la pelea sino no tener el món.
+            if ctx.sin_respuesta:
+                return (PESO_CAPTURA,
+                        f"capturar: falta respuesta de tipo para "
+                        f"{', '.join(ctx.sin_respuesta[:3])}; el nivel se recupera "
+                        f"después, el agujero de tipo no")
             if falta > 1:
                 return (8.0,
                         f"cazar {falta:.0f} nivel(es) por encima del entrenador: "
@@ -468,6 +577,32 @@ def puntuar(tipo: str, ctx: Contexto) -> tuple[float, str]:
         return (PESO_BATALLA_A_NIVEL, "cazar: ya en pie y a nivel")
 
     if tipo == "entrenador":
+        # **Veto por tipo: si se puede evitar al entrenador, se evita.**
+        #
+        # Regla del usuario, literal: "si podemos evitar al entrenador, lo
+        # evitamos, si es el lider, jugamos". O sea que la pregunta no es
+        # "¿me da experiencia?" (siempre la da) sino "¿hay con qué ganarle?".
+        # Y aquí la respuesta la da la **tabla de tipos**: si ningún món del
+        # equipo llega a x1 contra su especialidad, la pelea se pierde por
+        # tipos, no por nivel, y no hay nivel que la arregle.
+        #
+        # El jefe **no** entra en este veto: contra el líder se juega siempre,
+        # porque no se puede evitar y porque es la única forma de pasar.
+        #
+        # Antes entraba a ciegas: medido, se perdió contra un
+        # `team-rocket (Poison/Normal)` con Krabby x1, Ivysaur x0.5 y Clefairy,
+        # sin nada que le ganara.
+        tipos_riv = _tipos_del_entrenador(ctx)
+        # El veto por tipo es el experimento "desactivar_veto_tipo". Ver
+        # `experimento.py`: se midio que con el veto el bot pierde igual, pero
+        # sus.muertes tienen al equipo en x0.5 contra el rival, o sea que la
+        # regla le alejaba de la unica fuente de exp sin arreglar el problema
+        # de fondo (el equipo no tiene respuesta de tipo).
+        if tipos_riv and not ctx.es_jefe and EXP["veto_tipo"]:
+            if not _alguien_le_gana(ctx, tipos_riv):
+                return (-3.0,
+                        f"entrenador evitable: nadie le gana por tipo "
+                        f"({'/'.join(tipos_riv)})")
         # **Veto por nivel del rival, y la referencia es el EQUIPO.**
         # `trainerFightLevel` ya decía el nivel del entrenador y ese dato no
         # llegaba a la política. Lo que además estaba mal era la referencia:
@@ -479,40 +614,69 @@ def puntuar(tipo: str, ctx: Contexto) -> tuple[float, str]:
         # Lo que decide si una pelea se gana es el **equipo que la pelea**:
         # mejor món del equipo + 2 de margen, para no ser tan estricto que
         # bloquee la única fuente de exp.
-        tope_equipo = max(niveles) if niveles else 0
-        if ctx.nivel_rival > 0 and tope_equipo and ctx.nivel_rival > tope_equipo + 2:
+        # **El listón es el món que ABRE, no el mejor del equipo.** Con la
+        # referencia en el mejor món el veto no disparaba: un Mankey Nv10
+        # cubría a un Staryu Nv6 que es quien abre, y contra un fire-spitter
+        # Nv12 (12 > 10+2 es falso) se entraba y se perdía con el equipo entero
+        # a 0. Medido: `mios=[Staryu 0/19, Geodude 0/26, Mankey 0/28,
+        # Bulbasaur 0/29]` contra rival Nv12.
+        # Se usa el **menor** de los que pueden abrir, que es el que de verdad
+        # tiene que aguantar el combate: si el que va delante está 4 niveles
+        # por debajo, la pelea se pierde aunque el equipo tenga un món alto
+        # detrás. El margen de 1 (no 2) es porque aquí la referencia ya es
+        # conservadora.
+        # Con el mínimo un solo món flojo (el que va detrás y no pega)
+        # bloqueaba toda la exp; con el máximo un món alto tapaba al que abre.
+        # La media es el nivel con el que pelea el equipo de verdad, y deja
+        # pasar a un rival del mismo nivel: media de [9,7] es 8, y 9>8+1 falso.
+        tope_equipo = (sum(niveles) / len(niveles)) if niveles else 0
+        if ctx.nivel_rival > 0 and tope_equipo and ctx.nivel_rival > tope_equipo + 1:
             return (-4.0,
                     f"entrenador vetado: rival Nv{ctx.nivel_rival} supera al "
-                    f"mejor del equipo (Nv{tope_equipo:.0f}+2) — no es exp, "
+                    f"el nivel del equipo (Nv{tope_equipo:.0f}+1) — no es exp, "
                     f"es riesgo")
-        # **Veto por caídos sin cura.** La rama de abajo juega al entrenador
-        # "con caídos porque es la única fuente de exp", y es cierto: pero
-        # solo si no hay cura accesible. Con un único món en pie y sin pokecenter
-        # a mano, pelear es la última opción, no la primera.
-        if caidos and not ctx.hay_cura_disponible and vivos <= 1:
-            return (1.0,
-                    f"entrenador vetado: {vivos} món en pie, {caidos} caído(s) "
-                    f"y sin cura accesible")
-        # Antes se aplazaba con el equipo al 58% de PS. Medido en la tanda que
-        # perdió contra Brock: con 4 niveles de diferencia, bloquear al
-        # entrenador le quitaba la unica fuente de exp, se quedaba sin nodos y
-        # se plantaba en la puerta del gimnasio. Ahora solo se aplaza si hay
-        # caidos de verdad, o si el equipo esta muy bajo y no hay cura a mano.
-        # La regla del usuario es que el pokecenter es **obligatorio** si hay
-        # caídos, así que este trainer ya está vetado arriba por el corte de
-        # emergencia en cuanto hay cura a mano. Esta rama solo aplica cuando no
-        # hay cura disponible: sin centro delante, pelear es la única opción.
-        if caidos and not ctx.carry_debil and not ctx.hay_cura_disponible:
-            # Sin cura delante no hay nada mejor: el entrenador es la única
-            # fuente de exp que sube a **todo** el equipo. Antes valía
-            # `PESO_ENTRENADOR_SANO - 12` (o sea 22), tan bajo que el bot no lo
-            # elegía ni sin cura: se quedaba sin nodos y sin nivel.
-            return (PESO_ENTRENADOR_SANO,
-                    f"entrenador con {caidos} caído(s) y sin cura a mano: se "
-                    f"juega igual, es la única fuente de exp")
-        if ratio < 0.25:
-            return (3.0, f"entrenador aplazado: equipo al {ratio*100:.0f}%, "
-                         f"demasiado expuesto")
+        # ---- Riesgo: como llega el equipo a esta pelea -------------
+        # Medido en 100 runs: de 54 muertes de entrenador, **33 eligieron el
+        # nodo con 2 o menos móns en pie y 15 con uno solo**, y 21 se
+        # quedaron con un único món al perder. No es el nivel (el bot va +5)
+        # ni el tipo (el veto de tipo ya se midio y perdio): es llegar a
+        # pelear con el equipo desmontado y sin cura a mano.
+        #
+        # Solo aplica **sin cura disponible**. Con pokecenter delante el corte
+        # de emergencia del principio ya obliga a curar y esto no harian falta:
+        # la regla del usuario (R8) dice que con el equipo <=75% se va al
+        # centro, y eso ya esta implementado arriba.
+        # Brazo de control del experimento de la escalera: el comportamiento
+        # **literal** de antes, con su rama que premia pelear con caidos. Se
+        # conserva a proposito hasta tener veredicto; el dia que se cierre la
+        # hipotesis, esta rama y el flag se borran juntos.
+        if not EXP["escalera_riesgo"]:
+            if caidos and not ctx.carry_debil and not ctx.hay_cura_disponible:
+                return (PESO_ENTRENADOR_SANO,
+                        f"entrenador con {caidos} caído(s) y sin cura a mano: "
+                        f"se juega igual, es la única fuente de exp")
+            if ratio < 0.25:
+                return (3.0, f"entrenador aplazado: equipo al {ratio*100:.0f}%, "
+                             f"demasiado expuesto")
+        if not ctx.hay_cura_disponible:
+            # El `caidos >= 1` no es cosmetico: un equipo de **un solo món
+            # sano** es el inicio normal de la partida y ahi pelear es
+            # justo lo que hay que hacer. Lo que mata es perder móns, asi que
+            # la escalera por móns en pie solo aplica cuando ya se ha perdido
+            # alguno. El `ratio` de abajo ya recoge el caso "entero pero
+            # gastado", porque los caidos cuentan como 0 en la media.
+            if caidos >= 1:
+                for min_vivos, peso in ESCALERA_RIESGO_ENTRENADOR:
+                    if vivos <= min_vivos:
+                        return (peso,
+                                f"entrenador de riesgo: {vivos} món(s) en "
+                                f"pie, {caidos} caído(s) y sin cura a mano")
+            if ratio < UMBRAL_RIESGO_ALTO:
+                return (3.0, f"entrenador aplazado: equipo al {ratio*100:.0f}% "
+                             f"y sin cura delante")
+            if ratio < UMBRAL_RIESGO_MEDIO:
+                return (6.0, f"entrenador de riesgo: equipo al "
+                             f"{ratio*100:.0f}% y sin cura delante")
         if falta > 1:
             return (PESO_ENTRENADOR_SANO + 2.0,
                     f"entrenador: mucha exp, faltan ~{falta:.0f} de nivel")
@@ -601,6 +765,20 @@ def elegir(equipo: list[dict], nodos: list[dict], ctx_extra: dict | None = None,
     tipos_disponibles = [_tipo(n) for n in nodos
                          if n.get("clickable")
                          and str(n.get("id")) in ids_disponibles]
+
+    # **Cobertura de tipos (brazo C del experimento).**
+    # La medicion de 97 runs dio que en 21 de 26 muertes el mejor món del
+    # equipo era x0.5 contra el rival: el equipo no tenia respuesta de tipo.
+    # Este flag sube el peso del nodo de captura cuando al equipo le faltan
+    # respuestas para los tipos que hay en el mapa, para tapar el agujero antes
+    # de pelear en lugar de perder la pelea.
+    sin_respuesta: list[str] = []
+    if EXP["cobertura"] and "capturar" in tipos_disponibles:
+        por_sprite = extra.get("tipos_por_sprite") or {}
+        tipos_ruta = {t for ts in por_sprite.values() for t in ts}
+        sin_respuesta = sorted(t for t in tipos_ruta
+                               if not _equipo_responde_a(equipo, t))
+
     es_jefe_unica_salida = extra.get("es_jefe_unica_salida")
     if es_jefe_unica_salida is None:
         hay_exp = any(t in ("batalla", "entrenador")
@@ -651,6 +829,8 @@ def elegir(equipo: list[dict], nodos: list[dict], ctx_extra: dict | None = None,
         en_camino_al_jefe=bool(extra.get("en_camino_al_jefe")),
         hay_cura_disponible=("cura" in tipos_disponibles),
         caidos=_estado(equipo)[1],
+        tipos_por_sprite=dict(extra.get("tipos_por_sprite") or {}),
+        sin_respuesta=sin_respuesta,
     )
 
     punt: list[tuple[float, dict, str]] = []
@@ -676,6 +856,8 @@ def elegir(equipo: list[dict], nodos: list[dict], ctx_extra: dict | None = None,
             # distinto. Antes `nivel_rival` no llegaba a la política y ambos
             # puntuaban exactamente igual.
             if tipo == "entrenador":
+                # Sprite y si es jefe, para el veto de evitar.
+                ctx_n = replace(ctx_n, sprite=str(n.get("sprite") or ""))
                 niv_rival = n.get("nivel") or 0
                 try:
                     niv_rival = int(niv_rival)

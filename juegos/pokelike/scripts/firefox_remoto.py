@@ -18,7 +18,7 @@ Qué cubre y cómo:
   `input.performActions` con un clic real cuando hace falta (drag del HUD).
 - `keyboard`/`mouse` -> `input.performActions`.
 - `route` (bloquear ruido: anuncios y analítica) -> **no hay equivalente
-  limpio**. Se deja el拦截 desactivado y se acepta el banner de cookies, que el
+  limpio**. Se deja el interceptor desactivado y se acepta el banner de cookies, que el
   bot ya sabe saltyar. Es la única funcionalidad que se pierde.
 
 Limitaciones conocidas, todas medibles:
