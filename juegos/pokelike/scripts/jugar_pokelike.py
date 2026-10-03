@@ -2332,6 +2332,7 @@ class Bot:
             self.log(f"== brazo={brazo} | "
                      f"PKL_MARGEN_BASE={os.environ.get('PKL_MARGEN_BASE', '?')} | "
                      f"PKL_ESCALERA_RIESGO={os.environ.get('PKL_ESCALERA_RIESGO', '1')} | "
+                     f"PKL_TRADE={os.environ.get('PKL_TRADE', '1')} | "
                      f"codigo={os.environ.get('PKL_HASH', '?')} ==")
         if max_pasos and max_pasos > 0:
             # R1: el presupuesto es solo informativo y para las pruebas cortas.
