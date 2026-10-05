@@ -359,3 +359,458 @@ decisión en dos de cada tres casos. El ERROR fue el sitio donde se aplicaba.
 | ¿Funciona la búsqueda de efectividad? | **Sí** | `charAt(0).toUpperCase() + slice(1).toLowerCase()`, o sea CamelCase, que casa con `Psychic`, `Dragon`, `Dark`. Se sospechó lo contrario y era falso. |
 | ¿El starter es un bug? | **No: Bulbasaur es el correcto** | `Planta→Roca` y `Planta→Tierra` son 2x, o sea **x4 contra Brock**. Se afirmó lo contrario sin ejecutar la función y era falso. |
 | ¿El veto por tipo? | **Sigue siendo mala idea** | V1: A(veto) 0,64 vs B(sin veto) 1,62 insignias. |
+
+---
+
+# Diagnóstico de la apertura (56 runs, `hash=388bfc04`)
+
+Lote de **H11** (veto de nivel) parado en 56/100 para atacar esto. Los logs
+viven en `juegos/pokelike/log/vetonivel/`.
+
+## El resultado de H11: inconclusive, y probablemente no es el cuello
+
+Interim de 54 runs con resumen:
+
+| Brazo | n | media insignias |
+|---|---|---|
+| A (`PKL_VETO_NIVEL=1`, veto con -400 final) | 27 | 0,63 |
+| B (`PKL_VETO_NIVEL=0`, no-op) | 26 | 0,65 |
+
+El **sanity pasa**: A registró 5 penalizaciones por veto de nivel y B ninguna, o
+sea que el mecanismo hace lo que se le pedía (esto ya estaba verificado en
+`test_el_veto_de_nivel_gana_al_bono_de_ruta`). Pero **no mueve la aguja**.
+
+**H11 queda ABIERTA, no cerrada.** n=56 no alcanza para concluir nada sobre
+eficacia. Lo que sí se puede decir es que el veto se dispara **5 veces en 27
+runs**: es una señal poco frecuente, así que su techo es bajo por construcción.
+No se vuelve a invertir en H11 sin antes resolver la apertura.
+
+## El nivel NO es la causa (H1 confirmada por segunda vía)
+
+Medido sobre las 54 muertes, en la pantalla donde murió cada run:
+
+- Rival **por debajo** del equipo: **54/54**
+- Media: el rival era **14,8 niveles por debajo** del món más alto del equipo
+
+Confirma H1 por una vía independiente de la que se descartó (el filtro de
+nivel), y cierra la discusión: **no se muere por nivel**.
+
+## Dónde se muere: el primer mapa
+
+- **37%** (20/54) mueren con **0 insignias**, y las 20 en `Route 1`, en **36
+  pasos** de media. No llegan ni a la puerta de Brock con un equipo usable.
+- **31%** (17/54) mueren con **1 solo món en pie**; **54%** con 2 o menos.
+- Quién mata: Brock 10, entrenadores de ruta 6, salvajes 4.
+
+| Insignias | n | Pasos | Capturas |
+|---|---|---|---|
+| 0 | 20 | 36 | **1,1** |
+| 1 | 24 | 71 | 2,4 |
+| 2+ | 10 | 142 | 4,0 |
+
+### Trampa de método (importante)
+
+`insignias~pasos = 0,92` y `insignias~capturas = 0,66`. **Eso no prueba que
+capturar más haga llegar más lejos**: las runs largas pasan por más nodos y
+tienen más oportunidades de todo. Es el mismo error que ya se cometió una vez
+en este fichero ("una correlación leída como causal"). H12 solo entra cuando
+haya A/B controlado.
+
+## H12 · Cuando el bot elige por `capturar`, ¿el nodo ofrece pokéball?
+
+**Origen**: el bot elige el nodo de captura con peso 60 y el log decía
+`capturar: equipo de 1, hacen falta cuerpos` y luego no había captura.
+
+**Medida**: tipo crudo del nodo elegido (`catch` = ofrece pokéball, `battle` =
+no) frente a si hubo captura. Ya es medible porque **el tipo crudo ahora se
+registra**: `politica.BATALLA = {"pokeball"}` traducía el sprite de la pokéball
+a `batalla`, igual que el tipo `battle`, y el log no distinguía una cosa de la
+otra.
+
+- **Si sale X**: en las 20 muertes con 0 insignia la última pantalla era `battle`
+  sin pokéball → el problema es la **lotería del mapa**, no la política, y la
+  palanca es rerollear (`R`) buscando un `catch`.
+- **Si sale Y**: había nodo `catch` y el filtro lo rechazó → la política es
+  demasiado estricta en apertura.
+
+**Estado: X confirmado en 18/20.** Las 20 muertes con 0 insignia ocurrieron en
+pantallas sin nodo `catch`. Solo 2 rechazos por filtro en toda la muestra.
+
+## Punto 2 del usuario: ¿se capturó siempre que se podía?
+
+Con la traza de decisiones, primera partida con 5 nodos `catch`:
+
+| nodos `catch` | capturas | rechazos |
+|---|---|---|
+| 5 | 2 | 3 |
+
+**Los 5 dejan rastro.** Los 3 rechazos fueron todos `nada útil contra
+Water/Electric`: el equipo no tenía respuesta de tipo para Misty. Es la
+cobertura, no el filtro por nivel.
+
+Antes de la traza, el cuarto nodo `catch` se perdía en silencio
+(`capturas_pantalla >= 1` salía sin registrar). Instrumentado como
+`captura_renunciada`.
+
+## Lo que NO sabemos todavía, y sí se puede mirar ya
+
+- **A qué món se le da la MT**: `move_tutor` se contaba (`self.tutores`) pero
+  **no hay pantalla para ella en `MANEJADORES`**, así que el disco se enseña en
+  algún sitio que no se registra. Es la única palanca de daño real del juego
+  (las batallas son automáticas) y ahora hay `visitas tutor` en el resumen.
+- **Qué objeto va a qué Pokémon**: solo pasaba en `elite-prep-screen`, y la
+  bolsa llegaba casi vacía (media **1,4 objetos por run**). La causa probable es
+  que `PESO_CAPTURA=60` está por encima de `PESO_OBJETO=12`, así que el bot
+  gasta la pantalla en cazar y se pierde los nodos de objeto de paso. **No
+  medido.**
+
+## Instrumentación nueva (registra todo)
+
+`Bot.traza(evento, **campos)` + `volcar_traza()`: cada decisión queda como
+línea `DEC ...` en el log y como JSON en
+`juegos/pokelike/log/traza-<fecha>_p<pid>.json`. Eventos: `nodo`, `orden`,
+`captura_pedida` / `captura_confirmada` / `captura_rechazada` /
+`captura_renunciada`, `item_cogido`, `objeto_equipado` / `objeto_usado`,
+`swap` / `swap_arbitrario`, `trade_aceptado`.
+
+Dos `TypeError` aparecieron al añadirlo y los dos salieron **jugando**, no en
+los tests: `traza("nodo", tipo=…)` chocaba con el parámetro `tipo`, y
+`len(pend)`/`len(vivos)` donde la variable ya era un entero. Cubiertos por
+`test_toda_decision_deja_rastro`.
+
+---
+
+# H13 · El nodo de objeto (100 runs, `hash=a839ce20`)
+
+## El bug que sí era real
+
+`tiene_bolsa` significa **"quedan huecos"** (`not items_tomados >=
+MAX_ITEMS`) y la condición estaba **invertida**: el nodo de objeto puntuaba
+`PESO_OBJETO` (12.0) con la bolsa **llena** y **2.0** con sitio libre. El
+mensaje también mentía ("bolsa vacía" salía en la rama de bolsa llena).
+
+Medido en 924 pantallas de 56 runs: el nodo `item` se ofreció **144 veces
+(16%)** y el bot lo cogió **4 (3%)**. 26 de 54 runs terminaron con 0 objetos.
+
+Corregido detrás de `PKL_ITEM_HUECOS` (default **off**).
+
+## El resultado: NO cambia nada
+
+| | A (`=1`, coge con hueco) | B (`=0`, control) |
+|---|---|---|
+| n | 48 | 47 |
+| insignias | **1,21** | **1,21** |
+| objetos/run | 1,42 | 1,36 |
+| capturas/run | 2,50 | 2,43 |
+| nodos `item` elegidos | 71 | 74 |
+
+Mann-Whitney insignias **p=0,813**. El flag llega (113 veces "hay hueco" en A,
+0 en B) y aun así el bot **no coge más nodos de objeto**.
+
+**Por qué**: la inversión era real pero **no era el cuello**. El control ya
+cogía 74 nodos de objeto con un peso de 2.0, porque a 2.0 le ganaba al tutor
+(1.0) y al jefe aplazado (-3.0). Lo que le gana de verdad es `capturar` (60) y
+`entrenador` (34). Arreglar la lógica de un nodo sin tocar el **orden de
+prioridades** no mueve la aguja: es la segunda confirmación de que el binding
+constraint está en `PESO_*`, no en la lógica de cada rama.
+
+**H13 se archiva como "no, y se sabía por qué antes de gastar las runs"**.
+
+## Corrección de una cifra que estaba mal
+
+El informe del lote H11 decía 0,63 (A) y 0,65 (B). **Esos números son
+falsos**: se leyeron con `grep -m1 "insignias"`, que pilla la **primera** línea
+del log y no la del RESUMEN. En **34 de 54 runs** no coinciden.
+
+| | valor que dije | valor correcto |
+|---|---|---|
+| H11 brazo A | 0,63 | **0,93** |
+| H11 brazo B | 0,65 | **0,96** |
+
+Lo peor no es el error: es que la conclusión no cambia (sigue sin diferencia
+entre brazos), pero el nivel real era 0,94 y no 0,65, y eso cambia lo que
+creíamos sobre dónde estamos. **Regla**: los contadores de run se leen
+**siempre** de la sección RESUMEN, nunca del log entero.
+
+## El nivel subió sin que nadie lo hiciera (sin explicar)
+
+- H11 (`hash=388bfc04`): **0,94** insignias/run, n=54
+- H13 (`hash=a839ce20`): **1,21** insignias/run, n=95
+
++0,27 y **los dos brazos por igual**, así que no es el flag. Los cambios entre
+uno y otro fueron todos de diagnóstico (`traza`, tipo crudo), más la
+eliminación de una comprobación **muerta** en `_catch`
+(`capturas_pantalla >= 1` estaba dos veces y la segunda nunca se alcanzaba).
+
+**No se atribuye a nada**: no está medido y no se apunta como logro. Es la
+prueba de que con n≈50 y este mapa la varianza entre lotes es de ~0,3
+insignias, que es **mayor que cualquier efecto que hemos medido hasta ahora**.
+
+## Dónde mueren las 95 runs limpias
+
+| | |
+|---|---|
+| entrenador de ruta | **43 (45%)** |
+| jefe (gimnasio) | 43 (45%) |
+| salvaje | 9 (9%) |
+
+Reparto: 0→15, 1→**54**, 2→19, 3→5, 4→2. La mediana es 1 insignia y el 57% se
+queda en la primera. El techo sigue en 4 y **`CHAMPION` sigue a 0**.
+
+Esto **contradice** el diagnóstico de "la apertura es el cuello": en este lote
+solo 15/95 (16%) mueren con 0 insignias, frente al 37% del lote anterior.
+Con n=54 y n=95 la estimación de la apertura no es estable, así que la
+hipótesis de apertura queda **suspendida, no confirmada**.
+
+## Lo que sí queda established
+
+1. **El nivel no es el cuello** (dos vías independientes: filtro de nivel y
+   comparación rival-equipo, 54/54 rivales por debajo).
+2. **La lógica de los nodos no es el cuello**: un bug real (inversión) y otro
+   real (trade sin cerrar, 0/319) arreglados, ninguno movió la media.
+3. **Los pesos son el binding constraint**, y se mueven en decenas mientras
+   sus efectos son décimas de insignia.
+4. **La varianza entre lotes (~0,3 insignias) supera todos los efectos
+   medidos.** Por eso 100 runs no bastan para detectar nada: hacen falta
+   cientos, o una métrica con más potencia.
+
+---
+
+# El diagnóstico de por qué todo sale nulo: falta potencia, no ideas
+
+Calculado sobre las **149 runs limpias** de los dos lotes (H11 `388bfc04`,
+n=54, y H13 `a839ce20`, n=95).
+
+## `insignias` es una métrica comprimida
+
+| Insignias | Runs | % |
+|---|---|---|
+| 0 | 35 | 23% |
+| **1** | **78** | **52%** |
+| 2 | 24 | 16% |
+| 3 | 8 | 5% |
+| 4 | 4 | 3% |
+
+**76% de las runs dan 0 o 1 insignia.** El bot tiene suelo en 1 y techo en 4:
+no hay recorrido. Un cambio de política mueve **la cola**, no la moda, y en una
+variable con la mitad de las observaciones en un único valor casi no cabe un
+efecto de 0,2.
+
+## Qué se detecta con el tamaño de muestra que|Se ha usado
+
+| n por brazo | Detecta efectos de (insignias) |
+|---|---|
+| 25 | ≥ 1,5 |
+| 48 (lo nuestro) | **≥ 0,74** |
+| 147 | ≥ 0,30 |
+| 332 | ≥ 0,20 |
+
+**Las tres hipótesis probadas esperaban efectos de 0,1 a 0,3.** Con n=48/47
+eran **estructuralmente invisibles**. Los nulos de V1 (veto por tipo), H6 (trade)
+y H13 (nodo de objeto) **no son "no funciona": son "no se puede ver"**. Por eso
+`HIPOTESIS.md` insisted en no llenarse de "reglas que salieron de medir": casi
+ninguna de las que había se midió con potencia suficiente.
+
+## El tamaño de muestra NO era el problema
+
+Ritmo medido: **100 runs en ~25 min** con 2 en paralelo (0,15 h/run).
+
+| Efecto real | Runs totales | Horas |
+|---|---|---|
+| 0,50 ins | 106 | 0,3 |
+| 0,30 ins | 295 | **0,7** |
+| 0,20 ins | 663 | 1,7 |
+
+Detectar 0,2 insignias cuesta **1,7 horas**. No hay excusa. Se han estado
+gastando 25 min por hipótesis y(nullptr) se ha estado midiendo con la mitad
+de la muestra necesaria para cualquier efecto plausible.
+
+## Qué hacer: dos cambios de método, no de bot
+
+1. **Métrica primaria doble**: `insignias` (el objetivo) + `pasos` (detector
+   sensible). En el mismo par de brazos, `pasos` dio un **efecto
+   estandarizado 22× mayor** que `insignias` (d = 0,113 vs 0,005) porque es
+   una magnitud continua sin techo ni suelo (14-275 pasos) y se mueve **antes**
+   de que cambie el resultado final. Si `pasos` se mueve y `insignias` no, el
+   cambio afecta a la duración y no al desenlace: es información, no fracaso.
+2. **Tamaño de muestra dimensionado al efecto esperado**, no fijo en 100.
+   300-700 runs es 0,7-1,7 h: barato.
+
+## Lo que queda por decidir
+
+El orden de `PESO_*` es el binding constraint confirmado por dos vías
+(inversión del nodo de objeto, y el 2.0 que ya ganaba a tutor y jefe
+aplazado). Pero con la métrica arreglada y n=300, se puede medir por fin un
+cambio de pesos de verdad, en vez de especular.
+
+---
+
+# Diagnóstico de dónde muere la run (60 runs con instrumentación nueva)
+
+Todo lo de aquí sale de `traza-*.json` y de la sección RESUMEN, que son las dos
+fuentes fiables. El log de texto sale muestreado (1 de cada 4 pasos de batalla)
+y **no** sirve para contar. Extracto validado en
+`scripts/medir/nivel_gimnasio.py`: 266/266 combates de gimnasio, coincidencia
+con una segunda fuente independiente del 99%.
+
+## Los dos muros, y son de naturaleza distinta
+
+| Gimnasio | Rival | n | % victorias | nuestro nivel si **gana** | si **pierde** |
+|---|---|---|---|---|---|
+| Brock | 14 | 425 | **84%** | 10,6 | 10,9 |
+| **Misty** | 20 | 451 | **45%** | **20,2** | **17,7** |
+| **Erika** | 32 | 187 | **37%** | **38,8** | **37,3** |
+| Koga | 44 | 48 | 69% | 47,7 | 44,2 |
+
+- **Misty es un muro de NIVEL.** 2,5 niveles separan ganar de perder. La
+  composición **no** explica nada: el 97-100% de los equipos tiene Planta y el
+  mejor golpe contra el Agua es x2 en el **100%** de los dos grupos.
+- **Erika es un muro de TIPO.** Se llega **6,8 niveles por encima** (38,8
+  contra 32) y se pierde el 63%. El nivel no explica nada. Como el bot solo ha
+  elegido **Bulbasaur en 853 de 853 runs** (Planta/Veneno) contra un gimnasio
+  Planta/Veneno, es x0,5 en los dos lados. El starter que gana Brock es el
+  que mata en el cuarto gimnasio. **Decisión del usuario: no se cambia.**
+- **Brock es el control**: se gana llegando 3,4 niveles por debajo, porque
+  Planta contra Tierra/Roca es x4. Confirma que el nivel no siempre manda.
+
+## El jefe es una salida forzada: 98/98
+
+En **98 de 98** entradas al gimnasio, el jefe era la **única** opción de
+pantalla. El bot nunca elige entrar teniendo alternativa. El mensaje
+`jefe APLAZADO: hay N nivel(es) de faltan` devuelve −1,0 y **entra igual**: el
+−1,0 no puede ganar cuando solo hay un nodo. **No es un bug de conducta, es un
+log que afirma lo contrario de lo que hace.**
+
+## La aritmética de Misty
+
+| | |
+|---|---|
+| Niveles necesarios (10,4 → 20) | **9,6** |
+| Niveles que da el tramo | **4,0** |
+| Combates en el tramo | 3,5 |
+| Nodos `catch` que ofrece el mapa por run | **5,8** |
+| Capturas que confirma el bot | **2,07** |
+| Capturas que rechaza (98% por "nada útil") | **1,08** |
+| Entrenadores que ve por tramo | ~5 |
+| Entrenadores en los que entra | 2,3 (**56%**) |
+
+## El bucle del filtro de captura
+
+1. El filtro rechaza por falta de cobertura ("nada útil", **98%** de rechazos)
+2. El equipo se queda sin variedad
+3. El filtro vuelve a rechazar por falta de cobertura
+
+Y **rechazar no es gratis**: `catch-screen` tiene "Skip (flee)" y huir es **no
+pelear**, o sea perder el nivel. Medido: **1,88 nodos de pelea por run se quedan
+sin combate (18%)**.
+
+El nivel de las capturas **sube ×5** a lo largo de la run (4,7 → 11,5 → 25,5):
+capturar tarde es mucho peor que no capturar.
+
+## H15 · Capturar es más barato que rechazar (ABIERTA)
+
+Regla del usuario: *"es mejor capturar que rechazar; si tenemos un pokemon
+duplicado en tipo, podemos cambiarlo en el nodo de cambiar"*.
+
+- **Si sale X**: las capturas/run suben y con ellas las insignias → el filtro es
+  la causa y la escalera no era el cuello.
+- **Si sale Y**: subir capturas no cambia nada → el cuello está en otra parte.
+
+Flag `PKL_CAPTURA_PERMISIVA`, default 0. Cuando el filtro estricto deja a todos
+los candidatos fuera, entra con el mejor **manteniendo los duros** (no 0.5x
+contra todo el rival, stats por encima del listón, no capturado ya). Los blandos
+(tipo duplicado, sin 2x claro, nivel menor) dejan de ser motivo de rechazo, y el
+duplicado lo resuelve `_peor_para_sustituir` (regla 9), que ya existe.
+
+Verificado en aislamiento: **2 FALLAS sin el cambio, 319/0 con él**.
+
+## Escalera de riesgo (n≈55 por brazo): NEUTRA
+
+| | n | ent | salv | capturas | insignias |
+|---|---|---|---|---|---|
+| A (con) | 56 | 4,68 | 3,21 | 2,04 | 1,02 |
+| B (sin) | 55 | 5,55 | 2,71 | 2,27 | 1,18 |
+
+insignias p=0,438 · ent/run p=0,087. **Sin efecto medible**, y el sentido apunta
+a que resta. El lote sigue hasta n=150 por brazo antes de cerrarlo.
+
+## Cifras que retracto
+
+1. **"0,63 / 0,65 insignias"** (lote H11): leídas con `grep -m1`, que pilla la
+   primera línea del log y no la del RESUMEN. **Reales: 0,93 / 0,96.**
+2. **"La escalera mete más entrenadores y se autoalimenta"**: leído con un parser
+   roto. Con el parser correcto, B (sin escalera) pelea **más** (5,55 vs 4,68).
+3. **"93% aplaza al jefe"**: contaba el mensaje, no la conducta. Se aplaza 0% de
+   las veces porque nunca hay alternativa.
+4. **"El nivel no es el cuello"**: era cierto para Brock y falso para Misty. El
+   cuello depende del gimnasio. La medición original comparaba contra la última
+   pelea del log, casi siempre un salvaje.
+
+## Instrumentación añadida (todo esto es nuevo)
+
+- `Bot.traza()` + `volcar_traza()`: cada decisión queda como línea `DEC` y como
+  JSON en `log/traza-*.json`. Eventos: `nodo`, `orden`, `combate`, captura
+  (pedida/confirmada/rechazada/renunciada), `item_cogido`, `objeto_equipado`,
+  `swap`, `trade_aceptado`.
+- **Contadores de pelea SIN muestreo** (`peleas entrain.` / `peleas salvaje` en el
+  RESUMEN): el logout de texto sale 1 de cada 4 y cualquier conclusión sobre
+  peptidopeleas-sale contaminada por un factor 4 fijo.
+- Tipo **crudo** del nodo junto al traducido: `catch` (ofrece pokéball) vs
+  `battle` (no). Antes no se distinguían y era imposible medir H12.
+- `scripts/medir/nivel_gimnasio.py`: nivel del equipo en cada combate de
+  gimnasio, con validación cruzada contra una segunda fuente.
+
+---
+
+# H15 · EN MARCHA: captura permisiva (300 runs, `hash=89aee993`)
+
+Bitácora completa en `juegos/pokelike/log/captura/PROGRESO_H15.md` (ese
+directorio está en `.gitignore`, así que el estado que importa se apunta aquí).
+
+**Relanzado el 05-10 a las 20:57** con `scripts/exp_captura.sh 300 Kanto
+1500`, pid 11776. A = `PKL_CAPTURA_PERMISIVA=1`, B = `=0` (control),
+**150 por brazo, 2 en paralelo**, timeout 1500 s, brazos intercalados dentro
+del mismo bloque de tiempo.
+
+## Por qué esta y no seguir con la escalera
+
+La escalera quedó **neutra o negativa** (56 vs 55, insignias 1,02 vs 1,18,
+p=0,438; ent/run p=0,087) y era fontanería. **Misty es el muro real**: mata el
+34% de las runs limpias y es un muro de **nivel** (se gana a 20,2 y se pierde
+a 17,7, y el tramo da 4,0 de los 9,6 que pide). Y el filtro de captura es el
+bucle que se lo impide cerrar: rechaza el 98% por «nada útil», el equipo se
+queda sin variedad y vuelve a rechazar — y **rechazar cuesta la pelea**, porque
+`catch-screen` tiene «Skip (flee)» y huir es no pelear (1,88 nodos de pelea
+por run sin combate, 18%).
+
+## Comprobado antes de lanzar (para que no sea otro no-op)
+
+1. El flag **está cableado**: `politica.py:146` lo lee, `:682` relaja el filtro
+   de nivel del salvaje y `:824` añade el fallback permisivo.
+2. `test_integridad.py` → **319 correctas, 0 fallos**.
+3. Hash de hoy `89aee993` = el del intento abortado: `scripts/` intacto.
+4. **No había ninguna run corriendo**: dos batches solapados rompen la paridad.
+5. Sanity de arranque, con n=2 (no dice nada de insignias, pero sí lo que tenía
+   que decir): **capturas/run A 2,50 vs B 0,50**. El flag llega.
+
+## El intento de las 19:19-19:59 queda fuera
+
+Murió con `no se pudo volcar el atasco: [Errno 122] Disk quota exceeded`,
+atascado en `title-screen`. Sus 6 logs (3 con `RESUMEN`) están en
+`log/captura_ABORTADO_1958/` y **no se mezclan**: aunque son del mismo hash,
+metidos en este lote descuadrarían los brazos (A=2, B=1).
+
+## Trampa foreseeable: el flag no sale en la cabecera del log
+
+La cabecera solo lleva `brazo=A|B`, no `PKL_CAPTURA_PERMISIVA=…`. La llegada
+del flag hay que comprobarla **por conducta** (capturas/run), no por etiqueta.
+Si A y B acaban con las mismas capturas/run, el lote no mide nada y hay que
+pararlo, como se paró H11 a las 24 runs.
+
+## Ritmo
+
+Pares de 6 min y 3,5 min al arrancar → **~11 h** para las 300 (ETA ~mañana
+08:00). Se recalcula con cada parcial; el ritmo sube conforme avanza la tanda
+porque las runs largas se las come el timeout de 25 min. El lote se puede leer
+a cualquier n sin esperar al final, porque cada run deja su log entero en
+cuanto acaba.
