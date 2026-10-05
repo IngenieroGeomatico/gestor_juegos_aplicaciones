@@ -793,6 +793,19 @@ por run sin combate, 18%).
 5. Sanity de arranque, con n=2 (no dice nada de insignias, pero sí lo que tenía
    que decir): **capturas/run A 2,50 vs B 0,50**. El flag llega.
 
+## Parcial de las 21:26 (10/300 entregadas, 5 completas por brazo)
+
+| | A (permisivo) | B (control) |
+|---|---|---|
+| insignias/run | 1,40 | 0,40 |
+| pasos/run | 57,0 | 33,4 |
+| capturas/run | **3,20** | **1,20** |
+
+**n=5 no concluye nada** y la varianza entre lotes (~0,3 insignias) es mayor que
+cualquier efecto medido hasta ahora. Lo único ya afirmable es el sanity: el
+flag llega y multiplica las capturas, así que **H15 no es otro no-op como H10 y
+H11**. `pasos` también se mueve, que era la secundaria de mayor potencia.
+
 ## El intento de las 19:19-19:59 queda fuera
 
 Murió con `no se pudo volcar el atasco: [Errno 122] Disk quota exceeded`,
