@@ -793,18 +793,66 @@ por run sin combate, 18%).
 5. Sanity de arranque, con n=2 (no dice nada de insignias, pero sí lo que tenía
    que decir): **capturas/run A 2,50 vs B 0,50**. El flag llega.
 
-## Parcial de las 21:26 (10/300 entregadas, 5 completas por brazo)
+## Parcial de las 23:03 (34/300 entregadas, 16-17 completas por brazo)
 
-| | A (permisivo) | B (control) |
+**El mecanismo está confirmado y es grande. La primaria no se mueve.**
+
+| | A (permisivo) | B (control) | dif | p (MW) | d |
+|---|---|---|---|---|---|
+| **insignias/run** | 1,38 ± 0,96 | 1,18 ± 1,29 | **+0,20** | 0,234 | +0,17 |
+| pasos/run | 58,9 | 52,4 | +6,6 | 0,272 | +0,22 |
+| capturas/run | 3,00 | 2,41 | +0,59 | 0,311 | +0,40 |
+
+### El mecanismo: esto NO es un no-op
+
+| | A | B |
 |---|---|---|
-| insignias/run | 1,40 | 0,40 |
-| pasos/run | 57,0 | 33,4 |
-| capturas/run | **3,20** | **1,20** |
+| `captura_rechazada` (pantallas huyendo) | **1** | **25** |
+| peleas totales/run | **10,06** | 7,82 |
+| móns en el equipo al final | **4,00** | 3,41 |
 
-**n=5 no concluye nada** y la varianza entre lotes (~0,3 insignias) es mayor que
-cualquier efecto medido hasta ahora. Lo único ya afirmable es el sanity: el
-flag llega y multiplica las capturas, así que **H15 no es otro no-op como H10 y
-H11**. `pasos` también se mueve, que era la secundaria de mayor potencia.
+El flag hace lo que se le pidió: **convierte 24 «huir» en pelear**. Es la
+primera hipótesis de este fichero que mueve un mecanismo de esa forma (H10 y
+H11 fueron no-ops, y se pararon a las 24 runs).
+
+### Las insignias no se mueven, y se sabe por qué
+
+**Lo que A captura son cuerpos, no nivel.** El nivel capturado es casi idéntico
+en los dos brazos y bajo: mediana **4** en ambos, media 6,4 (A) frente a 8,1
+(B), y el 96% de las capturas cae en el primer tercio de la run. Los dos brazos
+viven de móns **nivel 4 de la Route 1** (30 de 47 en A, 23 de 41 en B).
+
+Y el cuello es un cuello de **nivel**, no de composición: Misty se gana llegando
+a 20,2 y se pierde a 17,7. **2,5 niveles separan ganar de perder, y capturar
+Route 1 da cuerpos sin mover el nivel del equipo a la altura de Misty.** Por eso
++2,2 peleas/run no se convierten en insignias. Es la predicción del mecanismo,
+no un fallo del flag.
+
+### Dónde muere
+
+| | A | B |
+|---|---|---|
+| Misty | 10 | 6 |
+| Brock | 3 | 4 |
+| **(sin llegar a gimnasio)** | **1** | **4** |
+
+A sí quita muertes de apertura (1 frente a 4), que es real. Pero de las runs que
+**llegan** a Misty mueren 10/15 en A y 6/13 en B. Con n=15 y n=13 eso es **ruido
+puro**: queda anotado para vigilarlo, no como resultado.
+
+### Estado de la decisión
+
+| | |
+|---|---|
+| Mecanismo | **CONFIRMADO**, grande |
+| Primaria | +0,20, p=0,234: indistinguible de cero a este n |
+| CI 95% del efecto | ~[-0,65, +1,05] |
+| Detecta 0,3 insignias | n≈150/brazo |
+
+**No se para el lote**: con n=16 no se decide nada y el mecanismo está
+confirmado. La pregunta que queda es si **cuerpos se convierten en insignias**,
+y la respuesta provisional es que no, porque el cuello es nivel y lo que se
+captura son cuerpos de nivel 4.
 
 ## El intento de las 19:19-19:59 queda fuera
 
@@ -822,8 +870,8 @@ pararlo, como se paró H11 a las 24 runs.
 
 ## Ritmo
 
-Pares de 6 min y 3,5 min al arrancar → **~11 h** para las 300 (ETA ~mañana
-08:00). Se recalcula con cada parcial; el ritmo sube conforme avanza la tanda
-porque las runs largas se las come el timeout de 25 min. El lote se puede leer
-a cualquier n sin esperar al final, porque cada run deja su log entero en
-cuanto acaba.
+**34 runs en 126 min = 3,7 min/run** → 300 runs ≈ **18,5 h**, ETA sobre las
+**15:30 de mañana**. La cifra de las 21:37 (13:30-14:30) era optimista: los
+pares averaged 7,4 min, no 5, porque las runs largas se las come el timeout de
+25 min. El lote se puede leer a cualquier n sin esperar al final, porque cada
+run deja su log entero en cuanto acaba.
