@@ -834,7 +834,66 @@ Alto Mando.
 `móns al entrar en Misty ≥5`**, que es la que tiene el efecto medido (p=0,006)
 y por tanto la que hay que mirar aunque insignias no se muevan.
 
+### El techo de 60 min también muerde, y hay que fijar la regla ANTES de que crezca n
+
+En v2 (26 runs) **un** run ha tocado el techo: brazo A, **60,0 min, 49 nodos,
+5 insignias**, muriendo con el equipo por nivel 49 después de pasar Brock, Misty,
+Surge, Erika y Koga. Sin `RESUMEN`.
+
+El patrón de duraciones es el mismo de v1, solo que más tarde:
+
+| | A | B |
+|---|---|---|
+| duración mediana | 5,0 min | 3,0 min |
+| duración máxima | **60,0 min** | 6,7 min |
+| MW | p=0,20 (v1: p=0,027) | |
+
+A sigue corriendo más que B. Con n=13 no tiene potencia para verlo, pero el
+signo es el mismo y **la asimetria estructural no ha cambiado**: el flag alarga
+las runs y el timeout se las come.
+
+**Y 60 min no es suficiente para el Elite Four.** La escalera de duración:
+
+| Insignias | duración mediana |
+|---|---|
+| 0 | 2,3 min |
+| 1 | 3,8 min |
+| 2-3 | 6,6 min |
+| **5 (la censurada)** | **>60 min** |
+
+Las dos runs del Elite Four de v1 gastaron **198 y 384 pasos**, y el ritmo
+medido aquí es 0,285 min/nodo: eso son **~56 y ~110 min**. O sea que **el Elite
+Four es estructuralmente inalcanzable con cualquier timeout que un lote de 300
+pueda pagar**, porque `wait` serializa el par y una run de 2 h bloquea el lote
+2 h.
+
+#### La regla que hay que fijar AHORA, con n=26
+
+En v1 el problema fue que la lectura cambió **después** de ver que el efecto
+estaba en A. Aquí se puede evitar: **n=26 todavía es barato**.
+
+**Regla que se pre-registra para el resto de v2:**
+
+> Un run cortado por timeout **se puntúa con las insignias que alcanzó**, que
+> están escritas en su log (`insignias=N` en la última línea `DEC nodo`). No se
+> puntúa 0, porque truncar hacia cero y truncar hacia el final son la misma
+> distorsión en direcciones opuestas, y aquí el sesgo va **contra el brazo
+> tratado**.
+>
+> Un timeout sigue siendo un fracaso: la run no ganó. Lo que cambia es la
+> puntuación, no el veredicto de «ha llegado al Champion».
+
+Esto **no** es cambiar la regla a posteriori, que es lo que hizo en v1: es
+fijarla antes de que haya n. A partir de este momento la lectura es la misma
+para todos los runs que queden, se lean cuando se lean.
+
+Con 1 run censurado de 13 en A, puntuarlo 0 baja la media de A en
+**5/13 = 0,38 insignias**, que a este n es más que toda la diferencia entre
+brazos. Por eso no se puede dejar la decisión para el final.
+
 ### H16 NO se lanza hasta que v2 reporte
+
+
 
 El lote v2 (timeout 3600) decide si H15 era un no-op o no, y su resultado
 llega antes que cualquier idea nueva que se quiera probar. Hasta entonces:
