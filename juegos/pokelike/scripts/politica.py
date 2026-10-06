@@ -28,6 +28,7 @@ Lo que hay que tener en la cabeza, todo medido contra el juego:
 from __future__ import annotations
 
 import json
+import os
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -129,6 +130,21 @@ MIN_NUCLEO = 2
 NIVEL_ROTACION_MAX = 2
 # Stat mínimo de un candidato para entrar en el equipo.
 MIN_STATS_CAPTURA = 220
+
+# H15 · Capturar es mas barato que rechazar. Regla del usuario: "es mejor
+# capturar que rechazar"; si hay un tipo duplicado, el nodo de cambio lo saca
+# fuera. La medicion que lo motivates:
+#   - el mapa ofrece **5,8 nodos `catch` por run** y el bot confirma **2,07**
+#     (y rechaza 1,08). Se pierde el 65% de la oportunidad.
+#   - el **98% de los rechazos** son `nada util contra X`: el filtro exige
+#     cobertura y el equipo no la tiene, asi que se cierra en bucle.
+#   - ademas el rechazo **cuesta la pelea**: `catch-screen` tiene "Skip (flee)",
+#     y huirse es no pelear, o sea perder el nivel del combate. Medido: 1,88
+#     nodos de pelea por run sin combate (18%).
+# El filtro de tipo se conserva como PREFERENCIA (ordena a los candidatos), no
+# como rechazo: con este flag, un 0.5x entra igualmente.
+CAPTURA_PERMISIVA = os.environ.get("PKL_CAPTURA_PERMISIVA", "0").strip().lower() in (
+    "1", "true", "si", "yes")
 # Listones antiguos, solo como respaldo si faltaran los datos reales.
 NIVEL_OBJETIVO_BASE = 9
 NIVEL_POR_INSIGNIA = 5
@@ -663,7 +679,7 @@ def elegir_captura(equipo: list[dict], candidatos: list[dict],
         # llegaba al primer gimnasio con un solo món. Medido: GAME_OVER con
         # equipo de 2.
         if (len(vivos) >= 3 and (c.get("nivel") or 0) < mejor_nivel
-                and not nuevos):
+                and not nuevos and not CAPTURA_PERMISIVA):
             continue
         if objetivo:
             # Contra el gimnasio que toca: no puede ser 0.5x contra **todo** su
@@ -805,6 +821,45 @@ def elegir_captura(equipo: list[dict], candidatos: list[dict],
                        f"nuevos={sorted(nuevos) or '-'} stats={stats} "
                        f"nivel={nivel_cand}")
 
+    if mejor is None and CAPTURA_PERMISIVA:
+        # **Regla del usuario: "es mejor capturar que rechazar".**
+        #
+        # Si el filtro estricto deja a todos los candidatos fuera, aqui se
+        # entra igualmente con el que mejor puntue entre los que solo
+        # incumplen los filtros **blandos** (tipo duplicado, sin 2x claro,
+        # nivel por debajo). Se mantienen los duros: que no sea 0.5x contra
+        # todo el rival, que tenga stats y que no se haya capturado ya.
+        #
+        # Por que el rechazo es caro y no gratis:
+        #   - `catch-screen` tiene "Skip (flee)": huir es NO pelear, o sea
+        #     perder el nivel del combate. Medido: 1,88 nodos de pelea por run
+        #     se quedan sin combate (18% de los nodos de pelea).
+        #   - el nodo de cambio ya sabe sacar al tipo repetido
+        #     (`_peor_para_sustituir`, regla 9), o sea que capturar un
+        #     duplicado no ocupa plaza: la libera.
+        #   - el 98% de los rechazos eran "nada util", o sea el filtro
+        #     esperando cobertura que el propio filtro impide conseguir.
+        for c in candidatos:
+            tipos = [T.normalizar(x) for x in (c.get("tipos") or []) if x]
+            if not tipos:
+                continue
+            st = sum((c.get("baseStats") or {}).values()) or 0
+            if st < MIN_STATS_CAPTURA:
+                continue
+            if (c.get("nombre") or "").strip().lower() in ya_capturados:
+                continue
+            # Duro: que no pierda por 0.5x contra **todo** el rival de ahora.
+            if objetivo and min((utilidad_contra(tipos, r)[0]
+                                 for r in objetivo), default=1.0) < 0.5:
+                continue
+            ref_t = {T.normalizar(t) for t in ref if t}
+            if ref_t and all(utilidad_contra(tipos, r)[1] < 0.5 for r in ref_t):
+                continue
+            return Decision(
+                "capturar", c.get("atajo"),
+                f"permisiva: {c['nombre']} {tipos} aunque noMejore "
+                f"(nivel={c.get('nivel')}, stats={st}); si el tipo esta "
+                f"repetido, el nodo de cambio saca al anterior")
     if mejor is None:
         return Decision("capturar", None,
                         f"nada útil contra {'/'.join(ref) or '?'} "

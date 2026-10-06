@@ -115,7 +115,8 @@ MARGEN_BASE = 0
 # era fragil (un nombre mal escrito creaba un atributo fantasma en vez de
 # fallar). Ver `experimento.py`.
 def _flags_entorno() -> dict:
-    out = {"veto_tipo": False, "cobertura": False, "escalera_riesgo": True}
+    out = {"veto_tipo": False, "cobertura": False, "escalera_riesgo": True,
+           "veto_nivel": True, "item_huecos": False}
     for k in out:
         v = os.environ.get(f"PKL_{k.upper()}")
         if v is None:
@@ -257,6 +258,15 @@ ESCALERA_RIESGO_EQUIPO = (
     (UMBRAL_RIESGO_ALTO, 3.0, -300.0),
     (UMBRAL_RIESGO_MEDIO, 6.0, -110.0),
 )
+# Veto por nivel (H11): si el rival supera a la media del equipo + 1, no es
+# exp, es riesgo. La guía lo pide literal ("1+ niveles por encima del rival"):
+# https://pokelike-guide.fr/en/normal/improving-your-team/ — level lead.
+# Era un no-op medido: devolvía -4.0 en `puntuar()` y el bono de ruta (60-300)
+# lo tapaba siempre (8/8 veces en 24 runs). Mismo arreglo que la escalera:
+# peso bajo en `puntuar()` + penalización final en `elegir()` que sí gana al
+# bono. Nunca es veto duro: si el entrenador es el único nodo se pelea igual.
+PENALIZACION_VETO_NIVEL = -400.0
+PESO_VETO_NIVEL = -4.0
 # El nodo `?` es aleatorio y trae shiny, pasivo o **trade**. El trade es la
 # mecanica mas fuerte del juego segun la guia: cambias tu peor món por uno
 # aleatorio **con +3 niveles y PS completo**, y las mejoras del Move Tutor se
@@ -377,6 +387,31 @@ def riesgo_entrenador(ctx: Contexto) -> tuple[float | None, float, str]:
             return (peso, pen,
                     f"entrenador {etiqueta}: equipo al {ratio*100:.0f}% "
                     f"y sin cura delante")
+    return None, 0.0, ""
+
+
+def veto_nivel_entrenador(ctx: Contexto) -> tuple[float | None, float, str]:
+    """Veto por nivel en dos tiempos (H11): peso + penalización final.
+
+    Devuelve `(peso_del_nodo, penalización, motivo)`. La referencia es la
+    **media del equipo + 1**, misma que `puntuar()` usaba antes: no se cambia
+    el umbral en este cambio, solo el sitio donde se aplica, para medir una
+    sola variable (ver HIPOTESIS.md H11).
+
+    Guía: "aim to keep your Pokémon one or more levels ABOVE the opponent"
+    (https://pokelike-guide.fr/en/normal/improving-your-team/). Un rival por
+    encima de media+1 no es exp, es el Ace Trainer Nv15 que mata runs en Nv11.
+
+    No es veto duro: si el entrenador es el único nodo se pelea igual, igual
+    que la escalera de riesgo.
+    """
+    niveles = _niveles(ctx.equipo)
+    tope_equipo = (sum(niveles) / len(niveles)) if niveles else 0
+    if ctx.nivel_rival > 0 and tope_equipo and ctx.nivel_rival > tope_equipo + 1:
+        return (PESO_VETO_NIVEL, PENALIZACION_VETO_NIVEL,
+                f"entrenador vetado: rival Nv{ctx.nivel_rival} supera al "
+                f"el nivel del equipo (Nv{tope_equipo:.0f}+1) — no es exp, "
+                f"es riesgo")
     return None, 0.0, ""
 
 
@@ -690,12 +725,12 @@ def puntuar(tipo: str, ctx: Contexto) -> tuple[float, str]:
         # bloqueaba toda la exp; con el máximo un món alto tapaba al que abre.
         # La media es el nivel con el que pelea el equipo de verdad, y deja
         # pasar a un rival del mismo nivel: media de [9,7] es 8, y 9>8+1 falso.
-        tope_equipo = (sum(niveles) / len(niveles)) if niveles else 0
-        if ctx.nivel_rival > 0 and tope_equipo and ctx.nivel_rival > tope_equipo + 1:
-            return (-4.0,
-                    f"entrenador vetado: rival Nv{ctx.nivel_rival} supera al "
-                    f"el nivel del equipo (Nv{tope_equipo:.0f}+1) — no es exp, "
-                    f"es riesgo")
+        # H11: el peso solo es el suelo; la parte que decide va en `elegir()`
+        # con `veto_nivel_entrenador(ctx)[1]`, igual que la escalera. Sin eso
+        # el -4.0 lo tapaba el bono de ruta (60-300) 8/8 veces.
+        vn_peso, _, vn_motivo = veto_nivel_entrenador(ctx)
+        if vn_peso is not None:
+            return (vn_peso, vn_motivo)
         # ---- Riesgo: como llega el equipo a esta pelea -------------
         # Medido en 100 runs: de 54 muertes de entrenador, **33 eligieron el
         # nodo con 2 o menos móns en pie y 15 con uno solo**, y 21 se
@@ -768,9 +803,25 @@ def puntuar(tipo: str, ctx: Contexto) -> tuple[float, str]:
         # (niveles, MT al principal, objetos), asi que no puede acercarse ni a
         # un nivel ni a una MT: si no, el bot gastaba pasos en la bolsa con el
         # equipo por debajo del liston.
+        #
+        # H13: la condición estaba **invertida**. `tiene_bolsa` quiere decir
+        # "quedan huecos" (`not items_tomados >= MAX_ITEMS`), así que el código
+        # puntúa el nodo con 12.0 cuando la bolsa está **llena** y con **2.0**
+        # cuando hay sitio: exactamente al revés. Medido en 924 pantallas de
+        # mapa (56 runs): el nodo `item` se ofreció 144 veces (16%) y el bot
+        # lo cogió **4** (3%); 26 de 54 runs terminaron con 0 objetos y la
+        # media fue 0,89. La guia dice lo contrario dos veces ("item nodes beat
+        # fight nodes early" y el Lucky Egg "outscales the route").
+        # El mensaje también mentía: "bolsa vacía" salía en la rama de bolsa
+        # llena.
         if not ctx.tiene_bolsa:
-            return (PESO_OBJETO, "objeto: bolsa vacía (3a prioridad)")
-        return (2.0, "objeto: ya hay objetos, no es prioridad")
+            # Sin huecos: coger el objeto es tirar un nodo, pero no hace daño.
+            return (2.0, "objeto: sin huecos en el equipo, no se coge")
+        if EXP["item_huecos"]:
+            return (PESO_OBJETO,
+                    "objeto: hay hueco y es la 3a prioridad (nivel > MT > "
+                    "objeto)")
+        return (2.0, "objeto: hay hueco pero no es prioridad (flag apagado)")
 
     if tipo == "incognita":
         return (PESO_INCOGNITA, "nodo sin identificar (trade o pasivo)")
@@ -998,6 +1049,17 @@ def elegir(equipo: list[dict], nodos: list[dict], ctx_extra: dict | None = None,
                     # ("... deja 34.0 combate(s) al jefe; entrenador de riesgo:
                     # 2 món(s) en pie -140; entrenador de riesgo: 2 món(s) ...").
                     razon += f"; -{abs(pen_ri):.0f} de penalización por riesgo"
+            # H11: veto por nivel sobre el score final, misma causa que la
+            # escalera. El -4.0 de `puntuar()` no perdía nunca contra el bono
+            # de ruta; el -400 sí. Guía: level lead 1+ por encima
+            # (https://pokelike-guide.fr/en/normal/improving-your-team/).
+            # No es veto duro: si es el único nodo se pelea igual.
+            if EXP.get("veto_nivel", True) and tipo == "entrenador":
+                _vn_peso, pen_nv, _mot_nv = veto_nivel_entrenador(ctx_n)
+                if pen_nv:
+                    s += pen_nv
+                    razon += (f"; -{abs(pen_nv):.0f} de penalización "
+                              f"por veto de nivel")
             punt.append((s, n, razon))
         if punt:
             break

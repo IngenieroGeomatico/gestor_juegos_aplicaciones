@@ -1003,7 +1003,7 @@ id: delEstado ? delEstado.id : null,
             }"""
         )
 
-    def activar_auto_skip(self) -> None:
+    def activar_auto_skip(self) -> str:
         """Enciende el auto-skip de los ajustes del juego.
 
         La guía lo recomienda como primera medida: "enable auto-skip on all
@@ -1014,25 +1014,56 @@ id: delEstado ? delEstado.id : null,
 
         La clave es `poke_settings` en localStorage. Se escribe **fusionando**
         con lo que haya, para no pisar el idioma, el tema ni nada del usuario.
+
+        **Las claves son PLANAS y el nombre exacto importa.** Descifrado el
+        bundle (`js/bundle.cb7dc30ffe.js`), el juego lee:
+
+            const sjS = getSettings();
+            const sju = sjS['autoSkipAllBattles'] || ...;
+            battleSpeedMultiplier = sju ? SKIP_SPEED : 1;   // SKIP_SPEED = 3
+
+        Antes se escribía un objeto anidado (`autoSkip.allFights`,
+        `autoSkip.evolutions`, `autoSkip.regularTrainers`,
+        `autoSkip.skipBossPreview`) que **no coincide con ninguna** de las que el
+        juego lee: `autoSkipAllBattles`, `autoSkipBattles`, `autoSkipEvolve`,
+        `skipBossPreview`. Consecuencia medida: **todas las partidas iban a
+        velocidad 1× en vez de 3×**, y el log decía "auto-skip activado" porque
+        `localStorage.setItem` no lanza excepción: el fallo era invisible.
+
+        Por eso esto **devuelve lo que el juego lee de verdad** en lugar de
+        asumir que la escritura ha funcionado. Es la diferencia entre decir
+        "activado" y poder demostrarlo.
         """
         try:
-            self.page.evaluate(
+            leido = self.page.evaluate(
                 r"""() => {
                     const K = 'poke_settings';
                     let s = {};
                     try { s = JSON.parse(localStorage.getItem(K) || '{}'); }
                     catch (e) { s = {}; }
-                    s.autoSkip = s.autoSkip || {};
-                    s.autoSkip.allFights = true;
-                    s.autoSkip.evolutions = true;
-                    s.autoSkip.regularTrainers = true;
-                    s.autoSkip.skipBossPreview = true;
+                    // PLANAS, y con el nombre que lee el bundle.
+                    s.autoSkipAllBattles = true;
+                    s.autoSkipBattles = true;
+                    s.autoSkipEvolve = true;
+                    s.skipBossPreview = true;
                     localStorage.setItem(K, JSON.stringify(s));
-                    return true;
+                    // Se relee lo guardado y se devuelve: si el juego lo lee con
+                    // otra forma, aquí se ve y no en un log que dice "activado".
+                    const v = JSON.parse(localStorage.getItem(K) || '{}');
+                    return {
+                        autoSkipAllBattles: !!v.autoSkipAllBattles,
+                        autoSkipBattles: !!v.autoSkipBattles,
+                        autoSkipEvolve: !!v.autoSkipEvolve,
+                        skipBossPreview: !!v.skipBossPreview,
+                        anidado_presente: !!(v.autoSkip && typeof v.autoSkip === 'object'),
+                    };
                 }"""
             )
-        except Exception:  # noqa: BLE001
-            pass
+            if isinstance(leido, dict):
+                return ", ".join(f"{k}={v}" for k, v in leido.items())
+            return str(leido)
+        except Exception as exc:  # noqa: BLE001
+            return f"NO SE PUDO ACTIVAR: {exc}"
 
     def equipo(self) -> list[dict]:
         """Equipo desde el HUD: nombre, nivel y porcentaje de PS."""

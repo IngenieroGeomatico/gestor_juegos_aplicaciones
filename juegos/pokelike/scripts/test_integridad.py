@@ -21,6 +21,7 @@ datos reales**, no la intención del código, que es donde se colaban.
 from __future__ import annotations
 
 import ast
+import importlib
 import json
 import os
 import sys
@@ -1201,8 +1202,440 @@ def test_los_niveles_vienen_numericos() -> None:
     # Y el bot solo debe usar sumas y max sobre niveles ya numéricos: si
     # reaparece un `int(...)` sospechoso alrededor de un nivel, salta.
     fuente = (SCRIPTS / "jugar_pokelike.py").read_text(encoding="utf-8")
+    # El nivel enemigo se normaliza con `_niv(e)` y no con `e["nivel"]`: el
+    # nivel puede llegar como texto y `max(int, str)` lanza TypeError. La cadena
+    # literal anterior (`e["nivel"]`) era justo el bug.
     check("el rival se guarda el nivel ya convertido",
-          'max(self.nivel_enemigo_max, e["nivel"])' in fuente)
+          "max(self.nivel_enemigo_max, _niv(e))" in fuente
+          and "int(m.get(\"nivel\")" in fuente,
+          "-> sin normalizar, un nivel de texto rompe la partida")
+
+
+def test_toda_decision_deja_rastro() -> None:
+    """Ninguna decisión se ejecuta sin quedar registrada en `traza`.
+
+    El log de texto dice **qué** se decidió pero no **sobre quién**: qué objeto
+    cogió y a qué món se lo puso, quién recibió la MT, a quién se sacó en el
+    cambio. Con eso no se puede auditar una partida.
+
+    El motivo de que sea un test y no una convención: al añadir la traza
+    aparecieron **dos** `TypeError` en la primera partida (`traza("nodo",
+    tipo=...)` chocaba con el parámetro `tipo`, y `len(pend)`/`len(vivos)` donde
+    la variable ya era un entero). Los dos reventaron en vivo, y solo se ven
+    jugando. Aquí se comprueba que la llamada existe **y que no vuelve a
+    colisionar**, que es el fallo que la skorregido.
+    """
+    txt = (SCRIPTS / "jugar_pokelike.py").read_text(encoding="utf-8")
+
+    # 1) El parámetro se llama `evento`, no `tipo`: casi todos los registros
+    #    llevan un campo `tipo=`, y con un parámetro `tipo` la llamada da
+    #    TypeError en el primer nodo del mapa.
+    check("traza no usa un parametro llamado 'tipo'",
+          "def traza(self, evento: str" in txt,
+          "-> volvería a colisionar con el campo tipo= de los registros")
+
+    # 2) Las tres salidas de `_catch` tienen que registrarse. Antes la
+    #    renuncia por `capturas_pantalla >= 1` salía sin rastro, y en una
+    #    partida de 5 nodos `catch` hubo 2 capturas y 3 rechazos: el cuarto
+    #    nodo no dejó ni una línea, indistinguible de un bug.
+    for salida in ("captura_pedida", "captura_renunciada", "captura_rechazada"):
+        check(f"la salida {salida} queda registrada",
+              f'self.traza("{salida}"' in txt, "-> hay un veto silencioso")
+
+    # 3) Que no haya dos comprobaciones iguales de `capturas_pantalla` en
+    #    `_catch`: la segunda era código muerto (la primera devuelve siempre).
+    cuerpo = txt[txt.index("    def _catch(self)"):]
+    cuerpo = cuerpo[:cuerpo.index("    def _opciones_genericas")]
+    check("_catch no repite la comprobacion de capturas_pantalla",
+          cuerpo.count("self.capturas_pantalla >= 1") == 1,
+          f"-> sale {cuerpo.count('self.capturas_pantalla >= 1')} veces")
+
+    # 4) Las decisiones con objetivo: objeto, cambio, MT, trade. Son las que
+    #    no se podían reconstruir y las que el usuario pidió registrar.
+    import re as _re
+    for evento in ("nodo", "orden", "item_cogido", "objeto_equipado",
+                   "swap", "trade_aceptado", "captura_confirmada"):
+        # La llamada puede partirse en varias líneas (`nodo` tiene 12 campos),
+        # así que se busca con regex y no con una cadena literal.
+        patron = _re.compile(r'self\.traza\(\s*"' + _re.escape(evento) + r'"')
+        check(f"se registra la decisión {evento}",
+              bool(patron.search(txt)), "-> no queda en el log de texto")
+
+    # 5) Y que la traza se vuelque a disco al terminar: en memoria se pierde
+    #    en cuanto el proceso muere.
+    check("la traza se vuelca a json",
+          "def volcar_traza(" in txt and "traza-" in txt,
+          "-> las decisiones no sobreviven a la run")
+    check("el volcado sale en el resumen",
+          "self.volcar_traza()" in txt.split("RESUMEN")[0].rsplit("def ", 1)[-1]
+          or "volcar_traza()" in txt, "-> no se anuncia dónde quedó")
+
+
+def test_el_nodo_de_objeto_ya_no_esta_invertido() -> None:
+    """Con hueco en el equipo, el nodo de objeto tiene que puntuar alto.
+
+    `tiene_bolsa` quiere decir **"quedan huecos"** (`not items_tomados >=
+    MAX_ITEMS`), y la condición estaba al revés: el nodo puntuaba `PESO_OBJETO`
+    cuando la bolsa estaba **llena** y `2.0` cuando había sitio. Medido en 924
+    pantallas de 56 runs: el nodo `item` se ofreció 144 veces y el bot lo cogió
+    **4**; 26 de 54 runs terminaron con cero objetos.
+
+    La guía dice lo contrario dos veces: "item nodes beat fight nodes early" y el
+    Lucky Egg "outscales the route".
+    """
+    plan = PL.plan_para("Kanto", 1)
+    equipo = [{"nombre": "Ivysaur", "tipos": ["Planta", "Veneno"], "nivel": 21,
+               "ps": 40, "ps_max": 40},
+              {"nombre": "Poliwag", "tipos": ["Agua"], "nivel": 20,
+               "ps": 40, "ps_max": 40}]
+    con_hueco = PL.Contexto(equipo=equipo, plan=plan, tiene_bolsa=True)
+    sin_hueco = PL.Contexto(equipo=equipo, plan=plan, tiene_bolsa=False)
+
+    original = PL.EXP["item_huecos"]
+    try:
+        PL.EXP["item_huecos"] = True
+        s_hueco, r_hueco = PL.puntuar("item", con_hueco)
+        PL.EXP["item_huecos"] = False
+        s_viejo, _ = PL.puntuar("item", con_hueco)
+    finally:
+        PL.EXP["item_huecos"] = original
+
+    check("con hueco el objeto vale PESO_OBJETO",
+          s_hueco == PL.PESO_OBJETO, f"-> {s_hueco} (esperado {PL.PESO_OBJETO})")
+    check("el objeto con hueco gana a cazar sin nivel",
+          s_hueco > PL.PESO_BATALLA_A_NIVEL,
+          f"-> objeto {s_hueco} vs batalla a nivel {PL.PESO_BATALLA_A_NIVEL}")
+    check("el objeto con hueco no supera al entrenador",
+          s_hueco < PL.PESO_ENTRENADOR_SANO,
+          f"-> objeto {s_hueco} vs entrenador {PL.PESO_ENTRENADOR_SANO}")
+    check("el control mantiene el 2.0 de siempre",
+          s_viejo < s_hueco, f"-> control {s_viejo} vs A {s_hueco}")
+
+    # Sin huecos no se coge: el nodo está gastado. Y el mensaje ya no puede
+    # decir "bolsa vacía" en esa rama, que era lo que mentía.
+    s_lleno, r_lleno = PL.puntuar("item", sin_hueco)
+    check("sin huecos el objeto no es prioridad", s_lleno < s_hueco,
+          f"-> {s_lleno}")
+    check("el mensaje de bolsa llena es honesto",
+          "bolsa vacía" not in r_lleno, f"-> {r_lleno}")
+
+
+def test_los_atributos_nuevos_nacen_en_init() -> None:
+    """Todo atributo que usa un método tiene que existir en `__init__`.
+
+    Se añadieron dos a `Bot` para la traza de decisiones (`_traza`,
+    `_tutor_visitado`) y se creaban **dentro de la rama que los usa**. Con eso
+    la primera visita a un nodo de tutor moría con `AttributeError: 'Bot'
+    object has no attribute '_tutor_visitado'`, y pasó en 26 de 100 runs del
+    lote de H13: un tercio de la muestra perdida por un atributo.
+
+    El patrón se comprueba sobre el **código**, no ejecutando el juego, porque
+    los 293 tests pasan con el bug puesto: el atributo solo se toca en la rama
+    del tutor, que ningún test alcanza.
+    """
+    import ast as _ast
+    txt = (SCRIPTS / "jugar_pokelike.py").read_text(encoding="utf-8")
+    arbol = _ast.parse(txt)
+    clase = next(n for n in _ast.walk(arbol)
+                 if isinstance(n, _ast.ClassDef) and n.name == "Bot")
+    init = next(n for n in clase.body
+                if isinstance(n, _ast.FunctionDef) and n.name == "__init__")
+    # Atributos que se leen con `self.X` en algún método y que no se asignan en
+    # ningún sitio de la clase.
+    asignados: set[str] = set()
+    for n in _ast.walk(clase):
+        if (isinstance(n, _ast.Assign)):
+            for tgt in n.targets:
+                if (isinstance(tgt, _ast.Attribute)
+                        and isinstance(tgt.value, _ast.Name)
+                        and tgt.value.id == "self"):
+                    asignados.add(tgt.attr)
+        elif isinstance(n, _ast.AugAssign) and isinstance(
+                n.target, _ast.Attribute):
+            if isinstance(n.target.value, _ast.Name) and n.target.value.id == "self":
+                asignados.add(n.target.attr)
+        elif (isinstance(n, _ast.AnnAssign) and isinstance(n.target, _ast.Attribute)
+              and isinstance(n.target.value, _ast.Name)
+              and n.target.value.id == "self"):
+            asignados.add(n.target.attr)
+
+    leidos: set[str] = set()
+    for n in _ast.walk(clase):
+        if (isinstance(n, _ast.Attribute) and isinstance(n.value, _ast.Name)
+                and n.value.id == "self" and isinstance(n.ctx, _ast.Load)):
+            leidos.add(n.attr)
+
+    # Lo que **no** es atributo: métodos de la clase y constantes de cuerpo
+    # (`MAX_ITEMS = 3`, `MANEJADORES = {...}`). `self.MANEJADORES` es una
+    # constante, no un atributo por crear, y `self.paso()` es un método.
+    no_atributos: set[str] = set()
+    for n in clase.body:
+        if isinstance(n, _ast.FunctionDef):
+            no_atributos.add(n.name)
+        elif isinstance(n, _ast.Assign):
+            for tgt in n.targets:
+                if isinstance(tgt, _ast.Name):
+                    no_atributos.add(tgt.id)
+        elif isinstance(n, _ast.AnnAssign) and isinstance(n.target, _ast.Name):
+            no_atributos.add(n.target.id)
+
+    # Los que se leen pero nunca se asignan en la clase. Los que se leen solo
+    # con `getattr(self, ...)` no aparecen aquí, y esos sí son seguros.
+    huerfanos = sorted(a for a in leidos - asignados - no_atributos
+                       if not a.startswith("__"))
+    check("ningun atributo se usa sin crearse en la clase",
+          not huerfanos, f"-> {huerfanos}")
+
+    # Y el caso concreto que rompió, nombrado explícitamente.
+    check("_tutor_visitado nace en __init__",
+          "_tutor_visitado" in asignados,
+          "-> AttributeError en la primera visita al tutor")
+    check("_traza nace en __init__",
+          "_traza" in asignados, "-> la traza no se puede escribir")
+
+
+def test_el_auto_skip_usa_las_claves_que_lee_el_juego() -> None:
+    """Las claves de `poke_settings` tienen que ser **planas** y las del juego.
+
+    Descifrado el bundle (`js/bundle.cb7dc30ffe.js`):
+
+        const SKIP_SPEED = 3;
+        const sju = sjS['autoSkipAllBattles'] || ...;
+        battleSpeedMultiplier = sju ? SKIP_SPEED : 1;
+
+    El bot escribía un objeto **anidado** (`autoSkip.allFights`,
+    `autoSkip.evolutions`, `autoSkip.regularTrainers`, `autoSkip.skipBossPreview`)
+    que no coincide con ninguna clave que el juego lea, así que **todas las
+    partidas iban a 1× en vez de 3×** y el log anunciaba "auto-skip activado".
+
+    No se podía detectar con los tests: el `try/except` que envuelve la
+    escritura nunca falla, porque `localStorage.setItem` no lanza excepción. Es
+    la clase de bug que este fichero documenta siete veces (comparar contra
+    una clave que no existe), pero con otra forma: la clave existe y es
+    distinta.
+
+    Aquí se comprueba contra las claves **reales del bundle**, no contra la
+    intención del código. Si el juego renombra una, este test hay que
+    actualizarlo a mano, que es justo lo que hay que hacer: nadie puede
+    cambiar el juego en silencio sin que se note.
+    """
+    txt = (SCRIPTS / "navegador.py").read_text(encoding="utf-8")
+
+    # Las cuatro claves que lee el juego, sacadas del bundle.
+    claves_juego = ("autoSkipAllBattles", "autoSkipBattles", "autoSkipEvolve",
+                    "skipBossPreview")
+    for clave in claves_juego:
+        check(f"el bot escribe {clave} (plana)", f"s.{clave} = true" in txt,
+              f"-> el juego lee '{clave}' y el bot no la pone")
+
+    # Y la forma anidada, que es la que no vale: si aparece, vuelve el bug.
+    for anidada in ("s.autoSkip.allFights", "s.autoSkip.evolutions",
+                    "s.autoSkip.regularTrainers", "s.autoSkip.skipBossPreview"):
+        check(f"ya no se usa la anidada {anidada}", anidada not in txt,
+              "-> el juego lee claves planas; la anidada no la lee nadie")
+
+    # Que la función **devuelva** lo leído. Sin esto el log vuelve a poder
+    # mentir: que la escritura no lance excepción no prueba que el juego la
+    # entienda.
+    cuerpo = txt[txt.index("def activar_auto_skip"):]
+    cuerpo = cuerpo[:cuerpo.index("def equipo(")]
+    check("activar_auto_skip relee lo guardado", "getItem(K)" in cuerpo
+          and "JSON.parse(localStorage.getItem(K)" in cuerpo,
+          "-> no verifica nada: el log no puede decir la verdad")
+    check("activar_auto_skip devuelve el estado",
+          "return {" in cuerpo and "autoSkipAllBattles: !!" in cuerpo,
+          "-> no devuelve nada, y el log no tiene con qué ser honesto")
+
+    # Y que el bot lo pinte en el log en vez de afirmar que sí.
+    jug = (SCRIPTS / "jugar_pokelike.py").read_text(encoding="utf-8")
+    check("el log dice lo leido, no 'activado' a secas",
+          "f\"  ajustes: {leido}\"" in jug,
+          "-> vuelve a anunciar 'activado' sin comprobarlo")
+    check("ya no se anuncia un 'activado' que nadie verifico",
+          "auto-skip activado (combates y evoluciones)" not in jug,
+          "-> esa frase era falsa: las claves no las leia el juego")
+
+
+def test_las_peleas_se_cuentan_sin_muestreo() -> None:
+    """El recuento de combates no puede pasar por el filtro de 4 en 4.
+
+    El volcado `estado:` / `mios=` sale solo de 4 en 4 pasos de batalla
+    (`_n_batalla % 4 == 0`), así que contar peleas leyendo el log subestima
+    **exactamente 4×**. Con ese error: cualquier conclusión sobre "cuántas peleas de
+    entrenador" quedan contaminadas por un factor fijo y no se pueden comparar
+    ni multiplicar por el +2 de niveles que da el entrenador.
+
+    Aquí se comprueba que el contador existe, se incrementa **fuera** del `if`
+    del muestreo y que sale en el RESUMEN, que es la sección fiable.
+    """
+    txt = (SCRIPTS / "jugar_pokelike.py").read_text(encoding="utf-8")
+
+    check("los contadores de pelea nacen en __init__",
+          all(k in txt for k in ("self.peleas = 0", "self.peleas_entrenador = 0",
+                                 "self.peleas_salvaje = 0")),
+          "-> sin inicializar, AttributeError en la primera batalla")
+
+    # El incremento tiene que estar ANTES del `if ... % 4 == 0` que guarda el
+    # volcado, y tiene que ser **código de verdad**. Un test que busca la cadena
+    # "self.peleas += 1" se deja engañar por un comentario: al comprobar si
+    # mordía, la sustitución `pass  # self.peleas += 1` siguió dando 312/312.
+    # Por eso se mira el AST, donde un comentario no existe.
+    import ast as _ast2
+    arbol = _ast2.parse(txt)
+    nodos_aug = [n for n in _ast2.walk(arbol)
+                 if isinstance(n, _ast2.AugAssign)
+                 and isinstance(n.target, _ast2.Attribute)
+                 and n.target.attr == "peleas"]
+    check("el contador existe como codigo, no en un comentario",
+          len(nodos_aug) == 1,
+          f"-> {len(nodos_aug)} incrementos reales de self.peleas")
+
+    if not nodos_aug:
+        return
+    linea_inc = nodos_aug[0].lineno
+    linea_muestreo = next(
+        (n.lineno for n in _ast2.walk(arbol)
+         if isinstance(n, _ast2.If)), None)
+    # El `if` del muestreo: el primero cuyo test menciona _n_batalla.
+    linea_muestreo = next(
+        (n.lineno for n in _ast2.walk(arbol)
+         if isinstance(n, _ast2.If) and "_n_batalla" in _ast2.dump(n.test)),
+        None)
+    check("el contador esta FUERA del muestreo de 4 en 4",
+          linea_muestreo is not None and linea_inc < linea_muestreo,
+          f"-> incremento en linea {linea_inc}, muestreo en "
+          f"{linea_muestreo}: si esta dentro, cuenta 1 de cada 4")
+
+    # Y la clasificacion: entrenador vsavage, por el titulo.
+    check("se distingue entrenador de salvaje",
+          '"wants to battle" in titulo' in txt
+          and "self.peleas_entrenador += 1" in txt
+          and "self.peleas_salvaje += 1" in txt,
+          "-> no se puede separar +2 niveles de +1")
+
+    # Y que salga en el RESUMEN, que es de donde se lee sin ambiguedad.
+    check("el desglose sale en el RESUMEN",
+          '"peleas entrain."' in txt and '"peleas salvaje"' in txt,
+          "-> el dato existe pero no es legible en ninguna parte")
+
+
+def test_el_volcado_de_combate_normaliza_el_nivel() -> None:
+    """El nivel puede venir como texto y `max()` revienta al mezclarlo.
+
+    Al contar **todas** las peleas (antes solo 1 de cada 4) apareció un
+    `TypeError: '>' not supported between instances of 'str' and 'int'` en el
+    primer combate: `"15"` y `15` en la misma lista. El código antiguo sufre el
+    mismo bug, pero el muestreo lo escondía.
+
+    Aquí se comprueba que el volcado normaliza con `int()` en vez de confiar en
+    que el nivel llega numérico, que es la razón de fondo.
+    """
+    txt = (SCRIPTS / "jugar_pokelike.py").read_text(encoding="utf-8")
+    cuerpo = txt[txt.index('self.traza("combate"'):]
+    cuerpo = cuerpo[:cuerpo.index("self._n_batalla")]
+    txt2 = (SCRIPTS / "jugar_pokelike.py").read_text(encoding="utf-8")
+    aux = txt2[txt2.index("def _niv(m: dict) -> int:"):]
+    aux = aux[:aux.index("self.traza(\"combate\"")]
+    check("el volcado de combate normaliza el nivel con int()",
+          "int(m.get(\"nivel\")" in aux and "except (TypeError, ValueError)" in aux,
+          "-> si el nivel llega como texto, max() lanza TypeError")
+    check("el volcado de combate usa default=0 en vez de comparar vacios",
+          "default=0" in cuerpo,
+          "-> sin default, una lista vacia lanza ValueError")
+
+
+
+_STD = {"hp": 60, "atk": 60, "def": 60, "spa": 60, "spd": 60, "spe": 60}
+PROX = ["Water", "Electric", "Grass"]
+
+
+def _mon(n, tp, nv):
+    return {"nombre": n, "tipos": tp, "nivel": nv, "ps": 100, "ps_max": 100,
+            "baseStats": _STD}
+
+
+def _cand(n, tp, nv, i):
+    return {"nombre": n, "tipos": tp, "nivel": nv, "atajo": i,
+            "baseStats": _STD}
+
+
+# Los tres que hoy salen "nada útil ... huyo" y con el flag entran.
+CASOS_CAPTURA = [
+    ("3 mons duplicados",
+     [_mon("Bulbasaur", ["Grass", "Poison"], 20),
+      _mon("Ivysaur", ["Grass", "Poison"], 20),
+      _mon("Poliwag", ["Water"], 20)],
+     [_cand("Oddish", ["Grass", "Poison"], 20, 1),
+      _cand("Rattata", ["Normal"], 20, 2),
+      _cand("Spearow", ["Normal", "Flying"], 20, 3)], "Water", "Electric"),
+    ("2 mons contra Agua",
+     [_mon("Bulbasaur", ["Grass", "Poison"], 18),
+      _mon("Pidgey", ["Normal", "Flying"], 18)],
+     [_cand("Staryu", ["Water"], 18, 1),
+      _cand("Psyduck", ["Water"], 18, 2),
+      _cand("Poliwag", ["Water"], 18, 3)], "Water", "Electric"),
+    ("equipo lleno de 6",
+     [_mon("M%d" % i, ["Grass", "Poison"] if i < 3 else ["Water"], 20)
+      for i in range(6)],
+     [_cand("Oddish", ["Grass", "Poison"], 20, 1),
+      _cand("Rattata", ["Normal"], 20, 2),
+      _cand("Spearow", ["Normal", "Flying"], 20, 3)], "Water", "Electric"),
+]
+
+
+def test_capturar_es_mas_barato_que_rechazar() -> None:
+    """H15 · Con el flag, un rechazo por falta de cobertura se convierte en captura.
+
+    Regla del usuario: "es mejor capturar que rechazar; si tenemos un pokemon
+    duplicado en tipo, podemos cambiarlo en el nodo de cambiar".
+
+    Los tres casos de abajo **hoy salen todos con "huyo"** y con el flag entran.
+    Son los que miden el bucle: el filtro rechaza por falta de cobertura, el
+    equipo se queda sin variedad y el filtro vuelve a rechazar.
+
+    Además, el rechazo no sale gratis: `catch-screen` tiene "Skip (flee)" y
+    huir es **no pelear**, o sea perder el nivel del combate.
+    """
+    import politica as PP
+    importlib.reload(PP)
+    # `getattr` y no acceso directo: si el flag no existe todavia, el test
+    # tiene que FALLAR limpio, no reventar el suite entero y perder el
+    # resultado de los 300 checks que vienen despues.
+    original = getattr(PP, "CAPTURA_PERMISIVA", False)
+    check("politica define CAPTURA_PERMISIVA",
+          hasattr(PP, "CAPTURA_PERMISIVA"),
+          "-> el flag no existe: el filtro sigue rechazando por cobertura")
+    try:
+        PP.CAPTURA_PERMISIVA = False
+        antes = [PP.elegir_captura(eq, cands, act, fut, 6, PROX, "Kanto").valor
+                 for nombre, eq, cands, act, fut in CASOS_CAPTURA]
+        PP.CAPTURA_PERMISIVA = True
+        despues = [PP.elegir_captura(eq, cands, act, fut, 6, PROX, "Kanto").valor
+                   for nombre, eq, cands, act, fut in CASOS_CAPTURA]
+    finally:
+        PP.CAPTURA_PERMISIVA = original
+
+    nuevos = sum(1 for a, d in zip(antes, despues) if a is None and d is not None)
+    check("el flag convierte rechazos en capturas", nuevos >= 2,
+          f"-> solo {nuevos} de {len(CASOS_CAPTURA)} cambiaron")
+    check("sin el flag los casos de cobertura siguen huyendo",
+          sum(1 for a in antes if a is None) >= 2,
+          f"-> {antes}: el control ya no huye y no se puede comparar")
+
+    # Y que el fallback respete los filtros DUROS: no entra un 0.5x contra
+    # todo el rival ni uno con stats de Worked.
+    import politica as P2
+    P2.CAPTURA_PERMISIVA = True
+    flojo = [{"nombre": "Caterpie", "tipos": ["Bug"], "nivel": 20, "atajo": 1,
+              "baseStats": {"hp": 5, "atk": 5, "def": 5}}]
+    d_flojo = P2.elegir_captura(
+        [{"nombre": "Bulbasaur", "tipos": ["Grass", "Poison"], "nivel": 20,
+          "ps": 100, "ps_max": 100, "baseStats": {"x": 300}}],
+        flojo, "Water", "Electric", 6, PROX, "Kanto")
+    check("el fallback no entra con stats de Worked", d_flojo.valor is None,
+          f"-> {d_flojo.valor}: el filtro duro de stats se perdio")
+    P2.CAPTURA_PERMISIVA = original
+
 
 
 def test_no_hay_codigo_muerto() -> None:
@@ -1804,7 +2237,12 @@ def test_la_escalera_gana_al_bono_de_ruta() -> None:
 
     nodos, edges = _pantalla()
     original = PL.EXP["escalera_riesgo"]
+    original_nivel = PL.EXP.get("veto_nivel", True)
     try:
+        # H11 aísla una sola variable: aquí se mide la escalera, así que el
+        # veto de nivel se apaga (si no, el control también evitaría al
+        # entrenador Nv12 con media 5 y los dos brazos medirían lo mismo).
+        PL.EXP["veto_nivel"] = False
         PL.EXP["escalera_riesgo"] = False
         d_b = PL.elegir(_roto(), nodos, {"hay_cura": False}, region="Kanto",
                         insignias=0, edges=edges)
@@ -1813,6 +2251,7 @@ def test_la_escalera_gana_al_bono_de_ruta() -> None:
                         insignias=0, edges=edges)
     finally:
         PL.EXP["escalera_riesgo"] = original
+        PL.EXP["veto_nivel"] = original_nivel
 
     check("sin escalera el bot elige al entrenador por el bono de ruta",
           d_b.tipo == "entrenador",
@@ -1877,6 +2316,89 @@ def test_el_brazo_de_control_no_hereda_la_escalera() -> None:
     check("sin el flag el trainer se juega igual por ser la unica exp",
           sin_flag > con_flag,
           f"-> control {sin_flag} vs escalera {con_flag}")
+
+
+def test_el_veto_de_nivel_gana_al_bono_de_ruta() -> None:
+    """H11: el veto por nivel tiene que poder perder contra el bono de ruta.
+
+    Mismo fallo que la escalera: devolvía -4.0 en `puntuar()` y el bono
+    (60-300) lo tapaba 8/8 veces. Aquí se monta la pantalla exacta: entrenador
+    Nv15 con 10 entrenadores y 20 combates por delante (+210) contra una
+    batalla sana. Equipo sano para aislar el veto de la escalera (sin caídos
+    y al 100%: `riesgo_entrenador` no dispara).
+    Guía: level lead 1+ por encima
+    (https://pokelike-guide.fr/en/normal/improving-your-team/).
+    """
+    def _pantalla() -> tuple[list[dict], list]:
+        nodos = [{"id": "t", "tipo": "trainer", "clickable": True,
+                   "sprite": "ace-trainer", "nivel": 15},
+                  {"id": "b", "tipo": "battle", "clickable": True, "nivel": 8}]
+        for i in range(10):
+            nodos.append({"id": f"et{i}", "tipo": "trainer"})
+        for i in range(20):
+            nodos.append({"id": f"co{i}", "tipo": "battle"})
+        edges: list = []
+        for i in range(10):
+            edges.append(["t", f"et{i}"])
+            for j in range(20):
+                edges.append([f"et{i}", f"co{j}"])
+        return nodos, edges
+
+    def _sano() -> list[dict]:
+        return [{"nombre": "Bulbasaur", "nivel": 8, "ps": 30, "ps_max": 30,
+                 "tipos": ["Planta", "Veneno"], "baseStats": {"hp": 100}},
+                {"nombre": "Pidgey", "nivel": 8, "ps": 25, "ps_max": 25,
+                 "tipos": ["Normal", "Volador"], "baseStats": {"hp": 100}},
+                {"nombre": "Geodude", "nivel": 8, "ps": 26, "ps_max": 26,
+                 "tipos": ["Roca", "Tierra"], "baseStats": {"hp": 100}}]
+
+    nodos, edges = _pantalla()
+    original = PL.EXP.get("veto_nivel", True)
+    original_esc = PL.EXP["escalera_riesgo"]
+    try:
+        PL.EXP["escalera_riesgo"] = True
+        PL.EXP["veto_nivel"] = False
+        d_b = PL.elegir(_sano(), nodos, {"hay_cura": False}, region="Kanto",
+                        insignias=0, edges=edges)
+        PL.EXP["veto_nivel"] = True
+        d_a = PL.elegir(_sano(), nodos, {"hay_cura": False}, region="Kanto",
+                        insignias=0, edges=edges)
+    finally:
+        PL.EXP["veto_nivel"] = original
+        PL.EXP["escalera_riesgo"] = original_esc
+
+    check("sin veto de nivel el bot entra al entrenador por el bono",
+          d_b.tipo == "entrenador",
+          f"-> el control debería elegir entrenador, eligió {d_b.tipo}")
+    check("con veto de nivel el rival superior pierde el nodo",
+          d_a.tipo != "entrenador",
+          f"-> el bono sigue tapando el veto; eligió {d_a.tipo}")
+    check("el veto de nivel cambia de verdad la decisión",
+          d_b.tipo != d_a.tipo,
+          f"-> los dos brazos acaban igual ({d_b.tipo})")
+
+    # Seguridad: si es lo único, se pelea igual (no es veto duro).
+    try:
+        PL.EXP["veto_nivel"] = True
+        solo = [{"id": "t", "tipo": "trainer", "clickable": True,
+                 "sprite": "ace-trainer", "nivel": 15}]
+        d_solo = PL.elegir(_sano(), solo, {"hay_cura": False}, region="Kanto",
+                           insignias=0, edges=[])
+    finally:
+        PL.EXP["veto_nivel"] = original
+    check("el veto de nivel no ata al bot si es lo único",
+          d_solo.tipo == "entrenador",
+          f"-> eligió {d_solo.tipo}: se quedaría sin nada que pulsar")
+
+    # Y `puntuar()` sigue diciendo "vetado" para el log y los tests viejos.
+    ctx = PL.Contexto(equipo=_sano(), plan=PL.plan_para("Kanto", 0),
+                      nivel_rival=15)
+    _p, motivo = PL.puntuar("entrenador", ctx)
+    check("el veto de nivel dice vetado en puntuar",
+          "vetado" in motivo, f"-> {motivo}")
+    _vp, pen, _m = PL.veto_nivel_entrenador(ctx)
+    check("el veto de nivel trae penalización final",
+          pen == PL.PENALIZACION_VETO_NIVEL, f"-> {pen}")
 
 
 class _PaginaFalsa:
@@ -2191,11 +2713,19 @@ def main() -> int:
     test_la_riesgo_de_exp_con_caidos_ya_no_existe()
     test_la_escalera_gana_al_bono_de_ruta()
     test_el_brazo_de_control_no_hereda_la_escalera()
+    test_el_veto_de_nivel_gana_al_bono_de_ruta()
     test_el_trade_se_cierra_con_el_atajo()
     test_el_trade_elige_el_atajo_por_tipo()
     test_el_brazo_de_control_del_trade_sigue_declinando()
     test_el_trade_no_acepta_a_ciegas()
     test_el_trade_nunca_cambia_al_starter()
+    test_toda_decision_deja_rastro()
+    test_el_nodo_de_objeto_ya_no_esta_invertido()
+    test_los_atributos_nuevos_nacen_en_init()
+    test_el_auto_skip_usa_las_claves_que_lee_el_juego()
+    test_las_peleas_se_cuentan_sin_muestreo()
+    test_capturar_es_mas_barato_que_rechazar()
+    test_el_volcado_de_combate_normaliza_el_nivel()
     test_no_hay_codigo_muerto()
 
     for o in OKS:

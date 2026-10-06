@@ -137,6 +137,11 @@ class Bot:
         self.combates = 0
         self.victorias = 0
         self.derrotas = 0
+        # Contadores de combate **sin muestreo**. El volcado de texto sale
+        # de 4 en 4, así que contar por el log subestima 4x.
+        self.peleas = 0
+        self.peleas_entrenador = 0
+        self.peleas_salvaje = 0
         self.capturas = 0
         # Una captura por pantalla, como pidió el usuario. Cazar para llenar el
         # equipo salía carísimo: cada caza es un nodo de nivel que se gasta en
@@ -168,6 +173,58 @@ class Bot:
         # El arrastre de slots puede fallar si el HUD cambia; se reintenta
         # unas pocas veces y luego se sigue jugando sin reordenar.
         self._reordenes_fallidos = 0
+        # Diario de decisiones. El log de texto dice **qué** se decidió pero no
+        # **sobre quién**: que objeto se cogió y a qué món se equipó, a quién
+        # se le dio la MT, a quién se sacó en el cambio. Sin eso no se puede
+        # auditar una partida ni responder "¿por qué se perdió esto?": se
+        # tomaban las decisiones y había que reconstruir el motivo leyendo el
+        # código. Va como lista de dicts y se vuelca a JSON al final.
+        self._traza: list[dict] = []
+        # Visitas al nodo del tutor, para el resumen. **Inicializado aquí y no
+        # en la rama que lo usa**: se creaba dentro del `elif d.tipo ==
+        # "tutor"` y por eso la PRIMERA visita a un tutor reventaba con
+        # `AttributeError`, matando 26 de 100 runs del lote de H13. Se puede
+        # comprobar con `test_los_atributos_nuevos_nacen_en_init`.
+        self._tutor_visitado: list[dict] = []
+
+    def traza(self, evento: str, **campos: object) -> None:
+        """Registra una decisión con su objetivo y su motivo.
+
+        El nombre (`evento`) es corto y estable para poder grepear, y los
+        campos son clave=valor. Sale en el log con prefijo `DEC` y además se
+        acumula para el volcado JSON, que es lo que permite medir sin releer
+        texto.
+
+        El primer parámetro se llama `evento` y no `tipo` **a propósito**: casi
+        todos los registros llevan un campo `tipo=` (el tipo del nodo), y con
+        un parámetro llamado `tipo` la llamada `traza("nodo", tipo=...)` daba
+        `TypeError: got multiple values for argument 'tipo'` en el primer nodo
+        del mapa. El error lo localizó el corte de `ERROR_DE_CODIGO`.
+        """
+        reg = {"paso": self.pasos, "evento": evento}
+        reg.update(campos)
+        self._traza.append(reg)
+        try:
+            self.log("  DEC " + evento + " " + " ".join(
+                f"{k}={v}" for k, v in campos.items() if v not in (None, "")))
+        except Exception:  # noqa: BLE001, S110
+            # La traza nunca puede tumbar la partida: es diagnóstico, no lógica.
+            pass
+
+    def volcar_traza(self) -> str:
+        """Escribe el diario de decisiones a JSON y devuelve la ruta."""
+        try:
+            destino = DIR_BOT / f"traza-{_MOMENTO}_p{os.getpid()}.json"
+            destino.parent.mkdir(parents=True, exist_ok=True)
+            destino.write_text(json.dumps(
+                {"region": self.region, "pasos": self.pasos,
+                 "insignias": self._insignias_final,
+                 "resultado": self.resultado,
+                 "decisiones": self._traza},
+                ensure_ascii=False, indent=1), encoding="utf-8")
+            return str(destino)
+        except OSError:
+            return ""
 
     def log(self, linea: str) -> None:
         if self.verbose:
@@ -507,6 +564,15 @@ class Bot:
                 self.capturas_pantalla += 1
                 self.log(f"  >>> CAPTURA confirmada "
                          f"(equipo {pend}->{len(equipo)}) | total {self.capturas}")
+                self.traza("captura_confirmada", equipo_antes=pend,
+                           equipo_despues=len(equipo),
+                           nuevos="|".join(
+                               f"{m.get('nombre')}:{m.get('nivel')}"
+                               # `pend` YA es un entero: es el `len()` del
+                               # equipo del momento en que se pidió la captura.
+                               # Con `len(pend)` reventaba en el primer
+                               # `catch` real.
+                               for m in equipo[pend:]) or "?")
             self._catch_pendiente = None
         insignias = self.j.insignias()
         # Reinicio del contador de capturas por pantalla. La clave es el **nodo** en el
@@ -702,6 +768,19 @@ class Bot:
             self._invalidar_ps("pokecenter")
         elif d.tipo == "tutor":
             self.tutores += 1
+            # **El nodo del tutor no tiene pantalla propia en `MANEJADORES`.**
+            # Se visitaba, se contaba como `tutores` y no había forma de saber
+            # **a qué món se le enseñó el disco**, que es la única palanca de
+            # daño real del juego (las batallas son automáticas). Aquí queda la
+            # visita registrada con el `usedTM` de antes y después; si el disco
+            # no se aplica en este nodo, se verá como `usado_antes=usado_despues`
+            # y habrá que buscar dónde se consume.
+            self._tutor_visitado.append({
+                "nodo": m.get("actual"), "equipo": len(equipo),
+                "principales": [m.get("nombre") for m in
+                                (orden or [])[:3]] or
+                               [x.get("nombre") for x in equipo[:3]],
+            })
         # A qué tipo se ordena el equipo. Solo en los combates donde el rival es
         # **conocido**: entrenador (su especialidad) y jefe (su equipo). En las
         # batallas sueltas no se sabe qué sale, y aun así se le pasaba el tipo del
@@ -723,15 +802,48 @@ class Bot:
         clica = [n for n in m["nodos"] if n.get("clickable")]
         tipos_disponibles = [P.tipo_de_estado(n.get("tipo")) if n.get("tipo")
                              else P.tipo_de_nodo(n.get("sprite")) for n in clica]
+        # **El tipo CRUDO al lado del traducido.** Los dos se imprimían igual y
+        # por eso no se podía distinguir un nodo de captura de una pelea normal:
+        # `BATALLA = {"pokeball"}` traduce el sprite de la pokéball a `batalla`,
+        # igual que el tipo `battle` del juego. Medido: un nodo con motivo
+        # `capturar: equipo de 1` terminó en `COMBATE GANADO` sin captura
+        # (falta la pokéball) y dos nodos idénticos sí la ofrecieron. Sin esto
+        # la métrica de capturas no distingue "el filtro la rechazó" de
+        # "el mapa no la ofreció", y por eso la muerte con 1 solo món no se
+        # podía atribuir a la política ni a la lotería del mapa.
+        crudos_disponibles = [str(n.get("tipo") or n.get("type")
+                                  or P.tipo_de_nodo(n.get("sprite")))
+                              for n in clica]
         self.log(f"  · {m.get('info') or 'ruta?'} | equipo {len(equipo)} (vivos {vivos}) "
                  f"niv {min(niv) if niv else 0}-{max(niv) if niv else 0} "
                  f"| lider {self.tipo_lider} | insignias {insignias} "
                  f"| disponibles {tipos_disponibles} "
+                 f"(crudo {crudos_disponibles}) "
                  f"| rivales {[n.get('nivel') for n in clica if n.get('nivel') is not None] or '?'} "
                  f"| total {len(m['nodos'])}/{len(self.nodos_vistos)}"
                  + self.diagnostico_estado())
         if d.valor:
             self.j.clic_por_atajo(str(d.valor))
+        # **Nodo elegido, con su tipo CRUDO.** El tipo traducido funde `catch`
+        # y `battle` en `batalla`, y sin el crudo no se puede saber si el bot
+        # entró a un nodo que ofrecía pokéball o a uno que no: medido, 18 de 20
+        # muertes con 0 insignia ocurrieron en pantallas sin nodo `catch`.
+        self.traza(
+            "nodo",
+            mapa=m.get("info") or "?",
+            nodo=m.get("actual") or "?",
+            tipo=d.tipo,
+            crudo=(next((str(x.get("tipo")) for x in clica
+                         if str(x.get("atajo")) == str(d.valor)), "?")),
+            atajo=d.valor,
+            equipo=len(equipo),
+            vivos=vivos,
+            niv=f"{min(niv) if niv else 0}-{max(niv) if niv else 0}",
+            insignias=insignias,
+            disponibles=",".join(crudos_disponibles),
+            capturas_pantalla=self.capturas_pantalla,
+            razon=(d.razon or "").split("|")[0].strip(),
+        )
         return f"nodo {d.valor}"
 
     def firma_batalla(self) -> str:
@@ -947,13 +1059,98 @@ class Bot:
             # La pantalla de combate si trae el valor real ("0/19"), asi que
             # se guarda aqui y se aplica encima del porcentaje.
             self._apuntar_ps_real(eb["mios"])
+            # **Contador de combates, sin muestreo.** El volcado de texto sale
+            # solo de 4 en 4 (`% 4 == 0`, más abajo), así que contar peleas
+            # leyendo el log subestima 4x y cualquier conclusión sobre "cuántas
+            # peleas de entrenador" sale mal por un factor fijo. Aquí se cuenta
+            # **todas**, en estructura, y el texto sigue muestreado.
+            #
+            # Por qué importa: el entrenador da +2 niveles a todo el equipo y el
+            # salvaje +1, y la diferencia entre ganar y perder el 2.º gimnasio es
+            # de 2,5 niveles (medido sobre 451 combates). Sin este contador no
+            # se puede ni plantear la pregunta.
+            titulo = str(eb.get("titulo") or "")
+            # Una pelea ocupa VARIOS pasos (auto-battle, continuar, cerrar) y
+            # `estado_batalla()` se relee en cada uno. Contando cada lectura
+            # salía 19 combates donde hubo 18. Se cuenta **una vez por pelea**,
+            # detectando el cambio de rival+nivel.
+            es_entrenador = "wants to battle" in titulo or "Battle vs" in titulo
+            primer_niv = 0
+            for _m in eb["mios"]:
+                try:
+                    primer_niv = int(_m.get("nivel") or 0)
+                except (TypeError, ValueError):
+                    primer_niv = 0
+                break
+            firma = (titulo, primer_niv, len(eb["enemigos"]))
+            if firma != getattr(self, "_pelea_abierta", None):
+                self._pelea_abierta = firma
+                self.peleas += 1
+                if es_entrenador:
+                    self.peleas_entrenador += 1
+                else:
+                    self.peleas_salvaje += 1
+
+            # El nivel puede viajar como TEXTO: `max()` sobre una mezcla de
+            # `"15"` y `15` lanza `'>' not supported between 'str' and 'int'`.
+            # Pasaba antes, pero solo 1 de cada 4 veces (el volcado viejo solo
+            # corría con `% 4 == 0`); al contar todas las peleas salía en el
+            # primer combate. Por eso el volcado nuevo **no** debe reutilizar
+            # esos valores: se normalizan aquí.
+            def _niv(m: dict) -> int:
+                """El nivel puede viajar como texto: `"15"` y `15` en la misma
+                lista hacen que `max()` lance TypeError."""
+                try:
+                    return int(m.get("nivel") or 0)
+                except (TypeError, ValueError):
+                    return 0
+
+            def _ps(m: dict) -> int:
+                """El PS llega como **fracción** `"0/43"`, no como entero.
+
+                `int("0/43")` lanza ValueError y con un `except` que devuelve 0
+                el recuento de móns vivos salía **siempre a 0**, en silencio. Se
+                queda con la parte de antes de la barra.
+                """
+                v = m.get("ps")
+                if isinstance(v, str):
+                    v = v.split("/")[0].strip()
+                try:
+                    return int(v or 0)
+                except (TypeError, ValueError):
+                    return 0
+
+            if firma == getattr(self, "_pelea_volcada", None):
+                ficha = None
+            else:
+                self._pelea_volcada = firma
+                ficha = True
+            if ficha:
+                self.traza("combate",
+                           rival=titulo[:44],
+                           tipo="entrenador" if es_entrenador else "salvaje",
+                           nuestro_niv=max((_niv(m) for m in eb["mios"]),
+                                           default=0),
+                           rival_niv=max((_niv(e) for e in eb["enemigos"]),
+                                         default=0),
+                           nuestros=len([m for m in eb["mios"]
+                                         if _ps(m) > 0]),
+                           suyo=len(eb["enemigos"]),
+                           insignias=self.j.insignias())
             # Se recuerda el nivel más alto que se ha visto: sirve para decidir si
             # un entrenador es arriesgado (perder una pelea de entrenador termina
             # la run). Los de Route 1 medían 3-4 y eran ganados de sobra; en rutas
             # posteriores suben.
             for e in eb["enemigos"]:
                 if e.get("nivel"):
-                    self.nivel_enemigo_max = max(self.nivel_enemigo_max, e["nivel"])
+                    # `_niv`, no `e["nivel"]`: el nivel puede llegar como texto y
+                    # `max(int, str)` lanza `TypeError: '>' not supported between
+                    # instances of 'str' and 'int'`. Aquí estaba en el volcado
+                    # viejo y solo se veía 1 de cada 4 veces; al contar todas las
+                    # peleas saltó en el primer combate. La causa de fondo es que
+                    # se comparaba contra `self.nivel_enemigo_max` (int) sin
+                    # normalizar el otro lado.
+                    self.nivel_enemigo_max = max(self.nivel_enemigo_max, _niv(e))
             # Cuántos móns trae el rival: a igual nivel, un entrenador de dos
             # móns contra un equipo de uno es imposible de ganar. En Mt Moon un
             # Firebreather (Charmander+Ponyta, 0.5x los dos) tumba a un
@@ -964,7 +1161,7 @@ class Bot:
             # El volcado al log se sigue haciendo de 4 en 4 pasos, que es lo que
             # hace falta para no llenar el log.
             if getattr(self, "_n_batalla", 0) % 4 == 0:
-                niv_enem = [e["nivel"] for e in eb["enemigos"] if e.get("nivel")]
+                niv_enem = [_niv(e) for e in eb["enemigos"] if e.get("nivel")]
                 self._ultimo_rival = eb["titulo"]
                 self.log(f"  estado: {eb['titulo']} | niveles rivales "
                          f"{min(niv_enem) if niv_enem else '?'}-"
@@ -1017,6 +1214,12 @@ class Bot:
         if self.j.reordenar_equipo(deseado):
             self.log(f"  ⋯ reordenado: {orden_actual} -> "
                      f"{self.j.orden_equipo()} (para {tipo_nodo})")
+            # El reordenado decide la pelea entera: el delantero se lleva casi
+            # toda la experiencia y el que va detrás llega gastado. Sin este
+            # registro no se puede reconstruir por qué un món iba primero.
+            self.traza("orden", para=tipo_nodo, rival=",".join(tipos_rival or []),
+                       antes=",".join(orden_actual),
+                       despues=",".join(deseado))
         elif self._reordenes_fallidos < 3:
             self._reordenes_fallidos += 1
             self.log(f"  ⋯ no se pudo reordenar (quedó {self.j.orden_equipo()})")
@@ -1060,6 +1263,13 @@ class Bot:
         vivos = sum(1 for m in self.equipo_con_tipos() if (m.get("ps") or 0) > 0)
         if self.capturas_pantalla >= 1:
             self.j.activar("#btn-skip-catch")
+            # Renuncia que **no** es del filtro de captura sino del contador de
+            # pantalla, y antes no dejaba rastro. Medido: en una partida con 4
+            # nodos `catch` hubo 3 capturas y la cuarta se fue por aquí sin
+            # dejar ni una línea, que es indistinguible de un bug.
+            self.traza("captura_renunciada", causa="ya se cazó en esta pantalla",
+                       capturas_pantalla=self.capturas_pantalla,
+                       equipo=vivos)
             return "huyo: ya se cazó uno en esta pantalla (prioridad es nivel)"
         # Con **menos de 3 en pie** se caza siempre, sea cual sea el nivel.
         # El veto por nivel era demasiadoRotundo: medido, el bot se quedó con
@@ -1068,10 +1278,9 @@ class Bot:
         # Sin veto por nivel: el libro de jugadas es "captura uno al principio
         # y luego a por nivel", no "solo captura si vas sobrado".
         self._catch_ignora_nivel = vivos < 3
-        if self.capturas_pantalla >= 1:
-            # Ya se cazó en esta pantalla: el resto de móns son nivel disfrazado.
-            self.j.activar("#btn-skip-catch")
-            return "huyo: ya se cazó uno en esta pantalla (prioridad es nivel)"
+        # (La comprobación de `capturas_pantalla >= 1` estaba **dos veces** en
+        # este método, y la segunda era código muerto: la primera devuelve
+        # siempre. Se deja una sola, con su registro en `traza`.)
         equipo = self.equipo_con_tipos()
         cands = self.cartas_con_datos("#catch-choices")
         insignias = self.j.insignias()
@@ -1105,9 +1314,9 @@ class Bot:
             # a quién se sustituye. Se apunta el objetivo ahora (el peor
             # miembro) porque en la pantalla siguiente ya no sabemos cuál de los
             # candidatos salió.
-            vivos = [m for m in equipo if (m.get("ps") or 0) > 0]
-            if len(vivos) >= P.MAX_EQUIPO:
-                flojo = min(vivos, key=lambda m: (
+            vivos_lista = [m for m in equipo if (m.get("ps") or 0) > 0]
+            if len(vivos_lista) >= P.MAX_EQUIPO:
+                flojo = min(vivos_lista, key=lambda m: (
                     (m.get("nivel") or 0),
                     -sum((m.get("baseStats") or {}).values()),
                     m.get("nombre") or ""))
@@ -1116,8 +1325,26 @@ class Bot:
                          f" por {d.valor}")
             self._catch_pendiente = len(self.j.equipo())
             self.j.clic_por_atajo(str(d.valor))
+            self.traza("captura_pedida", objetivo=d.valor,
+                       equipo=len(equipo), vivos=len(vivos_lista),
+                       candidatos="|".join(
+                           f"{c.get('nombre')}:{c.get('nivel')}"
+                           for c in cands) or "ninguno",
+                       motivo=d.razon)
             return f"peleo por {d.razon}"
+        # **Captura rechazada.** Es una decisión y se perdía: el log solo decía
+        # "huyo" con el motivo en texto. Aquí queda el candidato concreto, el
+        # rival que se tapaba y el motivo, que es lo que permite distinguir un
+        # filtro demasiado estricto de un mapa que no daba pokéball.
         self.j.activar("#btn-skip-catch")
+        # OJO: aquí `vivos` es el **entero** de arriba (solo la rama elegida lo
+        # reescribe como lista), así que va sin `len()`. Con `len(vivos)` el
+        # bot reventaba en cada captura rechazada.
+        self.traza("captura_rechazada", equipo=len(equipo), vivos=vivos,
+                   candidatos="|".join(
+                       f"{c.get('nombre')}:{c.get('nivel')}" for c in cands) or "ninguno",
+                   rival=",".join(x for x in (actual,) if x),
+                   motivo=d.razon)
         return f"huyo: {d.razon}"
 
     def _opciones_genericas(self, cont: str, fallback: str, etiqueta: str) -> str:
@@ -1248,6 +1475,18 @@ class Bot:
         self._ya_cogido_item = True
         self.anotar(P.Decision("item", elegido.get("txt", "")[:40],
                                f"tomo {self.items_tomados}/{self.MAX_ITEMS} por {via}"))
+        # Qué objeto y **por qué este**. El nodo de item no asigna el objeto a
+        # ningún món (eso pasa en `elite-prep-screen`, más adelante), así que
+        # sin este registro no se puede enlazar "cogí Expert Belt aquí" con
+        # "se equipó a Bulbasaur". `idx` es la posición en la lista de
+        # prioridad: 99 significa que ninguna palabra clave casó, o sea que el
+        # bot cogió el objeto **sin criterio de prioridad**.
+        self.traza("item_cogido", objeto=(elegido.get("txt", "")[:40]).replace("\n", " "),
+                   atajo=elegido.get("atajo"),
+                   prioridad=next((i for i, k in enumerate(orden)
+                                   if k in (elegido.get("txt") or "").lower()), 99),
+                   opciones="|".join((o.get("txt") or "").replace("\n", " ")[:28]
+                                     for o in ops))
         # Salir de la pantalla probando vías, de la más barata a la más fuerte.
         # Medido: el clic real "despierta" el modal, pero según el momento ni
         # siquiera con él avanza, y quedarse aquí bloquea la run entera.
@@ -1336,7 +1575,23 @@ class Bot:
                 # mismo conjunto de móns.
                 self._invalidar_ps("swap")
                 self.log(f"  ⋯ sustituido: sale {objetivo}")
+                # Cambio de Pokémon: quién entra, quién sale y por qué. Es la
+                # decisión que más caro sale si se equivoca (se pierde un món
+                # con su nivel) y solo quedaba en texto suelto.
+                ent = getattr(self, "_swap_nuevo_mons", None) or {}
+                self.traza("swap", sale=objetivo,
+                           entra=ent.get("nombre") or "?",
+                           nivel_entra=ent.get("nivel") or 0,
+                           causa="equipo_lleno" if getattr(
+                               self, "_catch_pendiente", None) is not None
+                           else "subida_nivel",
+                           atajo=elegido.get("atajo"))
+                self._swap_nuevo_mons = None
                 return f"swap: fuera {objetivo}"
+        # Sin objetivo: el código elegía la primera opción, o sea un món
+        # arbitrario. Queda registrado como tal, porque si alguna vez se ve en
+        # los logs significa que la regla del peor no se pudo aplicar.
+        self.traza("swap_arbitrario", motivo="sin objetivo calculado")
         return self._opciones_genericas("#swap-choices", "#btn-cancel-swap", "swap")
 
     def _peor_para_sustituir(self) -> str | None:
@@ -1653,6 +1908,13 @@ class Bot:
                 self._invalidar_ps("trade")
                 self.log("  ✓ trade aceptado (+3 niveles, PS completos) — "
                          "se reordena al más efectivo en el próximo nodo")
+                # El trade es el nodo más fuerte del juego (+3 niveles y PS
+                # completos) y se pierde un món. Sin registrar a quién se
+                # sacrificó no se puede evaluar si fue una buena decisión.
+                self.traza("trade_aceptado", recibido=recibido or "?",
+                           equipo="|".join(
+                               f"{m.get('nombre')}:{m.get('nivel')}"
+                               for m in self.equipo_con_tipos()))
                 return f"trade aceptado ({recibido or '?'})"
         except Exception as exc:  # noqa: BLE001
             self.log(f"  !! trade falló: {exc}")
@@ -2037,6 +2299,15 @@ class Bot:
             # su `div.team-slot.team-slot-reorder`. Antes solo se miraba si la
             # bolsa bajaba, y eso no distingue un equip de un objeto gastado.
             puesto = self.j.objeto_del_mons(nombre)
+            # **Qué objeto va a qué Pokémon y con qué motivo.** Es la segunda
+            # palanca del juego según la guía y era el punto ciego: la bolsa
+            # llegaba casi vacía (media 1,4 objetos por run) y cuando había
+            # algo no se anotaba el reparto, así que no se podía saber si el
+            # equipo iba equipado o desnudo.
+            self.traza("objeto_equipado" if puesto else "objeto_usado",
+                       objeto=str(oid_plan)[:28], mon=nombre,
+                       puesto=str(puesto or "")[:28],
+                       motivo=motivo, bolsa=f"{antes}->{despues}")
             if puesto:
                 hechos.append(f"{nombre} <- {puesto}")
                 self.log(f"  ⋯ objeto EQUIPADO -> {nombre}: {puesto} ({motivo})")
@@ -2255,6 +2526,15 @@ class Bot:
             ("pasos", str(self.pasos)),
             ("insignias", str(self._insignias_final)),
             ("combates", f"{self.victorias} ganados / {self.derrotas} perdidos"),
+            # **Desglose sin muestreo.** El logout de texto sale de 4 en 4, así
+            # que "cuántas peleas de entrenador" no se puede sacar del log: sale
+            # un cuarto de la realidad. Estos contadores no pasan por ese filtro.
+            # El entrenador da +2 niveles a todo el equipo y el salvaje +1, que
+            # es justo lo que decide el 2.º gimnasio (medido: 2,5 niveles).
+            ("peleas entrain.", f"{self.peleas_entrenador} "
+                               f"(+{self.peleas_entrenador * 2} nv)"),
+            ("peleas salvaje", f"{self.peleas_salvaje} "
+                              f"(+{self.peleas_salvaje} nv)"),
             ("capturas", str(self.capturas)),
             ("tutores", str(self.tutores)),
             ("objetos", str(self.objetos)),
@@ -2264,14 +2544,31 @@ class Bot:
         ancho = max(len(k) for k, _ in filas)
         lineas = ["", "-" * (ancho + 26), f"  RESUMEN {self.region}"]
         lineas += [f"  {k.ljust(ancho)} : {v}" for k, v in filas]
+        # El diario de decisiones se vuelca aquí, con la run ya terminada, para
+        # que exista aunque el proceso muera o se corte. Sin esto las decisiones
+        # solo vivían en el log de texto, del que no se puede medir nada.
+        destino = self.volcar_traza()
+        if destino:
+            lineas.append(f"  {'traza'.ljust(ancho)} : {destino}")
+            # Las visitas al nodo del tutor: no hay pantalla para ellas y sin
+            # este dato no se sabe a quién se le dio el disco.
+            if getattr(self, "_tutor_visitado", None):
+                lineas.append(f"  {'visitas tutor'.ljust(ancho)} : "
+                              f"{len(self._tutor_visitado)}")
         lineas += ["-" * (ancho + 26), ""]
         return "\n".join(lineas)
 
     def _activar_ajustes(self) -> None:
-        """Auto-skip al entrar, antes de tocar nada (ver `navegador`)."""
+        """Auto-skip al entrar, antes de tocar nada (ver `navegador`).
+
+        El log dice **lo que el juego ha leido**, no lo que el bot ha escrito.
+        Antes decía "activado" sin más y era falso: se escribian claves
+        anidadas (`autoSkip.allFights`) y el juego lee planas
+        (`autoSkipAllBattles`), con lo que las partidas iban a 1× en vez de 3×.
+        """
         try:
-            self.j.activar_auto_skip()
-            self.log("  ajustes: auto-skip activado (combates y evoluciones)")
+            leido = self.j.activar_auto_skip()
+            self.log(f"  ajustes: {leido}")
         except Exception as exc:  # noqa: BLE001
             self.log(f"  !! no se pudieron activar los ajustes: {exc}")
 
