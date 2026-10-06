@@ -834,6 +834,19 @@ Alto Mando.
 `móns al entrar en Misty ≥5`**, que es la que tiene el efecto medido (p=0,006)
 y por tanto la que hay que mirar aunque insignias no se muevan.
 
+### H16 NO se lanza hasta que v2 reporte
+
+El lote v2 (timeout 3600) decide si H15 era un no-op o no, y su resultado
+llega antes que cualquier idea nueva que se quiera probar. Hasta entonces:
+
+- **No se toca `politica.py` para H16.** H13 es el precedente exacto: la
+  inversión de `tiene_bolsa` era un bug real, se arregló, y el lote salió nulo
+  porque el bug no era el cuello. Arreglar sin medir cuesta cuatro horas.
+- La diferencia entre H15 y H16 es **cuantitativa y ya está medida**: H15 mueve
+  el equipo de 3,41 a 4,00 móns; el objetivo de H16 es 5-6 antes de Misty.
+  Ningún ajuste de pesos mueve esa distancia, así que H16 casi seguro necesita
+  cambiar **qué se captura**, no cuánto se puntúa un nodo.
+
 ## Lote v2 (timeout 3600) en marcha
 
 `hash=f56a010e`, 300 runs, 2 en paralelo. A los 10 min: 6+6 entregadas, 5+5
