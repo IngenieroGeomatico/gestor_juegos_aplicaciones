@@ -37,4 +37,5 @@ rag = [
 dev = [
     "playwright>=1.63.0",
     "python-xlib>=0.33",
+    "scipy>=1.18.1",
 ]

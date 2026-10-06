@@ -685,6 +685,7 @@ rag-lite = [
 dev = [
     { name = "playwright" },
     { name = "python-xlib" },
+    { name = "scipy" },
 ]
 
 [package.metadata]
@@ -707,6 +708,7 @@ provides-extras = ["rag-lite", "rag"]
 dev = [
     { name = "playwright", specifier = ">=1.63.0" },
     { name = "python-xlib", specifier = ">=0.33" },
+    { name = "scipy", specifier = ">=1.18.1" },
 ]
 
 [[package]]
