@@ -143,7 +143,19 @@ MIN_STATS_CAPTURA = 220
 #     nodos de pelea por run sin combate (18%).
 # El filtro de tipo se conserva como PREFERENCIA (ordena a los candidatos), no
 # como rechazo: con este flag, un 0.5x entra igualmente.
-CAPTURA_PERMISIVA = os.environ.get("PKL_CAPTURA_PERMISIVA", "0").strip().lower() in (
+#
+# **ENCENDIDO POR DEFECTO desde el 06-10**, con H15 confirmado (n=58 por brazo,
+# hash=f56a010e). Antes era 0.
+#
+#   A (permisivo) 1,57 insignias/run  |  B (estricto) 1,03
+#   dif +0,53, IC 95% [+0,09, +0,98], Mann-Whitney p=0,0056
+#   mons de equipo +1,12 (p=0,0001) y capturas +1,05 (p=0,0003)
+#   **rechazos de captura 0,84 -> 0,00 por run** (p=0,00003): el mecanismo
+#
+# Se conserva el flag porque el lote que lo midio es el unico que lo tiene, y
+# para poder repetir exactamente esa medicion hace que poder apagarlo.
+# `PKL_CAPTURA_PERMISIVA=0` lo devuelve al filtro estricto de siempre.
+CAPTURA_PERMISIVA = os.environ.get("PKL_CAPTURA_PERMISIVA", "1").strip().lower() in (
     "1", "true", "si", "yes")
 # Listones antiguos, solo como respaldo si faltaran los datos reales.
 NIVEL_OBJETIVO_BASE = 9
