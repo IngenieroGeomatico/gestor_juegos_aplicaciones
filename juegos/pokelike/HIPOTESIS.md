@@ -1096,6 +1096,75 @@ inútiles.
 
 ---
 
+---
+
+## Cómo parar un lote: la regla de la sigma NO sirve, y dos que sí
+
+Propuesta del usuario: *«en mínimos cuadrados se usa la sigma a posteriori; si
+la diferencia de sigma entre iteraciones es menor que un número, se corta»*.
+Buena intuición —parar cuando más datos no van a cambiar la decisión— pero el
+estadístico propuesto **no distingue convergencia de ruido**.
+
+### Por qué falla
+
+La sigma estimada del efecto es `SE(n) = sd·sqrt(2/n)`, y su cambio **relativo**
+entre iteraciones es `sqrt(n/(n+1))`, que tiende a 1 **siempre**:
+
+| n | SE | cambio por run |
+|---|---|---|
+| 40 | 0,318 | 1,23% |
+| 75 | 0,232 | 0,66% |
+| 300 | 0,116 | 0,17% |
+| 10.000 | 0,020 | 0,00% |
+
+Da igual que el efecto sea real, nulo o que esté cambiando: el ratio es el
+mismo. **Que la sigma tender a 0 es propiedad del estimador, no convergencia
+del resultado.**
+
+Simulación (400 réplicas, sd=1,42, n máximo 300):
+
+| | con efecto 0 (nulo) | con efecto real 1,05 |
+|---|---|---|
+| tol 0,05 | para en n=**50** | para en n=**16** |
+| tol 0,02 | para en n=114 | para en n=**29** |
+| tol 0,01 | para en n=224 | para en n=**40** |
+
+**Para ANTES cuanto más fuerte es el efecto.** Eso está del revés, y es la
+señal de que no mide convergencia. Endurecer la tolerancia solo alarga la
+tanda en los dos mundos; nunca distingue uno de otro.
+
+### Las dos reglas que sí funcionan
+
+| Regla | Para por | Con efecto 0 | Con efecto 1,05 |
+|---|---|---|---|
+| **Futilidad / decisión** (la pre-registrada) | que el IC 95% excluya la banda irrelevante | **nunca** (0%) | n=21 |
+| **O'Brien-Fleming** (group sequential, gasto de alpha) | eficacia, sin inflar el error tipo I | 7% (≈alpha) | n=25 |
+
+Futilidad: con efecto nulo **no para nunca** — se sigue recogiendo porque no se
+aprende nada, que es lo correcto. Con efecto real para en n≈21.
+
+O'Brien-Fleming con 3 looks fijos (n=25, 50, 75) y alpha repartido: con efecto
+nulo para el 7% de las veces (≈ el 5% presupuestado), y con efecto grande
+**para en el primer look**. Es la versión rigurosa de «parar cuando el p salga
+pequeño», que sin gasto de alpha sería optional stopping.
+
+### Y el mínimo de iteraciones que propose, sí
+
+Las dos reglas lo necesitan. La de futilidad usada aquí no dispara antes de
+n=20 por brazo; la de O'Brien-Fleming **exige looks fijos**, que es
+estructuralmente el mínimo.
+
+### Lo que esto dice de nuestra decisión
+
+Ambas reglas correctas habrían parado alrededor de **n=21-25 por brazo**, y
+pre-registramos 75. Son 3 h de lote de más por precisión que no vamos a usar:
+el IC a 75 (±0,38) y a 25 (±0,58) dan **la misma decisión** — encender el flag.
+
+**No se cambia el 75.** Cambiarlo ahora, después de ver el efecto, es
+exactamente la falta que este fichero lleva cuatro páginas pagando.
+
+---
+
 ### H16 NO se lanza hasta que v2 reporte
 
 
