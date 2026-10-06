@@ -891,6 +891,93 @@ Con 1 run censurado de 13 en A, puntuarlo 0 baja la media de A en
 **5/13 = 0,38 insignias**, que a este n es más que toda la diferencia entre
 brazos. Por eso no se puede dejar la decisión para el final.
 
+---
+
+# H15 · RESULTADO: el filtro permisivo SÍ mueve las insignias
+
+Interim de **v2 a n=24 por brazo** (48 runs), con la regla pre-registrada de
+puntuación de los runs censurados.
+
+| | A (permisivo) | B (control) | dif | p (MW) |
+|---|---|---|---|---|
+| **insignias/run** | **1,50 ± 1,35** | 0,65 ± 0,75 | **+0,85** | **0,011** |
+| móns en el equipo | 3,75 | 2,67 | +1,08 | 0,016 |
+| rechazos de captura | **0,00** | 0,58 | −0,58 | 0,002 |
+| peleas de entrenador | 5,21 | 3,83 | +1,37 | 0,177 |
+
+**Es el primer resultado con potencia en la primaria de todo el repo.** Los
+cinco anteriores (V1, H6, H11, H13, escalera) salieron nulos, y cuatro de
+ellos lo fueron porque no se podían ver, no porque no fueran.
+
+## Y aguanta el análisis de fragilidad
+
+Un p=0,011 en la primaria de este fichero no se acepta sin preguntarse de dónde
+sale. Las cinco lecturas del mismo dato:
+
+| Lectura | A | B | dif | p (MW) | p (permutación) |
+|---|---|---|---|---|---|
+| regla pre-registrada | 1,50 | 0,65 | **+0,85** | 0,011 | 0,0001 |
+| **censurado = 0** (la más conservadora) | 1,31 | 0,65 | **+0,65** | 0,032 | 0,0014 |
+| solo runs con `RESUMEN` | 1,42 | 0,68 | +0,74 | 0,014 | — |
+| topado a 3 insignias (recorta la cola) | 1,31 | 0,65 | +0,65 | 0,012 | — |
+| topado a 4 insignias | 1,42 | 0,65 | +0,77 | 0,011 | — |
+
+**Sobrevive a todas, y la más conservadora sigue dando p=0,032.** O sea que no
+lo llevan los 2 runs censurados ni la cola: es un desplazamiento de la
+distribución entera. Los valores ordenados lo dejan claro:
+
+```
+A: 5 5 4 3 3 2 2 2 1 1 1 1 ...      B: 3 2 1 1 1 1 1 1 1 0 0 0 ...
+```
+
+Y el rango del efecto honesto es **+0,65 a +0,85 insignias**, que es por encima
+de la varianza entre lotes (~0,3) que hasta ahora había tapado todo lo medido.
+
+## PERO el mecanismo no es H16: es la apertura
+
+| Entradas a Misty (n=15) | v1 | v2 |
+|---|---|---|
+| victorias | 21% | **20%** |
+| equipo mediano al entrar | 4 | **4** |
+| nivel max mediano | 18 | **16** |
+| nivel ≥20 y ≥5 móns | 3/3 ganaban | 0/1 |
+
+El equipo es más grande **a lo largo de la run** (3,75 contra 2,67) pero en
+Misty sigue habiendo 4 de mediana, y el nivel medio al llegar **ha bajado de 18
+a 16**. La condición de H16 no se cumple.
+
+De dónde sale la ventaja:
+
+| | A | B |
+|---|---|---|
+| mueren **sin llegar al primer gym** | **2** | **7** |
+| pasan de Misty | 8 | 2 |
+| ≥1 insignia | 83% | 58% (Fisher p=0,11) |
+| ≥2 insignias | 33% | 8% (Fisher p=0,072) |
+
+**El efecto es de apertura, no de muro.** El flag quita muertes de apertura (2
+contra 7), que es exactamente lo que pedía la regla del usuario —capturar en
+vez de huir— y eso sube las insignias. Pero **no abre Misty**: los dos brazos
+mueren en Misty por igual, y con el flag se llega con menos nivel.
+
+### La lectura provisional, en una frase
+
+> **Capturar es más barato que rechazar: confirmado, en la apertura y con
+> potencia. Pero el muro de Misty sigue exactamente igual**, y el cuello del
+> juego no se ha movido: el bot llega un poco más lejos y sigue sin subir.
+
+## Lo que queda por cerrar
+
+1. **n=150/brazo** para el efecto. A n=24 ya se detecta 0,8 sin problema, pero
+   el rango real del efecto está entre 0,65 y 0,85 y solo más n lo estrecha.
+2. **La contradicción con H16**: A tiene más equipo y sin embargo llega a
+   Misty con 4 móns y menos nivel. Si eso se confirma a n=150, H16 está
+   mal planteada y la palanca no es «rellenar la plantilla» sino **«llegar a
+   Misty con nivel»**.
+3. Los 2 runs censurados de A (5 y 4 insignias) explican ~0,2 del efecto.
+
+---
+
 ### H16 NO se lanza hasta que v2 reporte
 
 
