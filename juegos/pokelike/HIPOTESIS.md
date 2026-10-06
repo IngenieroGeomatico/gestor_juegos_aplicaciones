@@ -842,17 +842,90 @@ puro**: queda anotado para vigilarlo, no como resultado.
 
 ### Estado de la decisión
 
-| | |
-|---|---|
-| Mecanismo | **CONFIRMADO**, grande |
-| Primaria | +0,20, p=0,234: indistinguible de cero a este n |
-| CI 95% del efecto | ~[-0,65, +1,05] |
-| Detecta 0,3 insignias | n≈150/brazo |
+Actualizado con el parcial del **06-10 07:20 (178/300, 90 por brazo)**.
 
-**No se para el lote**: con n=16 no se decide nada y el mecanismo está
-confirmado. La pregunta que queda es si **cuerpos se convierten en insignias**,
-y la respuesta provisional es que no, porque el cuello es nivel y lo que se
-captura son cuerpos de nivel 4.
+## EL TIMEOUT SESGA SOLO CONTRA EL BRAZO TRATADO
+
+Esto es lo importante del lote, y no lo anticipated al lanzarlo.
+
+Las 7 runs sin `RESUMEN` **no son crashes del driver**: 5 de ellas duraron
+exactamente **25,0 min**, que es el `timeout 1500` del launcher. El `EPIPE` del
+driver de Playwright es el síntoma de que `timeout` mató el proceso, no la
+causa. Las otras 2 son un fallo de arranque de 1 min que cayó a la vez en los
+dos brazos y es inocuo.
+
+Y los timeouts están **solo en A**:
+
+| | A | B |
+|---|---|---|
+| runs > 20 min | **6** | **0** |
+| runs que chocaron con el timeout | **5** | **0** |
+| duración máxima | **25,0 min** | **13,4 min** |
+| duración mediana | 4,0 min | 3,5 min |
+
+**B no ha pasado de 13,4 minutos en 90 runs; A sí, seis veces.** Y la duración
+es la diferencia entre brazos con significación: MW **p=0,0265**.
+
+El flag hace las runs más largas (+1,23 peleas/run, equipos de 4,00 contra
+3,41), y el muro de 25 min **se come justo las runs largas**, que son
+precisamente donde el flag está trabajando. Las 5 de A demise con 8, 1, 2, 5 y
+2 insignias: **18 puntos de insignia que el protocolo cuenta como cero**.
+
+### Las tres lecturas del mismo dato, y por qué solo una da p<0,05
+
+| Lectura | A | B | dif | p (MW) | ≥1 ins. |
+|---|---|---|---|---|---|
+| **L1 · timeouts = 0 (protocolo literal)** | 1,21 | 1,01 | +0,20 | **0,216** | p=0,231 |
+| L2 · insignias leídas del log | 1,41 | 1,02 | +0,39 | 0,032 | p=0,048 |
+| L3 · solo runs con `RESUMEN` | 1,30 | 1,02 | +0,28 | 0,065 | p=0,044 |
+
+**L1 es la que manda**, porque es la que se pre-registró («los timeouts cuentan
+como fracaso») y porque las otras dos cambian la regla **después** de ver que
+el efecto estaba en A. Con L1, **H15 no es significativo: p=0,216.**
+
+La diferencia entre L1 y L2 (18 puntos / 90 runs = 0,20) es **exactamente** el
+hueco entre las dos lecturas. El resultado depende enteramente de cómo se traten
+5 runs, y una sola de ellas (la del Elite Four, 8 insignias) mueve el p de
+0,216 a 0,032.
+
+### La regla del timeout, leída bien
+
+La regla se escribió para que los timeouts **no se trunquen hacia el éxito**.
+Pero puntuarlos como 0 insignias trunca **hacia el fracaso**, que es la misma
+distorsión al revés. Y aquí el sesgo va **en contra del brazo tratado**, así
+que el protocolo **subestima A**.
+
+Arreglo: un timeout tiene que durar lo bastante para que pocas runs lo toquen.
+Con mediana de 4 min y solo 6 de 180 por encima de 20, **60 min captura
+prácticamente el lote entero**.
+
+### Reparto final con el protocolo (n=90/brazo)
+
+| | A | B |
+|---|---|---|
+| 0 insignias | 19 | 27 |
+| 1 | 52 | 47 |
+| 2 | 9 | 7 |
+| 3 | 6 | 6 |
+| 4 | 2 | 3 |
+| 5 | 1 | 0 |
+| **8 (Elite Four)** | **1** | 0 |
+
+El cambio mueve **la cola, no la moda**, otra vez: A tiene 8 runs menos en 0 y
+una run más en 5 y en 8. Es exactamente el patrón que la sección «falta
+potencia» describe para una métrica con el 52% en un solo valor.
+
+La otra lectura, con L2 (insignias recuperadas) y n=90:
+
+| | A | B | dif | p | d |
+|---|---|---|---|---|---|
+| insignias/run | 1,41 ± 1,43 | 1,02 ± 0,97 | +0,39 | 0,032 | +0,32 |
+| capturas/run | 2,92 | 2,38 | +0,54 | 0,029 | +0,35 |
+| peleas/run | 8,54 | 7,31 | +1,23 | 0,070 | — |
+| ≥1 insignia | 84% | 71% | — | Fisher 0,048 | — |
+
+Es **la primera vez que sale algo significativo en la primaria**, y sale por el
+hueco de los timeouts. Eso no es un resultado, es un artefacto del protocolo.
 
 ## El intento de las 19:19-19:59 queda fuera
 
@@ -870,8 +943,21 @@ pararlo, como se paró H11 a las 24 runs.
 
 ## Ritmo
 
-**34 runs en 126 min = 3,7 min/run** → 300 runs ≈ **18,5 h**, ETA sobre las
-**15:30 de mañana**. La cifra de las 21:37 (13:30-14:30) era optimista: los
-pares averaged 7,4 min, no 5, porque las runs largas se las come el timeout de
-25 min. El lote se puede leer a cualquier n sin esperar al final, porque cada
-run deja su log entero en cuanto acaba.
+**178 runs en 10 h 20 min = 3,4 min/run** → las 300 llegarían sobre las **16:00
+de hoy**, similar a lo previsto. La ETA de las 23:03 (15:30) era correcta.
+
+El ritmo **no** es el problema. El problema es que el lote se está midiendo con
+un timeout que solo muerde a un brazo.
+
+## Trampa de método nueva: el timeout como sesgo asimétrico
+
+Acabada de pagar. Al lanzar el lote se registró «timeout 25 min por run» porque
+una run colgada paró 10 h el lote anterior, y ese objetivo lo cumple. Lo que no
+se consideró es que **el flag cambia la duración de la run**, así que cualquier
+timeout asymmetry sesga el resultado.
+
+Regla que sale de aquí: **el timeout tiene que comprobarse contra la duración
+del brazo tratado, no contra el promedio**. Si el tratamiento alarga las runs,
+subir el timeout antes de lanzar, no después de contar. Aquí se perdieron 18
+puntos de insignia de A en 5 runs, y eso es exactamente el efecto que se
+buscaba medir.
