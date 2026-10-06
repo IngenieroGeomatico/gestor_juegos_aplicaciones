@@ -1044,6 +1044,58 @@ anécdotas. Y dos de las trescensuradas por el timeout de 25 min.
 
 ---
 
+---
+
+## REGLA DE PARADA PRE-REGISTRADA: n=75 por brazo (150 runs)
+
+Decidida el 06-10 con n=40 por brazo, **antes** de llegar a 75.
+
+**El criterio NO es «el p sale pequeño».** Parar cuando el resultado «parece
+estable» es *optional stopping*, y es la **cuarta** vez que este fichero paga
+esa factura (trade, veto por tipo, H16, y ahora esto). Mirar el p y parar
+cuando conviene infla la significación.
+
+**El criterio es de futilidad**, que sí es legítimo:
+
+> Se para a **n=75 por brazo (150 runs)**. Se sigue si el intervalo de confianza
+> todavía incluye un efecto irrelevante, y se para cuando ya no lo incluye.
+
+### Por qué 75 basta, con los números de ahora
+
+sd combinada 1,42 · efecto observado **+1,05**
+
+| n por brazo | IC 95% del efecto | detecc. mínimo (80%) | efecto / detecc. |
+|---|---|---|---|
+| 40 (ahora) | +0,31 a +1,36 | 0,75 ins | 1,11× |
+| 50 | +0,37 a +1,30 | 0,67 | 1,25× |
+| **75 (parada)** | **+0,45 a +1,22** | **0,55** | **1,53×** |
+| 100 | +0,50 a +1,16 | 0,47 | 1,76× |
+| 150 | +0,56 a +1,10 | 0,39 | 2,16× |
+
+A 75/brazo el intervalo **ya excluye 0 y excluye con holgura el −0,2** (empeorar
+de verdad). A 150/brazo se reduce a la mitad de ancho, **pero la decisión es la
+misma**. No se compra nada que valga las 8 h de lote de diferencia.
+
+### Qué se hace al parar
+
+1. Lectura única con la **regla pre-registada** (censurados → insignias del log),
+   y **también** la conservadora, por transparencia.
+2. **Si el efecto sigue excluyendo 0 y el −0,2: encender `PKL_CAPTURA_PERMISIVA`
+   por defecto.** Ese es el resultado que ya está ganado: +1,05 insignias,
+   p=0,0009, mecanismo verificado (25 rechazos → 0).
+3. **No se lanza H16 con estos datos.** El cuello sigue siendo nivel en Misty, y
+   para atacarlo hace falta un A/B con `nivel al entrar en Misty` declarado como
+   primaria **antes** de mirar. Queda escrito, no ejecutado.
+
+### Mecánica
+
+`exp_captura.sh` no se toca (cambiaría el hash y rompería la comparabilidad), así
+que la parada es **externa**: un vigilante espera a que ambos brazos tengan 75
+logs y mata el launcher **entre pares**, para no crear dos runs censurados
+inútiles.
+
+---
+
 ### H16 NO se lanza hasta que v2 reporte
 
 
