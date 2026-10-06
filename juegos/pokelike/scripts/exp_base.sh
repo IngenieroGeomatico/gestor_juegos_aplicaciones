@@ -69,18 +69,30 @@ lanzadas=0
 while [ "$lanzadas" -lt "$PEDIDAS" ]; do
   for _ in 1 2; do
     [ "$lanzadas" -ge "$PEDIDAS" ] && break
-    SALIDA="$LOGS/$ETIQUETA/${ETIQUETA}-$(date +%H%M%S)-$$.txt"
+    lanzadas=$((lanzadas + 1))
+    # El nombre lleva el indice de la run, NO solo el timestamp. Los dos runs
+    # de un par salen en el mismo segundo, y el segundo `>` trunca al primero:
+    # se perdia la mitad del lote sin que se notara (el launcher anunciaba
+    # "entregadas 4" con 2 ficheros en disco). En `exp_captura.sh` esto lo
+    # evita la etiqueta A/B del nombre; aqui, que no hay brazos, hay que poner
+    # el indice a mano. `$$` (pid del launcher) + el indice es unico, y se
+    # conoce ANTES de lanzar, asi que no hay carrera con el `>`.
+    SALIDA="$LOGS/$ETIQUETA/${ETIQUETA}-$(date +%H%M%S)-$$-$lanzadas.txt"
     PKL_BRAZO=base \
     PKL_HASH="$HASH" \
     timeout "$TIMEOUT" uv run --group dev python \
       juegos/pokelike/scripts/jugar_pokelike.py \
       --region "$REGION" --max-pasos "$MAX_PASOS" --reset \
       > "$SALIDA" 2>&1 &
-    lanzadas=$((lanzadas + 1))
   done
   wait
   ENTREGADOS=$(ls "$LOGS/$ETIQUETA"/${ETIQUETA}-*.txt 2>/dev/null | wc -l)
   COMPLETOS=$(grep -l "resultado *:" "$LOGS/$ETIQUETA"/${ETIQUETA}-*.txt 2>/dev/null | wc -l)
+  # Si entregados < lanzadas, se estan pisando: avisar, no seguir en silencio.
+  # Es la regla "cuenta las runs antes de lanzar" hecha comprobacion.
+  if [ "$ENTREGADOS" -lt "$lanzadas" ]; then
+    echo "   !! AVISO: lanzadas $lanzadas pero solo $ENTREGADOS ficheros en disco."
+  fi
   echo "   entregadas $lanzadas/$PEDIDAS  (en disco $ENTREGADOS, cerradas $COMPLETOS)"
 done
 
