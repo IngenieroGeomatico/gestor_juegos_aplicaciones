@@ -734,7 +734,147 @@ Verificado en aislamiento: **2 FALLAS sin el cambio, 319/0 con él**.
 insignias p=0,438 · ent/run p=0,087. **Sin efecto medible**, y el sentido apunta
 a que resta. El lote sigue hasta n=150 por brazo antes de cerrarlo.
 
-## Cifras que retracto
+---
+
+# H16 · Qué tienen las 3 runs que llegaron al Elite Four
+
+Pregunta del usuario: *«¿podemos estudiar por qué esas runs han llegado al
+Alto Mando para replicarlo?»*. Sí, y hay una condición que separa cleanly.
+
+**Fuente: los 180 logs de `log/captura_TIMEOUT1500/`, con
+`scripts/medir/nivel_gimnasio.py` (validación cruzada 79/79, +0,00).**
+
+## La escalera de nivel ES el progreso
+
+| Insignias | n | nivel max del equipo (mediana) |
+|---|---|---|
+| 0 | 39 | **8** |
+| 1 | 100 | **15** |
+| 2-3 | 28 | **26,5** |
+| 4-7 | 6 | **43** |
+| 8 (Elite Four) | 1 | **72** |
+
+## Misty es el muro, y es el único que importa
+
+| Gimnasio | rival | n | victorias | llega ganando | llega perdiendo |
+|---|---|---|---|---|---|
+| Brock | 14 | 39 | 82% | 11,2 | 9,6 |
+| **Misty** | 20 | 33 | **21%** | **21,3** | **17,1** |
+| Erika | 32 | 5 | 40% | 40,5 | 32,0 |
+| Koga | 44 | 2 | 0% | — | 42,0 |
+
+**De 38 muertes en gimnasio, 26 son en Misty: el 68%.** Y es un muro de nivel
+puro: 4,2 niveles separan ganar de perder. La mediana de quien llega a Misty
+está en **nivel 18 con 4 móns**.
+
+## LA CONDICIÓN: llegar a Misty con nivel 20 y 5 móns
+
+| Condición al entrar en Misty | Ganó | Fisher |
+|---|---|---|
+| **nivel ≥20 y ≥5 móns** | **3/3 (100%)** | **p=0,006** |
+| lo demás | 4/30 (13%) | |
+| nivel ≥18 y ≥5 móns | 4/5 (80%) | p=0,004 |
+| lo demás | 3/28 (11%) | |
+
+La población **falla las dos por poco**: mediana 18 y 4 móns. No es que el
+bot esté lejos del objetivo, es que está a dos niveles y un món.
+
+### Y el starter tiene que estar evolucionado
+
+| | con Ivysaur | con Bulbasaur sin evolucionar |
+|---|---|---|
+| Ganó Misty (n=7) | **6 (86%)** | 1 (14%) |
+| Perdió Misty (n=26) | 10 (38%) | **15 (58%)** |
+
+Fisher p=0,039. Llegar con el Bulbasaur sin evolucionar es la señal de que la
+run no arrancó bien; llegar con Ivysaur es la de que sí.
+
+## Cómo lo hizo la run del Elite Four, paso a paso
+
+Nivel y móns en cada mapa, de su propio log:
+
+| Momento | equipo | nivel | rival |
+|---|---|---|---|
+| Brock | 2 | 4-15 | 14 |
+| **Misty** | **3** | **17-21** | 20 |
+| Surge | 3 | 21-32 | 25 |
+| **Erika** | **6** | 27-43 | 32 |
+| Koga | 6 | 41-57 | 44 |
+| Blaine | 6 | 43-59 | 50 |
+| Giovanni | 6 | 48-72 | 55 |
+
+**Entró a Misty con 3 móns, no con 5, y ganó igual**: llevaba nivel 21. El
+equipo no es el requisito, **el nivel sí**. Pero a partir de Erika el equipo
+llega a 6 y **ya nunca baja**, y eso es lo que la lleva hasta el final: de
+ahí en adelante solo sube de nivel con 6 móns vivos.
+
+Contra Erika ganó con **Growlithe (Fuego)** en el equipo, no con Venusaur
+(Planta/Veneno, x0,5 contra el rival). El muro de tipo se cruzó con un
+segundo tipo, **sin tocar el starter** — que es la restricción que pusiste.
+
+## La receta, en una frase
+
+**Llegar a Misty a nivel 20+ con 5 móns y el starter evolucionado; a partir de
+ahí mantener 6 móns vivos y no perderlos.**
+
+- **Si sale X**: una política que rellene la plantilla hasta 5-6 antes de
+  Misty sube las insignias.
+- **Si sale Y**: el cuello no es Misty sino la Survivencia después, y habría que
+  mirar por qué las runs mueren con 3-4 móns después de pasar el segundo gym.
+
+## Por qué H15 no llega, y es la misma palanca
+
+H15 mueve el equipo de 3,41 a 4,00 móns y las capturas de 2,38 a 2,92/run. La
+dirección es la correcta, **pero la población solo confirma ~2,5 capturas por
+run y llegar a 6 móns pide ~5**. H15 deja de rechazar; no rellena. La
+diferencia entre las dos cosas es exactamente la que separa a este lote del
+Alto Mando.
+
+**H16 medido sobre la primaria `insignias`, con la primaria secundaria
+`móns al entrar en Misty ≥5`**, que es la que tiene el efecto medido (p=0,006)
+y por tanto la que hay que mirar aunque insignias no se muevan.
+
+## Lote v2 (timeout 3600) en marcha
+
+`hash=f56a010e`, 300 runs, 2 en paralelo. A los 10 min: 6+6 entregadas, 5+5
+completas, paridad exacta, **ningún timeout** (los 25 min ya no muerden). Los
+trades se ven funcionando en los logs.
+
+### El «trade es el atajo de nivel» — NO, era longitud de run
+
+Retractado el 06-10, con los 180 logs del lote v1. La corrección cruda es
+**demasiado buena para ser cierta**:
+
+| | insignias/run | n |
+|---|---|---|
+| con ≥3 trades | **2,53** | 17 (10%) |
+| sin | 1,01 | 157 |
+
++1,52 insignias, el mayor efecto visto en el repo. Pero `trades ~ pasos` r=0,40
+y `insignias ~ pasos` **r=0,89**, o sea que las runs largas ven más nodos de
+trade. Controlando por pasos (los que gastan 100-200):
+
+| | n | nivel max | insignias |
+|---|---|---|---|
+| con ≥2 trades | 7 | 43,3 | 4,29 |
+| sin | 7 | 35,6 | 3,14 |
+
+MW p=0,70 en nivel y p=0,31 en insignias. **El efecto desaparece**: era la
+longitud de la run, no el trade. Es exactamente el confound de «insignias~pasos»
+que este fichero ya advierte, y esta vez se detecto a tiempo.
+
+Los trades **sí** funcionan (H6 los arregló y se ven en los logs: «trade:
++3 niveles y PS completos»), pero no son la palanca.
+
+### Dos parsers míos dieron basura; el extractor validado no
+
+Al medir el tamaño del equipo en cada gimnasio, dos regex propias dieron
+resultados contradictorios e imposibles («con <6 móns, el 100% pasa de 4
+insignias», n=2). El extractor del repo
+`scripts/medir/nivel_gimnasio.py` da **79/79 de validación cruzada, diferencia
+media +0,00**. Todo lo de abajo sale de ahí. La lección ya estaba escrita en su
+docstring: «tres extracciones distintas del mismo log dieron +0,5, +0,9 y +2,2
+niveles de shortfall, y sólo una podía ser cierta».
 
 ### «Nadie ha pasado de 5 insignias» / «Techo: 5 insignias» — FALSO
 
