@@ -738,6 +738,12 @@ a que resta. El lote sigue hasta n=150 por brazo antes de cerrarlo.
 
 # H16 · Qué tienen las 3 runs que llegaron al Elite Four
 
+> **⚠️ RETRACTADA en su parte central el 06-10 a n=40 de v2. La «condición de
+> Misty» era un umbral elegido a posteriori y no replica.** Lee
+> «H16 · LA CONDICIÓN ERA UN UMBRAL A POSTERIORI» más abajo antes de usar nada
+> de esta sección. Lo que **sí** aguanta de H16 es la escalera de nivel y que el
+> cuello es nivel; lo que **no** aguanta es el punto de corte.
+
 Pregunta del usuario: *«¿podemos estudiar por qué esas runs han llegado al
 Alto Mando para replicarlo?»*. Sí, y hay una condición que separa cleanly.
 
@@ -975,6 +981,66 @@ mueren en Misty por igual, y con el flag se llega con menos nivel.
    mal planteada y la palanca no es «rellenar la plantilla» sino **«llegar a
    Misty con nivel»**.
 3. Los 2 runs censurados de A (5 y 4 insignias) explican ~0,2 del efecto.
+
+---
+
+---
+
+## H16 · LA CONDICIÓN DE MISTY ERA UN UMBRAL ELEGIDO A POSTERIORI
+
+Retractado el 06-10 a n=40 de v2. **No replica.**
+
+La condición que propuse —«llegar a Misty con nivel ≥20 y ≥5 móns → gana 3/3,
+p=0,006»— salió de **comparar las victorias contra las derrotas y elegir el
+umbral que mejor quedaba**. Eso es exactamente el diseño que este fichero ya ha
+pagado dos veces. Barrido de los umbrales plausibles (nivel 14-29 × equipo 3-6)
+sobre los dos lotes:
+
+| | v1 (33 entradas a Misty) | v2 (17 entradas a Misty) |
+|---|---|---|
+| umbrales con **p<0,05** | **19 de 39** | **0 de 28** |
+| el mejor | nivel≥20 y equipo≥3: 6/10, p=0,0012 | nivel≥19 y equipo≥4: 2/4, **p=0,22** |
+| **el de H16 (≥20 y ≥5)** | **3/3, p=0,0064** | **0/1, p=1,00** |
+
+En v1 **casi la mitad de los umbrales posibles** salen significativos. Eso no es
+descubrir una ley, es **comprarse significance eligiendo el mejor de 39**. Con 4
+victorias en 17 combates, el p mínimo alcanzable es ~0,0002, así que bastaba
+encontrar un umbral donde saliera bien.
+
+**Lo que queda en pie de H16 es la pregunta, no la respuesta:** el cuello es
+nivel, y la población llega a Misty con 4 móns y nivel 16-17. Eso sigue siendo
+cierto, y v2 lo confirma (Misty 24% de victorias, equipo mediano 4, nivel
+mediano 17). Lo que **no** es cierto es que haya un umbral cerrado que separe
+victoria de derrota.
+
+### Y queda una regla, que es lo importante
+
+> **No se eligen umbrales ni condiciones mirando quién ganó.** Se declara la
+> magnitud **antes**, en todos los runs, y se mide. Elegir el punto de corte con
+> la variable de resultado a la vista produce significance gratis, y con n=17
+> ni se nota hasta que llega el lote nuevo.
+
+Esto vale para el trade (+1,52 de crudo, 0 al controlar por pasos), para el veto
+por tipo, y ahora para la condición de Misty. **Tres veces el mismo error,
+siempre en la forma de «mira las que ganan y copia lo que hacen».**
+
+### El diseño que sí funciona: decisiones, no ganadores
+
+La razón por la que lo anterior falló es que **seleccionar por el resultado
+sesga la comparación**: las runs largas ganan más *y* tienen más de todo
+(`insignias~pasos` r=0,89). Para no sesgar hay que medir una magnitud **declarada
+antes** en **todos** los runs, o comparar **dentro de un mismo presupuesto de
+pasos**.
+
+| Diseño | Cómo | Estado |
+|---|---|---|
+| Mecanismo A/B con flag | un solo cambio, 300 runs, primaria declarada antes | **es lo que funciona**: H15 |
+| Comparar dentro de un tramo de pasos | bin por pasos y comparar dentro del bin | mató el efecto del trade |
+| Diff de ganadoras contra perdedoras | elegir por el resultado | trade, veto por tipo, H16 |
+| ❌ estudiar 3 runs atípicas | n=3, dos censuradas | no generaliza |
+
+Con n=3 runs del Elite Four en 1152 no se aprende una política: se aprenden
+anécdotas. Y dos de las trescensuradas por el timeout de 25 min.
 
 ---
 
