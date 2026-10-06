@@ -736,6 +736,32 @@ a que resta. El lote sigue hasta n=150 por brazo antes de cerrarlo.
 
 ## Cifras que retracto
 
+### «Nadie ha pasado de 5 insignias» / «Techo: 5 insignias» — FALSO
+
+Retractado el 06-10. **El Elite Four se ha alcanzado 3 veces en toda la
+historia del repo, y ya se había alcanzado antes de que se escribiera esta
+línea**:
+
+| Run | Lote | Insignias | A quién llegó |
+|---|---|---|---|
+| `viejo_1er_experimento/log-2026-10-01_22-45-57` | 1.er experimento, `PKL_MARGEN_BASE=2` | 8 | **Champions enteros** (Lorelei, Bruno, Agatha, Lance) |
+| `captura_TIMEOUT1500/captura-A-032636` | H15, brazo A | 8 | **Champions enteros**, y muere en el Champion |
+| `captura_TIMEOUT1500/captura-A-000427` | H15, brazo A | 8 | Murió en Bruno (timeout) |
+
+La del 1 de octubre no entraba en los lotes analizados porque es del primer
+experimento (`brazo=B_margen_2`, sin hash de código), y su techo se contará
+siempre como 5. **El techo real de este bot es 8 insignias, y se alcanza por
+la cola, no por la moda.**
+
+**Y el flag no tiene nada que ver**: 1/99 en el código viejo, 2/90 en A, 0/90
+en B. Los tres son compatibles con un ~1-2% de cola: llegar al Elite Four es un
+evento raro que el bot produce de vez en cuando, con el flag que sea.
+
+**Lo que sí sigue en pie: `CHAMPION` es 0.** Revisadas las **1.152 runs** del
+repo, `resultado` es `GAME_OVER` en las 1.152 (683 + 469 por formato). Nunca se
+ha ganado. La mejor run del proyecto llegó a la puerta del Champion con 6 móns
+en pie.
+
 1. **"0,63 / 0,65 insignias"** (lote H11): leídas con `grep -m1`, que pilla la
    primera línea del log y no la del RESUMEN. **Reales: 0,93 / 0,96.**
 2. **"La escalera mete más entrenadores y se autoalimenta"**: leído con un parser
@@ -949,12 +975,36 @@ de hoy**, similar a lo previsto. La ETA de las 23:03 (15:30) era correcta.
 El ritmo **no** es el problema. El problema es que el lote se está midiendo con
 un timeout que solo muerde a un brazo.
 
+## LOTE v2 · RELANZADO CON TIMEOUT 3600 (06-10 08:00)
+
+Decisión del usuario: opción 1 (parar y relanzar con el timeout arreglado).
+
+| | v1 (parado) | v2 (corriendo) |
+|---|---|---|
+| Timeout | 1500 s | **3600 s** |
+| Hash | `89aee993` | **`f56a010e`** |
+| Runs | 180 (A=90, B=90) | 0 → 300 |
+| Logs | `log/captura_TIMEOUT1500/` | `log/captura/` |
+| Salida | — | `/tmp/opencode/tanda_captura_h15_v2.log` |
+
+El hash cambia porque el propio launcher entra en el hash del código, así que
+los dos lotes quedan separados **por construcción**, que es para lo que existe
+la regla del hash.
+
+En `exp_captura.sh` el timeout pasa a ser **parámetro** (`$4`, por defecto
+3600) y se anuncia en la cabecera del lote, para que un timeout inadequate
+esté escrito en el registro en vez de escondido en el `timeout 1500` de una
+línea.
+
+Los 180 logs de v1 **no se mezclan**: sirven para el mecanismo (que no está
+censurado) y como evidencia del sesgo, no para la primaria.
+
 ## Trampa de método nueva: el timeout como sesgo asimétrico
 
 Acabada de pagar. Al lanzar el lote se registró «timeout 25 min por run» porque
 una run colgada paró 10 h el lote anterior, y ese objetivo lo cumple. Lo que no
 se consideró es que **el flag cambia la duración de la run**, así que cualquier
-timeout asymmetry sesga el resultado.
+timeout asimétrico sesga el resultado.
 
 Regla que sale de aquí: **el timeout tiene que comprobarse contra la duración
 del brazo tratado, no contra el promedio**. Si el tratamiento alarga las runs,
