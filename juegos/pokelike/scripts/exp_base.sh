@@ -146,6 +146,7 @@ trap 'kill -9 "$WD_PID" 2>/dev/null; rm -f "$VIVOS"' EXIT INT TERM
 # --- Lote --------------------------------------------------------------------
 lanzadas=0
 while [ "$lanzadas" -lt "$PEDIDAS" ]; do
+  PIDS=()
   for _ in 1 2; do
     [ "$lanzadas" -ge "$PEDIDAS" ] && break
     lanzadas=$((lanzadas + 1))
@@ -163,9 +164,18 @@ while [ "$lanzadas" -lt "$PEDIDAS" ]; do
       juegos/pokelike/scripts/jugar_pokelike.py \
       --region "$REGION" --max-pasos "$MAX_PASOS" --reset \
       > "$SALIDA" 2>&1 &
-    echo "$! $SALIDA" >> "$VIVOS"
+    PID_RUN="$!"
+    echo "$PID_RUN $SALIDA" >> "$VIVOS"
+    PIDS+=("$PID_RUN")
   done
-  wait
+  # **`wait` CON LOS PIDS DE LAS RUNS, nunca `wait` a secas.**
+  # Sin argumentos, `wait` espera a TODOS los hijos del launcher, y uno de
+  # ellos es el watchdog, que no sale nunca: su bucle es `while [ -f "$VIVOS" ]`
+  # y ese fichero no se borra hasta el final del script. O sea que el watchdog
+  # se espera a si mismo y el lote se queda clavado en el primer par. Pasó el
+  # 06-10: 2 runs cerradas a las 18:38 y el launcher sigue en `wait` a las
+  # 19:45, sin lanzar el par siguiente.
+  [ "${#PIDS[@]}" -gt 0 ] && wait "${PIDS[@]}"
   ENTREGADOS=$(ls "$LOGS/$ETIQUETA"/${ETIQUETA}-*.txt 2>/dev/null | wc -l)
   COMPLETOS=$(grep -l "resultado *:" "$LOGS/$ETIQUETA"/${ETIQUETA}-*.txt 2>/dev/null | wc -l)
   MATADOS=$(grep -c 'VIVO' "$LOG_GUARD" 2>/dev/null || echo 0)
@@ -187,5 +197,5 @@ grep -h "^  insignias *:" "$LOGS/$ETIQUETA"/${ETIQUETA}-*.txt 2>/dev/null |
 grep -h "^  capturas *:" "$LOGS/$ETIQUETA"/${ETIQUETA}-*.txt 2>/dev/null |
   awk '{s+=$3; n++} END {printf "   capturas/run %.2f\n", (n?s/n:0)}'
 grep -h "^  equipo *:" "$LOGS/$ETIQUETA"/${ETIQUETA}-*.txt 2>/dev/null |
-  awk '{s+=$1; n++} END {printf "   mons en el equipo %.2f\n", (n?s/n:0)}'
+  awk '{s+=$3; n++} END {printf "   mons en el equipo %.2f\n", (n?s/n:0)}'
 echo "== runs matadas por el guard de vivacidad: $(grep -c 'VIVO' "$LOG_GUARD" 2>/dev/null || echo 0) =="
