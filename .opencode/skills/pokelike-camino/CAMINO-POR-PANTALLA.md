@@ -99,10 +99,15 @@ que no se elige en la bifurcación no se recupera después**.
 
 ### Veto de entrenador (no negociable)
 
-Un entrenador se veta, con peso **-4**, si:
+Un entrenador se veta, con peso **-4** más **-400** final (H11), si:
 
-- El **nivel del rival** supera al mejor món del equipo + 2, o
-- Queda **un solo món en pie**, hay caídos y **no hay cura** accesible.
+- El **nivel del rival** supera a la media del equipo + 1 (`veto_nivel_entrenador()`, `PENALIZACION_VETO_NIVEL = -400`), o
+- Queda **un solo món en pie**, hay caídos y **no hay cura** accesible (escalera de riesgo).
+
+El -4 solo no decidía nada: el bono de ruta (60-300) lo tapaba 8/8 veces. La
+penalización final se suma en `elegir()` con el bono ya dentro, igual que la
+escalera. No es veto duro: si el entrenador es el único nodo se pelea igual.
+Guía: level lead 1+ por encima (improving-your-team).
 
 La referencia es el **equipo**, no el jefe. Comparar contra el nivel del líder
 deja pasar al Ace Trainer Nv15 con el equipo en Nv11, y eso es una derrota
