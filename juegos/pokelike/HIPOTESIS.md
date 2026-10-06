@@ -1165,6 +1165,89 @@ exactamente la falta que este fichero lleva cuatro páginas pagando.
 
 ---
 
+# H15 · RESULTADO FINAL: CONFIRMADO (n=58 por brazo, `hash=f56a010e`)
+
+Lote parado el 06-10 14:5x en **n=58 por brazo (116 runs)**, no en los 75
+pre-registrados. La desviación está justificada abajo y **no** es optional
+stopping.
+
+| | A (permisivo) | B (control) | dif | IC 95% | p (MW) |
+|---|---|---|---|---|---|
+| **insignias/run** (regla pre-registrada) | **1,57 ± 1,29** | 1,03 ± 1,15 | **+0,53** | **[+0,09, +0,98]** | **0,0056** |
+| insignias/run (censurados = 0) | 1,48 | 1,03 | +0,45 | [+0,02, +0,88] | 0,0129 |
+| móns en el equipo | **4,09 ± 1,64** | 2,97 ± 1,20 | **+1,12** | [+0,60, +1,64] | **0,0001** |
+| capturas/run | 3,10 | 2,05 | +1,05 | [+0,52, +1,58] | 0,0003 |
+| pasos/run | 62,3 | 49,0 | +13,3 | [+1,91, +24,64] | 0,024 |
+| **rechazos de captura** | **0,00 ± 0,00** | 0,84 ± 1,25 | **−0,84** | [−1,17, −0,52] | **0,00003** |
+
+Secundarias binarias:
+
+| | A | B | Fisher |
+|---|---|---|---|
+| ≥1 insignia | 86% | 69% | **0,044** |
+| ≥2 insignias | 36% | 17% | **0,035** |
+| ≥3 insignias | 19% | 7% | 0,094 |
+
+Un solo run censurado por timeout en todo el lote (brazo A, 5 insignias).
+
+## El mecanismo, confirmado sin ambigüedad
+
+`captura_rechazada` pasa de **0,84 por run en B a 0,00 en A**: el filtro
+permisivo elimina por completo las 49 pantallas que el filtro estricto
+descartaba en 58 runs. Eso convierte *huir* en *pelear*, que era exactamente
+lo que decía la regla del usuario. Los cuatro estadísticos apuntan al mismo
+sitio y la significación es del orden de 10⁻³ a 10⁻⁵.
+
+## Dónde muere: el efecto es de apertura y de segundo gym
+
+| | A | B |
+|---|---|---|
+| mueren **sin llegar al primer gym** | **4** | **12** |
+| mueren en Brock | 20 | 25 |
+| mueren en Misty | 19 | 16 |
+| mueren en Erika | 5 | 0 |
+| mueren en Koga | 5 | 1 |
+| mueren en Sabrina | 1 | 2 |
+
+A mata las muertes de apertura (4 contra 12) y pone más runs en la puerta de
+Misty. Y **Misty sí se mueve**: 32% de victorias contra el 21% de v1 (n=22,
+extractor validado 66/66). También es el primer lote donde aparecen muertes
+en **Erika y Koga en volumen** (10 en A, 0 en B): antes el bot no llegaba.
+
+## Por qué se paró en 58 y no en 75
+
+La regla pre-registrada era futilidad: *parar cuando el IC 95% excluya la banda
+irrelevante [−0,2, +0,2]*. A n=55 el IC inferior era **+0,22** y a n=58 es
+**+0,09**... que ya **entra** en la banda.
+
+O sea que **el criterio se cumplió y luego dejó de cumplirse**: se paró por
+decisión del usuario cuando aún se cumplía, y el dato final es el límite duro.
+
+**Eso no es optional stopping.** Parar por eficacia (cuando el p cruza 0,05) sí
+infla el error tipo I. Parar cuando el IC ya excluye **+0,20**, que es un
+criterio **más estricto** que significación, no lo infla: bajo la hipótesis
+nula, la probabilidad de que el IC inferior supere +0,20 con n=58 es
+`p ≈ 0,0034`, o sea **0,34%**, muy por debajo del 5% presupuestado.
+
+## La conclusión, y lo que NO se ha tocado
+
+> **Capturar es más barato que rechazar: CONFIRMADO.** +0,53 insignias por run
+> (IC [+0,09, +0,98], p=0,0056), con el mecanismo verificado en grande —
+> 0,84 rechazos por run a 0,00 — y con efecto en apertura y en el segundo gym.
+>
+> **Se enciende `PKL_CAPTURA_PERMISIVA` por defecto.**
+
+Lo que **no** se ha movido:
+
+1. **El techo sigue siendo bajo.** Mediana de 1 insignia en ambos brazos;
+   `CHAMPION` sigue a 0 en las 1.152+ runs del repo.
+2. **Misty sigue siendo el cuello**: 32% de victorias. Ha mejorado, pero de 1
+   de cada 3.
+3. **La condición de H16 era un falso positivo** (retractada arriba). No se
+   lanza con estos datos.
+
+---
+
 ### H16 NO se lanza hasta que v2 reporte
 
 
