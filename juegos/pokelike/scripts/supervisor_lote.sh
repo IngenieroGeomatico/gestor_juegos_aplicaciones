@@ -147,6 +147,17 @@ recoger_huerfanos() {
   if [ -z "$vivos" ] || [ ! -r "$vivos" ]; then
     return 0
   fi
+  # **Tabla vacia = no se toca nada.** El launcher hace `: > "$VIVOS"` al
+  # arrancar, y entre ese instante y el primer `echo pid log` hay una ventana
+  # en la que la tabla esta vacia. Leyendola en esa ventana, no se encuentra
+  # ningun PID vivo y se concluye que TODO es huerfano: se matan las runs que
+  # acaban de lanzarse. Sucedio a las 23:13.
+  #
+  # Una tabla vacia significa "todavia no se ha escrito nada", no "no queda
+  # nadie vivo".
+  if [ ! -s "$vivos" ]; then
+    return 0
+  fi
 
   # **Firma precisa del run, NO un `pgrep` flojo.**
   #
@@ -200,14 +211,22 @@ recoger_huerfanos() {
   return 0
 }
 
+# Gracia tras lanzar: no se declara muerto a un launcher durante estos segundos.
+# El pidfile del launcher ANTERIOR sigue en disco mientras el nuevo arranca, asi
+# que `vivo()` lee un PID muerto y declara muerto al recien lanzado: a los 60 s
+# de arrancar se relanzaba solo, en bucle.
+GRACIA_SEG="${GRACIA_SEG:-180}"
+arrancado_en=0
+
 lanzar() {
   setsid nohup "${ORDEN[@]}" >> "$SALIDA" 2>&1 < /dev/null &
-  nota "lanzado: ${ORDEN[*]}  (log en $SALIDA)"
+  arrancado_en=$(date +%s)
+  nota "lanzado: ${ORDEN[*]}  (log en $SALIDA). Gracia ${GRACIA_SEG}s."
 }
 
 nota "arranca. silencio maximo ${MINUTOS_SILENCIO} min (${SILENCIO_LIMITE}s), umbral memoria ${UMBRAL_MB} MB. dir=$LOGS_DIR"
 nota "orden: ${ORDEN[*]}"
-vivo || lanzar
+if ! vivo; then lanzar; fi
 
 ultimo=$(contar)
 ultimo_cambio=$(date +%s)
@@ -229,7 +248,7 @@ while true; do
     continue
   fi
 
-  if ! vivo; then
+  if ! vivo && [ $((ahora - arrancado_en)) -ge "$GRACIA_SEG" ]; then
     nota "el launcher NO esta vivo con $n runs. Recojo sus huerfanos y relanzo."
     recoger_huerfanos
     lanzar
