@@ -1580,3 +1580,130 @@ del brazo tratado, no contra el promedio**. Si el tratamiento alarga las runs,
 subir el timeout antes de lanzar, no después de contar. Aquí se perdieron 18
 puntos de insignia de A en 5 runs, y eso es exactamente el efecto que se
 buscaba medir.
+---
+
+# H15 · CIERRE: línea base con el flag encendido (n=150)
+
+Lanzada el 06-10 con `scripts/exp_base.sh 150 Kanto 1500 1800 600 60`, cerrada
+el 07-10. **150 runs, 140 cerradas, 10 cortadas por timeout, 0 killed por el
+guard de vivacidad.** Extractor validado con **94/94 de coincidencia cruzada y
+diferencia media +0,00**.
+
+## El número
+
+| | n | media | sd | **mediana** | ≥3 | ≥5 | ≥8 |
+|---|---|---|---|---|---|---|---|
+| v1 (filtro estricto) | 180 | 1,21 | 1,24 | **1** | — | — | 0 |
+| H15 brazo B (estricto) | 58 | 1,03 | 1,15 | **1** | — | — | 0 |
+| H15 brazo A (permisivo) | 58 | 1,57 | 1,29 | **1** | 19% | — | 0 |
+| **línea base (encendido)** | **150** | **1,33** | 1,26 | **1** | **14%** | **2%** | **1 (0,7%)** |
+
+**La mediana es 1 en los cuatro lotes, sin excepción.** 115 de 150 runs (77%)
+mueren con 0 o 1 insignia. La cola es más larga que en v1 (3 runs con ≥5, 1 con
+8) pero a 2% y 0,7% eso es ruido de cola, no un cambio de política.
+
+## Los dos hashes, y por qué no se ocultan
+
+| | n | media | max |
+|---|---|---|---|
+| `6ff56b8e` (las 22 primeras) | 21 | 1,86 ± 1,90 | **8** |
+| `eb781895` (tras reanudar) | 128 | 1,25 ± 1,11 | 6 |
+| **junto** | 150 | **1,33** | 8 |
+
+El bot es idéntico entre ambos (**ningún `.py` cambió**, comprobado con
+`git log --since` y `git status`); el hash difiere porque el launcher entró en
+el conjunto que se hashea y hubo que tocarlo para que reanudara.
+
+**Importa decirlo**: las 22 primeras dan 1,86 porque contienen la run del Elite
+Four. Leídas sin las 128 que la siguen, el lote parece ir a 1,86; leído completo,
+1,33. **Una sola run mueve la media del lote en 0,5.**
+
+## Dónde mueren
+
+| | n |
+|---|---|
+| Brock | 51 |
+| Misty | 47 |
+| sin llegar al primer gym | 21 |
+| Lt. Surge | 15 |
+| Erika | 11 |
+| Sabrina / Koga | 2 / 2 |
+| **Lance (Elite Four)** | **1** |
+
+**119 de 150 muertes (79%) están en los dos primeros gimnasios.** Ese es el
+cuello, y H15 no lo tocó: lo rodeó.
+
+## Los gimnasios, y la una buena noticia
+
+| Gimnasio | n | victorias | llega con nivel max (cuando gana) |
+|---|---|---|---|
+| Brock | 46 | **89%** | 11,0 |
+| **Misty** | 35 | **46%** | **20,2** |
+| Erika | 8 | 62% | 39,4 |
+| Koga | 2 | 50% | 45,0 |
+
+**Misty pasó del 21% (v1) al 46%**, y llega con nivel **20,2**.
+
+Y aquí está la ironía: **el umbral que H16 tenía retractado, «nivel ≥20»,
+coincide exactamente con el nivel con el que ahora se gana Misty**. Pero la
+condición retractada era nivel **y ≥5 móns**, y la población llega con **4 móns
+de mediana**. O sea: **el nivel se movió y el equipo no.** H16 acertó el número
+por casualidad y falló la condición, que es lo que se vio cuando no replicó.
+
+## Conclusión de H15
+
+> **Capturar es más barato que rechazar: CONFIRMADO**, con potencia (+0,53
+> insignias, IC [+0,09, +0,98], p=0,0056) y con el mecanismo verificado en
+> grande (0,84 → 0,00 rechazos por run). **Y encendido por defecto.**
+>
+> **Lo que NO hizo**: subir el techo. La mediana sigue en 1, el 77% muere en los
+> dos primeros gimnasios, y `CHAMPION` sigue a 0 en más de 1.300 runs del repo.
+
+El techo real de este bot es **8 insignias**, alcanzado 3 veces en toda su
+historia (1 vez aquí), y en las tres con código distinto. No es un estado
+alcanzable de forma repetida todavía.
+
+## Lo que queda como palanca
+
+1. **El equipo, no el filtro.** Llega a Misty con 4 móns de mediana cuando la
+   condición necesita 5-6. El filtro permisivo mueve capturas (2,4 → 3,1) pero
+   la población solo confirma ~3 capturas por run, y llegar a 6 móns pide ~5.
+2. **La captura tardía no sirve.** El nivel de lo capturado sube ×5 a lo largo
+   de la run, así que capturar mucho al final son cuerpos, no nivel.
+3. Cualquier ataque al cuello necesita un **A/B con primaria declarada antes**,
+   no el diff de una run que gana: esa operación ya salió mal tres veces en este
+   fichero (trade, veto por tipo, H16).
+
+## Los fallos de hoy, que son parte del resultado
+
+Cinco cosas que costaron el día. Todas de lanzamiento, ninguna del bot:
+
+1. **Nombres de log pisados.** Los dos runs de un par salían con el mismo
+   timestamp y el segundo `>` trunca al primero: **la mitad del lote perdida**
+   sin que se notara. `exp_captura.sh` lo evita con la etiqueta A/B; un
+   lanzador de un solo brazo necesita el índice a mano.
+2. **Stub de prueba que escribió encima de `jugar_pokelike.py`**, sustituindo
+   2.995 líneas por 9. Restaurado desde git y verificado (319/0 + diff vacío).
+   Un stub que ejerce de *path* distinto al del código real no prueba el
+   launcher: pisa lo que toca.
+3. **`wait` sin argumentos esperaba también al watchdog**, que nunca sale
+   porque su fichero existe hasta el final del script. Deadlock en el primer
+   par: 2 runs cerradas y el lote clavado.
+4. **Run colgada que se come el reloj del lote.** Una run estuvo 58,8 de 60 min
+   pulsando `continuar` contra un `Wild Tangela Lv13` sin resolverse. Como
+   `wait` espera a los dos runs del par, el throughput lo marcaba la peor run.
+   De ahí el guard de vivacidad.
+5. **Nadie vigilaba al launcher.** El lote murió a las 21:41 porque su árbol de
+   procesos cuelga del servicio del agente, y no se supo hasta las 06:16:
+   **8,6 h sin producir nada**, sin una sola señal en el log del launcher. El
+   guard vigilaba las runs; faltaba el latido sobre el proceso que las crea.
+
+### La regla que sale de las cinco
+
+> **El libro contable de un lote es `ls` del directorio de logs, no lo que el
+> launcher dice.** Las tres primeras veces el launcher anunció una cuenta que
+> no era la real, y las tres lo detectó mirar los ficheros. La cuarta vez no lo
+> detectó nadie porque no había quien mirara.
+
+Y su corolario: **un guard que vigila las unidades de trabajo no vigila el
+lanzador que las crea.** Ese hueco costó 8,6 h.
