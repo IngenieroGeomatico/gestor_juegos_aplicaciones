@@ -31,6 +31,9 @@ LOGS_DIR="${1:?falta el directorio de logs}"
 # bomba; por eso el nombre la lleva y el uso la repite.
 MINUTOS_SILENCIO="${2:?falta el limite de silencio en MINUTOS}"
 SILENCIO_LIMITE=$((MINUTOS_SILENCIO * 60))
+# MB libres por debajo de los cuales se recogehuerfanos y se avisa. 1200 MB con la
+# maquina en 7,3 GB: dos runs en paralelo mas el editor y el agente estan justos.
+UMBRAL_MB="${UMBRAL_MB:-1200}"
 shift 2
 ORDEN=("$@")
 
@@ -88,11 +91,25 @@ vivo() {
   return 1
 }
 
+matar_arbol() {
+  local pid="$1" hijo
+  for hijo in $(pgrep -P "$pid" 2>/dev/null); do matar_arbol "$hijo"; done
+  kill -9 "$pid" 2>/dev/null
+}
+
 matar_lanzador() {
+  # **Bajar por el arbol de hijos, no matar solo el launcher.**
+  #
+  # La cadena es launcher(bash) -> timeout -> uv -> python -> firefox, y cada
+  # firefox se lleva unos 400 MB. Matar solo el launcher deja a los cuatro
+  # huerfanos y **siguen corriendo**. Con los siete relanzamientos del bug de
+  # unidades del 07-10 eso apilo navegadores huerfanos hasta que systemd-oomd
+  # mato **VS Code** dos veces por presion de memoria (22:06 y 22:29), no el bot:
+  # el oomd mata el cgroup mas grande, y era el editor.
   local pid
   if [ -f "$PIDFILE" ]; then
     pid=$(cat "$PIDFILE" 2>/dev/null)
-    [ -n "$pid" ] && kill -9 "$pid" 2>/dev/null
+    if [ -n "$pid" ]; then matar_arbol "$pid"; fi
     rm -f "$PIDFILE"
   fi
   local p c
@@ -100,9 +117,33 @@ matar_lanzador() {
     c=$(tr '\0' ' ' < "/proc/$p/cmdline" 2>/dev/null)
     case "$c" in
       *"supervisor_lote"*) continue;;
-      "bash "*"$LANZADOR.sh"*) kill -9 "$p" 2>/dev/null;;
+      "bash "*"$LANZADOR.sh"*) matar_arbol "$p";;
     esac
   done
+}
+
+# **Recolector de huerfanos.** Un firefox o un python del bot cuyo PID no esta en
+# el fichero de runs vivas es huerfano por definicion, y se lleva hundreds of MB.
+memoria_disponible_mb() {
+  awk '/MemAvailable/{printf "%d", $2/1024}' /proc/meminfo
+}
+
+recoger_huerfanos() {
+  local vivos="$LOGS/$(basename "$LOGS_DIR").vivos"
+  local p cmd pid huerfano total=0
+  for p in $(pgrep -f "ms-play""wright" 2>/dev/null) $(pgrep -f "jugar_po""kelike.py" 2>/dev/null); do
+    cmd=$(tr '\0' ' ' < "/proc/$p/cmdline" 2>/dev/null)
+    [ -n "$cmd" ] || continue
+    huerfano=1
+    while read -r pid _log; do
+      [ "${pid:-}" = "$p" ] && huerfano=0 && break
+    done < "$vivos"
+    if [ "$huerfano" = "1" ]; then
+      kill -9 "$p" 2>/dev/null && total=$((total + 1))
+    fi
+  done
+  [ "$total" -gt 0 ] && nota "recogidos $total procesos huerfanos del bot"
+  return 0
 }
 
 lanzar() {
@@ -110,7 +151,7 @@ lanzar() {
   nota "lanzado: ${ORDEN[*]}  (log en $SALIDA)"
 }
 
-nota "arranca. silencio maximo ${MINUTOS_SILENCIO} min (${SILENCIO_LIMITE}s). dir=$LOGS_DIR"
+nota "arranca. silencio maximo ${MINUTOS_SILENCIO} min (${SILENCIO_LIMITE}s), umbral memoria ${UMBRAL_MB} MB. dir=$LOGS_DIR"
 nota "orden: ${ORDEN[*]}"
 vivo || lanzar
 
@@ -149,5 +190,28 @@ while true; do
     lanzar
     ultimo=$n
     ultimo_cambio=$ahora
+    continue
+  fi
+
+  # **Memoria.** El 07-10 systemd-oomd mato **VS Code** dos veces (22:06 y 22:29)
+  # por presion de memoria: no el bot, el cgroup mas grande, que era el editor.
+  # El bot no era inocente: apilaba firefox huerfanos de los relanzamientos.
+  # Aqui se recoge lo huerfano de verdad y, si la memoria sigue justa, se dice.
+  LIBRE=$(memoria_disponible_mb)
+  if [ "${LIBRE:-0}" -lt "$UMBRAL_MB" ]; then
+    recoger_huerfanos
+    LIBRE=$(memoria_disponible_mb)
+    if [ "${LIBRE:-0}" -lt "$UMBRAL_MB" ] && [ "${AVISOS:-0}" -eq 0 ]; then
+      AVISOS=1
+      nota "AVISO: solo ${LIBRE} MB libres (< ${UMBRAL_MB}) y no basta con recoger huerfanos."
+      nota "  -> el lote sigue; no se para por esto. Pero el OOM mata el cgroup"
+      nota "     mas grande y ese no es el bot: si el editor se cae otra vez, la"
+      nota "     causa somos los runs en paralelo."
+    fi
+  else
+    AVISOS=0
+    # Aunque la memoria este bien, se recogen los huerfanos: es la condicion que
+    # los genero y no cuesta nada.
+    recoger_huerfanos
   fi
 done
