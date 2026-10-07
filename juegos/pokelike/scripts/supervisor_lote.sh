@@ -70,18 +70,38 @@ nota() { echo "[$(date '+%d/%m %H:%M')] $*" >> "$SUP_LOG"; }
 contar() { ls "$LOGS"/*.txt 2>/dev/null | wc -l; }
 
 vivo() {
-  local pid
-  # 1) pidfile: la via fiable, si el launcher lo escribe.
+  local pid c p
+  # **1) pidfile, pero solo si su PID sigue vivo.** Si el PID esta muerto NO se
+  # devuelve falso aqui: se cae al plan B por nombre. Un pidfile obsoleto (el de
+  # un launcher anterior, que sigue en disco hasta que el nuevo lo escribe)
+  # hacia que el supervisor declarase muerto a un launcher **vivo**, y se
+  # relanzaba en bucle.
   if [ -f "$PIDFILE" ]; then
     pid=$(cat "$PIDFILE" 2>/dev/null)
     if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then
       return 0
     fi
-    return 1
   fi
-  # 2) sin pidfile: buscar por nombre, **excluyendo al propio supervisor**.
-  local p c
+
+  # **2) plan B: buscar por nombre, excluyendo al supervisor y a los ancestros.**
+  # Hace falta porque `setsid nohup bash ... &` crea subshells que heredan la
+  # linea de ordenes del launcher, asi que `pgrep -f` devuelve mas de un PID y
+  # solo UNO es el launcher de verdad. El ancestorsco descarta al supervisor
+  # (lleva el nombre del launcher como argumento) y al shell del agente.
+  local PROPIOS=" "
+  local w q
+  PROPIOS="$PROPIOS$$ "
+  w=$(awk '/^PPid:/{print $2}' "/proc/$$/status" 2>/dev/null)
+  while [ -n "$w" ] && [ "$w" -gt 1 ] 2>/dev/null; do
+    case "$PROPIOS" in *" $w "*) break;; esac
+    PROPIOS="$PROPIOS$w "
+    q=$(awk '/^PPid:/{print $2}' "/proc/$w/status" 2>/dev/null)
+    [ "$q" = "$w" ] && break
+    w="$q"
+  done
+
   for p in $(pgrep -f "$pat_lanz" 2>/dev/null); do
+    case "$PROPIOS" in *" $p "*) continue;; esac
     c=$(tr '\0' ' ' < "/proc/$p/cmdline" 2>/dev/null)
     case "$c" in
       *"supervisor_lote"*) continue;;
