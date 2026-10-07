@@ -76,6 +76,10 @@ mkdir -p "$LOGS/$ETIQUETA"
 VIVOS="$LOGS/${ETIQUETA}.vivos"
 LOG_GUARD="$LOGS/${ETIQUETA}_guard.log"
 PIDFILE="$LOGS/${ETIQUETA}.pid"
+# Log del launcher: lo pone el supervisor, y si no existe se crea aqui para que el
+# trap de salida tenga donde escribir.
+SALIDA="${SALIDA:-$LOGS/${ETIQUETA}.lanzador.log}"
+touch "$SALIDA" 2>/dev/null || true
 
 echo "== H17 · captura por nivel | A=1 B=0 | n=$PEDIDAS en total (~$((PEDIDAS/2)) por brazo) | $REGION | hash=$HASH =="
 echo "   timeout=${TIMEOUT}s vivacidad=${VIVACIDAD}s (tick ${TICK}s) | logs en $LOGS/$ETIQUETA"
@@ -124,7 +128,22 @@ if [ ! -w "$VIVOS" ]; then
   exit 1
 fi
 watchdog & WD_PID=$!
-trap 'kill -9 "$WD_PID" 2>/dev/null; rm -f "$VIVOS" "$PIDFILE"' EXIT INT TERM
+# **El launcher dice por que se va.** Se llevaba horas muriendo en silencio:
+# el supervisor veia el proceso desaparecer, relanzaba, y no habia ni una linea
+# en el log que explicase por que. Con `trap ... EXIT` se imprime el codigo de
+# salida y la senal recibida.
+#   - Si sale con codigo 0 y sin senal: el bucle termino de verdad (imprime "== fin").
+#   - Si aparece CODIGO= o SENAL=, ya no hay que adivinar.
+registrar_salida() {
+  local codigo=$?
+  local senal=""
+  [ "$codigo" -gt 128 ] && senal=" senal=$((codigo - 128))"
+  [ "$codigo" -ne 0 ] && echo "[$(date '+%d/%m %H:%M:%S')] el launcher SALE codigo=$codigo$senal" >> "$SALIDA"
+  kill -9 "$WD_PID" 2>/dev/null
+  rm -f "$VIVOS" "$PIDFILE"
+}
+trap registrar_salida EXIT
+trap 'registrar_salida; exit 130' INT TERM
 
 # **Pidfile.** El supervisor comprueba este PID en vez de hacer `pgrep -f` por el
 # nombre del script, porque el supervisor **se pasa el nombre del launcher como

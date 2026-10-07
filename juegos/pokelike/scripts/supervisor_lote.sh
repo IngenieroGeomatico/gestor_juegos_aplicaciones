@@ -239,7 +239,11 @@ GRACIA_SEG="${GRACIA_SEG:-180}"
 arrancado_en=0
 
 lanzar() {
-  setsid nohup "${ORDEN[@]}" >> "$SALIDA" 2>&1 < /dev/null &
+  # **SALIDA se le pasa al launcher por entorno**, para que su trap de salida
+  # escriba en el MISMO log que el supervisor. Si cada uno escribiera en el suyo,
+  # el diagnostico de por que se muere quedaria en un fichero aparte y habria que
+  # ir a buscarlo.
+  SALIDA="$SALIDA" setsid nohup "${ORDEN[@]}" >> "$SALIDA" 2>&1 < /dev/null &
   arrancado_en=$(date +%s)
   nota "lanzado: ${ORDEN[*]}  (log en $SALIDA). Gracia ${GRACIA_SEG}s."
 }
