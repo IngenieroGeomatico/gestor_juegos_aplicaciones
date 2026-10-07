@@ -66,8 +66,16 @@ HASH="$( { for f in "${ENTRADA[@]}"; do
 cd "$RAIZ"
 
 mkdir -p "$LOGS/$ETIQUETA"
-VIVOS="$(mktemp /tmp/opencode/h17vivos.XXXXXX)"
+# **El fichero de runsvivas va en el repo, no en `/tmp`.**
+# El 07-10 `/tmp/opencode` paso a ser de root sin escritura, el `mktemp`
+# fallo con "Permission denied" y el fichero quedo VACIO: el guard de
+# vivacidad arranca con `while [ -f "$VIVOS" ]`, asi que con un fichero
+# inexistente **no se lanza y no avisa**: el lote corria sin red de
+# seguridad. Y `/tmp` se limpia solo, que ya hacia falta no depender de
+# el para el estado de un lote.
+VIVOS="$LOGS/${ETIQUETA}.vivos"
 LOG_GUARD="$LOGS/${ETIQUETA}_guard.log"
+PIDFILE="$LOGS/${ETIQUETA}.pid"
 
 echo "== H17 · captura por nivel | A=1 B=0 | n=$PEDIDAS por brazo | $REGION | hash=$HASH =="
 echo "   timeout=${TIMEOUT}s vivacidad=${VIVACIDAD}s (tick ${TICK}s) | logs en $LOGS/$ETIQUETA"
@@ -104,8 +112,27 @@ watchdog() {
   done
 }
 : > "$VIVOS"
+# **Si el fichero de runsvivas no se puede escribir, el lote NO arranca.**
+# Así falló el guard el 07-10: el `mktemp` dio "Permission denied" porque
+# `/tmp/opencode` pasó a ser de root, `$VIVOS` quedó vacío, el
+# `while [ -f "$VIVOS" ]` del watchdog no entró nunca, y el lote corría **sin
+# red de seguridad y sin decir nada**. Un guard que no puede vigilar tiene que
+# fallar aquí, no esperar a que se le eche de menos.
+if [ ! -w "$VIVOS" ]; then
+  echo "ABORTA: no puedo escribir $VIVOS, y sin el no hay guard de vivacidad." >&2
+  echo "        Un guard que no puede vigilar debe fallar aqui, no en silencio." >&2
+  exit 1
+fi
 watchdog & WD_PID=$!
-trap 'kill -9 "$WD_PID" 2>/dev/null; rm -f "$VIVOS"' EXIT INT TERM
+trap 'kill -9 "$WD_PID" 2>/dev/null; rm -f "$VIVOS" "$PIDFILE"' EXIT INT TERM
+
+# **Pidfile.** El supervisor comprueba este PID en vez de hacer `pgrep -f` por el
+# nombre del script, porque el supervisor **se pasa el nombre del launcher como
+# argumento**: `bash supervisor_lote.sh log/h17 45 bash exp_h17.sh ...`. O sea
+# que `pgrep -f exp_h17` encuentra al propio supervisor, que empieza igual por
+# "bash ", y se creería vivo un launcher muerto para siempre. El pidfile no
+# admite esa ambigüedad.
+echo $$ > "$PIDFILE"
 
 # Se reanuda: las runs ya en disco cuentan como entregadas de su brazo.
 resumen_brazo() {

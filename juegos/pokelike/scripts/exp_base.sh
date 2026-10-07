@@ -67,7 +67,14 @@ fi
 RAIZ="$(cd "$(dirname "$0")/../../.." && pwd)"
 LOGS="$RAIZ/juegos/pokelike/log"
 ETIQUETA="base"
-VIVOS="$(mktemp /tmp/opencode/vivos.XXXXXX)"
+# **El fichero de runsvivas va en el repo, no en `/tmp`.**
+# El 07-10 `/tmp/opencode` paso a ser de root sin escritura, el `mktemp`
+# fallo con "Permission denied" y el fichero quedo VACIO: el guard de
+# vivacidad arranca con `while [ -f "$VIVOS" ]`, asi que con un fichero
+# inexistente **no se lanza y no avisa**: el lote corria sin red de
+# seguridad. Y `/tmp` se limpia solo, que ya hacia falta no depender de
+# el para el estado de un lote.
+VIVOS="$LOGS/${ETIQUETA}.vivos"
 LOG_GUARD="$LOGS/${ETIQUETA}_guard.log"
 
 # Mismo conjunto de entradas que el resto de lanzadores, para que los hashes

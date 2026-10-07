@@ -1,0 +1,853 @@
+navegador: firefox (headless)
+pokedex cargado: 767 especies
+  ajustes: autoSkipAllBattles=True, autoSkipBattles=True, autoSkipEvolve=True, skipBossPreview=True, anidado_presente=False
+== brazo=base | PKL_MARGEN_BASE=? | PKL_ESCALERA_RIESGO=1 | PKL_TRADE=1 | codigo=6ff56b8e ==
+== run Kanto | presupuesto 1500 pasos (solo para pruebas: agotado NO corta la run) ==
+  [nueva_run -> True] Story
+  [region -> Kanto] elige KANTO
+  [trainer -> boy] avatar
+  [starter -> 1] Bulbasaur ['Grass', 'Poison'] vs [['Ground', 'Rock'], ['Psychic', 'Water'], ['Electric'], ['Grass', 'Poison'], ['Poison']] ventaja=['8.00', '2.00', '4.00', '2.00', '2.00'] media=3.60 peor=2.00 stats=318
+  starters: [('Bulbasaur', ['Grass', 'Poison']), ('Charmander', ['Fire']), ('Squirtle', ['Water'])]
+  → buscando el tutor de movimientos por n1_0
+  ↻ buscando trade (intento 1/1): no hay nodo de trade a la vista y la guia dice tirar el mapa para buscarlo
+  [nodo -> 1] batalla score=375.0 (capturar: equipo de 1, hacen falta cuerpos antes que nivel; deja 90.0 combate(s) al jefe) | mapa: Route 1: vs Brock (Rock) | plan: insignias 0 | Ciudad Plateada nv14-14 [Ground/Rock]
+  · Route 1: vs Brock (Rock) | equipo 1 (vivos 1) niv 5-5 | lider Rock | insignias 0 | disponibles ['batalla', 'batalla'] (crudo ['catch', 'battle']) | rivales ? | total 23/1 | TM usado: False, bolsa: []
+  DEC nodo mapa=Route 1: vs Brock (Rock) nodo=n0_0 tipo=batalla crudo=catch atajo=1 equipo=1 vivos=1 niv=5-5 insignias=0 disponibles=catch,battle capturas_pantalla=0 razon=batalla score=375.0 (capturar: equipo de 1, hacen falta cuerpos antes que nivel; deja 90.0 combate(s) al jefe)
+  [capturar -> 1] Rattata ['Normal']: 2x apertura=0 2x region=0 sin 0.5x=8 entrenadores=0.90 nuevos=['Normal'] stats=253 nivel=4
+  DEC captura_pedida objetivo=1 equipo=1 vivos=1 candidatos=Rattata:4|Voltorb:4|Nidoran-m:4 motivo=Rattata ['Normal']: 2x apertura=0 2x region=0 sin 0.5x=8 entrenadores=0.90 nuevos=['Normal'] stats=253 nivel=4
+  >>> CAPTURA confirmada (equipo 1->2) | total 1
+  DEC captura_confirmada equipo_antes=1 equipo_despues=2 nuevos=Rattata:4
+  → buscando el tutor de movimientos por n2_0
+  ↻ buscando trade (intento 1/1): no hay nodo de trade a la vista y la guia dice tirar el mapa para buscarlo
+  [nodo -> 2] batalla score=245.5 (capturar: equipo de 2, hacen falta cuerpos antes que nivel; deja 53.0 combate(s) al jefe) | mapa: Route 1: vs Brock (Rock) | plan: insignias 0 | Ciudad Plateada nv14-14 [Ground/Rock]
+  · Route 1: vs Brock (Rock) | equipo 2 (vivos 2) niv 4-5 | lider Rock | insignias 0 | disponibles ['item', 'batalla'] (crudo ['item', 'catch']) | rivales ? | total 23/2 | TM usado: False, bolsa: []
+  DEC nodo mapa=Route 1: vs Brock (Rock) nodo=n1_0 tipo=batalla crudo=catch atajo=2 equipo=2 vivos=2 niv=4-5 insignias=0 disponibles=item,catch capturas_pantalla=0 razon=batalla score=245.5 (capturar: equipo de 2, hacen falta cuerpos antes que nivel; deja 53.0 combate(s) al jefe)
+  [capturar -> 3] Sandshrew ['Ground']: 2x apertura=2 2x region=7 sin 0.5x=8 entrenadores=1.27 nuevos=['Ground'] stats=300 nivel=4
+  DEC captura_pedida objetivo=3 equipo=2 vivos=2 candidatos=Pikachu:4|Geodude:4|Sandshrew:4 motivo=Sandshrew ['Ground']: 2x apertura=2 2x region=7 sin 0.5x=8 entrenadores=1.27 nuevos=['Ground'] stats=300 nivel=4
+  >>> CAPTURA confirmada (equipo 2->3) | total 2
+  DEC captura_confirmada equipo_antes=2 equipo_despues=3 nuevos=Sandshrew:4
+  → buscando el tutor de movimientos por n3_1
+  ↻ buscando trade (intento 1/1): no hay nodo de trade a la vista y la guia dice tirar el mapa para buscarlo
+  [nodo -> 2] entrenador score=134.0 (entrenador: mucha exp, faltan ~10 de nivel; deja 28.0 combate(s) al jefe) | mapa: Route 1: vs Brock (Rock) | plan: insignias 0 | Ciudad Plateada nv14-14 [Ground/Rock]
+  ⋯ contragolpe contra hiker (Rock/Ground/Fighting, Nv2): ['Bulbasaur', 'Sandshrew', 'Rattata']
+  ⋯ no se pudo reordenar (quedó ['Bulbasaur', 'Rattata', 'Sandshrew'])
+  · Route 1: vs Brock (Rock) | equipo 3 (vivos 3) niv 4-5 | lider Rock | insignias 0 | disponibles ['incognita', 'entrenador'] (crudo ['question', 'trainer']) | rivales [2] | total 23/2 | TM usado: False, bolsa: []
+  DEC nodo mapa=Route 1: vs Brock (Rock) nodo=n2_1 tipo=entrenador crudo=trainer atajo=2 equipo=3 vivos=3 niv=4-5 insignias=0 disponibles=question,trainer capturas_pantalla=0 razon=entrenador score=134.0 (entrenador: mucha exp, faltan ~10 de nivel; deja 28.0 combate(s) al jefe)
+  [continuar -> True] pulso continuar hasta el final
+  DEC combate rival=Hiker wants to battle! tipo=entrenador nuestro_niv=7 rival_niv=2 nuestros=3 suyo=1 insignias=0
+  estado: Hiker wants to battle! | niveles rivales 2-2
+  enemigos=[('Rhyhorn Lv2', '0/15', 2)]
+  mios=[('Bulbasaur Lv5', '23/23', 7), ('Rattata Lv4', '19/19', 6), ('Sandshrew Lv4', '22/22', 6)]
+  → buscando el tutor de movimientos por n4_1
+  ↻ buscando trade (intento 1/1): no hay nodo de trade a la vista y la guia dice tirar el mapa para buscarlo
+  >>> COMBATE GANADO (continuamos en map-screen) | 1-0
+  [nodo -> 2] entrenador score=74.5 (entrenador: mucha exp, faltan ~8 de nivel; deja 11.0 combate(s) al jefe) | mapa: Route 1: vs Brock (Rock) | plan: insignias 0 | Ciudad Plateada nv14-14 [Ground/Rock]
+  ⋯ contragolpe contra bug-catcher (Bug, Nv3): ['Rattata', 'Bulbasaur', 'Sandshrew']
+  ⋯ no se pudo reordenar (quedó ['Bulbasaur', 'Rattata', 'Sandshrew'])
+  · Route 1: vs Brock (Rock) | equipo 3 (vivos 3) niv 6-7 | lider Rock | insignias 0 | disponibles ['tutor', 'entrenador'] (crudo ['move_tutor', 'trainer']) | rivales [3] | total 23/2 | TM usado: False, bolsa: []
+  DEC nodo mapa=Route 1: vs Brock (Rock) nodo=n3_2 tipo=entrenador crudo=trainer atajo=2 equipo=3 vivos=3 niv=6-7 insignias=0 disponibles=move_tutor,trainer capturas_pantalla=0 razon=entrenador score=74.5 (entrenador: mucha exp, faltan ~8 de nivel; deja 11.0 combate(s) al jefe)
+  [continuar -> True] pulso continuar hasta el final
+  DEC combate rival=Bug Catcher wants to battle! tipo=entrenador nuestro_niv=7 rival_niv=3 nuestros=3 suyo=1 insignias=0
+  ↻ buscando trade (intento 1/1): no hay nodo de trade a la vista y la guia dice tirar el mapa para buscarlo
+  >>> COMBATE GANADO (continuamos en map-screen) | 2-0
+  [nodo -> 1] entrenador score=57.0 (entrenador: mucha exp, faltan ~6 de nivel; deja 6.0 combate(s) al jefe) | mapa: Route 1: vs Brock (Rock) | plan: insignias 0 | Ciudad Plateada nv14-14 [Ground/Rock]
+  ⋯ contragolpe contra policeman (Fire, Nv4): ['Sandshrew', 'Rattata', 'Bulbasaur']
+  ⋯ reordenado: ['Bulbasaur', 'Rattata', 'Sandshrew'] -> ['Sandshrew', 'Rattata', 'Bulbasaur'] (para entrenador)
+  DEC orden para=entrenador antes=Bulbasaur,Rattata,Sandshrew despues=Sandshrew,Rattata,Bulbasaur
+  · Route 1: vs Brock (Rock) | equipo 3 (vivos 3) niv 8-9 | lider Rock | insignias 0 | disponibles ['entrenador', 'incognita'] (crudo ['trainer', 'question']) | rivales [4] | total 23/2 | TM usado: False, bolsa: []
+  DEC nodo mapa=Route 1: vs Brock (Rock) nodo=n4_2 tipo=entrenador crudo=trainer atajo=1 equipo=3 vivos=3 niv=8-9 insignias=0 disponibles=trainer,question capturas_pantalla=0 razon=entrenador score=57.0 (entrenador: mucha exp, faltan ~6 de nivel; deja 6.0 combate(s) al jefe)
+  [continuar -> True] pulso continuar hasta el final
+  DEC combate rival=Officer wants to battle! tipo=entrenador nuestro_niv=11 rival_niv=4 nuestros=3 suyo=1 insignias=0
+  ↻ buscando trade (intento 1/1): no hay nodo de trade a la vista y la guia dice tirar el mapa para buscarlo
+  >>> COMBATE GANADO (continuamos en map-screen) | 3-0
+  [nodo -> 1] incognita score=12.5 (nodo sin identificar (trade o pasivo); deja 1 combate(s) al jefe) | mapa: Route 1: vs Brock (Rock) | plan: insignias 0 | Ciudad Plateada nv14-14 [Ground/Rock]
+  ⋯ reordenado: ['Sandshrew', 'Rattata', 'Bulbasaur'] -> ['Bulbasaur', 'Sandshrew', 'Rattata'] (para incognita)
+  DEC orden para=incognita rival=Ground,Rock antes=Sandshrew,Rattata,Bulbasaur despues=Bulbasaur,Sandshrew,Rattata
+  · Route 1: vs Brock (Rock) | equipo 3 (vivos 3) niv 10-11 | lider Rock | insignias 0 | disponibles ['incognita', 'incognita'] (crudo ['question', 'question']) | rivales ? | total 23/2 | TM usado: False, bolsa: []
+  DEC nodo mapa=Route 1: vs Brock (Rock) nodo=n5_2 tipo=incognita crudo=question atajo=1 equipo=3 vivos=3 niv=10-11 insignias=0 disponibles=question,question capturas_pantalla=0 razon=incognita score=12.5 (nodo sin identificar (trade o pasivo); deja 1 combate(s) al jefe)
+  [continuar -> True] pulso continuar hasta el final
+  DEC combate rival=Ace Trainer wants to battle! tipo=entrenador nuestro_niv=11 rival_niv=4 nuestros=3 suyo=1 insignias=0
+  ↻ buscando trade (intento 1/1): no hay nodo de trade a la vista y la guia dice tirar el mapa para buscarlo
+  >>> COMBATE GANADO (continuamos en map-screen) | 4-0
+  [nodo -> 1] cura score=50.0 (pokecenter: paso obligatorio hacia el jefe, ya se va entero pero se pasa por aqui igualmente) | mapa: Route 1: vs Brock (Rock) | plan: insignias 0 | Ciudad Plateada nv14-14 [Ground/Rock]
+  · PS real invalidado (pokecenter)
+  ⋯ reordenado: ['Bulbasaur', 'Sandshrew', 'Rattata'] -> ['Sandshrew', 'Rattata', 'Bulbasaur'] (para cura)
+  DEC orden para=cura antes=Bulbasaur,Sandshrew,Rattata despues=Sandshrew,Rattata,Bulbasaur
+  · Route 1: vs Brock (Rock) | equipo 3 (vivos 3) niv 12-13 | lider Rock | insignias 0 | disponibles ['cura', 'batalla'] (crudo ['pokecenter', 'battle']) | rivales ? | total 23/2 | TM usado: False, bolsa: []
+  DEC nodo mapa=Route 1: vs Brock (Rock) nodo=n6_1 tipo=cura crudo=pokecenter atajo=1 equipo=3 vivos=3 niv=12-13 insignias=0 disponibles=pokecenter,battle capturas_pantalla=0 razon=cura score=50.0 (pokecenter: paso obligatorio hacia el jefe, ya se va entero pero se pasa por aqui igualmente)
+  ↻ buscando trade (intento 1/1): no hay nodo de trade a la vista y la guia dice tirar el mapa para buscarlo
+  ↻ reroll del mapa (1/3): sin trainer ni combate y el jefe como única salida, la guía dice tirar el mapa para buscar trade o exp
+  ↻ reroll del mapa (2/3): sin trainer ni combate y el jefe como única salida, la guía dice tirar el mapa para buscar trade o exp
+  ↻ reroll del mapa (3/3): sin trainer ni combate y el jefe como única salida, la guía dice tirar el mapa para buscar trade o exp
+  [nodo -> 1] jefe score=-1.0 (jefe APLAZADO: hay 2 nivel(es) de faltan (listón 14, rival 14); se busca más exp | medio 12 < listón 14) | mapa: Route 1: vs Brock (Rock) | plan: insignias 0 | Ciudad Plateada nv14-14 [Ground/Rock]
+  ⋯ orden contra jefe: ['Sandshrew', 'Bulbasaur', 'Rattata']
+  ⋯ reordenado: ['Sandshrew', 'Rattata', 'Bulbasaur'] -> ['Sandshrew', 'Bulbasaur', 'Rattata'] (para jefe)
+  DEC orden para=jefe antes=Sandshrew,Rattata,Bulbasaur despues=Sandshrew,Bulbasaur,Rattata
+  · Route 1: vs Brock (Rock) | equipo 3 (vivos 3) niv 12-13 | lider Rock | insignias 0 | disponibles ['jefe'] (crudo ['boss']) | rivales ? | total 23/2 | TM usado: False, bolsa: []
+  DEC nodo mapa=Route 1: vs Brock (Rock) nodo=n7_0 tipo=jefe crudo=boss atajo=1 equipo=3 vivos=3 niv=12-13 insignias=0 disponibles=boss capturas_pantalla=0 razon=jefe score=-1.0 (jefe APLAZADO: hay 2 nivel(es) de faltan (listón 14, rival 14); se busca más exp
+  [prep -> Sandshrew] rival Rock/Ground -> ['Bulbasaur', 'Sandshrew', 'Rattata']
+  ⋯ prep: rival Rock/Ground -> ['Bulbasaur', 'Sandshrew', 'Rattata']
+  ⋯ no se pudo reordenar (quedó ['Sandshrew', 'Bulbasaur', 'Rattata'])
+  [continuar -> True] pulso continuar hasta el final
+  DEC combate rival=Gym Battle vs Brock! tipo=entrenador nuestro_niv=13 rival_niv=14 nuestros=3 suyo=2 insignias=0
+  estado: Gym Battle vs Brock! | niveles rivales 12-14
+  enemigos=[('Geodude Lv12', '0/31', 12), ('Onix Lv14', '33/33', 14)]
+  mios=[('Sandshrew Lv12', '29/34', 12), ('Bulbasaur Lv13', '34/34', 13), ('Rattata Lv12', '29/29', 12)]
+  [insignia -> True] insignia conseguida (total 1)
+  · PS real invalidado (insignia)
+  >>> COMBATE GANADO (continuamos en badge-screen) | 5-0
+  → buscando el tutor de movimientos por n1_0
+  ↻ buscando trade (intento 1/1): no hay nodo de trade a la vista y la guia dice tirar el mapa para buscarlo
+  [nodo -> 2] batalla score=617.0 (cazar 6 nivel(es) por encima del entrenador: el equipo ya tiene 3 móns, ahora toca ganar experiencia; deja 174.0 combate(s) al jefe) | mapa: Mt Moon: vs Misty (Water) | plan: insignias 1 | Ciudad Celeste nv20-20 [Psychic/Water]
+  >> insignias: 0 -> 1
+  · Mt Moon: vs Misty (Water) | equipo 3 (vivos 3) niv 14-15 | lider Water | insignias 1 | disponibles ['batalla', 'batalla'] (crudo ['catch', 'battle']) | rivales ? | total 23/3 | TM usado: False, bolsa: []
+  DEC nodo mapa=Mt Moon: vs Misty (Water) nodo=n0_0 tipo=batalla crudo=battle atajo=2 equipo=3 vivos=3 niv=14-15 insignias=1 disponibles=catch,battle capturas_pantalla=0 razon=batalla score=617.0 (cazar 6 nivel(es) por encima del entrenador: el equipo ya tiene 3 móns, ahora toca ganar experiencia; deja 174.0 combate(s) al jefe)
+  [continuar -> True] pulso continuar hasta el final
+  DEC combate rival=Wild Nidoran-f appeared! tipo=salvaje nuestro_niv=16 rival_niv=7 nuestros=3 suyo=1 insignias=1
+  → buscando el tutor de movimientos por n2_1
+  ↻ buscando trade (intento 1/1): no hay nodo de trade a la vista y la guia dice tirar el mapa para buscarlo
+  >>> COMBATE GANADO (continuamos en map-screen) | 6-0
+  [nodo -> 1] entrenador score=389.5 (entrenador: mucha exp, faltan ~5 de nivel; deja 101.0 combate(s) al jefe) | mapa: Mt Moon: vs Misty (Water) | plan: insignias 1 | Ciudad Celeste nv20-20 [Psychic/Water]
+  ⋯ contragolpe contra team-rocket (Poison/Normal, Nv9): ['Sandshrew', 'Rattata', 'Ivysaur']
+  ⋯ reordenado: ['Sandshrew', 'Ivysaur', 'Rattata'] -> ['Sandshrew', 'Rattata', 'Ivysaur'] (para entrenador)
+  DEC orden para=entrenador antes=Sandshrew,Ivysaur,Rattata despues=Sandshrew,Rattata,Ivysaur
+  · Mt Moon: vs Misty (Water) | equipo 3 (vivos 3) niv 15-16 | lider Water | insignias 1 | disponibles ['entrenador', 'batalla'] (crudo ['trainer', 'battle']) | rivales [9] | total 23/4 | TM usado: False, bolsa: []
+  DEC nodo mapa=Mt Moon: vs Misty (Water) nodo=n1_1 tipo=entrenador crudo=trainer atajo=1 equipo=3 vivos=3 niv=15-16 insignias=1 disponibles=trainer,battle capturas_pantalla=0 razon=entrenador score=389.5 (entrenador: mucha exp, faltan ~5 de nivel; deja 101.0 combate(s) al jefe)
+  [continuar -> True] pulso continuar hasta el final
+  DEC combate rival=Team Rocket Grunt wants to battle! tipo=entrenador nuestro_niv=16 rival_niv=9 nuestros=3 suyo=2 insignias=1
+  → buscando el tutor de movimientos por n3_2
+  ↻ buscando trade (intento 1/1): no hay nodo de trade a la vista y la guia dice tirar el mapa para buscarlo
+  >>> COMBATE GANADO (continuamos en map-screen) | 7-0
+  [nodo -> 2] entrenador score=232.0 (entrenador: mucha exp, faltan ~3 de nivel; deja 56.0 combate(s) al jefe) | mapa: Mt Moon: vs Misty (Water) | plan: insignias 1 | Ciudad Celeste nv20-20 [Psychic/Water]
+  ⋯ contragolpe contra fisher (Water, Nv10): ['Ivysaur', 'Sandshrew', 'Rattata']
+  ⋯ reordenado: ['Sandshrew', 'Rattata', 'Ivysaur'] -> ['Ivysaur', 'Sandshrew', 'Rattata'] (para entrenador)
+  DEC orden para=entrenador antes=Sandshrew,Rattata,Ivysaur despues=Ivysaur,Sandshrew,Rattata
+  · Mt Moon: vs Misty (Water) | equipo 3 (vivos 3) niv 17-18 | lider Water | insignias 1 | disponibles ['item', 'entrenador'] (crudo ['item', 'trainer']) | rivales [10] | total 23/4 | TM usado: False, bolsa: []
+  DEC nodo mapa=Mt Moon: vs Misty (Water) nodo=n2_1 tipo=entrenador crudo=trainer atajo=2 equipo=3 vivos=3 niv=17-18 insignias=1 disponibles=item,trainer capturas_pantalla=0 razon=entrenador score=232.0 (entrenador: mucha exp, faltan ~3 de nivel; deja 56.0 combate(s) al jefe)
+  [continuar -> True] pulso continuar hasta el final
+  DEC combate rival=Fisherman wants to battle! tipo=entrenador nuestro_niv=18 rival_niv=10 nuestros=3 suyo=2 insignias=1
+  → buscando el tutor de movimientos por n4_2
+  ↻ buscando trade (intento 1/1): no hay nodo de trade a la vista y la guia dice tirar el mapa para buscarlo
+  >>> COMBATE GANADO (continuamos en map-screen) | 8-0
+  [nodo -> 1] incognita score=40.0 (nodo sin identificar (trade o pasivo); deja 31.0 combate(s) al jefe) | mapa: Mt Moon: vs Misty (Water) | plan: insignias 1 | Ciudad Celeste nv20-20 [Psychic/Water]
+  ⋯ reordenado: ['Ivysaur', 'Sandshrew', 'Rattata'] -> ['Sandshrew', 'Ivysaur', 'Rattata'] (para incognita)
+  DEC orden para=incognita rival=Psychic,Water antes=Ivysaur,Sandshrew,Rattata despues=Sandshrew,Ivysaur,Rattata
+  · Mt Moon: vs Misty (Water) | equipo 3 (vivos 3) niv 19-20 | lider Water | insignias 1 | disponibles ['incognita', 'tutor'] (crudo ['question', 'move_tutor']) | rivales ? | total 23/4 | TM usado: False, bolsa: []
+  DEC nodo mapa=Mt Moon: vs Misty (Water) nodo=n3_2 tipo=incognita crudo=question atajo=1 equipo=3 vivos=3 niv=19-20 insignias=1 disponibles=question,move_tutor capturas_pantalla=0 razon=incognita score=40.0 (nodo sin identificar (trade o pasivo); deja 31.0 combate(s) al jefe)
+  [continuar -> True] pulso continuar hasta el final
+  DEC combate rival=Wild Beedrill appeared! tipo=salvaje nuestro_niv=20 rival_niv=11 nuestros=3 suyo=1 insignias=1
+  estado: Wild Beedrill appeared! | niveles rivales 11-11
+  enemigos=[('Beedrill Lv11', '0/35', 11)]
+  mios=[('Sandshrew Lv19', '39/48', 19), ('Ivysaur Lv20', '54/54', 20), ('Rattata Lv19', '40/40', 19)]
+  ↻ buscando trade (intento 1/1): no hay nodo de trade a la vista y la guia dice tirar el mapa para buscarlo
+  >>> COMBATE GANADO (continuamos en map-screen) | 9-0
+  [nodo -> 2] entrenador score=25.0 (entrenador: ya a nivel, no hace falta arriesgar; deja 19.0 combate(s) al jefe) | mapa: Mt Moon: vs Misty (Water) | plan: insignias 1 | Ciudad Celeste nv20-20 [Psychic/Water]
+  ⋯ contragolpe contra bug-catcher (Bug, Nv13): ['Raticate', 'Ivysaur', 'Sandshrew']
+  ⋯ reordenado: ['Sandshrew', 'Ivysaur', 'Raticate'] -> ['Raticate', 'Ivysaur', 'Sandshrew'] (para entrenador)
+  DEC orden para=entrenador antes=Sandshrew,Ivysaur,Raticate despues=Raticate,Ivysaur,Sandshrew
+  · Mt Moon: vs Misty (Water) | equipo 3 (vivos 3) niv 20-21 | lider Water | insignias 1 | disponibles ['entrenador', 'entrenador'] (crudo ['trainer', 'trainer']) | rivales [13, 13] | total 23/4 | TM usado: False, bolsa: []
+  DEC nodo mapa=Mt Moon: vs Misty (Water) nodo=n4_1 tipo=entrenador crudo=trainer atajo=2 equipo=3 vivos=3 niv=20-21 insignias=1 disponibles=trainer,trainer capturas_pantalla=0 razon=entrenador score=25.0 (entrenador: ya a nivel, no hace falta arriesgar; deja 19.0 combate(s) al jefe)
+  [continuar -> True] pulso continuar hasta el final
+  DEC combate rival=Bug Catcher wants to battle! tipo=entrenador nuestro_niv=21 rival_niv=13 nuestros=3 suyo=2 insignias=1
+  ↻ buscando trade (intento 1/1): no hay nodo de trade a la vista y la guia dice tirar el mapa para buscarlo
+  >>> COMBATE GANADO (continuamos en map-screen) | 10-0
+  [nodo -> 2] incognita score=14.0 (nodo sin identificar (trade o pasivo); deja 5.0 combate(s) al jefe) | mapa: Mt Moon: vs Misty (Water) | plan: insignias 1 | Ciudad Celeste nv20-20 [Psychic/Water]
+  ⋯ reordenado: ['Raticate', 'Ivysaur', 'Sandslash'] -> ['Sandslash', 'Ivysaur', 'Raticate'] (para incognita)
+  DEC orden para=incognita rival=Psychic,Water antes=Raticate,Ivysaur,Sandslash despues=Sandslash,Ivysaur,Raticate
+  · Mt Moon: vs Misty (Water) | equipo 3 (vivos 3) niv 22-23 | lider Water | insignias 1 | disponibles ['entrenador', 'incognita'] (crudo ['trainer', 'question']) | rivales [14] | total 23/4 | TM usado: False, bolsa: []
+  DEC nodo mapa=Mt Moon: vs Misty (Water) nodo=n5_2 tipo=incognita crudo=question atajo=2 equipo=3 vivos=3 niv=22-23 insignias=1 disponibles=trainer,question capturas_pantalla=0 razon=incognita score=14.0 (nodo sin identificar (trade o pasivo); deja 5.0 combate(s) al jefe)
+  [continuar -> True] pulso continuar hasta el final
+  DEC combate rival=Ace Trainer wants to battle! tipo=entrenador nuestro_niv=23 rival_niv=14 nuestros=3 suyo=2 insignias=1
+  ↻ buscando trade (intento 1/1): no hay nodo de trade a la vista y la guia dice tirar el mapa para buscarlo
+  >>> COMBATE GANADO (continuamos en map-screen) | 11-0
+  [nodo -> 1] entrenador score=-99.0 (entrenador de riesgo: equipo al 69% y sin cura delante; deja 5.0 combate(s) al jefe; -110 de penalización por riesgo) | mapa: Mt Moon: vs Misty (Water) | plan: insignias 1 | Ciudad Celeste nv20-20 [Psychic/Water]
+  ⋯ scientist es de tipo 'Diversos': sin contragolpe posible
+  · Mt Moon: vs Misty (Water) | equipo 3 (vivos 3) niv 24-25 | lider Water | insignias 1 | disponibles ['entrenador'] (crudo ['trainer']) | rivales [15] | total 23/4 | TM usado: False, bolsa: []
+  DEC nodo mapa=Mt Moon: vs Misty (Water) nodo=n6_2 tipo=entrenador crudo=trainer atajo=1 equipo=3 vivos=3 niv=24-25 insignias=1 disponibles=trainer capturas_pantalla=0 razon=entrenador score=-99.0 (entrenador de riesgo: equipo al 69% y sin cura delante; deja 5.0 combate(s) al jefe; -110 de penalización por riesgo)
+  [continuar -> True] pulso continuar hasta el final
+  DEC combate rival=Scientist wants to battle! tipo=entrenador nuestro_niv=25 rival_niv=15 nuestros=3 suyo=2 insignias=1
+  ↻ buscando trade (intento 1/1): no hay nodo de trade a la vista y la guia dice tirar el mapa para buscarlo
+  >>> COMBATE GANADO (continuamos en map-screen) | 12-0
+  [nodo -> 1] jefe score=12.0 (jefe: única salida y listo (medio 26 >= listón 20)) | mapa: Mt Moon: vs Misty (Water) | plan: insignias 1 | Ciudad Celeste nv20-20 [Psychic/Water]
+  ⋯ orden contra jefe: ['Ivysaur', 'Sandslash', 'Raticate']
+  ⋯ reordenado: ['Sandslash', 'Ivysaur', 'Raticate'] -> ['Ivysaur', 'Sandslash', 'Raticate'] (para jefe)
+  DEC orden para=jefe antes=Sandslash,Ivysaur,Raticate despues=Ivysaur,Sandslash,Raticate
+  · Mt Moon: vs Misty (Water) | equipo 3 (vivos 3) niv 26-27 | lider Water | insignias 1 | disponibles ['jefe'] (crudo ['boss']) | rivales ? | total 23/4 | TM usado: False, bolsa: []
+  DEC nodo mapa=Mt Moon: vs Misty (Water) nodo=n7_1 tipo=jefe crudo=boss atajo=1 equipo=3 vivos=3 niv=26-27 insignias=1 disponibles=boss capturas_pantalla=0 razon=jefe score=12.0 (jefe: única salida y listo (medio 26 >= listón 20))
+  [prep -> Ivysaur] rival Water/Psychic -> ['Ivysaur', 'Sandslash', 'Raticate']
+  ⋯ prep: rival Water/Psychic -> ['Ivysaur', 'Sandslash', 'Raticate']
+  [continuar -> True] pulso continuar hasta el final
+  DEC combate rival=Gym Battle vs Misty! tipo=entrenador nuestro_niv=27 rival_niv=20 nuestros=3 suyo=2 insignias=1
+  estado: Gym Battle vs Misty! | niveles rivales 18-20
+  enemigos=[('Staryu Lv18', '0/38', 18), ('Starmie Lv20', '54/54', 20)]
+  mios=[('Ivysaur Lv27', '63/69', 27), ('Sandslash Lv26', '58/75', 26), ('Raticate Lv26', '24/64', 26)]
+  [insignia -> True] insignia conseguida (total 2)
+  · PS real invalidado (insignia)
+  >>> COMBATE GANADO (continuamos en badge-screen) | 13-0
+  ↻ buscando trade (intento 1/1): no hay nodo de trade a la vista y la guia dice tirar el mapa para buscarlo
+  [nodo -> 2] batalla score=175.0 (capturar: equipo de 3 y ya a nivel, ampliar con el mas alto de esta pantalla; deja 115.0 combate(s) al jefe) | mapa: Nugget Bridge: vs Lt. Surge (Electric) | plan: insignias 2 | Ciudad Azafran nv25-25 [Electric]
+  >> insignias: 1 -> 2
+  ⋯ reordenado: ['Ivysaur', 'Sandslash', 'Raticate'] -> ['Raticate', 'Ivysaur', 'Sandslash'] (para batalla)
+  DEC orden para=batalla rival=Electric antes=Ivysaur,Sandslash,Raticate despues=Raticate,Ivysaur,Sandslash
+  · Nugget Bridge: vs Lt. Surge (Electric) | equipo 3 (vivos 3) niv 28-29 | lider Electric | insignias 2 | disponibles ['batalla', 'batalla'] (crudo ['catch', 'battle']) | rivales ? | total 23/5 | TM usado: False, bolsa: []
+  DEC nodo mapa=Nugget Bridge: vs Lt. Surge (Electric) nodo=n0_0 tipo=batalla crudo=battle atajo=2 equipo=3 vivos=3 niv=28-29 insignias=2 disponibles=catch,battle capturas_pantalla=0 razon=batalla score=175.0 (capturar: equipo de 3 y ya a nivel, ampliar con el mas alto de esta pantalla; deja 115.0 combate(s) al jefe)
+  [continuar -> True] pulso continuar hasta el final
+  DEC combate rival=Wild Kabuto appeared! tipo=salvaje nuestro_niv=29 rival_niv=13 nuestros=3 suyo=1 insignias=2
+  ↻ buscando trade (intento 1/1): no hay nodo de trade a la vista y la guia dice tirar el mapa para buscarlo
+  >>> COMBATE GANADO (continuamos en map-screen) | 14-0
+  [nodo -> 1] batalla score=126.0 (capturar: equipo de 3 y ya a nivel, ampliar con el mas alto de esta pantalla; deja 66.0 combate(s) al jefe) | mapa: Nugget Bridge: vs Lt. Surge (Electric) | plan: insignias 2 | Ciudad Azafran nv25-25 [Electric]
+  · Nugget Bridge: vs Lt. Surge (Electric) | equipo 3 (vivos 3) niv 29-30 | lider Electric | insignias 2 | disponibles ['batalla', 'batalla'] (crudo ['catch', 'catch']) | rivales ? | total 23/6 | TM usado: False, bolsa: []
+  DEC nodo mapa=Nugget Bridge: vs Lt. Surge (Electric) nodo=n1_1 tipo=batalla crudo=catch atajo=1 equipo=3 vivos=3 niv=29-30 insignias=2 disponibles=catch,catch capturas_pantalla=0 razon=batalla score=126.0 (capturar: equipo de 3 y ya a nivel, ampliar con el mas alto de esta pantalla; deja 66.0 combate(s) al jefe)
+  [capturar -> 1] permisiva: Farfetchd ['Normal', 'Flying'] aunque noMejore (nivel=15, stats=377); si el tipo esta repetido, el nodo de cambio saca al anterior
+  DEC captura_pedida objetivo=1 equipo=3 vivos=3 candidatos=Farfetchd:15|Rhyhorn:15|Koffing:15 motivo=permisiva: Farfetchd ['Normal', 'Flying'] aunque noMejore (nivel=15, stats=377); si el tipo esta repetido, el nodo de cambio saca al anterior
+  >>> CAPTURA confirmada (equipo 3->4) | total 3
+  DEC captura_confirmada equipo_antes=3 equipo_despues=4 nuevos=Farfetchd:15
+  ↻ buscando trade (intento 1/1): no hay nodo de trade a la vista y la guia dice tirar el mapa para buscarlo
+  [nodo -> 2] entrenador score=43.0 (entrenador: ya a nivel, no hace falta arriesgar; deja 37.0 combate(s) al jefe) | mapa: Nugget Bridge: vs Lt. Surge (Electric) | plan: insignias 2 | Ciudad Azafran nv25-25 [Electric]
+  ⋯ contragolpe contra fisher (Water, Nv16): ['Ivysaur', 'Sandslash', 'Raticate', 'Farfetchd']
+  ⋯ reordenado: ['Raticate', 'Ivysaur', 'Sandslash', 'Farfetchd'] -> ['Ivysaur', 'Sandslash', 'Raticate', 'Farfetchd'] (para entrenador)
+  DEC orden para=entrenador antes=Raticate,Ivysaur,Sandslash,Farfetchd despues=Ivysaur,Sandslash,Raticate,Farfetchd
+  · Nugget Bridge: vs Lt. Surge (Electric) | equipo 4 (vivos 4) niv 15-30 | lider Electric | insignias 2 | disponibles ['entrenador', 'entrenador'] (crudo ['trainer', 'trainer']) | rivales [16, 16] | total 23/6 | TM usado: False, bolsa: []
+  DEC nodo mapa=Nugget Bridge: vs Lt. Surge (Electric) nodo=n2_1 tipo=entrenador crudo=trainer atajo=2 equipo=4 vivos=4 niv=15-30 insignias=2 disponibles=trainer,trainer capturas_pantalla=0 razon=entrenador score=43.0 (entrenador: ya a nivel, no hace falta arriesgar; deja 37.0 combate(s) al jefe)
+  [continuar -> True] pulso continuar hasta el final
+  DEC combate rival=Fisherman wants to battle! tipo=entrenador nuestro_niv=30 rival_niv=16 nuestros=4 suyo=2 insignias=2
+  ↻ buscando trade (intento 1/1): no hay nodo de trade a la vista y la guia dice tirar el mapa para buscarlo
+  >>> COMBATE GANADO (continuamos en map-screen) | 15-0
+  [nodo -> 2] batalla score=76.0 (capturar: equipo de 4 y ya a nivel, ampliar con el mas alto de esta pantalla; deja 16.0 combate(s) al jefe) | mapa: Nugget Bridge: vs Lt. Surge (Electric) | plan: insignias 2 | Ciudad Azafran nv25-25 [Electric]
+  ⋯ reordenado: ['Venusaur', 'Sandslash', 'Raticate', 'Farfetchd'] -> ['Raticate', 'Farfetchd', 'Venusaur', 'Sandslash'] (para batalla)
+  DEC orden para=batalla rival=Electric antes=Venusaur,Sandslash,Raticate,Farfetchd despues=Raticate,Farfetchd,Venusaur,Sandslash
+  · Nugget Bridge: vs Lt. Surge (Electric) | equipo 4 (vivos 4) niv 17-32 | lider Electric | insignias 2 | disponibles ['entrenador', 'batalla'] (crudo ['trainer', 'battle']) | rivales [18] | total 23/6 | TM usado: False, bolsa: []
+  DEC nodo mapa=Nugget Bridge: vs Lt. Surge (Electric) nodo=n3_2 tipo=batalla crudo=battle atajo=2 equipo=4 vivos=4 niv=17-32 insignias=2 disponibles=trainer,battle capturas_pantalla=0 razon=batalla score=76.0 (capturar: equipo de 4 y ya a nivel, ampliar con el mas alto de esta pantalla; deja 16.0 combate(s) al jefe)
+  [continuar -> True] pulso continuar hasta el final
+  DEC combate rival=Wild Tangela appeared! tipo=salvaje nuestro_niv=32 rival_niv=17 nuestros=4 suyo=1 insignias=2
+  ↻ buscando trade (intento 1/1): no hay nodo de trade a la vista y la guia dice tirar el mapa para buscarlo
+  >>> COMBATE GANADO (continuamos en map-screen) | 16-0
+  [nodo -> 1] entrenador score=17.0 (entrenador: ya a nivel, no hace falta arriesgar; deja 11.0 combate(s) al jefe) | mapa: Nugget Bridge: vs Lt. Surge (Electric) | plan: insignias 2 | Ciudad Azafran nv25-25 [Electric]
+  ⋯ contragolpe contra fire-spitter (Fire, Nv19): ['Sandslash', 'Raticate', 'Farfetchd', 'Venusaur']
+  ⋯ reordenado: ['Raticate', 'Farfetchd', 'Venusaur', 'Sandslash'] -> ['Sandslash', 'Raticate', 'Farfetchd', 'Venusaur'] (para entrenador)
+  DEC orden para=entrenador antes=Raticate,Farfetchd,Venusaur,Sandslash despues=Sandslash,Raticate,Farfetchd,Venusaur
+  · Nugget Bridge: vs Lt. Surge (Electric) | equipo 4 (vivos 4) niv 18-33 | lider Electric | insignias 2 | disponibles ['entrenador', 'entrenador'] (crudo ['trainer', 'trainer']) | rivales [19, 19] | total 23/6 | TM usado: False, bolsa: []
+  DEC nodo mapa=Nugget Bridge: vs Lt. Surge (Electric) nodo=n4_2 tipo=entrenador crudo=trainer atajo=1 equipo=4 vivos=4 niv=18-33 insignias=2 disponibles=trainer,trainer capturas_pantalla=0 razon=entrenador score=17.0 (entrenador: ya a nivel, no hace falta arriesgar; deja 11.0 combate(s) al jefe)
+  [continuar -> True] pulso continuar hasta el final
+  DEC combate rival=Firebreather wants to battle! tipo=entrenador nuestro_niv=33 rival_niv=19 nuestros=4 suyo=2 insignias=2
+  estado: Firebreather wants to battle! | niveles rivales 19-19
+  enemigos=[('Growlithe Lv19', '0/49', 19), ('Vulpix Lv19', '43/43', 19)]
+  mios=[('Sandslash Lv32', '90/90', 32), ('Raticate Lv32', '14/77', 32), ('Farfetchd Lv18', '46/46', 18), ('Venusaur Lv33', '95/95', 33)]
+  ↻ buscando trade (intento 1/1): no hay nodo de trade a la vista y la guia dice tirar el mapa para buscarlo
+  >>> COMBATE GANADO (continuamos en map-screen) | 17-0
+  [nodo -> 2] batalla score=62.0 (capturar: equipo de 4 y ya a nivel, ampliar con el mas alto de esta pantalla; deja 2 combate(s) al jefe) | mapa: Nugget Bridge: vs Lt. Surge (Electric) | plan: insignias 2 | Ciudad Azafran nv25-25 [Electric]
+  ⋯ reordenado: ['Sandslash', 'Raticate', 'Farfetchd', 'Venusaur'] -> ['Farfetchd', 'Venusaur', 'Sandslash', 'Raticate'] (para batalla)
+  DEC orden para=batalla rival=Electric antes=Sandslash,Raticate,Farfetchd,Venusaur despues=Farfetchd,Venusaur,Sandslash,Raticate
+  · Nugget Bridge: vs Lt. Surge (Electric) | equipo 4 (vivos 4) niv 20-35 | lider Electric | insignias 2 | disponibles ['entrenador', 'batalla'] (crudo ['trainer', 'catch']) | rivales [20] | total 23/6 | TM usado: False, bolsa: []
+  DEC nodo mapa=Nugget Bridge: vs Lt. Surge (Electric) nodo=n5_2 tipo=batalla crudo=catch atajo=2 equipo=4 vivos=4 niv=20-35 insignias=2 disponibles=trainer,catch capturas_pantalla=0 razon=batalla score=62.0 (capturar: equipo de 4 y ya a nivel, ampliar con el mas alto de esta pantalla; deja 2 combate(s) al jefe)
+  [capturar -> 2] permisiva: Horsea ['Water'] aunque noMejore (nivel=20, stats=295); si el tipo esta repetido, el nodo de cambio saca al anterior
+  DEC captura_pedida objetivo=2 equipo=4 vivos=4 candidatos=Metapod:20|Horsea:20|Omanyte:20 motivo=permisiva: Horsea ['Water'] aunque noMejore (nivel=20, stats=295); si el tipo esta repetido, el nodo de cambio saca al anterior
+  >>> CAPTURA confirmada (equipo 4->5) | total 4
+  DEC captura_confirmada equipo_antes=4 equipo_despues=5 nuevos=Horsea:20
+  ↻ buscando trade (intento 1/1): no hay nodo de trade a la vista y la guia dice tirar el mapa para buscarlo
+  [nodo -> 1] batalla score=61.0 (capturar: equipo de 5 y ya a nivel, ampliar con el mas alto de esta pantalla; deja 1 combate(s) al jefe) | mapa: Nugget Bridge: vs Lt. Surge (Electric) | plan: insignias 2 | Ciudad Azafran nv25-25 [Electric]
+  ⋯ reordenado: ['Farfetchd', 'Venusaur', 'Sandslash', 'Raticate', 'Horsea'] -> ['Horsea', 'Farfetchd', 'Venusaur', 'Sandslash', 'Raticate'] (para batalla)
+  DEC orden para=batalla rival=Electric antes=Farfetchd,Venusaur,Sandslash,Raticate,Horsea despues=Horsea,Farfetchd,Venusaur,Sandslash,Raticate
+  · Nugget Bridge: vs Lt. Surge (Electric) | equipo 5 (vivos 5) niv 20-35 | lider Electric | insignias 2 | disponibles ['batalla'] (crudo ['battle']) | rivales ? | total 23/6 | TM usado: False, bolsa: []
+  DEC nodo mapa=Nugget Bridge: vs Lt. Surge (Electric) nodo=n6_2 tipo=batalla crudo=battle atajo=1 equipo=5 vivos=5 niv=20-35 insignias=2 disponibles=battle capturas_pantalla=0 razon=batalla score=61.0 (capturar: equipo de 5 y ya a nivel, ampliar con el mas alto de esta pantalla; deja 1 combate(s) al jefe)
+  [continuar -> True] pulso continuar hasta el final
+  DEC combate rival=Wild Koffing appeared! tipo=salvaje nuestro_niv=35 rival_niv=20 nuestros=5 suyo=1 insignias=2
+  ↻ buscando trade (intento 1/1): no hay nodo de trade a la vista y la guia dice tirar el mapa para buscarlo
+  >>> COMBATE GANADO (continuamos en map-screen) | 18-0
+  [nodo -> 1] jefe score=12.0 (jefe: única salida y listo (medio 30 >= listón 25)) | mapa: Nugget Bridge: vs Lt. Surge (Electric) | plan: insignias 2 | Ciudad Azafran nv25-25 [Electric]
+  ⋯ orden contra jefe: ['Sandslash', 'Horsea', 'Farfetchd', 'Raticate', 'Venusaur']
+  ⋯ reordenado: ['Horsea', 'Farfetchd', 'Venusaur', 'Sandslash', 'Raticate'] -> ['Sandslash', 'Horsea', 'Farfetchd', 'Raticate', 'Venusaur'] (para jefe)
+  DEC orden para=jefe antes=Horsea,Farfetchd,Venusaur,Sandslash,Raticate despues=Sandslash,Horsea,Farfetchd,Raticate,Venusaur
+  · Nugget Bridge: vs Lt. Surge (Electric) | equipo 5 (vivos 5) niv 21-36 | lider Electric | insignias 2 | disponibles ['jefe'] (crudo ['boss']) | rivales ? | total 23/6 | TM usado: False, bolsa: []
+  DEC nodo mapa=Nugget Bridge: vs Lt. Surge (Electric) nodo=n7_1 tipo=jefe crudo=boss atajo=1 equipo=5 vivos=5 niv=21-36 insignias=2 disponibles=boss capturas_pantalla=0 razon=jefe score=12.0 (jefe: única salida y listo (medio 30 >= listón 25))
+  [prep -> Sandslash] rival Electric -> ['Sandslash', 'Venusaur', 'Raticate', 'Horsea', 'Farfetchd']
+  ⋯ prep: rival Electric -> ['Sandslash', 'Venusaur', 'Raticate', 'Horsea', 'Farfetchd']
+  [continuar -> True] pulso continuar hasta el final
+  DEC combate rival=Gym Battle vs Lt. Surge! tipo=entrenador nuestro_niv=36 rival_niv=25 nuestros=5 suyo=3 insignias=2
+  [insignia -> True] insignia conseguida (total 3)
+  >>> COMBATE GANADO (continuamos en badge-screen) | 19-0
+  → buscando el tutor de movimientos por n1_0
+  ↻ buscando trade (intento 1/1): no hay nodo de trade a la vista y la guia dice tirar el mapa para buscarlo
+  [nodo -> 2] batalla score=198.0 (capturar: equipo de 5 y ya a nivel, ampliar con el mas alto de esta pantalla; deja 138.0 combate(s) al jefe) | mapa: Rock Tunnel: vs Erika (Grass) | plan: insignias 3 | Ciudad Canela nv32-32 [Grass/Poison]
+  >> insignias: 2 -> 3
+  ⋯ reordenado: ['Sandslash', 'Horsea', 'Farfetchd', 'Raticate', 'Venusaur'] -> ['Raticate', 'Sandslash', 'Horsea', 'Farfetchd', 'Venusaur'] (para batalla)
+  DEC orden para=batalla rival=Grass,Poison antes=Sandslash,Horsea,Farfetchd,Raticate,Venusaur despues=Raticate,Sandslash,Horsea,Farfetchd,Venusaur
+  · Rock Tunnel: vs Erika (Grass) | equipo 5 (vivos 5) niv 23-38 | lider Grass | insignias 3 | disponibles ['batalla', 'batalla'] (crudo ['catch', 'battle']) | rivales ? | total 23/7 | TM usado: False, bolsa: []
+  DEC nodo mapa=Rock Tunnel: vs Erika (Grass) nodo=n0_0 tipo=batalla crudo=battle atajo=2 equipo=5 vivos=5 niv=23-38 insignias=3 disponibles=catch,battle capturas_pantalla=0 razon=batalla score=198.0 (capturar: equipo de 5 y ya a nivel, ampliar con el mas alto de esta pantalla; deja 138.0 combate(s) al jefe)
+  [continuar -> True] pulso continuar hasta el final
+  DEC combate rival=Wild Jigglypuff appeared! tipo=salvaje nuestro_niv=39 rival_niv=20 nuestros=5 suyo=1 insignias=3
+  → buscando el tutor de movimientos por n2_1
+  ↻ buscando trade (intento 1/1): no hay nodo de trade a la vista y la guia dice tirar el mapa para buscarlo
+  >>> COMBATE GANADO (continuamos en map-screen) | 20-0
+  [nodo -> 2] batalla score=125.0 (capturar: equipo de 5 y ya a nivel, ampliar con el mas alto de esta pantalla; deja 65.0 combate(s) al jefe) | mapa: Rock Tunnel: vs Erika (Grass) | plan: insignias 3 | Ciudad Canela nv32-32 [Grass/Poison]
+  · Rock Tunnel: vs Erika (Grass) | equipo 5 (vivos 5) niv 24-39 | lider Grass | insignias 3 | disponibles ['entrenador', 'batalla'] (crudo ['trainer', 'battle']) | rivales [22] | total 23/7 | TM usado: False, bolsa: []
+  DEC nodo mapa=Rock Tunnel: vs Erika (Grass) nodo=n1_1 tipo=batalla crudo=battle atajo=2 equipo=5 vivos=5 niv=24-39 insignias=3 disponibles=trainer,battle capturas_pantalla=0 razon=batalla score=125.0 (capturar: equipo de 5 y ya a nivel, ampliar con el mas alto de esta pantalla; deja 65.0 combate(s) al jefe)
+  [continuar -> True] pulso continuar hasta el final
+  DEC combate rival=Wild Nidorina appeared! tipo=salvaje nuestro_niv=39 rival_niv=21 nuestros=5 suyo=1 insignias=3
+  estado: Wild Nidorina appeared! | niveles rivales 21-21
+  enemigos=[('Nidorina Lv21', '23/60', 21)]
+  mios=[('Raticate Lv38', '72/89', 38), ('Sandslash Lv38', '105/105', 38), ('Horsea Lv24', '48/48', 24), ('Farfetchd Lv24', '58/58', 24), ('Venusaur Lv39', '111/111', 39)]
+  → buscando el tutor de movimientos por n3_2
+  ↻ buscando trade (intento 1/1): no hay nodo de trade a la vista y la guia dice tirar el mapa para buscarlo
+  >>> COMBATE GANADO (continuamos en map-screen) | 21-0
+  [nodo -> 1] batalla score=104.0 (capturar: equipo de 5 y ya a nivel, ampliar con el mas alto de esta pantalla; deja 44.0 combate(s) al jefe) | mapa: Rock Tunnel: vs Erika (Grass) | plan: insignias 3 | Ciudad Canela nv32-32 [Grass/Poison]
+  · Rock Tunnel: vs Erika (Grass) | equipo 5 (vivos 5) niv 25-40 | lider Grass | insignias 3 | disponibles ['batalla', 'batalla'] (crudo ['battle', 'catch']) | rivales ? | total 23/8 | TM usado: False, bolsa: []
+  DEC nodo mapa=Rock Tunnel: vs Erika (Grass) nodo=n2_2 tipo=batalla crudo=battle atajo=1 equipo=5 vivos=5 niv=25-40 insignias=3 disponibles=battle,catch capturas_pantalla=0 razon=batalla score=104.0 (capturar: equipo de 5 y ya a nivel, ampliar con el mas alto de esta pantalla; deja 44.0 combate(s) al jefe)
+  [continuar -> True] pulso continuar hasta el final
+  DEC combate rival=Wild Gastly appeared! tipo=salvaje nuestro_niv=40 rival_niv=23 nuestros=5 suyo=1 insignias=3
+  → buscando el tutor de movimientos por n4_1
+  ↻ buscando trade (intento 1/1): no hay nodo de trade a la vista y la guia dice tirar el mapa para buscarlo
+  >>> COMBATE GANADO (continuamos en map-screen) | 22-0
+  [nodo -> 2] batalla score=83.0 (capturar: equipo de 5 y ya a nivel, ampliar con el mas alto de esta pantalla; deja 23.0 combate(s) al jefe) | mapa: Rock Tunnel: vs Erika (Grass) | plan: insignias 3 | Ciudad Canela nv32-32 [Grass/Poison]
+  · Rock Tunnel: vs Erika (Grass) | equipo 5 (vivos 5) niv 26-41 | lider Grass | insignias 3 | disponibles ['entrenador', 'batalla'] (crudo ['trainer', 'catch']) | rivales [25] | total 23/8 | TM usado: False, bolsa: []
+  DEC nodo mapa=Rock Tunnel: vs Erika (Grass) nodo=n3_2 tipo=batalla crudo=catch atajo=2 equipo=5 vivos=5 niv=26-41 insignias=3 disponibles=trainer,catch capturas_pantalla=0 razon=batalla score=83.0 (capturar: equipo de 5 y ya a nivel, ampliar con el mas alto de esta pantalla; deja 23.0 combate(s) al jefe)
+  [capturar -> 2] Onix ['Rock', 'Ground']: 2x apertura=2 2x region=7 sin 0.5x=8 entrenadores=1.38 nuevos=['Rock'] stats=385 nivel=25
+  DEC captura_pedida objetivo=2 equipo=5 vivos=5 candidatos=Slowpoke:25|Onix:25|Diglett:25 motivo=Onix ['Rock', 'Ground']: 2x apertura=2 2x region=7 sin 0.5x=8 entrenadores=1.38 nuevos=['Rock'] stats=385 nivel=25
+  >>> CAPTURA confirmada (equipo 5->6) | total 5
+  DEC captura_confirmada equipo_antes=5 equipo_despues=6 nuevos=Onix:25
+  ↻ buscando trade (intento 1/1): no hay nodo de trade a la vista y la guia dice tirar el mapa para buscarlo
+  [nodo -> 1] entrenador score=20.0 (entrenador: ya a nivel, no hace falta arriesgar; deja 14.0 combate(s) al jefe) | mapa: Rock Tunnel: vs Erika (Grass) | plan: insignias 3 | Ciudad Canela nv32-32 [Grass/Poison]
+  ⋯ contragolpe contra fire-spitter (Fire, Nv26): ['Sandslash', 'Onix', 'Horsea', 'Raticate', 'Farfetchd', 'Venusaur']
+  ⋯ reordenado: ['Raticate', 'Sandslash', 'Horsea', 'Farfetchd', 'Venusaur', 'Onix'] -> ['Sandslash', 'Onix', 'Horsea', 'Raticate', 'Farfetchd', 'Venusaur'] (para entrenador)
+  DEC orden para=entrenador antes=Raticate,Sandslash,Horsea,Farfetchd,Venusaur,Onix despues=Sandslash,Onix,Horsea,Raticate,Farfetchd,Venusaur
+  · Rock Tunnel: vs Erika (Grass) | equipo 6 (vivos 6) niv 25-41 | lider Grass | insignias 3 | disponibles ['entrenador', 'entrenador'] (crudo ['trainer', 'trainer']) | rivales [26, 26] | total 23/8 | TM usado: False, bolsa: []
+  DEC nodo mapa=Rock Tunnel: vs Erika (Grass) nodo=n4_2 tipo=entrenador crudo=trainer atajo=1 equipo=6 vivos=6 niv=25-41 insignias=3 disponibles=trainer,trainer capturas_pantalla=0 razon=entrenador score=20.0 (entrenador: ya a nivel, no hace falta arriesgar; deja 14.0 combate(s) al jefe)
+  [continuar -> True] pulso continuar hasta el final
+  DEC combate rival=Firebreather wants to battle! tipo=entrenador nuestro_niv=41 rival_niv=26 nuestros=6 suyo=3 insignias=3
+  ↻ buscando trade (intento 1/1): no hay nodo de trade a la vista y la guia dice tirar el mapa para buscarlo
+  >>> COMBATE GANADO (continuamos en map-screen) | 23-0
+  [nodo -> 1] entrenador score=11.0 (entrenador: ya a nivel, no hace falta arriesgar; deja 5.0 combate(s) al jefe) | mapa: Rock Tunnel: vs Erika (Grass) | plan: insignias 3 | Ciudad Canela nv32-32 [Grass/Poison]
+  ⋯ ace-trainer es de tipo 'Diversos': sin contragolpe posible
+  ⋯ reordenado: ['Sandslash', 'Onix', 'Horsea', 'Raticate', 'Farfetchd', 'Venusaur'] -> ['Onix', 'Raticate', 'Sandslash', 'Horsea', 'Farfetchd', 'Venusaur'] (para entrenador)
+  DEC orden para=entrenador antes=Sandslash,Onix,Horsea,Raticate,Farfetchd,Venusaur despues=Onix,Raticate,Sandslash,Horsea,Farfetchd,Venusaur
+  · Rock Tunnel: vs Erika (Grass) | equipo 6 (vivos 6) niv 27-43 | lider Grass | insignias 3 | disponibles ['entrenador', 'entrenador'] (crudo ['trainer', 'trainer']) | rivales [28, 28] | total 23/8 | TM usado: False, bolsa: []
+  DEC nodo mapa=Rock Tunnel: vs Erika (Grass) nodo=n5_2 tipo=entrenador crudo=trainer atajo=1 equipo=6 vivos=6 niv=27-43 insignias=3 disponibles=trainer,trainer capturas_pantalla=0 razon=entrenador score=11.0 (entrenador: ya a nivel, no hace falta arriesgar; deja 5.0 combate(s) al jefe)
+  [continuar -> True] pulso continuar hasta el final
+  DEC combate rival=Ace Trainer wants to battle! tipo=entrenador nuestro_niv=43 rival_niv=28 nuestros=6 suyo=3 insignias=3
+  ↻ buscando trade (intento 1/1): no hay nodo de trade a la vista y la guia dice tirar el mapa para buscarlo
+  >>> COMBATE GANADO (continuamos en map-screen) | 24-0
+  [nodo -> 2] cura score=70.0 (curar: paso obligatorio hacia el jefe y hay 2 caido(s); deja 12.0 combate(s) al jefe) | mapa: Rock Tunnel: vs Erika (Grass) | plan: insignias 3 | Ciudad Canela nv32-32 [Grass/Poison]
+  ⋯ reordenado: ['Onix', 'Raticate', 'Sandslash', 'Horsea', 'Farfetchd', 'Venusaur'] -> ['Sandslash', 'Horsea', 'Farfetchd', 'Venusaur', 'Onix', 'Raticate'] (para cura)
+  DEC orden para=cura antes=Onix,Raticate,Sandslash,Horsea,Farfetchd,Venusaur despues=Sandslash,Horsea,Farfetchd,Venusaur
+  · Rock Tunnel: vs Erika (Grass) | equipo 6 (vivos 4) niv 29-45 | lider Grass | insignias 3 | disponibles ['item', 'cura'] (crudo ['item', 'pokecenter']) | rivales ? | total 23/8 | TM usado: False, bolsa: []
+  DEC nodo mapa=Rock Tunnel: vs Erika (Grass) nodo=n6_1 tipo=cura crudo=pokecenter atajo=2 equipo=6 vivos=4 niv=29-45 insignias=3 disponibles=item,pokecenter capturas_pantalla=0 razon=cura score=70.0 (curar: paso obligatorio hacia el jefe y hay 2 caido(s); deja 12.0 combate(s) al jefe)
+  ↻ buscando trade (intento 1/1): no hay nodo de trade a la vista y la guia dice tirar el mapa para buscarlo
+  [nodo -> 1] jefe score=12.0 (jefe: única salida y listo (medio 37 >= listón 32)) | mapa: Rock Tunnel: vs Erika (Grass) | plan: insignias 3 | Ciudad Canela nv32-32 [Grass/Poison]
+  ⋯ orden contra jefe: ['Sandslash', 'Farfetchd', 'Venusaur', 'Onix', 'Horsea', 'Raticate']
+  ⋯ reordenado: ['Sandslash', 'Horsea', 'Farfetchd', 'Venusaur', 'Onix', 'Raticate'] -> ['Sandslash', 'Farfetchd', 'Venusaur', 'Onix', 'Horsea', 'Raticate'] (para jefe)
+  DEC orden para=jefe antes=Sandslash,Horsea,Farfetchd,Venusaur,Onix,Raticate despues=Sandslash,Farfetchd,Venusaur,Onix,Horsea,Raticate
+  · Rock Tunnel: vs Erika (Grass) | equipo 6 (vivos 6) niv 29-45 | lider Grass | insignias 3 | disponibles ['jefe'] (crudo ['boss']) | rivales ? | total 23/8 | TM usado: False, bolsa: []
+  DEC nodo mapa=Rock Tunnel: vs Erika (Grass) nodo=n7_1 tipo=jefe crudo=boss atajo=1 equipo=6 vivos=6 niv=29-45 insignias=3 disponibles=boss capturas_pantalla=0 razon=jefe score=12.0 (jefe: única salida y listo (medio 37 >= listón 32))
+  [prep -> Raticate] rival Grass/Poison -> ['Raticate', 'Farfetchd', 'Onix', 'Venusaur', 'Sandslash', 'Horsea']
+  ⋯ prep: rival Grass/Poison -> ['Raticate', 'Farfetchd', 'Onix', 'Venusaur', 'Sandslash', 'Horsea']
+  [continuar -> True] pulso continuar hasta el final
+  DEC combate rival=Gym Battle vs Erika! tipo=entrenador nuestro_niv=45 rival_niv=32 nuestros=6 suyo=3 insignias=3
+  estado: Gym Battle vs Erika! | niveles rivales 26-32
+  enemigos=[('Tangela Lv26', '24/69', 26), ('Victreebel Lv31', '90/90', 31), ('Vileplume Lv32', '90/90', 32)]
+  mios=[('Sandslash Lv44', '46/120', 44), ('Farfetchd Lv30', '71/71', 30), ('Venusaur Lv45', '127/127', 45), ('Onix Lv29', '59/59', 29), ('Horsea Lv30', '58/58', 30), ('Raticate Lv44', '102/102', 44)]
+  [insignia -> True] insignia conseguida (total 4)
+  >>> COMBATE GANADO (continuamos en badge-screen) | 25-0
+  ↻ buscando trade (intento 1/1): no hay nodo de trade a la vista y la guia dice tirar el mapa para buscarlo
+  [nodo -> 2] batalla score=589.0 (cazar 5 nivel(es) por encima del entrenador: el equipo ya tiene 6 móns, ahora toca ganar experiencia; deja 166.0 combate(s) al jefe) | mapa: Silph Co: vs Koga (Poison) | plan: insignias 4 | Ciudad Fucsia nv44-44 [Poison]
+  >> insignias: 3 -> 4
+  ⋯ reordenado: ['Sandslash', 'Farfetchd', 'Venusaur', 'Onix', 'Seadra', 'Raticate'] -> ['Raticate', 'Sandslash', 'Farfetchd', 'Seadra', 'Onix', 'Venusaur'] (para batalla)
+  DEC orden para=batalla rival=Poison antes=Sandslash,Farfetchd,Venusaur,Onix,Seadra,Raticate despues=Raticate,Sandslash,Farfetchd,Seadra,Onix,Venusaur
+  · Silph Co: vs Koga (Poison) | equipo 6 (vivos 6) niv 31-47 | lider Poison | insignias 4 | disponibles ['batalla', 'batalla'] (crudo ['catch', 'battle']) | rivales ? | total 23/9 | TM usado: False, bolsa: []
+  DEC nodo mapa=Silph Co: vs Koga (Poison) nodo=n0_0 tipo=batalla crudo=battle atajo=2 equipo=6 vivos=6 niv=31-47 insignias=4 disponibles=catch,battle capturas_pantalla=0 razon=batalla score=589.0 (cazar 5 nivel(es) por encima del entrenador: el equipo ya tiene 6 móns, ahora toca ganar experiencia; deja 166.0 combate(s) al jefe)
+  [continuar -> True] pulso continuar hasta el final
+  DEC combate rival=Wild Gloom appeared! tipo=salvaje nuestro_niv=47 rival_niv=28 nuestros=6 suyo=1 insignias=4
+  ↻ buscando trade (intento 1/1): no hay nodo de trade a la vista y la guia dice tirar el mapa para buscarlo
+  >>> COMBATE GANADO (continuamos en map-screen) | 26-0
+  [nodo -> 1] item score=324.0 (objeto: hay hueco pero no es prioridad (flag apagado); deja 92.0 combate(s) al jefe) | mapa: Silph Co: vs Koga (Poison) | plan: insignias 4 | Ciudad Fucsia nv44-44 [Poison]
+  · Silph Co: vs Koga (Poison) | equipo 6 (vivos 6) niv 32-48 | lider Poison | insignias 4 | disponibles ['item', 'item'] (crudo ['item', 'item']) | rivales ? | total 23/10 | TM usado: False, bolsa: []
+  DEC nodo mapa=Silph Co: vs Koga (Poison) nodo=n1_1 tipo=item crudo=item atajo=1 equipo=6 vivos=6 niv=32-48 insignias=4 disponibles=item,item capturas_pantalla=0 razon=item score=324.0 (objeto: hay hueco pero no es prioridad (flag apagado); deja 92.0 combate(s) al jefe)
+  item: ['Sharp Beak +40% Flying move damage; attempts Flying-type attacks if able', 'Sacred Ash Fully restores HP and revives a Pokémon (works on fainted or alive) U', 'Poison Barb +40% Poison move damage; attempts Poison-type attacks if able']
+    item DOM: {"texto": "Item Found! Choose one item to keep Sharp Beak +40% Flying move damage; attempts Flying-type attacks if able Sacred Ash Fully restores HP and revives a Pokémon ", "opciones": [{"id": null, "clase": "item-card", "atajo": "1", "txt": "Sharp Beak\n+40% Flying mov"}, {"id": null, "clase": "item-card", "atajo": "2", "txt": "Sacred Ash\nFully restores "}, {"id": null, "clase": "item-card", "a
+  [item -> Sharp Beak +40% Flying move damage; atte] tomo 1/3 por tecla 1
+  DEC item_cogido objeto=Sharp Beak +40% Flying move damage; atte atajo=1 prioridad=6 opciones=Sharp Beak +40% Flying move |Sacred Ash Fully restores HP|Poison Barb +40% Poison move
+  item: 'tecla Space' no funcionó
+  item: 'tecla Space' no funcionó
+  item: salida con 'clic JS en SKIP' (intento 3)
+  ↻ buscando trade (intento 1/1): no hay nodo de trade a la vista y la guia dice tirar el mapa para buscarlo
+  [nodo -> 2] item score=184.0 (objeto: hay hueco pero no es prioridad (flag apagado); deja 52.0 combate(s) al jefe) | mapa: Silph Co: vs Koga (Poison) | plan: insignias 4 | Ciudad Fucsia nv44-44 [Poison]
+  · Silph Co: vs Koga (Poison) | equipo 6 (vivos 6) niv 32-48 | lider Poison | insignias 4 | disponibles ['incognita', 'item'] (crudo ['question', 'item']) | rivales ? | total 23/10 | TM usado: False, bolsa: []
+  DEC nodo mapa=Silph Co: vs Koga (Poison) nodo=n2_1 tipo=item crudo=item atajo=2 equipo=6 vivos=6 niv=32-48 insignias=4 disponibles=question,item capturas_pantalla=0 razon=item score=184.0 (objeto: hay hueco pero no es prioridad (flag apagado); deja 52.0 combate(s) al jefe)
+  [nodo -> 2] item score=184.0 (objeto: hay hueco pero no es prioridad (flag apagado); deja 52.0 combate(s) al jefe) | mapa: Silph Co: vs Koga (Poison) | plan: insignias 4 | Ciudad Fucsia nv44-44 [Poison]
+  · Silph Co: vs Koga (Poison) | equipo 6 (vivos 6) niv 32-48 | lider Poison | insignias 4 | disponibles ['incognita', 'item'] (crudo ['question', 'item']) | rivales ? | total 23/10 | TM usado: False, bolsa: []
+  DEC nodo mapa=Silph Co: vs Koga (Poison) nodo=n2_1 tipo=item crudo=item atajo=2 equipo=6 vivos=6 niv=32-48 insignias=4 disponibles=question,item capturas_pantalla=0 razon=item score=184.0 (objeto: hay hueco pero no es prioridad (flag apagado); deja 52.0 combate(s) al jefe)
+  item: ['Quick Claw 50% chance to attack first regardless of speed', 'Hard Stone +40% Rock move damage; attempts Rock-type attacks if able', 'Rare Candy Gives a Pokémon +3 levels USABLE ITEM']
+    item DOM: {"texto": "Item Found! Choose one item to keep Quick Claw 50% chance to attack first regardless of speed Hard Stone +40% Rock move damage; attempts Rock-type attacks if ab", "opciones": [{"id": null, "clase": "item-card", "atajo": "1", "txt": "Quick Claw\n50% chance to a"}, {"id": null, "clase": "item-card", "atajo": "2", "txt": "Hard Stone\n+40% Rock move "}, {"id": null, "clase": "item-card", "a
+  [item -> Hard Stone +40% Rock move damage; attemp] tomo 2/3 por tecla 2
+  DEC item_cogido objeto=Hard Stone +40% Rock move damage; attemp atajo=2 prioridad=10 opciones=Quick Claw 50% chance to att|Hard Stone +40% Rock move da|Rare Candy Gives a Pokémon +
+  item: 'tecla Space' no funcionó
+  item: 'tecla Space' no funcionó
+  item: salida con 'clic JS en SKIP' (intento 3)
+  ↻ buscando trade (intento 1/1): no hay nodo de trade a la vista y la guia dice tirar el mapa para buscarlo
+  [nodo -> 1] entrenador score=148.0 (entrenador: mucha exp, faltan ~4 de nivel; deja 32.0 combate(s) al jefe) | mapa: Silph Co: vs Koga (Poison) | plan: insignias 4 | Ciudad Fucsia nv44-44 [Poison]
+  ⋯ contragolpe contra bug-catcher (Bug, Nv33): ['Onix', 'Seadra', 'Raticate', 'Farfetchd', 'Venusaur', 'Sandslash']
+  · Silph Co: vs Koga (Poison) | equipo 6 (vivos 6) niv 32-48 | lider Poison | insignias 4 | disponibles ['entrenador', 'entrenador'] (crudo ['trainer', 'trainer']) | rivales [33, 33] | total 23/10 | TM usado: False, bolsa: []
+  DEC nodo mapa=Silph Co: vs Koga (Poison) nodo=n3_2 tipo=entrenador crudo=trainer atajo=1 equipo=6 vivos=6 niv=32-48 insignias=4 disponibles=trainer,trainer capturas_pantalla=0 razon=entrenador score=148.0 (entrenador: mucha exp, faltan ~4 de nivel; deja 32.0 combate(s) al jefe)
+  [nodo -> 1] entrenador score=148.0 (entrenador: mucha exp, faltan ~4 de nivel; deja 32.0 combate(s) al jefe) | mapa: Silph Co: vs Koga (Poison) | plan: insignias 4 | Ciudad Fucsia nv44-44 [Poison]
+  ⋯ contragolpe contra bug-catcher (Bug, Nv33): ['Onix', 'Seadra', 'Raticate', 'Farfetchd', 'Venusaur', 'Sandslash']
+  ⋯ reordenado: ['Raticate', 'Sandslash', 'Farfetchd', 'Seadra', 'Onix', 'Venusaur'] -> ['Onix', 'Seadra', 'Raticate', 'Farfetchd', 'Venusaur', 'Sandslash'] (para entrenador)
+  DEC orden para=entrenador antes=Raticate,Sandslash,Farfetchd,Seadra,Onix,Venusaur despues=Onix,Seadra,Raticate,Farfetchd,Venusaur,Sandslash
+  · Silph Co: vs Koga (Poison) | equipo 6 (vivos 6) niv 32-48 | lider Poison | insignias 4 | disponibles ['entrenador', 'entrenador'] (crudo ['trainer', 'trainer']) | rivales [33, 33] | total 23/10 | TM usado: False, bolsa: []
+  DEC nodo mapa=Silph Co: vs Koga (Poison) nodo=n3_2 tipo=entrenador crudo=trainer atajo=1 equipo=6 vivos=6 niv=32-48 insignias=4 disponibles=trainer,trainer capturas_pantalla=0 razon=entrenador score=148.0 (entrenador: mucha exp, faltan ~4 de nivel; deja 32.0 combate(s) al jefe)
+  [continuar -> True] pulso continuar hasta el final
+  DEC combate rival=Bug Catcher wants to battle! tipo=entrenador nuestro_niv=48 rival_niv=33 nuestros=6 suyo=3 insignias=4
+  ↻ buscando trade (intento 1/1): no hay nodo de trade a la vista y la guia dice tirar el mapa para buscarlo
+  >>> COMBATE GANADO (continuamos en map-screen) | 27-0
+  [nodo -> 2] batalla score=102.5 (cazar 2 nivel(es) por encima del entrenador: el equipo ya tiene 6 móns, ahora toca ganar experiencia; deja 27.0 combate(s) al jefe) | mapa: Silph Co: vs Koga (Poison) | plan: insignias 4 | Ciudad Fucsia nv44-44 [Poison]
+  ⋯ reordenado: ['Onix', 'Seadra', 'Raticate', 'Farfetchd', 'Venusaur', 'Sandslash'] -> ['Sandslash', 'Farfetchd', 'Venusaur', 'Raticate', 'Onix', 'Seadra'] (para batalla)
+  DEC orden para=batalla rival=Poison antes=Onix,Seadra,Raticate,Farfetchd,Venusaur,Sandslash despues=Sandslash,Farfetchd,Venusaur,Raticate
+  · Silph Co: vs Koga (Poison) | equipo 6 (vivos 4) niv 34-50 | lider Poison | insignias 4 | disponibles ['entrenador', 'batalla'] (crudo ['trainer', 'battle']) | rivales [34] | total 23/10 | TM usado: False, bolsa: []
+  DEC nodo mapa=Silph Co: vs Koga (Poison) nodo=n4_1 tipo=batalla crudo=battle atajo=2 equipo=6 vivos=4 niv=34-50 insignias=4 disponibles=trainer,battle capturas_pantalla=0 razon=batalla score=102.5 (cazar 2 nivel(es) por encima del entrenador: el equipo ya tiene 6 móns, ahora toca ganar experiencia; deja 27.0 combate(s) al jefe)
+  [continuar -> True] pulso continuar hasta el final
+  DEC combate rival=Wild Charmeleon appeared! tipo=salvaje nuestro_niv=51 rival_niv=33 nuestros=4 suyo=1 insignias=4
+  ↻ buscando trade (intento 1/1): no hay nodo de trade a la vista y la guia dice tirar el mapa para buscarlo
+  >>> COMBATE GANADO (continuamos en map-screen) | 28-0
+  [nodo -> 2] batalla score=29.0 (cazar 1 nivel(es) por encima del entrenador: el equipo ya tiene 6 móns, ahora toca ganar experiencia; deja 6.0 combate(s) al jefe) | mapa: Silph Co: vs Koga (Poison) | plan: insignias 4 | Ciudad Fucsia nv44-44 [Poison]
+  ⋯ reordenado: ['Sandslash', 'Farfetchd', 'Venusaur', 'Raticate', 'Onix', 'Seadra'] -> ['Sandslash', 'Farfetchd', 'Venusaur', 'Raticate', 'Onix', 'Seadra'] (para batalla)
+  DEC orden para=batalla rival=Poison antes=Sandslash,Farfetchd,Venusaur,Raticate,Onix,Seadra despues=Sandslash,Farfetchd,Venusaur,Raticate
+  · Silph Co: vs Koga (Poison) | equipo 6 (vivos 4) niv 34-51 | lider Poison | insignias 4 | disponibles ['entrenador', 'batalla'] (crudo ['trainer', 'battle']) | rivales [36] | total 23/10 | TM usado: False, bolsa: []
+  DEC nodo mapa=Silph Co: vs Koga (Poison) nodo=n5_2 tipo=batalla crudo=battle atajo=2 equipo=6 vivos=4 niv=34-51 insignias=4 disponibles=trainer,battle capturas_pantalla=0 razon=batalla score=29.0 (cazar 1 nivel(es) por encima del entrenador: el equipo ya tiene 6 móns, ahora toca ganar experiencia; deja 6.0 combate(s) al jefe)
+  [continuar -> True] pulso continuar hasta el final
+  DEC combate rival=Wild Pidgeotto appeared! tipo=salvaje nuestro_niv=51 rival_niv=35 nuestros=4 suyo=1 insignias=4
+  estado: Wild Pidgeotto appeared! | niveles rivales 35-35
+  enemigos=[('Pidgeotto Lv35', '37/89', 35)]
+  mios=[('Sandslash Lv50', '120/135', 50), ('Farfetchd Lv36', '83/83', 36), ('Venusaur Lv51', '142/142', 51), ('Raticate Lv50', '57/115', 50), ('Onix Lv34', '0/67', 34), ('Seadra Lv35', '0/83', 35)]
+  ↻ buscando trade (intento 1/1): no hay nodo de trade a la vista y la guia dice tirar el mapa para buscarlo
+  >>> COMBATE GANADO (continuamos en map-screen) | 29-0
+  [nodo -> 1] entrenador score=-99.0 (entrenador de riesgo: equipo al 57% y sin cura delante; deja 5.0 combate(s) al jefe; -110 de penalización por riesgo) | mapa: Silph Co: vs Koga (Poison) | plan: insignias 4 | Ciudad Fucsia nv44-44 [Poison]
+  ⋯ contragolpe contra hiker (Rock/Ground/Fighting, Nv37): ['Venusaur', 'Sandslash', 'Raticate', 'Farfetchd', 'Seadra', 'Onix']
+  ⋯ reordenado: ['Sandslash', 'Farfetchd', 'Venusaur', 'Raticate', 'Onix', 'Seadra'] -> ['Venusaur', 'Sandslash', 'Raticate', 'Farfetchd', 'Seadra', 'Onix'] (para entrenador)
+  DEC orden para=entrenador antes=Sandslash,Farfetchd,Venusaur,Raticate,Onix,Seadra despues=Venusaur,Sandslash,Raticate,Farfetchd,Seadra,Onix
+  · Silph Co: vs Koga (Poison) | equipo 6 (vivos 4) niv 34-52 | lider Poison | insignias 4 | disponibles ['entrenador'] (crudo ['trainer']) | rivales [37] | total 23/10 | TM usado: False, bolsa: []
+  DEC nodo mapa=Silph Co: vs Koga (Poison) nodo=n6_2 tipo=entrenador crudo=trainer atajo=1 equipo=6 vivos=4 niv=34-52 insignias=4 disponibles=trainer capturas_pantalla=0 razon=entrenador score=-99.0 (entrenador de riesgo: equipo al 57% y sin cura delante; deja 5.0 combate(s) al jefe; -110 de penalización por riesgo)
+  [continuar -> True] pulso continuar hasta el final
+  DEC combate rival=Hiker wants to battle! tipo=entrenador nuestro_niv=52 rival_niv=37 nuestros=4 suyo=3 insignias=4
+  ↻ buscando trade (intento 1/1): no hay nodo de trade a la vista y la guia dice tirar el mapa para buscarlo
+  >>> COMBATE GANADO (continuamos en map-screen) | 30-0
+  [nodo -> 1] jefe score=4.0 (jefe: única salida, se entra igual (2 caído(s))) | mapa: Silph Co: vs Koga (Poison) | plan: insignias 4 | Ciudad Fucsia nv44-44 [Poison]
+  ⋯ orden contra jefe: ['Sandslash', 'Farfetchd', 'Raticate', 'Venusaur', 'Seadra', 'Onix']
+  ⋯ reordenado: ['Venusaur', 'Sandslash', 'Raticate', 'Farfetchd', 'Seadra', 'Onix'] -> ['Sandslash', 'Farfetchd', 'Raticate', 'Venusaur', 'Seadra', 'Onix'] (para jefe)
+  DEC orden para=jefe antes=Venusaur,Sandslash,Raticate,Farfetchd,Seadra,Onix despues=Sandslash,Farfetchd,Raticate,Venusaur,Seadra,Onix
+  · Silph Co: vs Koga (Poison) | equipo 6 (vivos 4) niv 34-54 | lider Poison | insignias 4 | disponibles ['jefe'] (crudo ['boss']) | rivales ? | total 23/10 | TM usado: False, bolsa: []
+  DEC nodo mapa=Silph Co: vs Koga (Poison) nodo=n7_1 tipo=jefe crudo=boss atajo=1 equipo=6 vivos=4 niv=34-54 insignias=4 disponibles=boss capturas_pantalla=0 razon=jefe score=4.0 (jefe: única salida, se entra igual (2 caído(s)))
+  [prep -> Sandslash] rival Poison -> ['Sandslash', 'Raticate', 'Farfetchd', 'Venusaur', 'Seadra', 'Onix']
+  ⋯ prep: rival Poison -> ['Sandslash', 'Raticate', 'Farfetchd', 'Venusaur', 'Seadra', 'Onix']
+  [continuar -> True] pulso continuar hasta el final
+  DEC combate rival=Gym Battle vs Koga! tipo=entrenador nuestro_niv=54 rival_niv=44 nuestros=4 suyo=4 insignias=4
+  [insignia -> True] insignia conseguida (total 5)
+  >>> COMBATE GANADO (continuamos en badge-screen) | 31-0
+  ↻ buscando trade (intento 1/1): no hay nodo de trade a la vista y la guia dice tirar el mapa para buscarlo
+  [nodo -> 1] batalla score=114.0 (capturar: equipo de 6 y ya a nivel, ampliar con el mas alto de esta pantalla; deja 54.0 combate(s) al jefe) | mapa: Safari Zone: vs Sabrina (Psychic) | plan: insignias 5 | Ciudad Lavanda nv44-44 [Bug/Poison/Psychic]
+  >> insignias: 4 -> 5
+  ⋯ reordenado: ['Sandslash', 'Farfetchd', 'Raticate', 'Venusaur', 'Seadra', 'Onix'] -> ['Onix', 'Raticate', 'Seadra', 'Sandslash', 'Farfetchd', 'Venusaur'] (para batalla)
+  DEC orden para=batalla rival=Bug,Poison,Psychic antes=Sandslash,Farfetchd,Raticate,Venusaur,Seadra,Onix despues=Onix,Raticate,Seadra,Sandslash,Farfetchd,Venusaur
+  · Safari Zone: vs Sabrina (Psychic) | equipo 6 (vivos 6) niv 34-56 | lider Poison | insignias 5 | disponibles ['batalla', 'batalla'] (crudo ['catch', 'battle']) | rivales ? | total 23/11 | TM usado: False, bolsa: []
+  DEC nodo mapa=Safari Zone: vs Sabrina (Psychic) nodo=n0_0 tipo=batalla crudo=catch atajo=1 equipo=6 vivos=6 niv=34-56 insignias=5 disponibles=catch,battle capturas_pantalla=0 razon=batalla score=114.0 (capturar: equipo de 6 y ya a nivel, ampliar con el mas alto de esta pantalla; deja 54.0 combate(s) al jefe)
+  [capturar -> 1] permisiva: Scyther ['Bug', 'Flying'] aunque noMejore (nivel=37, stats=500); si el tipo esta repetido, el nodo de cambio saca al anterior
+  ⋯ equipo lleno: sustituiré a Onix por 1
+  DEC captura_pedida objetivo=1 equipo=6 vivos=6 candidatos=Scyther:37|Butterfree:37|Jolteon:37 motivo=permisiva: Scyther ['Bug', 'Flying'] aunque noMejore (nivel=37, stats=500); si el tipo esta repetido, el nodo de cambio saca al anterior
+  ⋯ sustituido: sale Onix
+  DEC swap sale=Onix entra=? nivel_entra=0 causa=equipo_lleno atajo=1
+  ↻ buscando trade (intento 1/1): no hay nodo de trade a la vista y la guia dice tirar el mapa para buscarlo
+  [nodo -> 2] batalla score=85.0 (capturar: equipo de 6 y ya a nivel, ampliar con el mas alto de esta pantalla; deja 25.0 combate(s) al jefe) | mapa: Safari Zone: vs Sabrina (Psychic) | plan: insignias 5 | Ciudad Lavanda nv44-44 [Bug/Poison/Psychic]
+  ⋯ reordenado: ['Scyther', 'Raticate', 'Seadra', 'Sandslash', 'Farfetchd', 'Venusaur'] -> ['Raticate', 'Scyther', 'Seadra', 'Sandslash', 'Farfetchd', 'Venusaur'] (para batalla)
+  DEC orden para=batalla rival=Bug,Poison,Psychic antes=Scyther,Raticate,Seadra,Sandslash,Farfetchd,Venusaur despues=Raticate,Scyther,Seadra,Sandslash,Farfetchd,Venusaur
+  · Safari Zone: vs Sabrina (Psychic) | equipo 6 (vivos 6) niv 35-56 | lider Poison | insignias 5 | disponibles ['entrenador', 'batalla'] (crudo ['trainer', 'battle']) | rivales [38] | total 23/12 | TM usado: False, bolsa: []
+  DEC nodo mapa=Safari Zone: vs Sabrina (Psychic) nodo=? tipo=batalla crudo=battle atajo=2 equipo=6 vivos=6 niv=35-56 insignias=5 disponibles=trainer,battle capturas_pantalla=0 razon=batalla score=85.0 (capturar: equipo de 6 y ya a nivel, ampliar con el mas alto de esta pantalla; deja 25.0 combate(s) al jefe)
+  [continuar -> True] pulso continuar hasta el final
+  DEC combate rival=Wild Beedrill appeared! tipo=salvaje nuestro_niv=56 rival_niv=37 nuestros=6 suyo=1 insignias=5
+  [nodo -> 2] batalla score=68.0 (capturar: equipo de 6 y ya a nivel, ampliar con el mas alto de esta pantalla; deja 8.0 combate(s) al jefe) | mapa: Safari Zone: vs Sabrina (Psychic) | plan: insignias 5 | Ciudad Lavanda nv44-44 [Bug/Poison/Psychic]
+  · Safari Zone: vs Sabrina (Psychic) | equipo 6 (vivos 6) niv 36-57 | lider Poison | insignias 5 | disponibles ['entrenador', 'batalla'] (crudo ['trainer', 'battle']) | rivales [39] | total 23/12 | TM usado: False, bolsa: []
+  DEC nodo mapa=Safari Zone: vs Sabrina (Psychic) nodo=n2_1 tipo=batalla crudo=battle atajo=2 equipo=6 vivos=6 niv=36-57 insignias=5 disponibles=trainer,battle capturas_pantalla=0 razon=batalla score=68.0 (capturar: equipo de 6 y ya a nivel, ampliar con el mas alto de esta pantalla; deja 8.0 combate(s) al jefe)
+  >>> COMBATE GANADO (continuamos en map-screen) | 32-0
+  [continuar -> True] pulso continuar hasta el final
+  DEC combate rival=Wild Golbat appeared! tipo=salvaje nuestro_niv=57 rival_niv=38 nuestros=6 suyo=1 insignias=5
+  estado: Wild Golbat appeared! | niveles rivales 38-38
+  enemigos=[('Golbat Lv38', '63/105', 38)]
+  mios=[('Raticate Lv56', '53/127', 56), ('Scyther Lv38', '101/101', 38), ('Seadra Lv36', '85/85', 36), ('Sandslash Lv56', '150/150', 56), ('Farfetchd Lv42', '95/95', 42), ('Venusaur Lv57', '158/158', 57)]
+  [nodo -> 2] batalla score=61.0 (capturar: equipo de 6 y ya a nivel, ampliar con el mas alto de esta pantalla; deja 1 combate(s) al jefe) | mapa: Safari Zone: vs Sabrina (Psychic) | plan: insignias 5 | Ciudad Lavanda nv44-44 [Bug/Poison/Psychic]
+  ⋯ reordenado: ['Raticate', 'Scyther', 'Seadra', 'Sandslash', 'Farfetchd', 'Venusaur'] -> ['Scyther', 'Seadra', 'Sandslash', 'Farfetchd', 'Venusaur', 'Raticate'] (para batalla)
+  DEC orden para=batalla rival=Bug,Poison,Psychic antes=Raticate,Scyther,Seadra,Sandslash,Farfetchd,Venusaur despues=Scyther,Seadra,Sandslash,Farfetchd,Venusaur,Raticate
+  · Safari Zone: vs Sabrina (Psychic) | equipo 6 (vivos 6) niv 37-58 | lider Poison | insignias 5 | disponibles ['entrenador', 'batalla'] (crudo ['trainer', 'catch']) | rivales [40] | total 23/12 | TM usado: False, bolsa: []
+  DEC nodo mapa=Safari Zone: vs Sabrina (Psychic) nodo=n3_2 tipo=batalla crudo=catch atajo=2 equipo=6 vivos=6 niv=37-58 insignias=5 disponibles=trainer,catch capturas_pantalla=0 razon=batalla score=61.0 (capturar: equipo de 6 y ya a nivel, ampliar con el mas alto de esta pantalla; deja 1 combate(s) al jefe)
+  >>> COMBATE GANADO (continuamos en map-screen) | 33-0
+  [capturar -> 1] permisiva: Mr-mime ['Psychic', 'Fairy'] aunque noMejore (nivel=40, stats=460); si el tipo esta repetido, el nodo de cambio saca al anterior
+  ⋯ equipo lleno: sustituiré a Seadra por 1
+  DEC captura_pedida objetivo=1 equipo=6 vivos=6 candidatos=Mr-mime:40|Golbat:40|Scyther:40 motivo=permisiva: Mr-mime ['Psychic', 'Fairy'] aunque noMejore (nivel=40, stats=460); si el tipo esta repetido, el nodo de cambio saca al anterior
+  ⋯ sustituido: sale Seadra
+  DEC swap sale=Seadra entra=? nivel_entra=0 causa=equipo_lleno atajo=2
+  [nodo -> 1] incognita score=9.0 (nodo sin identificar (trade o pasivo)) | mapa: Safari Zone: vs Sabrina (Psychic) | plan: insignias 5 | Ciudad Lavanda nv44-44 [Bug/Poison/Psychic]
+  · Safari Zone: vs Sabrina (Psychic) | equipo 6 (vivos 6) niv 39-58 | lider Poison | insignias 5 | disponibles ['incognita', 'incognita'] (crudo ['question', 'question']) | rivales ? | total 23/12 | TM usado: False, bolsa: []
+  DEC nodo mapa=Safari Zone: vs Sabrina (Psychic) nodo=? tipo=incognita crudo=question atajo=1 equipo=6 vivos=6 niv=39-58 insignias=5 disponibles=question,question capturas_pantalla=0 razon=incognita score=9.0 (nodo sin identificar (trade o pasivo))
+  [continuar -> True] pulso continuar hasta el final
+  DEC combate rival=Ace Trainer wants to battle! tipo=entrenador nuestro_niv=58 rival_niv=41 nuestros=6 suyo=3 insignias=5
+  [nodo -> 2] incognita score=21.0 (nodo sin identificar (trade o pasivo); deja 12.0 combate(s) al jefe) | mapa: Safari Zone: vs Sabrina (Psychic) | plan: insignias 5 | Ciudad Lavanda nv44-44 [Bug/Poison/Psychic]
+  ⋯ reordenado: ['Scizor', 'Mr-mime', 'Sandslash', 'Farfetchd', 'Venusaur', 'Raticate'] -> ['Farfetchd', 'Venusaur', 'Raticate', 'Sandslash', 'Scizor', 'Mr-mime'] (para incognita)
+  DEC orden para=incognita rival=Bug,Poison,Psychic antes=Scizor,Mr-mime,Sandslash,Farfetchd,Venusaur,Raticate despues=Farfetchd,Venusaur,Raticate,Sandslash
+  · Safari Zone: vs Sabrina (Psychic) | equipo 6 (vivos 4) niv 41-60 | lider Poison | insignias 5 | disponibles ['item', 'incognita'] (crudo ['item', 'question']) | rivales ? | total 23/12 | TM usado: False, bolsa: []
+  DEC nodo mapa=Safari Zone: vs Sabrina (Psychic) nodo=n5_2 tipo=incognita crudo=question atajo=2 equipo=6 vivos=4 niv=41-60 insignias=5 disponibles=item,question capturas_pantalla=0 razon=incognita score=21.0 (nodo sin identificar (trade o pasivo); deja 12.0 combate(s) al jefe)
+  >>> COMBATE GANADO (continuamos en map-screen) | 34-0
+  [capturar -> 2] Lapras ['Water', 'Ice']: 2x apertura=1 2x region=4 sin 0.5x=8 entrenadores=1.19 nuevos=['Ice', 'Water'] stats=535 nivel=42
+  DEC captura_pedida objetivo=2 equipo=6 vivos=4 candidatos=Hypno:42|Lapras:42|Haunter:42 motivo=Lapras ['Water', 'Ice']: 2x apertura=1 2x region=4 sin 0.5x=8 entrenadores=1.19 nuevos=['Ice', 'Water'] stats=535 nivel=42
+  ⋯ swap ofrece: Lapras Nv42 Water/Ice
+  ⋯ cambio por nivel: fuera Mr-mime
+  ⋯ sustituido: sale Mr-mime
+  DEC swap sale=Mr-mime entra=Lapras nivel_entra=42 causa=equipo_lleno atajo=6
+  [nodo -> 1] cura score=62.0 (curar 1 caído(s): el jefe es salida forzada; deja 12.0 combate(s) al jefe) | mapa: Safari Zone: vs Sabrina (Psychic) | plan: insignias 5 | Ciudad Lavanda nv44-44 [Bug/Poison/Psychic]
+  ⋯ reordenado: ['Farfetchd', 'Venusaur', 'Raticate', 'Sandslash', 'Scizor', 'Lapras'] -> ['Lapras', 'Farfetchd', 'Venusaur', 'Raticate', 'Sandslash', 'Scizor'] (para cura)
+  DEC orden para=cura antes=Farfetchd,Venusaur,Raticate,Sandslash,Scizor,Lapras despues=Lapras,Farfetchd,Venusaur,Raticate,Sandslash
+  · Safari Zone: vs Sabrina (Psychic) | equipo 6 (vivos 5) niv 41-60 | lider Poison | insignias 5 | disponibles ['cura'] (crudo ['pokecenter']) | rivales ? | total 23/12 | TM usado: False, bolsa: []
+  DEC nodo mapa=Safari Zone: vs Sabrina (Psychic) nodo=? tipo=cura crudo=pokecenter atajo=1 equipo=6 vivos=5 niv=41-60 insignias=5 disponibles=pokecenter capturas_pantalla=0 razon=cura score=62.0 (curar 1 caído(s): el jefe es salida forzada; deja 12.0 combate(s) al jefe)
+  [nodo -> 1] jefe score=12.0 (jefe: única salida y listo (medio 51 >= listón 44)) | mapa: Safari Zone: vs Sabrina (Psychic) | plan: insignias 5 | Ciudad Lavanda nv44-44 [Bug/Poison/Psychic]
+  ⋯ orden contra jefe: ['Farfetchd', 'Sandslash', 'Scizor', 'Lapras', 'Raticate', 'Venusaur']
+  ⋯ reordenado: ['Lapras', 'Farfetchd', 'Venusaur', 'Raticate', 'Sandslash', 'Scizor'] -> ['Farfetchd', 'Sandslash', 'Scizor', 'Lapras', 'Raticate', 'Venusaur'] (para jefe)
+  DEC orden para=jefe antes=Lapras,Farfetchd,Venusaur,Raticate,Sandslash,Scizor despues=Farfetchd,Sandslash,Scizor,Lapras,Raticate,Venusaur
+  · Safari Zone: vs Sabrina (Psychic) | equipo 6 (vivos 6) niv 41-60 | lider Poison | insignias 5 | disponibles ['jefe'] (crudo ['boss']) | rivales ? | total 23/12 | TM usado: False, bolsa: []
+  DEC nodo mapa=Safari Zone: vs Sabrina (Psychic) nodo=n7_1 tipo=jefe crudo=boss atajo=1 equipo=6 vivos=6 niv=41-60 insignias=5 disponibles=boss capturas_pantalla=0 razon=jefe score=12.0 (jefe: única salida y listo (medio 51 >= listón 44))
+  [prep -> Raticate] rival Bug/Poison/Psychic -> ['Raticate', 'Farfetchd', 'Lapras', 'Venusaur', 'Sandslash', 'Scizor']
+  ⋯ prep: rival Bug/Poison/Psychic -> ['Raticate', 'Farfetchd', 'Lapras', 'Venusaur', 'Sandslash', 'Scizor']
+  [continuar -> True] pulso continuar hasta el final
+  DEC combate rival=Gym Battle vs Sabrina! tipo=entrenador nuestro_niv=60 rival_niv=44 nuestros=5 suyo=4 insignias=5
+  [insignia -> True] insignia conseguida (total 6)
+  >>> COMBATE GANADO (continuamos en badge-screen) | 35-0
+  [nodo -> 1] batalla score=90.0 (capturar: equipo de 6 y ya a nivel, ampliar con el mas alto de esta pantalla; deja 30.0 combate(s) al jefe) | mapa: Seafoam Island: vs Blaine (Fire) | plan: insignias 6 | Ciudad Cerulea nv53-53 [Fire]
+  >> insignias: 5 -> 6
+  ⋯ reordenado: ['Farfetchd', 'Sandslash', 'Scizor', 'Lapras', 'Raticate', 'Venusaur'] -> ['Sandslash', 'Raticate', 'Farfetchd', 'Lapras', 'Scizor', 'Venusaur'] (para batalla)
+  DEC orden para=batalla rival=Fire antes=Farfetchd,Sandslash,Scizor,Lapras,Raticate,Venusaur despues=Sandslash,Raticate,Farfetchd,Lapras,Scizor,Venusaur
+  · Seafoam Island: vs Blaine (Fire) | equipo 6 (vivos 6) niv 43-62 | lider Fire | insignias 6 | disponibles ['batalla', 'batalla'] (crudo ['catch', 'battle']) | rivales ? | total 23/13 | TM usado: False, bolsa: []
+  DEC nodo mapa=Seafoam Island: vs Blaine (Fire) nodo=n0_0 tipo=batalla crudo=catch atajo=1 equipo=6 vivos=6 niv=43-62 insignias=6 disponibles=catch,battle capturas_pantalla=0 razon=batalla score=90.0 (capturar: equipo de 6 y ya a nivel, ampliar con el mas alto de esta pantalla; deja 30.0 combate(s) al jefe)
+  [capturar -> 1] permisiva: Vileplume ['Grass', 'Poison'] aunque noMejore (nivel=43, stats=490); si el tipo esta repetido, el nodo de cambio saca al anterior
+  ⋯ equipo lleno: sustituiré a Scizor por 1
+  DEC captura_pedida objetivo=1 equipo=6 vivos=6 candidatos=Vileplume:43|Nidoking:43|Pidgeot:43 motivo=permisiva: Vileplume ['Grass', 'Poison'] aunque noMejore (nivel=43, stats=490); si el tipo esta repetido, el nodo de cambio saca al anterior
+  ⋯ sustituido: sale Scizor
+  DEC swap sale=Scizor entra=? nivel_entra=0 causa=equipo_lleno atajo=5
+  [nodo -> 1] entrenador score=23.0 (entrenador: ya a nivel, no hace falta arriesgar; deja 17.0 combate(s) al jefe) | mapa: Seafoam Island: vs Blaine (Fire) | plan: insignias 6 | Ciudad Cerulea nv53-53 [Fire]
+  ⋯ contragolpe contra fisher (Water, Nv44): ['Venusaur', 'Vileplume', 'Sandslash', 'Raticate', 'Farfetchd', 'Lapras']
+  ⋯ reordenado: ['Sandslash', 'Raticate', 'Farfetchd', 'Lapras', 'Vileplume', 'Venusaur'] -> ['Venusaur', 'Vileplume', 'Sandslash', 'Raticate', 'Farfetchd', 'Lapras'] (para entrenador)
+  DEC orden para=entrenador antes=Sandslash,Raticate,Farfetchd,Lapras,Vileplume,Venusaur despues=Venusaur,Vileplume,Sandslash,Raticate,Farfetchd,Lapras
+  · Seafoam Island: vs Blaine (Fire) | equipo 6 (vivos 6) niv 43-62 | lider Fire | insignias 6 | disponibles ['entrenador', 'entrenador'] (crudo ['trainer', 'trainer']) | rivales [44, 44] | total 23/13 | TM usado: False, bolsa: []
+  DEC nodo mapa=Seafoam Island: vs Blaine (Fire) nodo=? tipo=entrenador crudo=trainer atajo=1 equipo=6 vivos=6 niv=43-62 insignias=6 disponibles=trainer,trainer capturas_pantalla=0 razon=entrenador score=23.0 (entrenador: ya a nivel, no hace falta arriesgar; deja 17.0 combate(s) al jefe)
+  [continuar -> True] pulso continuar hasta el final
+  DEC combate rival=Fisherman wants to battle! tipo=entrenador nuestro_niv=62 rival_niv=44 nuestros=6 suyo=3 insignias=6
+  [nodo -> 1] batalla score=68.0 (capturar: equipo de 6 y ya a nivel, ampliar con el mas alto de esta pantalla; deja 8.0 combate(s) al jefe) | mapa: Seafoam Island: vs Blaine (Fire) | plan: insignias 6 | Ciudad Cerulea nv53-53 [Fire]
+  ⋯ reordenado: ['Venusaur', 'Vileplume', 'Sandslash', 'Raticate', 'Farfetchd', 'Lapras'] -> ['Sandslash', 'Raticate', 'Farfetchd', 'Lapras', 'Vileplume', 'Venusaur'] (para batalla)
+  DEC orden para=batalla rival=Fire antes=Venusaur,Vileplume,Sandslash,Raticate,Farfetchd,Lapras despues=Sandslash,Raticate,Farfetchd,Lapras,Vileplume,Venusaur
+  · Seafoam Island: vs Blaine (Fire) | equipo 6 (vivos 6) niv 45-64 | lider Fire | insignias 6 | disponibles ['batalla', 'batalla'] (crudo ['catch', 'battle']) | rivales ? | total 23/13 | TM usado: False, bolsa: []
+  DEC nodo mapa=Seafoam Island: vs Blaine (Fire) nodo=n2_0 tipo=batalla crudo=catch atajo=1 equipo=6 vivos=6 niv=45-64 insignias=6 disponibles=catch,battle capturas_pantalla=0 razon=batalla score=68.0 (capturar: equipo de 6 y ya a nivel, ampliar con el mas alto de esta pantalla; deja 8.0 combate(s) al jefe)
+  >>> COMBATE GANADO (continuamos en map-screen) | 36-0
+  [capturar -> 1] permisiva: Muk ['Poison'] aunque noMejore (nivel=44, stats=500); si el tipo esta repetido, el nodo de cambio saca al anterior
+  ⋯ equipo lleno: sustituiré a Vileplume por 1
+  DEC captura_pedida objetivo=1 equipo=6 vivos=6 candidatos=Muk:44|Dodrio:44|Seaking:44 motivo=permisiva: Muk ['Poison'] aunque noMejore (nivel=44, stats=500); si el tipo esta repetido, el nodo de cambio saca al anterior
+  ⋯ sustituido: sale Vileplume
+  DEC swap sale=Vileplume entra=? nivel_entra=0 causa=equipo_lleno atajo=5
+  [nodo -> 1] entrenador score=13.0 (entrenador: ya a nivel, no hace falta arriesgar; deja 7.0 combate(s) al jefe) | mapa: Seafoam Island: vs Blaine (Fire) | plan: insignias 6 | Ciudad Cerulea nv53-53 [Fire]
+  ⋯ old-guy es de tipo 'Diversos': sin contragolpe posible
+  · Seafoam Island: vs Blaine (Fire) | equipo 6 (vivos 6) niv 44-64 | lider Fire | insignias 6 | disponibles ['entrenador'] (crudo ['trainer']) | rivales [45] | total 23/13 | TM usado: False, bolsa: []
+  DEC nodo mapa=Seafoam Island: vs Blaine (Fire) nodo=? tipo=entrenador crudo=trainer atajo=1 equipo=6 vivos=6 niv=44-64 insignias=6 disponibles=trainer capturas_pantalla=0 razon=entrenador score=13.0 (entrenador: ya a nivel, no hace falta arriesgar; deja 7.0 combate(s) al jefe)
+  [continuar -> True] pulso continuar hasta el final
+  DEC combate rival=Gentleman wants to battle! tipo=entrenador nuestro_niv=64 rival_niv=45 nuestros=6 suyo=3 insignias=6
+  estado: Gentleman wants to battle! | niveles rivales 45-45
+  enemigos=[('Porygon-z Lv45', '53/131', 45), ('Clefable Lv45', '140/140', 45), ('Wigglytuff Lv45', '181/181', 45)]
+  mios=[('Sandslash Lv63', '80/167', 63), ('Raticate Lv63', '142/142', 63), ('Farfetchd Lv49', '109/109', 49), ('Lapras Lv46', '175/175', 46), ('Muk Lv44', '146/146', 44), ('Venusaur Lv64', '51/176', 64)]
+  [nodo -> 2] batalla score=86.0 (capturar: equipo de 6 y ya a nivel, ampliar con el mas alto de esta pantalla; deja 26.0 combate(s) al jefe) | mapa: Seafoam Island: vs Blaine (Fire) | plan: insignias 6 | Ciudad Cerulea nv53-53 [Fire]
+  ⋯ reordenado: ['Sandslash', 'Raticate', 'Farfetchd', 'Lapras', 'Muk', 'Venusaur'] -> ['Raticate', 'Farfetchd', 'Lapras', 'Muk', 'Sandslash', 'Venusaur'] (para batalla)
+  DEC orden para=batalla rival=Fire antes=Sandslash,Raticate,Farfetchd,Lapras,Muk,Venusaur despues=Raticate,Farfetchd,Lapras,Muk,Sandslash,Venusaur
+  · Seafoam Island: vs Blaine (Fire) | equipo 6 (vivos 6) niv 46-66 | lider Fire | insignias 6 | disponibles ['batalla', 'batalla'] (crudo ['battle', 'battle']) | rivales ? | total 23/14 | TM usado: False, bolsa: []
+  DEC nodo mapa=Seafoam Island: vs Blaine (Fire) nodo=n4_0 tipo=batalla crudo=battle atajo=2 equipo=6 vivos=6 niv=46-66 insignias=6 disponibles=battle,battle capturas_pantalla=0 razon=batalla score=86.0 (capturar: equipo de 6 y ya a nivel, ampliar con el mas alto de esta pantalla; deja 26.0 combate(s) al jefe)
+  >>> COMBATE GANADO (continuamos en map-screen) | 37-0
+  [continuar -> True] pulso continuar hasta el final
+  DEC combate rival=Wild Pidgeot appeared! tipo=salvaje nuestro_niv=66 rival_niv=45 nuestros=6 suyo=1 insignias=6
+  [nodo -> 1] batalla score=73.0 (capturar: equipo de 6 y ya a nivel, ampliar con el mas alto de esta pantalla; deja 13.0 combate(s) al jefe) | mapa: Seafoam Island: vs Blaine (Fire) | plan: insignias 6 | Ciudad Cerulea nv53-53 [Fire]
+  ⋯ reordenado: ['Raticate', 'Farfetchd', 'Lapras', 'Muk', 'Sandslash', 'Venusaur'] -> ['Farfetchd', 'Lapras', 'Muk', 'Sandslash', 'Raticate', 'Venusaur'] (para batalla)
+  DEC orden para=batalla rival=Fire antes=Raticate,Farfetchd,Lapras,Muk,Sandslash,Venusaur despues=Farfetchd,Lapras,Muk,Sandslash,Raticate,Venusaur
+  · Seafoam Island: vs Blaine (Fire) | equipo 6 (vivos 6) niv 47-67 | lider Fire | insignias 6 | disponibles ['batalla', 'batalla'] (crudo ['catch', 'battle']) | rivales ? | total 23/14 | TM usado: False, bolsa: []
+  DEC nodo mapa=Seafoam Island: vs Blaine (Fire) nodo=n5_1 tipo=batalla crudo=catch atajo=1 equipo=6 vivos=6 niv=47-67 insignias=6 disponibles=catch,battle capturas_pantalla=0 razon=batalla score=73.0 (capturar: equipo de 6 y ya a nivel, ampliar con el mas alto de esta pantalla; deja 13.0 combate(s) al jefe)
+  >>> COMBATE GANADO (continuamos en map-screen) | 38-0
+  [capturar -> 2] Rhydon ['Ground', 'Rock']: 2x apertura=2 2x region=7 sin 0.5x=8 entrenadores=1.38 nuevos=['Rock'] stats=485 nivel=46
+  ⋯ equipo lleno: sustituiré a Muk por 2
+  DEC captura_pedida objetivo=2 equipo=6 vivos=6 candidatos=Starmie:46|Rhydon:46|Clefable:46 motivo=Rhydon ['Ground', 'Rock']: 2x apertura=2 2x region=7 sin 0.5x=8 entrenadores=1.38 nuevos=['Rock'] stats=485 nivel=46
+  ⋯ sustituido: sale Muk
+  DEC swap sale=Muk entra=? nivel_entra=0 causa=equipo_lleno atajo=3
+  [nodo -> 1] cura score=45.0 (curar: el carry está al 32% (es el que tiene que llegar entero); deja 12.0 combate(s) al jefe) | mapa: Seafoam Island: vs Blaine (Fire) | plan: insignias 6 | Ciudad Cerulea nv53-53 [Fire]
+  · Seafoam Island: vs Blaine (Fire) | equipo 6 (vivos 6) niv 46-67 | lider Fire | insignias 6 | disponibles ['cura'] (crudo ['pokecenter']) | rivales ? | total 23/14 | TM usado: False, bolsa: []
+  DEC nodo mapa=Seafoam Island: vs Blaine (Fire) nodo=? tipo=cura crudo=pokecenter atajo=1 equipo=6 vivos=6 niv=46-67 insignias=6 disponibles=pokecenter capturas_pantalla=0 razon=cura score=45.0 (curar: el carry está al 32% (es el que tiene que llegar entero); deja 12.0 combate(s) al jefe)
+  [nodo -> 1] jefe score=12.0 (jefe: única salida y listo (medio 58 >= listón 53)) | mapa: Seafoam Island: vs Blaine (Fire) | plan: insignias 6 | Ciudad Cerulea nv53-53 [Fire]
+  ⋯ orden contra jefe: ['Sandslash', 'Lapras', 'Rhydon', 'Farfetchd', 'Raticate', 'Venusaur']
+  ⋯ reordenado: ['Farfetchd', 'Lapras', 'Rhydon', 'Sandslash', 'Raticate', 'Venusaur'] -> ['Sandslash', 'Lapras', 'Rhydon', 'Farfetchd', 'Raticate', 'Venusaur'] (para jefe)
+  DEC orden para=jefe antes=Farfetchd,Lapras,Rhydon,Sandslash,Raticate,Venusaur despues=Sandslash,Lapras,Rhydon,Farfetchd,Raticate,Venusaur
+  · Seafoam Island: vs Blaine (Fire) | equipo 6 (vivos 6) niv 46-67 | lider Fire | insignias 6 | disponibles ['jefe'] (crudo ['boss']) | rivales ? | total 23/14 | TM usado: False, bolsa: []
+  DEC nodo mapa=Seafoam Island: vs Blaine (Fire) nodo=n7_0 tipo=jefe crudo=boss atajo=1 equipo=6 vivos=6 niv=46-67 insignias=6 disponibles=boss capturas_pantalla=0 razon=jefe score=12.0 (jefe: única salida y listo (medio 58 >= listón 53))
+  [prep -> Sandslash] rival Fire -> ['Sandslash', 'Lapras', 'Rhydon', 'Raticate', 'Farfetchd', 'Venusaur']
+  ⋯ prep: rival Fire -> ['Sandslash', 'Lapras', 'Rhydon', 'Raticate', 'Farfetchd', 'Venusaur']
+  [continuar -> True] pulso continuar hasta el final
+  DEC combate rival=Gym Battle vs Blaine! tipo=entrenador nuestro_niv=67 rival_niv=53 nuestros=6 suyo=4 insignias=6
+  [insignia -> True] insignia conseguida (total 7)
+  >>> COMBATE GANADO (continuamos en badge-screen) | 39-0
+  → buscando el tutor de movimientos por n1_0
+  [nodo -> 1] batalla score=113.0 (capturar: equipo de 6 y ya a nivel, ampliar con el mas alto de esta pantalla; deja 53.0 combate(s) al jefe) | mapa: Viridian City: vs Giovanni (Ground) | plan: insignias 7 | Ciudad Verde nv60-60 [Ground/Poison/Rock]
+  >> insignias: 6 -> 7
+  ⋯ reordenado: ['Sandslash', 'Lapras', 'Rhyperior', 'Farfetchd', 'Raticate', 'Venusaur'] -> ['Lapras', 'Venusaur', 'Sandslash', 'Rhyperior', 'Raticate', 'Farfetchd'] (para batalla)
+  DEC orden para=batalla rival=Ground,Poison,Rock antes=Sandslash,Lapras,Rhyperior,Farfetchd,Raticate,Venusaur despues=Lapras,Venusaur,Sandslash,Rhyperior,Raticate,Farfetchd
+  · Viridian City: vs Giovanni (Ground) | equipo 6 (vivos 6) niv 48-69 | lider Ground | insignias 7 | disponibles ['batalla', 'batalla'] (crudo ['catch', 'battle']) | rivales ? | total 23/15 | TM usado: False, bolsa: []
+  DEC nodo mapa=Viridian City: vs Giovanni (Ground) nodo=n0_0 tipo=batalla crudo=catch atajo=1 equipo=6 vivos=6 niv=48-69 insignias=7 disponibles=catch,battle capturas_pantalla=0 razon=batalla score=113.0 (capturar: equipo de 6 y ya a nivel, ampliar con el mas alto de esta pantalla; deja 53.0 combate(s) al jefe)
+  [capturar -> 2] permisiva: Seaking ['Water'] aunque noMejore (nivel=47, stats=450); si el tipo esta repetido, el nodo de cambio saca al anterior
+  ⋯ equipo lleno: sustituiré a Rhyperior por 2
+  DEC captura_pedida objetivo=2 equipo=6 vivos=6 candidatos=Electabuzz:47|Seaking:47|Nidoqueen:47 motivo=permisiva: Seaking ['Water'] aunque noMejore (nivel=47, stats=450); si el tipo esta repetido, el nodo de cambio saca al anterior
+  ⋯ sustituido: sale Rhyperior
+  DEC swap sale=Rhyperior entra=? nivel_entra=0 causa=equipo_lleno atajo=4
+  [nodo -> 2] batalla score=84.0 (capturar: equipo de 6 y ya a nivel, ampliar con el mas alto de esta pantalla; deja 24.0 combate(s) al jefe) | mapa: Viridian City: vs Giovanni (Ground) | plan: insignias 7 | Ciudad Verde nv60-60 [Ground/Poison/Rock]
+  ⋯ reordenado: ['Lapras', 'Venusaur', 'Sandslash', 'Seaking', 'Raticate', 'Farfetchd'] -> ['Lapras', 'Seaking', 'Venusaur', 'Sandslash', 'Raticate', 'Farfetchd'] (para batalla)
+  DEC orden para=batalla rival=Ground,Poison,Rock antes=Lapras,Venusaur,Sandslash,Seaking,Raticate,Farfetchd despues=Lapras,Seaking,Venusaur,Sandslash,Raticate,Farfetchd
+  · Viridian City: vs Giovanni (Ground) | equipo 6 (vivos 6) niv 47-69 | lider Ground | insignias 7 | disponibles ['entrenador', 'batalla'] (crudo ['trainer', 'catch']) | rivales [48] | total 23/16 | TM usado: False, bolsa: []
+  DEC nodo mapa=Viridian City: vs Giovanni (Ground) nodo=? tipo=batalla crudo=catch atajo=2 equipo=6 vivos=6 niv=47-69 insignias=7 disponibles=trainer,catch capturas_pantalla=0 razon=batalla score=84.0 (capturar: equipo de 6 y ya a nivel, ampliar con el mas alto de esta pantalla; deja 24.0 combate(s) al jefe)
+  [capturar -> 2] Exeggutor ['Grass', 'Psychic']: 2x apertura=2 2x region=6 sin 0.5x=8 entrenadores=1.42 nuevos=['Psychic'] stats=530 nivel=48
+  ⋯ equipo lleno: sustituiré a Seaking por 2
+  DEC captura_pedida objetivo=2 equipo=6 vivos=6 candidatos=Electrode:48|Exeggutor:48|Raichu:48 motivo=Exeggutor ['Grass', 'Psychic']: 2x apertura=2 2x region=6 sin 0.5x=8 entrenadores=1.42 nuevos=['Psychic'] stats=530 nivel=48
+  ⋯ sustituido: sale Seaking
+  DEC swap sale=Seaking entra=? nivel_entra=0 causa=equipo_lleno atajo=2
+  [nodo -> 2] batalla score=71.0 (capturar: equipo de 6 y ya a nivel, ampliar con el mas alto de esta pantalla; deja 11.0 combate(s) al jefe) | mapa: Viridian City: vs Giovanni (Ground) | plan: insignias 7 | Ciudad Verde nv60-60 [Ground/Poison/Rock]
+  · Viridian City: vs Giovanni (Ground) | equipo 6 (vivos 6) niv 48-69 | lider Ground | insignias 7 | disponibles ['item', 'batalla'] (crudo ['item', 'catch']) | rivales ? | total 23/16 | TM usado: False, bolsa: []
+  DEC nodo mapa=Viridian City: vs Giovanni (Ground) nodo=? tipo=batalla crudo=catch atajo=2 equipo=6 vivos=6 niv=48-69 insignias=7 disponibles=item,catch capturas_pantalla=0 razon=batalla score=71.0 (capturar: equipo de 6 y ya a nivel, ampliar con el mas alto de esta pantalla; deja 11.0 combate(s) al jefe)
+  [capturar -> 3] Ninetales ['Fire']: 2x apertura=0 2x region=2 sin 0.5x=7 entrenadores=0.94 nuevos=['Fire'] stats=505 nivel=49
+  ⋯ equipo lleno: sustituiré a Exeggutor por 3
+  DEC captura_pedida objetivo=3 equipo=6 vivos=6 candidatos=Nidoqueen:49|Porygon:49|Ninetales:49 motivo=Ninetales ['Fire']: 2x apertura=0 2x region=2 sin 0.5x=7 entrenadores=0.94 nuevos=['Fire'] stats=505 nivel=49
+  ⋯ sustituido: sale Exeggutor
+  DEC swap sale=Exeggutor entra=? nivel_entra=0 causa=equipo_lleno atajo=2
+  [nodo -> 1] incognita score=15.0 (nodo sin identificar (trade o pasivo); deja 6.0 combate(s) al jefe) | mapa: Viridian City: vs Giovanni (Ground) | plan: insignias 7 | Ciudad Verde nv60-60 [Ground/Poison/Rock]
+  · Viridian City: vs Giovanni (Ground) | equipo 6 (vivos 6) niv 49-69 | lider Ground | insignias 7 | disponibles ['incognita', 'legendario'] (crudo ['question', 'legendary']) | rivales ? | total 23/16 | TM usado: False, bolsa: []
+  DEC nodo mapa=Viridian City: vs Giovanni (Ground) nodo=? tipo=incognita crudo=question atajo=1 equipo=6 vivos=6 niv=49-69 insignias=7 disponibles=question,legendary capturas_pantalla=0 razon=incognita score=15.0 (nodo sin identificar (trade o pasivo); deja 6.0 combate(s) al jefe)
+  [capturar -> 1] permisiva: Rapidash ['Fire'] aunque noMejore (nivel=50, stats=500); si el tipo esta repetido, el nodo de cambio saca al anterior
+  ⋯ equipo lleno: sustituiré a Ninetales por 1
+  DEC captura_pedida objetivo=1 equipo=6 vivos=6 candidatos=Rapidash:50|Golduck:50|Dewgong:50 motivo=permisiva: Rapidash ['Fire'] aunque noMejore (nivel=50, stats=500); si el tipo esta repetido, el nodo de cambio saca al anterior
+  ⋯ sustituido: sale Ninetales
+  DEC swap sale=Ninetales entra=? nivel_entra=0 causa=equipo_lleno atajo=2
+  [nodo -> 1] trade score=13.0 (trade: a nivel ya, no hace falta; deja 1 combate(s) al jefe) | mapa: Viridian City: vs Giovanni (Ground) | plan: insignias 7 | Ciudad Verde nv60-60 [Ground/Poison/Rock]
+  · Viridian City: vs Giovanni (Ground) | equipo 6 (vivos 6) niv 50-69 | lider Ground | insignias 7 | disponibles ['trade', 'entrenador'] (crudo ['trade', 'trainer']) | rivales [50] | total 23/16 | TM usado: False, bolsa: []
+  DEC nodo mapa=Viridian City: vs Giovanni (Ground) nodo=? tipo=trade crudo=trade atajo=1 equipo=6 vivos=6 niv=50-69 insignias=7 disponibles=trade,trainer capturas_pantalla=0 razon=trade score=13.0 (trade: a nivel ya, no hace falta; deja 1 combate(s) al jefe)
+  trade: se ofrece Farfetchd
+  trade: opciones [('1', '? WATER Lv 57'), ('2', '? FLYING Lv 57'), ('3', '? GROUND Lv 57')] -> se pide la 1 (? WATER Lv 57)
+  ✓ trade aceptado con el atajo 1 (? WATER Lv 57): +3 niveles y PS completos
+  shiny: ['Golduck Lv. 57 WATER SP.A 113 SPE 101 HP 158 DEF 93 SP.D 96 CRIT 6% 158/158 Hydr', 'CONTINUE']
+  → buscando el tutor de movimientos por n6_0
+  [nodo -> 2] batalla score=61.0 (capturar: equipo de 6 y ya a nivel, ampliar con el mas alto de esta pantalla; deja 1 combate(s) al jefe) | mapa: Viridian City: vs Giovanni (Ground) | plan: insignias 7 | Ciudad Verde nv60-60 [Ground/Poison/Rock]
+  ⋯ reordenado: ['Lapras', 'Rapidash', 'Venusaur', 'Sandslash', 'Raticate', 'Golduck'] -> ['Golduck', 'Lapras', 'Rapidash', 'Venusaur', 'Sandslash', 'Raticate'] (para batalla)
+  DEC orden para=batalla rival=Ground,Poison,Rock antes=Lapras,Rapidash,Venusaur,Sandslash,Raticate,Golduck despues=Golduck,Lapras,Rapidash,Venusaur,Sandslash,Raticate
+  · Viridian City: vs Giovanni (Ground) | equipo 6 (vivos 6) niv 50-69 | lider Ground | insignias 7 | disponibles ['tutor', 'batalla'] (crudo ['move_tutor', 'battle']) | rivales ? | total 23/16 | TM usado: False, bolsa: []
+  DEC nodo mapa=Viridian City: vs Giovanni (Ground) nodo=n5_1 tipo=batalla crudo=battle atajo=2 equipo=6 vivos=6 niv=50-69 insignias=7 disponibles=move_tutor,battle capturas_pantalla=0 razon=batalla score=61.0 (capturar: equipo de 6 y ya a nivel, ampliar con el mas alto de esta pantalla; deja 1 combate(s) al jefe)
+  [continuar -> True] pulso continuar hasta el final
+  DEC combate rival=Wild Slowbro appeared! tipo=salvaje nuestro_niv=69 rival_niv=50 nuestros=6 suyo=1 insignias=7
+  [nodo -> 1] cura score=50.0 (pokecenter: paso obligatorio hacia el jefe, ya se va entero pero se pasa por aqui igualmente) | mapa: Viridian City: vs Giovanni (Ground) | plan: insignias 7 | Ciudad Verde nv60-60 [Ground/Poison/Rock]
+  · Viridian City: vs Giovanni (Ground) | equipo 6 (vivos 6) niv 51-70 | lider Ground | insignias 7 | disponibles ['cura', 'legendario'] (crudo ['pokecenter', 'legendary']) | rivales ? | total 23/16 | TM usado: False, bolsa: []
+  DEC nodo mapa=Viridian City: vs Giovanni (Ground) nodo=n6_1 tipo=cura crudo=pokecenter atajo=1 equipo=6 vivos=6 niv=51-70 insignias=7 disponibles=pokecenter,legendary capturas_pantalla=0 razon=cura score=50.0 (pokecenter: paso obligatorio hacia el jefe, ya se va entero pero se pasa por aqui igualmente)
+  >>> COMBATE GANADO (continuamos en map-screen) | 40-0
+  [nodo -> 1] jefe score=12.0 (jefe: única salida y listo (medio 62 >= listón 60)) | mapa: Viridian City: vs Giovanni (Ground) | plan: insignias 7 | Ciudad Verde nv60-60 [Ground/Poison/Rock]
+  ⋯ orden contra jefe: ['Golduck', 'Lapras', 'Venusaur', 'Sandslash', 'Rapidash', 'Raticate']
+  ⋯ reordenado: ['Golduck', 'Lapras', 'Rapidash', 'Venusaur', 'Sandslash', 'Raticate'] -> ['Golduck', 'Lapras', 'Venusaur', 'Sandslash', 'Rapidash', 'Raticate'] (para jefe)
+  DEC orden para=jefe antes=Golduck,Lapras,Rapidash,Venusaur,Sandslash,Raticate despues=Golduck,Lapras,Venusaur,Sandslash,Rapidash,Raticate
+  · Viridian City: vs Giovanni (Ground) | equipo 6 (vivos 6) niv 51-70 | lider Ground | insignias 7 | disponibles ['jefe'] (crudo ['boss']) | rivales ? | total 23/16 | TM usado: False, bolsa: []
+  DEC nodo mapa=Viridian City: vs Giovanni (Ground) nodo=n7_0 tipo=jefe crudo=boss atajo=1 equipo=6 vivos=6 niv=51-70 insignias=7 disponibles=boss capturas_pantalla=0 razon=jefe score=12.0 (jefe: única salida y listo (medio 62 >= listón 60))
+  [prep -> Sandslash] rival Ground/Poison/Rock -> ['Sandslash', 'Golduck', 'Lapras', 'Venusaur', 'Raticate', 'Rapidash']
+  ⋯ prep: rival Ground/Poison/Rock -> ['Sandslash', 'Golduck', 'Lapras', 'Venusaur', 'Raticate', 'Rapidash']
+  [continuar -> True] pulso continuar hasta el final
+  DEC combate rival=Gym Battle vs Giovanni! tipo=entrenador nuestro_niv=70 rival_niv=60 nuestros=6 suyo=5 insignias=7
+  estado: Gym Battle vs Giovanni! | niveles rivales 53-60
+  enemigos=[('Dugtrio Lv55', '0/103', 55), ('Nidoqueen Lv53', '158/158', 53), ('Nidoking Lv54', '151/151', 54), ('Rhyhorn Lv56', '155/155', 56), ('Rhydon Lv60', '196/196', 60)]
+  mios=[('Golduck Lv58', '61/160', 58), ('Lapras Lv52', '197/197', 52), ('Venusaur Lv70', '192/192', 70), ('Sandslash Lv69', '182/182', 69), ('Rapidash Lv51', '127/127', 51), ('Raticate Lv69', '154/154', 69)]
+  [insignia -> True] insignia conseguida (total 8)
+  >>> COMBATE GANADO (continuamos en badge-screen) | 41-0
+  → buscando el tutor de movimientos por n1_0
+  [nodo -> 1] batalla score=121.0 (capturar: equipo de 6 y ya a nivel, ampliar con el mas alto de esta pantalla; deja 61.0 combate(s) al jefe) | mapa: Elite Four & Champion | plan: insignias 8 | Lorelei nv56-56 [Ice/Psychic/Water]
+  >> insignias: 7 -> 8
+  ⋯ reordenado: ['Golduck', 'Lapras', 'Venusaur', 'Sandslash', 'Rapidash', 'Raticate'] -> ['Sandslash', 'Venusaur', 'Raticate', 'Rapidash', 'Golduck', 'Lapras'] (para batalla)
+  DEC orden para=batalla rival=Ice,Psychic,Water antes=Golduck,Lapras,Venusaur,Sandslash,Rapidash,Raticate despues=Sandslash,Venusaur,Raticate,Rapidash,Golduck,Lapras
+  · Elite Four & Champion | equipo 6 (vivos 6) niv 53-72 | lider Ground | insignias 8 | disponibles ['batalla', 'batalla'] (crudo ['catch', 'battle']) | rivales ? | total 23/17 | TM usado: False, bolsa: []
+  DEC nodo mapa=Elite Four & Champion nodo=n0_0 tipo=batalla crudo=catch atajo=1 equipo=6 vivos=6 niv=53-72 insignias=8 disponibles=catch,battle capturas_pantalla=0 razon=batalla score=121.0 (capturar: equipo de 6 y ya a nivel, ampliar con el mas alto de esta pantalla; deja 61.0 combate(s) al jefe)
+  [capturar -> 1] Alakazam ['Psychic']: 2x apertura=0 2x region=4 sin 0.5x=8 entrenadores=1.08 nuevos=['Psychic'] stats=500 nivel=53
+  ⋯ equipo lleno: sustituiré a Rapidash por 1
+  DEC captura_pedida objetivo=1 equipo=6 vivos=6 candidatos=Alakazam:53|Gyarados:53|Omastar:53 motivo=Alakazam ['Psychic']: 2x apertura=0 2x region=4 sin 0.5x=8 entrenadores=1.08 nuevos=['Psychic'] stats=500 nivel=53
+  ⋯ sustituido: sale Rapidash
+  DEC swap sale=Rapidash entra=? nivel_entra=0 causa=equipo_lleno atajo=4
+  [nodo -> 2] entrenador score=42.0 (entrenador: ya a nivel, no hace falta arriesgar; deja 36.0 combate(s) al jefe) | mapa: Elite Four & Champion | plan: insignias 8 | Lorelei nv56-56 [Ice/Psychic/Water]
+  ⋯ contragolpe contra hiker (Rock/Ground/Fighting, Nv55): ['Lapras', 'Venusaur', 'Golduck', 'Alakazam', 'Sandslash', 'Raticate']
+  ⋯ reordenado: ['Sandslash', 'Venusaur', 'Raticate', 'Alakazam', 'Golduck', 'Lapras'] -> ['Lapras', 'Venusaur', 'Golduck', 'Alakazam', 'Sandslash', 'Raticate'] (para entrenador)
+  DEC orden para=entrenador antes=Sandslash,Venusaur,Raticate,Alakazam,Golduck,Lapras despues=Lapras,Venusaur,Golduck,Alakazam,Sandslash,Raticate
+  · Elite Four & Champion | equipo 6 (vivos 6) niv 53-72 | lider Ground | insignias 8 | disponibles ['entrenador', 'entrenador'] (crudo ['trainer', 'trainer']) | rivales [55, 55] | total 23/18 | TM usado: False, bolsa: []
+  DEC nodo mapa=Elite Four & Champion nodo=? tipo=entrenador crudo=trainer atajo=2 equipo=6 vivos=6 niv=53-72 insignias=8 disponibles=trainer,trainer capturas_pantalla=0 razon=entrenador score=42.0 (entrenador: ya a nivel, no hace falta arriesgar; deja 36.0 combate(s) al jefe)
+  [continuar -> True] pulso continuar hasta el final
+  DEC combate rival=Hiker wants to battle! tipo=entrenador nuestro_niv=72 rival_niv=55 nuestros=6 suyo=3 insignias=8
+  → buscando el tutor de movimientos por n3_1
+  [nodo -> 2] batalla score=127.0 (capturar: equipo de 6 y ya a nivel, ampliar con el mas alto de esta pantalla; deja 67.0 combate(s) al jefe) | mapa: Elite Four & Champion | plan: insignias 8 | Lorelei nv56-56 [Ice/Psychic/Water]
+  ⋯ reordenado: ['Lapras', 'Venusaur', 'Golduck', 'Alakazam', 'Sandslash', 'Raticate'] -> ['Sandslash', 'Venusaur', 'Raticate', 'Alakazam', 'Golduck', 'Lapras'] (para batalla)
+  DEC orden para=batalla rival=Ice,Psychic,Water antes=Lapras,Venusaur,Golduck,Alakazam,Sandslash,Raticate despues=Sandslash,Venusaur,Raticate,Alakazam,Golduck
+  · Elite Four & Champion | equipo 6 (vivos 5) niv 55-74 | lider Ground | insignias 8 | disponibles ['incognita', 'batalla'] (crudo ['question', 'catch']) | rivales ? | total 23/18 | TM usado: False, bolsa: []
+  DEC nodo mapa=Elite Four & Champion nodo=n2_1 tipo=batalla crudo=catch atajo=2 equipo=6 vivos=5 niv=55-74 insignias=8 disponibles=question,catch capturas_pantalla=0 razon=batalla score=127.0 (capturar: equipo de 6 y ya a nivel, ampliar con el mas alto de esta pantalla; deja 67.0 combate(s) al jefe)
+  >>> COMBATE GANADO (continuamos en map-screen) | 42-0
+  [capturar -> 2] permisiva: Aerodactyl ['Rock', 'Flying'] aunque noMejore (nivel=57, stats=515); si el tipo esta repetido, el nodo de cambio saca al anterior
+  DEC captura_pedida objetivo=2 equipo=6 vivos=5 candidatos=Alakazam:57|Aerodactyl:57|Kabutops:57 motivo=permisiva: Aerodactyl ['Rock', 'Flying'] aunque noMejore (nivel=57, stats=515); si el tipo esta repetido, el nodo de cambio saca al anterior
+  ⋯ swap ofrece: Aerodactyl Nv57 Rock/Flying
+  ⋯ cambio por nivel: fuera Lapras
+  ⋯ sustituido: sale Lapras
+  DEC swap sale=Lapras entra=Aerodactyl nivel_entra=57 causa=equipo_lleno atajo=6
+  [nodo -> 2] tutor score=18.0 (MT: sin nodo accesible ahora; deja 10.0 combate(s) al jefe) | mapa: Elite Four & Champion | plan: insignias 8 | Lorelei nv56-56 [Ice/Psychic/Water]
+  ⋯ reordenado: ['Sandslash', 'Venusaur', 'Raticate', 'Alakazam', 'Golduck', 'Aerodactyl'] -> ['Venusaur', 'Raticate', 'Sandslash', 'Aerodactyl', 'Golduck', 'Alakazam'] (para tutor)
+  DEC orden para=tutor antes=Sandslash,Venusaur,Raticate,Alakazam,Golduck,Aerodactyl despues=Venusaur,Raticate,Sandslash,Aerodactyl,Golduck,Alakazam
+  · Elite Four & Champion | equipo 6 (vivos 6) niv 55-74 | lider Ground | insignias 8 | disponibles ['item', 'tutor'] (crudo ['item', 'move_tutor']) | rivales ? | total 23/18 | TM usado: False, bolsa: []
+  DEC nodo mapa=Elite Four & Champion nodo=? tipo=tutor crudo=move_tutor atajo=2 equipo=6 vivos=6 niv=55-74 insignias=8 disponibles=item,move_tutor capturas_pantalla=0 razon=tutor score=18.0 (MT: sin nodo accesible ahora; deja 10.0 combate(s) al jefe)
+  [nodo -> 2] tutor score=18.0 (MT: sin nodo accesible ahora; deja 10.0 combate(s) al jefe) | mapa: Elite Four & Champion | plan: insignias 8 | Lorelei nv56-56 [Ice/Psychic/Water]
+  · Elite Four & Champion | equipo 6 (vivos 6) niv 55-74 | lider Ground | insignias 8 | disponibles ['item', 'tutor'] (crudo ['item', 'move_tutor']) | rivales ? | total 23/18 | TM usado: False, bolsa: []
+  DEC nodo mapa=Elite Four & Champion nodo=n4_2 tipo=tutor crudo=move_tutor atajo=2 equipo=6 vivos=6 niv=55-74 insignias=8 disponibles=item,move_tutor capturas_pantalla=0 razon=tutor score=18.0 (MT: sin nodo accesible ahora; deja 10.0 combate(s) al jefe)
+  → buscando el tutor de movimientos por n5_2
+  [nodo -> 2] batalla score=66.0 (capturar: equipo de 6 y ya a nivel, ampliar con el mas alto de esta pantalla; deja 6.0 combate(s) al jefe) | mapa: Elite Four & Champion | plan: insignias 8 | Lorelei nv56-56 [Ice/Psychic/Water]
+  ⋯ reordenado: ['Venusaur', 'Raticate', 'Sandslash', 'Aerodactyl', 'Golduck', 'Alakazam'] -> ['Sandslash', 'Aerodactyl', 'Venusaur', 'Raticate', 'Alakazam', 'Golduck'] (para batalla)
+  DEC orden para=batalla rival=Ice,Psychic,Water antes=Venusaur,Raticate,Sandslash,Aerodactyl,Golduck,Alakazam despues=Sandslash,Aerodactyl,Venusaur,Raticate,Alakazam,Golduck
+  · Elite Four & Champion | equipo 6 (vivos 6) niv 55-74 | lider Ground | insignias 8 | disponibles ['tutor', 'batalla'] (crudo ['move_tutor', 'battle']) | rivales ? | total 23/18 | TM usado: True, bolsa: []
+  DEC nodo mapa=Elite Four & Champion nodo=n4_2 tipo=batalla crudo=battle atajo=2 equipo=6 vivos=6 niv=55-74 insignias=8 disponibles=move_tutor,battle capturas_pantalla=0 razon=batalla score=66.0 (capturar: equipo de 6 y ya a nivel, ampliar con el mas alto de esta pantalla; deja 6.0 combate(s) al jefe)
+  [continuar -> True] pulso continuar hasta el final
+  DEC combate rival=Wild Dragonite appeared! tipo=salvaje nuestro_niv=74 rival_niv=59 nuestros=6 suyo=1 insignias=8
+  [nodo -> 1] entrenador score=11.0 (entrenador: ya a nivel, no hace falta arriesgar; deja 5.0 combate(s) al jefe) | mapa: Elite Four & Champion | plan: insignias 8 | Lorelei nv56-56 [Ice/Psychic/Water]
+  ⋯ contragolpe contra bug-catcher (Bug, Nv62): ['Aerodactyl', 'Golduck', 'Alakazam', 'Raticate', 'Venusaur', 'Sandslash']
+  ⋯ reordenado: ['Sandslash', 'Aerodactyl', 'Venusaur', 'Raticate', 'Alakazam', 'Golduck'] -> ['Aerodactyl', 'Golduck', 'Alakazam', 'Raticate', 'Venusaur', 'Sandslash'] (para entrenador)
+  DEC orden para=entrenador antes=Sandslash,Aerodactyl,Venusaur,Raticate,Alakazam,Golduck despues=Aerodactyl,Golduck,Alakazam,Raticate,Venusaur,Sandslash
+  · Elite Four & Champion | equipo 6 (vivos 5) niv 56-75 | lider Ground | insignias 8 | disponibles ['entrenador'] (crudo ['trainer']) | rivales [62] | total 23/18 | TM usado: True, bolsa: []
+  DEC nodo mapa=Elite Four & Champion nodo=n5_3 tipo=entrenador crudo=trainer atajo=1 equipo=6 vivos=5 niv=56-75 insignias=8 disponibles=trainer capturas_pantalla=0 razon=entrenador score=11.0 (entrenador: ya a nivel, no hace falta arriesgar; deja 5.0 combate(s) al jefe)
+  >>> COMBATE GANADO (continuamos en map-screen) | 43-0
+  [continuar -> True] pulso continuar hasta el final
+  DEC combate rival=Bug Catcher wants to battle! tipo=entrenador nuestro_niv=75 rival_niv=62 nuestros=5 suyo=3 insignias=8
+  [nodo -> 1] item score=2.0 (objeto: hay hueco pero no es prioridad (flag apagado)) | mapa: Elite Four & Champion | plan: insignias 8 | Lorelei nv56-56 [Ice/Psychic/Water]
+  ⋯ reordenado: ['Aerodactyl', 'Golduck', 'Alakazam', 'Raticate', 'Venusaur', 'Sandslash'] -> ['Venusaur', 'Raticate', 'Alakazam', 'Aerodactyl', 'Golduck', 'Sandslash'] (para item)
+  DEC orden para=item antes=Aerodactyl,Golduck,Alakazam,Raticate,Venusaur,Sandslash despues=Venusaur,Raticate,Alakazam
+  · Elite Four & Champion | equipo 6 (vivos 3) niv 58-77 | lider Ground | insignias 8 | disponibles ['item'] (crudo ['item']) | rivales ? | total 23/18 | TM usado: True, bolsa: []
+  DEC nodo mapa=Elite Four & Champion nodo=n6_2 tipo=item crudo=item atajo=1 equipo=6 vivos=3 niv=58-77 insignias=8 disponibles=item capturas_pantalla=0 razon=item score=2.0 (objeto: hay hueco pero no es prioridad (flag apagado))
+  >>> COMBATE GANADO (continuamos en map-screen) | 44-0
+  item: ['Choice Band +40% physical damage, -20% DEF', 'Wide Lens +20% damage on all moves', 'Eviolite stops evolutions, if the pokemon is not the final stage it gets +50% DE']
+    item DOM: {"texto": "Item Found! Choose one item to keep Choice Band +40% physical damage, -20% DEF Wide Lens +20% damage on all moves Eviolite stops evolutions, if the pokemon is n", "opciones": [{"id": null, "clase": "item-card", "atajo": "1", "txt": "Choice Band\n+40% physical "}, {"id": null, "clase": "item-card", "atajo": "2", "txt": "Wide Lens\n+20% damage on a"}, {"id": null, "clase": "item-card", "a
+  [item -> Wide Lens +20% damage on all moves] tomo 3/3 por tecla 2
+  DEC item_cogido objeto=Wide Lens +20% damage on all moves atajo=2 prioridad=25 opciones=Choice Band +40% physical da|Wide Lens +20% damage on all|Eviolite stops evolutions, i
+  item: 'tecla Space' no funcionó
+  item: 'tecla Space' no funcionó
+  item: salida con 'clic JS en SKIP' (intento 3)
+  [nodo -> 1] jefe score=4.0 (jefe: única salida, se entra igual (3 caído(s))) | mapa: Elite Four & Champion | plan: insignias 8 | Lorelei nv56-56 [Ice/Psychic/Water]
+  ⋯ orden contra jefe: ['Venusaur', 'Raticate', 'Alakazam', 'Aerodactyl', 'Golduck', 'Sandslash']
+  · Elite Four & Champion | equipo 6 (vivos 3) niv 58-77 | lider Ground | insignias 8 | disponibles ['jefe'] (crudo ['boss']) | rivales ? | total 23/18 | TM usado: True, bolsa: []
+  DEC nodo mapa=Elite Four & Champion nodo=n7_1 tipo=jefe crudo=boss atajo=1 equipo=6 vivos=3 niv=58-77 insignias=8 disponibles=boss capturas_pantalla=0 razon=jefe score=4.0 (jefe: única salida, se entra igual (3 caído(s)))
+  [nodo -> 1] jefe score=4.0 (jefe: única salida, se entra igual (3 caído(s))) | mapa: Elite Four & Champion | plan: insignias 8 | Lorelei nv56-56 [Ice/Psychic/Water]
+  ⋯ orden contra jefe: ['Venusaur', 'Raticate', 'Alakazam', 'Aerodactyl', 'Golduck', 'Sandslash']
+  · Elite Four & Champion | equipo 6 (vivos 3) niv 58-77 | lider Ground | insignias 8 | disponibles ['jefe'] (crudo ['boss']) | rivales ? | total 23/18 | TM usado: True, bolsa: []
+  DEC nodo mapa=Elite Four & Champion nodo=n7_1 tipo=jefe crudo=boss atajo=1 equipo=6 vivos=3 niv=58-77 insignias=8 disponibles=boss capturas_pantalla=0 razon=jefe score=4.0 (jefe: única salida, se entra igual (3 caído(s)))
+  [prep -> Raticate] rival Water/Ice/Psychic -> ['Venusaur', 'Raticate', 'Alakazam', 'Sandslash', 'Golduck', 'Aerodactyl']
+  ⋯ prep: rival Water/Ice/Psychic -> ['Venusaur', 'Raticate', 'Alakazam', 'Sandslash', 'Golduck', 'Aerodactyl']
+  [continuar -> True] pulso continuar hasta el final
+  DEC combate rival=Elite Four: Lorelei! tipo=salvaje nuestro_niv=77 rival_niv=56 nuestros=3 suyo=5 insignias=8
+  estado: Elite Four: Lorelei! | niveles rivales 53-56
+  enemigos=[('Dewgong Lv54', '0/161', 54), ('Cloyster Lv53', '0/116', 53), ('Slowbro Lv54', '166/166', 54), ('Jynx Lv56', '138/138', 56), ('Lapras Lv56', '211/211', 56)]
+  mios=[('Venusaur Lv77', '115/210', 77), ('Raticate Lv76', '169/169', 76), ('Alakazam Lv58', '131/131', 58), ('Aerodactyl Lv60', '0/166', 60), ('Golduck Lv65', '0/179', 65), ('Sandslash Lv74', '0/195', 74)]
+  [prep -> Alakazam] rival Rock/Ground/Fighting -> ['Venusaur', 'Alakazam', 'Raticate', 'Sandslash', 'Golduck', 'Aerodactyl']
+  ⋯ prep: rival Rock/Ground/Fighting -> ['Venusaur', 'Alakazam', 'Raticate', 'Sandslash', 'Golduck', 'Aerodactyl']
+  [continuar -> True] pulso continuar hasta el final
+  DEC combate rival=Elite Four: Bruno! tipo=salvaje nuestro_niv=79 rival_niv=58 nuestros=1 suyo=5 insignias=8
+  [prep -> Alakazam] rival Ghost/Poison/Flying -> ['Alakazam', 'Venusaur', 'Raticate', 'Sandslash', 'Golduck', 'Aerodactyl']
+  ⋯ prep: rival Ghost/Poison/Flying -> ['Alakazam', 'Venusaur', 'Raticate', 'Sandslash', 'Golduck', 'Aerodactyl']
+  [continuar -> True] pulso continuar hasta el final
+  DEC combate rival=Elite Four: Agatha! tipo=salvaje nuestro_niv=80 rival_niv=58 nuestros=1 suyo=5 insignias=8
+  [prep -> Raticate] rival Water/Flying/Dragon -> ['Raticate', 'Alakazam', 'Venusaur', 'Sandslash', 'Golduck', 'Aerodactyl']
+  ⋯ prep: rival Water/Flying/Dragon -> ['Raticate', 'Alakazam', 'Venusaur', 'Sandslash', 'Golduck', 'Aerodactyl']
+  [continuar -> True] pulso continuar hasta el final
+  DEC combate rival=Elite Four: Lance! tipo=salvaje nuestro_niv=80 rival_niv=62 nuestros=0 suyo=5 insignias=8
+  >>> COMBATE PERDIDO contra Elite Four: Lorelei! | nos quedan: Venusaur(54/100), Raticate(100/100), Alakazam(100/100) | 44-1
+
+-----------------------------------------
+  RESUMEN Kanto
+  resultado       : GAME_OVER
+  pasos           : 228
+  insignias       : 8
+  combates        : 44 ganados / 1 perdidos
+  peleas entrain. : 28 (+56 nv)
+  peleas salvaje  : 20 (+20 nv)
+  capturas        : 5
+  tutores         : 2
+  objetos         : 3
+  centros         : 5
+  equipo          : 6 (58-77)
+  traza           : /home/radi/Proyectos/Github/gestor_juegos_aplicaciones/juegos/pokelike/log/traza-2026-10-06_20-30-57_p231290.json
+  visitas tutor   : 2
+-----------------------------------------
+
+{
+  "resultado": "GAME_OVER",
+  "region": "Kanto",
+  "pasos": 228,
+  "insignias": 8,
+  "equipo": [
+    {
+      "n": "Venusaur",
+      "lv": 77,
+      "ps": 54
+    },
+    {
+      "n": "Raticate",
+      "lv": 76,
+      "ps": 100
+    },
+    {
+      "n": "Alakazam",
+      "lv": 58,
+      "ps": 100
+    },
+    {
+      "n": "Aerodactyl",
+      "lv": 60,
+      "ps": 0
+    },
+    {
+      "n": "Golduck",
+      "lv": 65,
+      "ps": 0
+    },
+    {
+      "n": "Sandslash",
+      "lv": 74,
+      "ps": 0
+    }
+  ],
+  "tipos_equipo": [
+    "Grass",
+    "Poison",
+    "Normal",
+    "Psychic",
+    "Rock",
+    "Flying",
+    "Water",
+    "Ground"
+  ],
+  "decisiones": [
+    "[insignia -> True] insignia conseguida (total 8)",
+    "[nodo -> 1] batalla score=121.0 (capturar: equipo de 6 y ya a nivel, ampliar con el mas alto de esta pantalla; deja 61.0 combate(s) al jefe) | mapa: Elite Four & Champion | plan: insignias 8 | Lorelei nv56-56 [Ice/Psychic/Water]",
+    "[capturar -> 1] Alakazam ['Psychic']: 2x apertura=0 2x region=4 sin 0.5x=8 entrenadores=1.08 nuevos=['Psychic'] stats=500 nivel=53",
+    "[nodo -> 2] entrenador score=42.0 (entrenador: ya a nivel, no hace falta arriesgar; deja 36.0 combate(s) al jefe) | mapa: Elite Four & Champion | plan: insignias 8 | Lorelei nv56-56 [Ice/Psychic/Water]",
+    "[continuar -> True] pulso continuar hasta el final",
+    "[nodo -> 2] batalla score=127.0 (capturar: equipo de 6 y ya a nivel, ampliar con el mas alto de esta pantalla; deja 67.0 combate(s) al jefe) | mapa: Elite Four & Champion | plan: insignias 8 | Lorelei nv56-56 [Ice/Psychic/Water]",
+    "[capturar -> 2] permisiva: Aerodactyl ['Rock', 'Flying'] aunque noMejore (nivel=57, stats=515); si el tipo esta repetido, el nodo de cambio saca al anterior",
+    "[nodo -> 2] tutor score=18.0 (MT: sin nodo accesible ahora; deja 10.0 combate(s) al jefe) | mapa: Elite Four & Champion | plan: insignias 8 | Lorelei nv56-56 [Ice/Psychic/Water]",
+    "[nodo -> 2] tutor score=18.0 (MT: sin nodo accesible ahora; deja 10.0 combate(s) al jefe) | mapa: Elite Four & Champion | plan: insignias 8 | Lorelei nv56-56 [Ice/Psychic/Water]",
+    "[nodo -> 2] batalla score=66.0 (capturar: equipo de 6 y ya a nivel, ampliar con el mas alto de esta pantalla; deja 6.0 combate(s) al jefe) | mapa: Elite Four & Champion | plan: insignias 8 | Lorelei nv56-56 [Ice/Psychic/Water]",
+    "[continuar -> True] pulso continuar hasta el final",
+    "[nodo -> 1] entrenador score=11.0 (entrenador: ya a nivel, no hace falta arriesgar; deja 5.0 combate(s) al jefe) | mapa: Elite Four & Champion | plan: insignias 8 | Lorelei nv56-56 [Ice/Psychic/Water]",
+    "[continuar -> True] pulso continuar hasta el final",
+    "[nodo -> 1] item score=2.0 (objeto: hay hueco pero no es prioridad (flag apagado)) | mapa: Elite Four & Champion | plan: insignias 8 | Lorelei nv56-56 [Ice/Psychic/Water]",
+    "[item -> Wide Lens +20% damage on all moves] tomo 3/3 por tecla 2",
+    "[nodo -> 1] jefe score=4.0 (jefe: única salida, se entra igual (3 caído(s))) | mapa: Elite Four & Champion | plan: insignias 8 | Lorelei nv56-56 [Ice/Psychic/Water]",
+    "[nodo -> 1] jefe score=4.0 (jefe: única salida, se entra igual (3 caído(s))) | mapa: Elite Four & Champion | plan: insignias 8 | Lorelei nv56-56 [Ice/Psychic/Water]",
+    "[prep -> Raticate] rival Water/Ice/Psychic -> ['Venusaur', 'Raticate', 'Alakazam', 'Sandslash', 'Golduck', 'Aerodactyl']",
+    "[continuar -> True] pulso continuar hasta el final",
+    "[prep -> Alakazam] rival Rock/Ground/Fighting -> ['Venusaur', 'Alakazam', 'Raticate', 'Sandslash', 'Golduck', 'Aerodactyl']",
+    "[continuar -> True] pulso continuar hasta el final",
+    "[prep -> Alakazam] rival Ghost/Poison/Flying -> ['Alakazam', 'Venusaur', 'Raticate', 'Sandslash', 'Golduck', 'Aerodactyl']",
+    "[continuar -> True] pulso continuar hasta el final",
+    "[prep -> Raticate] rival Water/Flying/Dragon -> ['Raticate', 'Alakazam', 'Venusaur', 'Sandslash', 'Golduck', 'Aerodactyl']",
+    "[continuar -> True] pulso continuar hasta el final"
+  ]
+}
