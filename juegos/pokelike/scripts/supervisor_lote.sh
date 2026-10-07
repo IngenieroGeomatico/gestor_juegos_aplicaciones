@@ -100,7 +100,8 @@ vivo() {
     w="$q"
   done
 
-  for p in $(pgrep -f "$pat_lanz" 2>/dev/null); do
+  for p in /proc/[0-9]*; do
+    p="${p#/proc/}"
     case "$PROPIOS" in *" $p "*) continue;; esac
     c=$(tr '\0' ' ' < "/proc/$p/cmdline" 2>/dev/null)
     case "$c" in
@@ -133,7 +134,8 @@ matar_lanzador() {
     rm -f "$PIDFILE"
   fi
   local p c
-  for p in $(pgrep -f "$pat_lanz" 2>/dev/null); do
+  for p in /proc/[0-9]*; do
+    p="${p#/proc/}"
     c=$(tr '\0' ' ' < "/proc/$p/cmdline" 2>/dev/null)
     case "$c" in
       *"supervisor_lote"*) continue;;
@@ -213,21 +215,37 @@ recoger_huerfanos() {
     w="$q"
   done
 
-  # Raices: procesos `timeout` cuya linea contiene la firma. Cada run es uno.
-  for raiz in $(pgrep -f "timeout" 2>/dev/null); do
+  # Raices: se leen de /proc, NO con `pgrep`.
+  #
+  # `pgrep -f timeout` casa con CUALQUIER proceso que tenga la palabra timeout en
+  # su linea de comandos, y no solo con los `timeout <n> uv run ...` del bot. Si
+  # ademas ese proceso menciona el bot —que es justo lo que pasa con el shell del
+  # agente cuando escribe un comando— el recolector lo mataba. Quinta vez que un
+  # `pgrep -f` flojo muerde en este fichero.
+  #
+  # La forma exacta: el PRIMER token de /proc/PID/cmdline tiene que ser
+  # literalmente `timeout`, y la linea tiene que contener la firma del run.
+  local raiz linea primer es_vivo pid
+  for raiz in /proc/[0-9]*; do
+    raiz="${raiz#/proc/}"
     case "$PROPIOS" in *" $raiz "*) continue;; esac
-    grep -qF "$SIG" "/proc/$raiz/cmdline" 2>/dev/null || continue
-    # Si esta raiz esta viva segun la tabla, todo su arbol es legitimo.
-    local es_vivo=0
+    linea=$(tr '\0' ' ' < "/proc/$raiz/cmdline" 2>/dev/null)
+    [ -n "$linea" ] || continue
+    primer="${linea%% *}"
+    [ "$primer" = "timeout" ] || continue
+    case "$linea" in *"$SIG"*) ;; *) continue;; esac
+    # Es una raiz de run. ¿Esta viva segun la tabla?
+    es_vivo=0
     while read -r pid _log; do
       [ "${pid:-}" = "$raiz" ] && es_vivo=1 && break
     done < "$vivos"
     [ "$es_vivo" = "1" ] && continue
-    # Raiz huerfana: se lleva su arbol entero.
     total=$((total + 1))
     matar_arbol "$raiz"
   done
-  [ "$total" -gt 0 ] && nota "recogidas $total runs huerfanas (raices sin cerrar)"
+  if [ "$total" -gt 0 ]; then
+    nota "recogidas $total runs huerfanas (raices sin cerrar)"
+  fi
   return 0
 }
 
