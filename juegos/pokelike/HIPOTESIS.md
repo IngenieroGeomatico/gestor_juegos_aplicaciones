@@ -1707,3 +1707,118 @@ Cinco cosas que costaron el día. Todas de lanzamiento, ninguna del bot:
 
 Y su corolario: **un guard que vigila las unidades de trabajo no vigila el
 lanzador que las crea.** Ese hueco costó 8,6 h.
+---
+
+# H17 · La apertura se gasta en cuerpos y el cuello pide nivel
+
+Abierta el 07-10, **antes de mirar el resultado**. Los datos queMotivan vienen
+del cierre de H15 (n=150), no de diffear una run que gana.
+
+## El diagnóstico, en una línea
+
+**El 79% de las muertes están en Brock y Misty, y a Misty se llega con el nivel
+justo (20,2, el que gana) pero con el equipo corto (4 móns de mediana).**
+
+## Lo que ya está medido del reparto de la apertura
+
+En el lote de n=150, **382 pantallas** de las de antes de la tercera insignia
+ofrecían `trainer` junto a `battle` o `catch`. El bot eligió:
+
+| | n | % |
+|---|---|---|
+| entrenador | 150 | **39%** |
+| batalla / capturar | 183 | **48%** |
+| otro (cura, tutor, jefe, incognita) | 49 | 13% |
+
+Y con el filtro permisivo **ya no rechaza capturas**: los rechazos están en 0.
+O sea que el bot **no dice que no a las capturas**, es que gasta la apertura en
+otros nodos.
+
+## Y el código dice por dónde
+
+`planificador.py`:
+
+| rama | peso |
+|---|---|
+| `if len(equipo) < 3: return PESO_CAPTURA` | **60** |
+| `PESO_ENTRENADOR_SANO` | **34** |
+| `if falta > 1` con equipo ≥ 3: cazar | **8** |
+| `PESO_CAPTURA` equipo ≥ 3 y a nivel | **60** |
+| `PESO_BATALLA_NIVEL` | 15 |
+
+**La rama que domina la apertura es `len(equipo) < 3 → capturar (60)`, y su
+motivo registrado es literalmente «capturar: equipo de 2, hacen falta cuerpos
+antes que nivel».** Es la razón de captura más común del lote.
+
+Y R2 dice que el entrenador da **+2 niveles por pelea** y el salvaje **+1**. O
+sea que una pelea de entrenador es **el doble de eficiente por combate**, y el
+peso lo trata como si costara lo mismo.
+
+## La hipótesis
+
+> **La apertura se gasta en cuerpos porque el disparador es el tamaño del
+> equipo (`len(equipo) < 3`), y el cuello antes de Misty pide nivel.** Con el
+> filtro permisivo una captura con 1-2 móns ya es casi gratis, así que la
+> rama de 60 puntos gana siempre, y la pelea que sube el doble de nivel por
+> combate se queda sin sitio.
+
+## Lo que hay que instrumentar ANTES de lanzar
+
+**No lanzar esto sin registrar el score de todos los candidatos.** El log
+actual solo deja el score del nodo elegido, y para saber *qué rama* gana a la
+del entrenador en esas 382 pantallas hubo que ir a emparejar prosa con regex,
+que es justo lo que ya salió mal tres veces en este fichero (tres
+extracciones del mismo log dieron +0,5, +0,9 y +2,2 niveles de shortfall, y solo
+una podía ser cierta).
+
+Instrumentación: en cada `DEC nodo`, escribir **todos** los candidatos con su
+score, tipo y motivo, no solo el ganador. Con eso la pregunta «qué le gana a
+PESO_ENTRENADOR_SANO en la apertura» se responde leyendo un log, no parseando.
+
+## Primaria, declarada ANTES de mirar
+
+| | |
+|---|---|
+| **Primaria** | victorias en **Misty**, sobre las entradas a Misty (no sobre las runs) |
+| Secundaria 1 | móns en el equipo **en la puerta de Misty** (mediana; hoy 4) |
+| Secundaria 2 | nivel en la puerta de Misty (mediana; hoy 18-20) |
+| **NO es primaria** | insignias/run. Ya se sabe que la mediana va a 1 aunque la media se mueva |
+
+Misty como primaria y no insignias porque es donde está el 46% de las muertes
+que cuentan, y porque responde a la intervención: si el cuello es el nivel de
+la apertura, Misty se mueve.
+
+## Los dos brazos
+
+Un solo cambio, el mínimo:
+
+- **A (control)**: `len(equipo) < 3 → capturar (60)`, como ahora.
+- **B**: la apertura no puede gastar en cuerpos por encima de un listón de
+  niveles; el jugador o la abertura decide con el coste real (entrenador = 2
+  niveles por pelea).
+
+## Lectura
+
+- **X**: Misty sube por encima del 55% y la secundaria 1 sube de 4 a 5+ →
+  **el cuello era la apertura y el equipo importaba más que el filtro**.
+- **Y**: Misty se queda donde está → el cuello no es la apertura, y toca mirar
+  el tramo posterior a Misty, que nadie ha mirado todavía.
+
+- **X parcial**: Misty sube pero los móns no → el efecto es de nivel, no de
+  equipo, y la hipótesis se corrige a la mitad sin tira el lote.
+
+## Lo que NO se hace aquí
+
+- No se toca `planificador.py` hasta tener la instrumentación. H13 gastó 48 h
+  arreglando una lógica de captura real que no era el cuello.
+- No se elige el brazo mirando cuál gana. Los dos brazos se prueban.
+- No se sube el listón de equipo sin mirar: 4 móns es lo que hay, no un objetivo.
+
+## La lección que aplica
+
+Esta es la cuarta vez que se toca este cuello. Las tres anteriores (trade, veto
+por tipo, H16) se lancèrent «mira lo que hacen las que ganan». Esta vez la
+hipótesis sale de **aritmética y del código**: R2 dice +2 por entrenador, el
+código da 34 al entrenador y 60 a capturar con equipo corto, y el 48% de las
+pantallas con las dos cosas en pantalla se va a la segunda. No hay ningún
+`p` aquí todavía, y no debe haberlo hasta que se mida.
