@@ -1822,3 +1822,87 @@ hipótesis sale de **aritmética y del código**: R2 dice +2 por entrenador, el
 código da 34 al entrenador y 60 a capturar con equipo corto, y el 48% de las
 pantallas con las dos cosas en pantalla se va a la segunda. No hay ningún
 `p` aquí todavía, y no debe haberlo hasta que se mida.
+## H17 · CORREGIDA: la primaria era Misty y no tiene potencia
+
+Cambiada **antes de mirar un solo dato** de este lote, que es el momento
+legítimo. La primaria era «victorias en Misty» y es un error dimensional:
+
+| n/brazo | entradas a Misty reales | detección (80%) |
+|---|---|---|
+| 150 | 35 | **±32,5 puntos** |
+| 300 | 70 | ±23,4 |
+| 600 | 140 | ±16,7 |
+
+Solo hay **0,233 entradas a Misty por run**. Para un efecto de +10 puntos harían
+falta ~6.700 runs por brazo.
+
+**Morir en Misty no significa que esa proporción tenga suficientes
+observaciones para medirla.** Ya se había avisado dos veces en este fichero de
+que `insignias` es una métrica comprimida, y aun así elegí una métrica *más*
+específica con *menos* observaciones. La especificidad se paga en n.
+
+| métrica | n/brazo | detección (80%) |
+|---|---|---|
+| **insignias/run** (sd 1,26) | 150 | **±0,41 insignias** |
+| **≥2 insignias** (31%) | 150 | ±15,8 puntos |
+| victorias Misty (46%) | 150 | ±32,5 puntos ❌ |
+
+`insignias/run` a 150/brazo detecta justo el tamaño del efecto de H15 (+0,53).
+**Por eso H15 se vio y por eso esta sí se va a ver.**
+
+## H17 · lo que se midió antes de escribir una línea de política
+
+**1. El mecanismo, con la tabla de candidatos instrumentada** (decid +
+control en un solo commit, sin mirar ningún log de partida):
+
+| estado | sin flag | con flag |
+|---|---|---|
+| equipo de 1 | `batalla=60 entrenador=36` → capturar | igual (el flag no entra) |
+| equipo de 3 y falta nivel | `entrenador=36 batalla=8` | `batalla=60 entrenador=36` → capturar |
+
+**El umbral `len(equipo) < 3` es lo que lo voltea.**
+
+**2. La apertura, sobre los 150 runs que ya existían** (recuento de decisiones,
+no selección por resultado):
+
+| antes de Misty | media | niveles que aporta |
+|---|---|---|
+| entrenadores | 4,07 | **8,1** (+2) |
+| capturas | 3,19 | 3,2 (+1) **y 3,19 móns** |
+| batallas sueltas | **6,52** | 6,5 (+1) |
+
+Reparto del nivel: 46% entrenador, 54% resto. **Se pelea el doble de veces sin
+capturar que capturando**, y cazar no da nada más que nivel: una captura *es*
+una pelea.
+
+**3. Dónde NO está el problema:** en el **42%** de las pantallas con `trainer`
+disponible el equipo tiene menos de 3 móns, y ahí gana capturar por peso
+(60 > 36) sin que el flag cambie nada. No es el filtro: es orden de prioridades.
+
+## H17 · la opción A queda DESCARTADA, y por qué
+
+Era: «si falta nivel, que la pelea del entrenador gane a capturar».
+
+**Se descarta porque una captura da +1 nivel *y un món*, y un entrenador +2
+niveles y ningún món.** Preferir al entrenador en la apertura significa **pagar
+un món por un nivel extra**, justo cuando los móns son lo que falta: se llega a
+Misty con 4 de mediana cuando la condición necesita 5-6. Y tiene una cola mala:
+**perder contra un entrenador termina la run**, así que mete al bot en
+entrenadores con 1-2 móns a cambio de muerte.
+
+Lo que se cambia es **un peso, en la dirección documentada**: la rama
+`falta > 1` con equipo ≥3 y pokeball en pantalla pasa de 8.0 a `PESO_CAPTURA`
+(60). La comparación **con el entrenador (36) se queda como está**, que es el
+trueque razonable cuando el equipo es corto.
+
+Flag: `PKL_CAPTURA_POR_NIVEL`, **default 0** (control). Lote:
+`scripts/exp_h17.sh 300 Kanto 1800`, 150 por brazo, brazos intercalados.
+
+## Lectura
+
+- **X**: `insignias/run` sube por encima de +0,41 → el desperdicio de las 6,5
+  batallas sueltas era real y era cuello.
+- **Y**: nada se mueve → el cuello no es la apertura. Y entonces toca mirar el
+  tramo **posterior** a Misty, que nadie ha mirado todavía.
+- **X parcial**: sube `≥2 insignias` pero no la media → el efecto existe y está
+  en la cola.

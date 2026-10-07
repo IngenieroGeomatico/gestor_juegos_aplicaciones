@@ -116,7 +116,8 @@ MARGEN_BASE = 0
 # fallar). Ver `experimento.py`.
 def _flags_entorno() -> dict:
     out = {"veto_tipo": False, "cobertura": False, "escalera_riesgo": True,
-           "veto_nivel": True, "item_huecos": False}
+           "veto_nivel": True, "item_huecos": False,
+           "captura_por_nivel": False}
     for k in out:
         v = os.environ.get(f"PKL_{k.upper()}")
         if v is None:
@@ -658,6 +659,38 @@ def puntuar(tipo: str, ctx: Contexto) -> tuple[float, str]:
                         f"{', '.join(ctx.sin_respuesta[:3])}; el nivel se recupera "
                         f"después, el agujero de tipo no")
             if falta > 1:
+                if EXP["captura_por_nivel"]:
+                    # **H17: cuando falta nivel y esta pantalla ofrece
+                    # pokeball, capturar DOMINA a cazar.**
+                    #
+                    # Medido en el lote de 150 runs, en la ventana antes de
+                    # Misty: 6,52 batallas sueltas frente a 3,19 capturas. O sea
+                    # que se pelea el doble de veces sin capturar que
+                    # capturando.
+                    #
+                    # Y cazar no es mejor que capturar: R2 da +1 nivel a la
+                    # pelea, y una captura **es** una pelea. O sea que capturar
+                    # da el mismo nivel **y ademas un món**. Este 8.0 estaba
+                    # por debajo del entrenador (36), asi que cuando la pantalla
+                    # tenia captura y faltaba nivel, el bot se iba al
+                    # entrenador y la pantalla de captura no se llegaba a ver.
+                    #
+                    # Lo que NO se toca es la comparacion con el entrenador
+                    # (36): una captura da +1 nivel y un món, un entrenador +2
+                    # niveles y ningun món, y ademas perder contra un entrenador
+                    # termina la run. Con el equipo corto —que es el caso aquí,
+                    # que solo entra por encima de 3 móns— ese trueque es
+                    # razonable y arriesgado tocarlo.
+                    #
+                    # La opcion de preferir SIEMPRE al entrenador por sobre la
+                    # captura se descarto antes de escribir esto: significaba
+                    # pagar un món por un nivel extra justo cuando los móns son
+                    # lo que falta (se llega a Misty con 4 de mediana cuando la
+                    # condicion necesita 5-6).
+                    return (PESO_CAPTURA,
+                            f"capturar tambien sube nivel: faltan "
+                            f"{falta:.0f} y una captura es una pelea que deja "
+                            f"un món de más")
                 return (8.0,
                         f"cazar {falta:.0f} nivel(es) por encima del entrenador: "
                         f"el equipo ya tiene {len(equipo)} móns, ahora toca "
