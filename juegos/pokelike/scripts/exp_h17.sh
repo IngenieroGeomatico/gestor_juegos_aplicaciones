@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# H17 · Capturar por nivel (n=150 por brazo).
+# H17 · Capturar por nivel (n=300 en total, ~150 por brazo).
 #
 # QUÉ MIDE: si capturar en la apertura cuando falta nivel sube las insignias.
 # El cambio es **un peso**: la rama `falta > 1` con equipo >= 3 y pokeball en
@@ -77,7 +77,7 @@ VIVOS="$LOGS/${ETIQUETA}.vivos"
 LOG_GUARD="$LOGS/${ETIQUETA}_guard.log"
 PIDFILE="$LOGS/${ETIQUETA}.pid"
 
-echo "== H17 · captura por nivel | A=1 B=0 | n=$PEDIDAS por brazo | $REGION | hash=$HASH =="
+echo "== H17 · captura por nivel | A=1 B=0 | n=$PEDIDAS en total (~$((PEDIDAS/2)) por brazo) | $REGION | hash=$HASH =="
 echo "   timeout=${TIMEOUT}s vivacidad=${VIVACIDAD}s (tick ${TICK}s) | logs en $LOGS/$ETIQUETA"
 echo "   primaria: insignias/run | secundaria: >=2 insignias"
 
@@ -146,6 +146,18 @@ resumen_brazo() {
 }
 
 lanzadas=0
+# **Reanuda.** Las runs ya en disco cuentan como entregadas. Sin esto, cada
+# relanzamiento del supervisor empezaba en `lanzadas=0` y el launcher anunciaba
+# "entregadas 2/300" con 28 ficheros en disco: la contabilidad del launcher
+# mentia, que es justo lo que este protocolo no permite. Los nombres llevan
+# timestamp y PID, asi que al reanudar no se pisa ningun log anterior.
+for Z in A B; do
+  n=$(ls "$LOGS/$ETIQUETA"/${ETIQUETA}-${Z}-*.txt 2>/dev/null | wc -l)
+  lanzadas=$((lanzadas + n))
+done
+if [ "$lanzadas" -gt 0 ]; then
+  echo "   reanudando: $lanzadas runs ya en disco (hash $HASH), quedan $((PEDIDAS - lanzadas))"
+fi
 while [ "$lanzadas" -lt "$PEDIDAS" ]; do
   PIDS=()
   for K in 0 1; do

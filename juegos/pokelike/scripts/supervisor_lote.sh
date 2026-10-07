@@ -16,15 +16,21 @@
 #   3. ¿el lote terminó de verdad? (el launcher imprime su línea de fin)
 #
 # Uso:
-#   bash supervisor_lote.sh <dir_de_logs> <segundos_de_silencio_max> \
+#   bash supervisor_lote.sh <dir_de_logs> <MINUTOS_de_silencio_max> \
 #                           <orden_de_lanzamiento...>
-# Por ejemplo:
+# Por ejemplo (45 MINUTOS de silencio):
 #   bash supervisor_lote.sh log/h17 45 \
 #     bash scripts/exp_h17.sh 300 Kanto 1800
 set -u
 
 LOGS_DIR="${1:?falta el directorio de logs}"
-SILENCIO_LIMITE="${2:?falta el limite de silencio en segundos}"
+# **EN MINUTOS, y se multiplica por 60 al comparar.** El 07-10 esta comprobación
+# comparaba segundos contra un `45` que yo pasé esperando minutos: el supervisor
+# mataba el launcher cada 45 s, siete veces seguidas, y dejó 13 de 30 runs
+# huérfanas sin RESUMEN. Un parámetro de tiempo sin la unidad en el nombre es una
+# bomba; por eso el nombre la lleva y el uso la repite.
+MINUTOS_SILENCIO="${2:?falta el limite de silencio en MINUTOS}"
+SILENCIO_LIMITE=$((MINUTOS_SILENCIO * 60))
 shift 2
 ORDEN=("$@")
 
@@ -104,7 +110,7 @@ lanzar() {
   nota "lanzado: ${ORDEN[*]}  (log en $SALIDA)"
 }
 
-nota "arranca. silencio maximo ${SILENCIO_LIMITE}s. dir=$LOGS_DIR"
+nota "arranca. silencio maximo ${MINUTOS_SILENCIO} min (${SILENCIO_LIMITE}s). dir=$LOGS_DIR"
 nota "orden: ${ORDEN[*]}"
 vivo || lanzar
 
