@@ -122,27 +122,81 @@ matar_lanzador() {
   done
 }
 
-# **Recolector de huerfanos.** Un firefox o un python del bot cuyo PID no esta en
-# el fichero de runs vivas es huerfano por definicion, y se lleva hundreds of MB.
 memoria_disponible_mb() {
   awk '/MemAvailable/{printf "%d", $2/1024}' /proc/meminfo
 }
 
+# El fichero de runs vivas. El launcher lo escribe en `log/<etiqueta>.vivos`,
+# o sea **fuera** del directorio del lote. Buscarlo por glob evita tener que
+# reconstruir esa ruta, que ya se equivoco una vez: el recolector miraba
+# `log/h17/h17.vivos` y el fichero real es `log/h17.vivos`, asi que no recogia a
+# nadie y los huerfanos se acumulaban.
+fichero_vivos() { ls "$RAIZ"/juegos/pokelike/log/*.vivos 2>/dev/null | head -1; }
+
+# **Recolector de huerfanos.**
+#
+# Un firefox o un python del bot cuyo PID no esta en el fichero de runs vivas es
+# huerfano por definicion, y se lleva cientos de MB.
+#
+# **Falla al reves**: si no se puede leer la lista de vivas, NO mata nada. El
+# error de esta funcion en la otra direccion seria matar las runs legitimas,
+# que es una perdida de lote; dejar un huerfano 400 MB es solo una molestia.
 recoger_huerfanos() {
-  local vivos="$LOGS/$(basename "$LOGS_DIR").vivos"
-  local p cmd pid huerfano total=0
-  for p in $(pgrep -f "ms-play""wright" 2>/dev/null) $(pgrep -f "jugar_po""kelike.py" 2>/dev/null); do
-    cmd=$(tr '\0' ' ' < "/proc/$p/cmdline" 2>/dev/null)
-    [ -n "$cmd" ] || continue
-    huerfano=1
-    while read -r pid _log; do
-      [ "${pid:-}" = "$p" ] && huerfano=0 && break
-    done < "$vivos"
-    if [ "$huerfano" = "1" ]; then
-      kill -9 "$p" 2>/dev/null && total=$((total + 1))
-    fi
+  local vivos total=0
+  vivos="$(fichero_vivos)"
+  if [ -z "$vivos" ] || [ ! -r "$vivos" ]; then
+    return 0
+  fi
+
+  # **Firma precisa del run, NO un `pgrep` flojo.**
+  #
+  # `pgrep -f jugar_pokelike.py` encuentra a CUALQUIER proceso cuya linea de
+  # comandos contenga ese nombre, incluido el shell del propio agente cuando
+  # escribe un comando que lo menciona. Cuatro veces seguidas hoy: la primera
+  # mato mi shell, y esta vez la mato el recolector que acababa de escribir, que
+  # se llevo por delante un proceso inocente. Un `pgrep` flojo aqui mata gente.
+  #
+  # La firma real de un run es la invocacion completa: `timeout N uv run --group
+  # dev python juegos/pokelike/scripts/jugar_pokelike.py`. Un shell no la tiene.
+  local SIG="uv run --group dev python juegos/pokelike/scripts/jugar""_pokelike.py"
+  local raiz huerfano pid
+
+  # **Nunca matar a un ancestro propio.** La firma no basta: si el shell del
+  # agente escribe un comando que la contiene, ese shell la tiene en su linea de
+  # comandos y es indistinguible de un run. Aqui ya lo hizo: al PROBAR el
+  # recolector con la firma escrita en el comando, ese comando se mato a si
+  # mismo.
+  #
+  # La unica distincion fiable es genealogica: el supervisor no puede matar a
+  # quien lo puso en marcha. Se listan el propio PID y todos sus ancestros, y
+  # cualquier PID de esa lista queda fuera siempre.
+  local PROPIOS=" "
+  local w q
+  PROPIOS="$PROPIOS$$ "
+  w=$(awk '/^PPid:/{print $2}' "/proc/$$/status" 2>/dev/null)
+  while [ -n "$w" ] && [ "$w" -gt 1 ] 2>/dev/null; do
+    case "$PROPIOS" in *" $w "*) break;; esac
+    PROPIOS="$PROPIOS$w "
+    q=$(awk '/^PPid:/{print $2}' "/proc/$w/status" 2>/dev/null)
+    [ "$q" = "$w" ] && break
+    w="$q"
   done
-  [ "$total" -gt 0 ] && nota "recogidos $total procesos huerfanos del bot"
+
+  # Raices: procesos `timeout` cuya linea contiene la firma. Cada run es uno.
+  for raiz in $(pgrep -f "timeout" 2>/dev/null); do
+    case "$PROPIOS" in *" $raiz "*) continue;; esac
+    grep -qF "$SIG" "/proc/$raiz/cmdline" 2>/dev/null || continue
+    # Si esta raiz esta viva segun la tabla, todo su arbol es legitimo.
+    local es_vivo=0
+    while read -r pid _log; do
+      [ "${pid:-}" = "$raiz" ] && es_vivo=1 && break
+    done < "$vivos"
+    [ "$es_vivo" = "1" ] && continue
+    # Raiz huerfana: se lleva su arbol entero.
+    total=$((total + 1))
+    matar_arbol "$raiz"
+  done
+  [ "$total" -gt 0 ] && nota "recogidas $total runs huerfanas (raices sin cerrar)"
   return 0
 }
 
@@ -176,7 +230,8 @@ while true; do
   fi
 
   if ! vivo; then
-    nota "el launcher NO esta vivo con $n runs. Relanzo."
+    nota "el launcher NO esta vivo con $n runs. Recojo sus huerfanos y relanzo."
+    recoger_huerfanos
     lanzar
     ultimo=$n
     ultimo_cambio=$ahora
