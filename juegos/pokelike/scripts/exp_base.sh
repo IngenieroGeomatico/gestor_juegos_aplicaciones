@@ -144,7 +144,15 @@ WD_PID=$!
 trap 'kill -9 "$WD_PID" 2>/dev/null; rm -f "$VIVOS"' EXIT INT TERM
 
 # --- Lote --------------------------------------------------------------------
-lanzadas=0
+# **Reanuda en vez de repetir.** Las 20 runs que ya hay en disco cuentan como
+# entregadas, con su MISMO hash. Pasó el 07-10: el lote murió a las 21:41 (su
+# árbol de procesos cuelga del servicio del agente y lo limpió) y las 8,6 h
+# siguientes nadie se enteró. Relanzar a ciegas habría repetido esas 20 runs y
+# el hash seguiría siendo el mismo, o sea que dosijiadas indistinguibles.
+lanzadas=$(ls "$LOGS/$ETIQUETA"/${ETIQUETA}-*.txt 2>/dev/null | wc -l)
+if [ "$lanzadas" -gt 0 ]; then
+  echo "   reanudando: $lanzadas runs ya en disco (hash $HASH), quedan $((PEDIDAS - lanzadas))"
+fi
 while [ "$lanzadas" -lt "$PEDIDAS" ]; do
   PIDS=()
   for _ in 1 2; do
