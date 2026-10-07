@@ -1077,10 +1077,28 @@ def elegir(equipo: list[dict], nodos: list[dict], ctx_extra: dict | None = None,
     mejor_s, mejor, mejor_razon = max(punt, key=lambda x: x[0])
     tipo_mejor = (P.tipo_de_estado(mejor.get("tipo")) if mejor.get("tipo")
                   else P.tipo_de_nodo(mejor.get("sprite", "")))
+    # **H17: la tabla de TODOS los candidatos, no solo el ganador.**
+    #
+    # Antes el log de una pantalla de decisión traia un único score, el del nodo
+    # elegido. Preguntar *"qué rama le gana al entrenador en la apertura"* con
+    # eso obligaba a emparejar prosa con regex para reconstruir los candidatos,
+    # y eso ya salió mal tres veces en este repo: tres extracciones del mismo log
+    # dieron +0,5, +0,9 y +2,2 niveles de shortfall, y solo una podía ser cierta.
+    #
+    # Aqui se escribe la tabla entera en el propio motivo de la decisión, con el
+    # score **final** de cada nodo (ya con el bono de ruta dentro, y con la
+    # escalera de riesgo y el veto de nivel aplicados). Se ordenan de mayor a
+    # menor y se recortan a 6: las pantallas del juego ofrecen 2-5 nodos, asi que
+    # el recorte no pierde nada, y en el peor caso (un mapa con muchos) lo que se
+    # pierde es el mas bajo, que no es el que gana.
+    _opc = " ".join(
+        f"{_tipo(n)}={s:.0f}"
+        for s, n, _r in sorted(punt, key=lambda x: -x[0])[:6])
     return P.Decision("nodo", mejor.get("atajo"),
                       f"{tipo_mejor} score={mejor_s:.1f} ({mejor_razon})"
                       + (f" | mapa: {info_mapa}" if info_mapa else "")
-                      + f" | plan: {plan.resumen()}",
+                      + f" | plan: {plan.resumen()}"
+                      + f" | opc: {_opc}",
                       tipo=tipo_mejor)
 
 
