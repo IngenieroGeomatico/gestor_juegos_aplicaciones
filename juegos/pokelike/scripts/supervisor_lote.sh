@@ -261,6 +261,20 @@ lanzar() {
   # escriba en el MISMO log que el supervisor. Si cada uno escribiera en el suyo,
   # el diagnostico de por que se muere quedaria en un fichero aparte y habria que
   # ir a buscarlo.
+  # **El log del launcher se archiva y se empieza de cero en cada arranque.**
+  # La comprobacion de final es `grep -q '^== fin' "$SALIDA"`, y ese log se abre
+  # con `>>`: si el lote anterior termino (o quedo a medias con un `== fin` viejo),
+  # su linea sigue ahi y el supervisor lee que ESTE lote acabo en el primer ciclo.
+  # Sucedio a las 06:40: dijo "el lote termino" con la segunda run en marcha.
+  #
+  # Es la quinta vez que un fichero de estado de la ronda anterior se lee como si
+  # fuera de esta: el pidfile viejo, la tabla de vivas vacia, `stat` sobre un log
+  # inexistente, el glob entrecomillado... y ahora esto. Un guard es tan fuerte
+  # como su fuente de verdad, y una fuente de verdad que no se reinicia no lo es.
+  if [ -f "$SALIDA" ] && [ -s "$SALIDA" ]; then
+    mv -f "$SALIDA" "$SALIDA.$(date +%Y%m%d-%H%M%S)"
+  fi
+  : > "$SALIDA"
   SALIDA="$SALIDA" setsid nohup "${ORDEN[@]}" >> "$SALIDA" 2>&1 < /dev/null &
   arrancado_en=$(date +%s)
   nota "lanzado: ${ORDEN[*]}  (log en $SALIDA). Gracia ${GRACIA_SEG}s."

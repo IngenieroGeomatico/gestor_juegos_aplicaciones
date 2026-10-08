@@ -213,6 +213,14 @@ for Z in A B; do
   lanzadas=$((lanzadas + n))
 done
 entrega=$lanzadas
+# El log del guard tambien es estado de ESTA ronda. Si el lote arranca de cero se
+# vacia: si no, `matadas` suma las bajas de la ronda anterior y el recuento que se
+# lee al final no es el de este lote. Con una linea del 07-10 dentro, `matadas=1`
+# era una baja de hace nueve horas. Si es una reanudacion NO se vacia, porque esas
+# bajas si son de este lote.
+if [ "$lanzadas" -eq 0 ]; then
+  : > "$LOG_GUARD"
+fi
 if [ "$lanzadas" -gt 0 ]; then
   echo "   reanudando: $lanzadas runs ya en disco (hash $HASH), quedan $((PEDIDAS - lanzadas))"
 fi
