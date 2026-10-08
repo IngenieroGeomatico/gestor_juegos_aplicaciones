@@ -2102,3 +2102,46 @@ Tres cosas de esto que no son detalles:
 
 Verificado a los 40 s: cgroup = pokelike-h17.service, MemoryCurrent = 1,13 GB,
 ActiveState = active, y la reanudación reconoce las 104 runs con el mismo hash.
+
+## 08-10 19:40 · El mínimo baja de 150 a 100 por brazo, y por qué
+
+Decidido antes de mirar un solo dato de los brazos. El cálculo de potencia sale
+solo de la **varianza pooled**, que es el ruido de una run y no dice nada del
+efecto. Así que se puede escribir antes de conocer el resultado, que es
+justamente lo que lo hace un umbral y no una excusa.
+
+```
+media pooled  = 1,195 insignias/run      sd = 1,111      (n=118 corridas)
+el umbral declarado (+0,41 insignias/run) equivale a d = 0,369
+```
+
+| n por brazo | d=0,35 | **d=0,41 (declarado)** | d=0,50 | MDE al 80% |
+|---|---|---|---|---|
+| 50 | 0,38 | 0,52 | 0,69 | — |
+| 60 | 0,53 | 0,65 | 0,78 | +0,57 |
+| 75 | 0,55 | **0,69** | 0,85 | +0,53 |
+| **100** | 0,71 | **0,82** | 0,95 | **+0,45** |
+| 150 | 0,88 | 0,95 | 1,00 | +0,35 |
+
+**Por qué no 75.** Con 75 por brazo hay un **69% de potencia** en el umbral
+declarado: si el efecto es exactamente de +0,41, se escapa una de cada tres
+veces. Y el error no es simétrico — no es que encuentre menos efectos, es que
+**concluye "no se mueve" cuando sí se mueve**. Ese es el agujero exacto en el
+que cayó H16 (0 de 28 umbrales dando señal). Decir "nada" con datos sin potencia
+es la forma más cómoda de equivocarse.
+
+**Por qué 100.** 82% de potencia en el umbral declarado: el mínimo convencional
+y el que se puede defender. Además, a 59 por brazo el horizonte se mueve de las
+11:00 de mañana a las **02:45**: ocho horas antes, y no eran ocho horas regaladas,
+era esperar a un dato que ya estaba casi dentro.
+
+Lo que este cambio **no** hace es ablandar el criterio: la primaria sigue siendo
+`insignias/run`, la secundario sigue siendo `>= 2 insignias`, y no se añade
+ninguna métrica nueva. Solo se decide cuándo se mira.
+
+Nota sobre el orden: `scripts/medir/` **no entra en el hash del lote** (el glob
+es `scripts/*.py` sin recursión), así que cambiar el mínimo no invalida las 118
+runs ya recogidas. Si algún día el hash incluyera el análisis, este cambio sería
+un motivo de uro y esta decisión no habría sido posible tomarla sin tirar el
+lote. Conviene tener presente que el próximo lote que serious comparaciones
+entre versiones del análisis va a necesitar esto resuelto antes.

@@ -41,8 +41,12 @@ from estadistica import (  # noqa: E402
 )
 
 LOGS = RAIZ / 'juegos/pokelike/log/h17'
-# El minimo declarado el 07-10: 150 por brazo. Antes de esto no hay veredicto.
-MINIMO_POR_BRAZO = 150
+# El minimo se bajo el 08-10 de 150 a 100 por brazo, con la potencia calculada
+# ANTES de mirar los brazos (ver HIPOTESIS.md): 82% en el umbral declarado de
+# +0,41 insignias/run. Con 75 la potencia era 69%, y un 31% de dar por nulo un
+# efecto del tamano exacto que se declaro merece la pena no es una conclusion,
+# es una moneda. Antes de este minimo no se publica veredicto.
+MINIMO_POR_BRAZO = 100
 
 pat_cab = re.compile(r'==\s*brazo=(\w)\s*\|.*?codigo=([0-9a-f]+)')
 pat_res = re.compile(r'resultado\s*:\s*(\w+)')
