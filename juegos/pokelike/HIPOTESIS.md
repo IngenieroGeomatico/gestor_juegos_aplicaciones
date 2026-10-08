@@ -1906,3 +1906,100 @@ Flag: `PKL_CAPTURA_POR_NIVEL`, **default 0** (control). Lote:
   tramo **posterior** a Misty, que nadie ha mirado todavía.
 - **X parcial**: sube `≥2 insignias` pero no la media → el efecto existe y está
   en la cola.
+
+## 08-10 · La noche de los siete guardes
+
+El lote H17 no avanzó en dos noches por razones que no tenían nada que ver con la
+hipótesis. Vale la pena escribirlas enteras, porque el patrón es una sola cosa.
+
+### Los tres OOM
+
+`systemd-oomd` mató **VS Code** a las 22:06, 22:29 y 23:46 — oomd mata el cgroup
+más grande, y el más grande era el editor. La cuenta de esa última:
+
+```
+VS Code 2197 + opencode 544 + deno 413 + 2 runs ~1500 = ~4650 MB
+sobre 7299 MB de total
+```
+
+El margen no existía. El repo ya avisaba en tres scripts de que la máquina tiene
+7 GiB y solo 2 runs; los 2 runs eran justo lo que no cabía al lado del editor.
+**`PARALELO` pasa a 1 por defecto.** No cambia el experimento: mismos brazos,
+mismo bot, mismo hash. Cuesta el doble de pared.
+
+### Los siete fallos
+
+Cinco de ellos eran **míos**, escritos mientras arreglaba lo anterior.
+
+| # | Fallo | Qué hacía |
+|---|---|---|
+| 1 | `MAX_PASOS=1500` desapareció al meter `PARALELO` | con `set -u` el launcher abortaba en la primera run. **300 runs en 1 segundo**, 43 bytes cada uno |
+| 2 | `vivo()` con las dos rutas rotas | daba falso **siempre** (abajo) |
+| 3 | guard: `stat` inexistente → 0 | leía 1.791.409.360 s de silencio y **mataba runs sanas** |
+| 4 | `trap EXIT` heredado por el subshell de cada run | cada log de run acababa con la despedida del launcher |
+| 5 | `[ -e "$glob" ]` entrecomillado | el resumen decía «sin runs» con 150 logs en disco |
+| 6 | `== fin` viejo en el log del launcher | el supervisor se rindió a los 2 minutos |
+| 7 | reanudación sin comprobar el hash | mezcló runs de dos versiones del código |
+
+El 2 es el que llevaba dos noches: **el launcher no ha muerto ni una vez.** El
+supervisor se convencía de que estaba muerto por dos motivos a la vez.
+
+```
+LANZADOR="$(basename "${ORDEN[0]}" .sh)"   # ORDEN[0] es "bash", no el script
+PIDFILE="$LOGS/$(basename "$LOGS_DIR").pid" # -> log/h17/h17.pid
+```
+
+`basename "${ORDEN[0]}" .sh` daba `bash`, así que el patrón de reserva era
+`bash *bash.sh*`: imposible que casara. Y el pidfile apuntaba a
+`log/h17/h17.pid`, un fichero que **nunca ha existido** — el launcher escribe
+`log/h17.pid`. Las dos vías de `vivo()` eran no-ops. Solo la gracia de 180 s
+tapaba el bucle: relanzaba cada 3 minutos y dejaba el launcher anterior con su
+run. Por eso siempre hubo «2 runs en paralelo» con `PARALELO=1`.
+
+### El patrón: un guard leyendo mal su propia fuente de verdad
+
+Cinco de los siete fallos son la misma frase:
+
+1. el pidfile de un launcher **anterior** → declaraba muerto al recién lanzado
+2. la tabla de vidas **vacía** → declaraba huérfanas a las runs sanas
+3. `stat` sobre un log **inexistente** → mataba runs sanas
+4. el glob **entrecomillado** → el resumen mentía
+5. el `== fin` de **otro lote** → el supervisor abandonaba el suyo
+6. y ahora la reanudación sin mirar el **hash**
+
+En todos, el guard acertó sobre el mundo y se equivocó sobre el fichero. La
+lección operativa que queda escrita: **un guard es tan fuerte como la fuente que
+lee, y una fuente que no se reinicia entre rondas es el estado de la ronda
+anterior.** Por eso ahora:
+
+- el log del launcher se archiva y se vacía en cada arranque
+- el log del guard se vacía si el lote arranca de cero (no si reanuda: esas bajas
+  sí son de este lote)
+- el supervisor **anota la evidencia** con la que cree que el launcher está
+  muerto (pidfile, su contenido, `kill -0`, `LANZADOR` derivado), no solo la
+  conclusión
+- si no encuentra ningún `.sh` entre sus argumentos, **aborta** en vez de
+  relanzando un lote que no puede ni reconocer
+
+Lo que más tiempo costó no fue encontrar los fallos: fue que **todos se
+presentaban como symptoms del lote**. «El launcher muere solo», «el supervisor
+relanza», «se me queda sin memoria». Ninguno de esos mensajes era el fallo.
+
+### El estado del lote
+
+Relanzado el 08-10 06:58 con `PARALELO=1`, hash `447c7444`, directorio limpio.
+A las 14:53: **95 runs** (47 cerradas por brazo), sin relanzamientos falsos,
+1 run y 1 Firefox, 2.989 MB libres, integridad 319/0, y una sola baja del guard
+por 624 s de silencio real (legítima, no un falso positivo).
+
+Ritmo real **5,05 min/run** → las 206 que faltan son ~17 h.
+
+El análisis es `scripts/medir/informe_h17.py`, **escrito antes de los datos**
+(n=47 por brazo) y con la regla de no dar veredicto por debajo de n=150. Lo
+primero que imprime es el mecanismo, no la primaria: si el flag no hubiera
+llegado al brazo, las insignias no significarían nada. Ahora: **594 decisiones con
+el flag en A, 0 en B**; capturas 3,35 contra 2,65.
+
+Un defecto cosmético queda **sin tocar a propósito**: `matadas=0` sale partido en
+dos líneas (`grep -c` imprime 0 y sale con error, y el `|| echo 0` añade otro 0).
+Arreglarlo cambia el hash y el guard de hash abortaría el lote, así que espera.
