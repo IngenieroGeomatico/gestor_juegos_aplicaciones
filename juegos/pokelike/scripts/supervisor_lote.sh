@@ -61,8 +61,30 @@ LANZADOR="$(basename "${ORDEN[0]}" .sh)"
 #
 # El pidfile lo escribe el launcher al arrancar y lo borra al terminar. Si no
 # existe, se deduce por nombre **excluyendo** al propio supervisor.
-PIDFILE="$LOGS/$(basename "$LOGS_DIR").pid"
-pat_lanz="$(printf '%s' "$LANZADOR" | cut -c1-4)""$(printf '%s' "$LANZADOR" | cut -c5-)"
+# **El pidfile NO esta dentro del directorio del lote.** El launcher calcula su
+# propio LOGS como .../pokelike/log (sin el nombre del lote) y escribe ahi
+# `h17.pid`. El supervisor hacia `$LOGS/h17.pid`, o sea `log/h17/h17.pid`, un
+# fichero que no ha existido nunca: la via principal de vivo() miraba al vacio.
+PIDFILE="$(dirname "$LOGS")/$(basename "$LOGS_DIR").pid"
+
+# **`ORDEN[0]` es `bash`, no el launcher.** El supervisor se invoca asi:
+#   bash supervisor_lote.sh log/h17 45 bash exp_h17.sh 300 Kanto 1800
+# y `$@` empieza por el nombre del lote. `basename "${ORDEN[0]}" .sh` daba
+# `LANZADOR="bash"`, con lo que el patron del plan B era `bash *bash.sh*` y no
+# podia encontrar nada jamas. El launcher es el primer argumento que parece un
+# script.
+LANZADOR=""
+for _arg in "${ORDEN[@]}"; do
+  case "$_arg" in
+    *.sh) LANZADOR="$(basename "$_arg" .sh)"; break;;
+  esac
+done
+# Un supervisor que no sabe cual es su launcher no debe arrancar: se quedaria
+# relanzando un lote que no puede ni reconocer.
+if [ -z "$LANZADOR" ]; then
+  echo "ABORTA: no encuentro el launcher en los argumentos: ${ORDEN[*]}" >&2
+  exit 1
+fi
 
 : > "$SUP_LOG"
 nota() { echo "[$(date '+%d/%m %H:%M')] $*" >> "$SUP_LOG"; }
@@ -305,7 +327,15 @@ while true; do
   fi
 
   if ! vivo && [ $((ahora - arrancado_en)) -ge "$GRACIA_SEG" ]; then
-    nota "el launcher NO esta vivo con $n runs. Recojo sus huerfanos y relanzo."
+    # **Se dice con que evidencia, no solo la conclusion.** Este mismo fallo
+    # (vivo() devolviendo falso siempre por un pidfile mal construido y un
+    # LANZADOR mal derivado) llevo dos noches義 pareciendo "el launcher muere solo",
+    # y el supervisor se limitaba a anotar la conclusion sin los datos que la
+    # sostenian. Un guard que no enseña su evidencia obliga a adivinar.
+    _pid_cf="$(cat "$PIDFILE" 2>/dev/null || echo '<no existe>')"
+    _vivo_cf="no"
+    [ -n "$_pid_cf" ] && kill -0 "$_pid_cf" 2>/dev/null && _vivo_cf="si"
+    nota "el launcher NO esta vivo con $n runs (pidfile=$PIDFILE dice '$_pid_cf' kill -0=$_vivo_cf | LANZADOR=$LANZADOR | vivo() mirara $LANZADOR.sh). Recojo sus huerfanos y relanzo."
     recoger_huerfanos
     lanzar
     ultimo=$n
