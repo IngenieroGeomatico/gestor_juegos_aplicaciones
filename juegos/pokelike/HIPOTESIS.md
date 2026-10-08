@@ -2003,3 +2003,102 @@ el flag en A, 0 en B**; capturas 3,35 contra 2,65.
 Un defecto cosmético queda **sin tocar a propósito**: `matadas=0` sale partido en
 dos líneas (`grep -c` imprime 0 y sale con error, y el `|| echo 0` añade otro 0).
 Arreglarlo cambia el hash y el guard de hash abortaría el lote, así que espera.
+
+### Por qué el lote moría siempre con el editor (cuarto OOM, 16:33)
+
+El lote llevaba 8 h estable y a las 16:33 se murió entero, en silencio, sin
+dejar ni una línea de despedida. La pista estaba en el journal:
+
+```
+16:33:39  Killed app-com.microsoft.VSCode-156736.scope (3,9 G de 7,3 G,
+          51,49% > 50,00% durante >20s con actividad de reclaimed)
+16:33     el lote deja de escribir ← el MISMO segundo
+```
+
+Y en el journal del navegador del bot:
+
+```
+comm=".../ms-playwright/firefox/firef"  label="vscode (unconfined)"
+```
+
+**El lote vivía dentro del ámbito de memoria de VS Code.** `setsid` crea una
+sesión nueva, pero no cambia el cgroup: el lote heredaba el del proceso que lo
+lanzara. Así que cada vez que oomd mataba el editor —porque es el cgroup más
+grande— **se llevaba el lote por delante**. Cuatro muertes, cuatro veces
+coincidiendo con un OOM de VS Code. No era el lote el que fallaba.
+
+Y `UMBRAL_MB=1200` del supervisor no servía para nada: oomd no dispara cuando la
+memoria se agota, sino al **cruzar el 50% de uso**. A las 16:33 había 3,4 GB
+libres y aun así mató.
+
+**Arreglo: el lote vive en su propia unidad de systemd.**
+
+```
+systemd-run --user --unit=pokelike-h17 --collect \
+  --property=MemoryHigh=1500M --property=MemoryMax=2000M \
+  --property=MemorySwapMax=1G \
+  bash <RAIZ>/juegos/pokelike/scripts/supervisor_lote.sh log/h17 45 bash <RAIZ>/...exp_h17.sh 300 Kanto 1800
+```
+
+Tres cosas de esto que no son detalles:
+
+1. **Ruta absoluta.** `systemd-run` no hereda el directorio de trabajo: con ruta
+   relativa la unidad moría con status=127 en el mismo segundo y sin más pista.
+2. **`MemoryHigh=1500M`** hace que el kernel recicle *dentro* de la unidad en
+   lugar de dejar que la presión suba hasta el slice entero y temptar a oomd.
+3. **`MemoryMax=2000M`** hace que, si alguna vez se pasa, muera **el bot** y no
+   el editor. Sigue habiendo un OOM, pero es el que se puede permitir este
+   trabajo: una run que se repite, no el editor de uno.
+
+Verificado a los 40 s: `cgroup = pokelike-h17.service`, `MemoryCurrent = 1,13 GB`,
+`ActiveState = active`, y la reanudación recognizes las 104 runs con el mismo hash.
+
+
+### Por qué el lote moría siempre con el editor (cuarto OOM, 16:33)
+
+El lote llevaba 8 h estable y a las 16:33 se murió entero, en silencio, sin
+dejar ni una línea de despedida. La pista estaba en el journal:
+
+```
+16:33:39  Killed app-com.microsoft.VSCode-156736.scope (3,9 G de 7,3 G,
+          51,49% > 50,00% durante >20s con actividad de reclaimed)
+16:33     el lote deja de escribir <- el MISMO segundo
+```
+
+Y en el journal del navegador del bot:
+
+```
+comm=".../ms-playwright/firefox/firef"  label="vscode (unconfined)"
+```
+
+**El lote vivía dentro del ámbito de memoria de VS Code.** `setsid` crea una
+sesión nueva, pero no cambia el cgroup: el lote heredaba el del proceso que lo
+lanzara. Así que cada vez que oomd mataba el editor —porque es el cgroup más
+grande— **se llevaba el lote por delante**. Cuatro muertes, cuatro veces
+coincidiendo con un OOM de VS Code. No era el lote el que fallaba.
+
+Y `UMBRAL_MB=1200` del supervisor no servía para nada: oomd no dispara cuando la
+memoria se agota, sino al **cruzar el 50% de uso**. A las 16:33 había 3,4 GB
+libres y aun así mató.
+
+**Arreglo: el lote vive en su propia unidad de systemd.**
+
+```
+systemd-run --user --unit=pokelike-h17 --collect \
+  --property=MemoryHigh=1500M --property=MemoryMax=2000M \
+  --property=MemorySwapMax=1G \
+  bash <RAIZ>/scripts/supervisor_lote.sh log/h17 45 bash <RAIZ>/scripts/exp_h17.sh 300 Kanto 1800
+```
+
+Tres cosas de esto que no son detalles:
+
+1. **Ruta absoluta.** `systemd-run` no hereda el directorio de trabajo: con ruta
+   relativa la unidad moría con status=127 en el mismo segundo y sin más pista.
+2. **`MemoryHigh=1500M`** hace que el kernel recicle *dentro* de la unidad en
+   lugar de dejar que la presión suba hasta el slice entero y temptar a oomd.
+3. **`MemoryMax=2000M`** hace que, si alguna vez se pasa, muera **el bot** y no
+   el editor. Sigue habiendo un OOM, pero es el que se puede permitir este
+   trabajo: una run que se repite, no el editor de uno.
+
+Verificado a los 40 s: cgroup = pokelike-h17.service, MemoryCurrent = 1,13 GB,
+ActiveState = active, y la reanudación reconoce las 104 runs con el mismo hash.
