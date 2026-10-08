@@ -42,6 +42,7 @@ set -u
 PEDIDAS="${1:-300}"
 REGION="${2:-Kanto}"
 TIMEOUT="${3:-1800}"
+MAX_PASOS=1500
 
 # **Runs simultaneos: 1, no 2.**
 #
@@ -119,7 +120,17 @@ watchdog() {
     while read -r pid log; do
       [ -n "${pid:-}" ] || continue
       kill -0 "$pid" 2>/dev/null || continue
-      ultima=$(stat -c %Y "$log" 2>/dev/null || echo 0)
+      # **Si `stat` no puede leer el log, NO se toca la run.** Antes:
+      #     ultima=$(stat -c %Y "$log" 2>/dev/null || echo 0)
+      # `stat` imprime 0 cuando el fichero no existe, o sea que "no existe" y
+      # "escribio en 1970" eran lo mismo. El guard leia entonces 1.791.409.360 s
+      # de silencio y mataba una run perfectamente sana. Sucedio de verdad:
+      #   "run pid=149559 lleva 1791409360s sin escribir: se mata"
+      # Un guard que no puede leer no puede afirmar nada, y lo que hace ahora es
+      # callarse. Matar por un dato que no tiene es peor que no vigilar.
+      [ -f "$log" ] || continue
+      ultima=$(stat -c %Y "$log" 2>/dev/null) || continue
+      [ -n "$ultima" ] || continue
       if [ $((ahora - ultima)) -ge "$VIVACIDAD" ]; then
         echo "[$(date '+%d/%m %H:%M')] run pid=$pid lleva $((ahora - ultima))s sin escribir: se mata. $(basename "$log")" >> "$LOG_GUARD"
         matar_arbol "$pid"
@@ -147,6 +158,12 @@ watchdog & WD_PID=$!
 #   - Si sale con codigo 0 y sin senal: el bucle termino de verdad (imprime "== fin").
 #   - Si aparece CODIGO= o SENAL=, ya no hay que adivinar.
 registrar_salida() {
+  # **Solo en el launcher, nunca en los subshells de las runs.** `cmd &` crea un
+  # subshell que hereda este trap, y cada run escribia en su propio log la
+  # despedida del launcher —que ni era suya ni la merecia—. En un subshell
+  # `$$` es el PID del proceso padre (el launcher) y `BASHPID` el suyo propio:
+  # si no coinciden, aqui no es el launcher y no hay nada que registrar.
+  [ "$BASHPID" = "$$" ] || return 0
   local codigo=$?
   local senal=""
   [ "$codigo" -gt 128 ] && senal=" senal=$((codigo - 128))"
@@ -168,8 +185,16 @@ echo $$ > "$PIDFILE"
 # Se reanuda: las runs ya en disco cuentan como entregadas de su brazo.
 resumen_brazo() {
   local Z="$1"
-  local f="$LOGS/$ETIQUETA/${ETIQUETA}-${Z}-"*.txt
-  [ -e "$f" ] || { echo "   $Z: sin runs"; return; }
+  # Ojo: `[ -e "$glob" ]` NUNCA expande el glob (un `*` dentro de comillas es un
+  # `*` literal), asi que el test era falso siempre y este resumen decia "sin
+  # runs" aunque hubiera 150 logs en disco. Se pregunta con `compgen -G`, que si
+  # expande, y se cuenta con un glob que si se expande en el `ls`.
+  # El `*` va FUERA de las comillas a proposito: `compgen -G` exige que el
+  # patron case completo, y `h17prueba-A-` no es el nombre de ningun fichero
+  # (los hay `h17prueba-A-063126-172335-1.txt`). Sin ese `*` no encuentra nada y
+  # vuelve a decir "sin runs" con 150 logs en disco.
+  compgen -G "$LOGS/$ETIQUETA/${ETIQUETA}-${Z}-"* > /dev/null 2>&1 || {
+    echo "   $Z: sin runs"; return; }
   local n; n=$(grep -h "^  insignias *:" $f 2>/dev/null | wc -l)
   local m; m=$(grep -h "^  insignias *:" $f 2>/dev/null | awk '{s+=$3} END {printf "%.2f", (NR?s/NR:0)}')
   local g; g=$(grep -h "^  insignias *:" $f 2>/dev/null | awk '$3>=2' | wc -l)
