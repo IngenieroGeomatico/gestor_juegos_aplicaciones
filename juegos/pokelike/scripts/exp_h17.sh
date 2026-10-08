@@ -94,6 +94,32 @@ PIDFILE="$LOGS/${ETIQUETA}.pid"
 SALIDA="${SALIDA:-$LOGS/${ETIQUETA}.lanzador.log}"
 touch "$SALIDA" 2>/dev/null || true
 
+# --- El codigo esta congelado: solo se reanuda si el hash sigue siendo el mismo ---
+#
+# La cuenta de reanudacion suma los logs que ya hay en disco, pero hasta ahora no
+# miraba DE QUE CODIGO eran. Sucedio a las 06:51: el directorio conservaba 4 runs
+# del hash cb90528d y el launcher reanudo diciendo "4 runs ya en disco (hash
+# a706b4d0)", como si fueran de este codigo. Si al final del lote se mezclan runs
+# de dos versiones en la misma muestra, el resultado no significa nada, y ademas
+# es justo el error que este protocolo existe para no cometer.
+#
+# Ante un hash distinto el launcher ABORTA. Vaciar el directorio automaticamente
+# seria lo comodo y lo peligroso: se pierde una tanda entera sin que nadie lo
+# decida. Que lo decida quien lo launched.
+MARCA="$LOGS/$ETIQUETA.hash"
+if [ -f "$MARCA" ]; then
+  _previo="$(cat "$MARCA" 2>/dev/null)"
+  if [ "$_previo" != "$HASH" ]; then
+    echo "ABORTA: $LOGS/$ETIQUETA contiene runs del codigo $_previo y ahora el codigo es $HASH." >&2
+    echo "        No se reanuda un lote cambiandole el codigo a mitad: se" >&2
+    echo "        mezclarian runs de dos versiones en la misma muestra." >&2
+    echo "        Mueve el directorio fuera de ahi y relanza (eso es una decision)." >&2
+    exit 1
+  fi
+else
+  echo "$HASH" > "$MARCA"
+fi
+
 echo "== H17 · captura por nivel | A=1 B=0 | n=$PEDIDAS en total (~$((PEDIDAS/2)) por brazo) | $REGION | hash=$HASH =="
 echo "   timeout=${TIMEOUT}s vivacidad=${VIVACIDAD}s (tick ${TICK}s) | en paralelo: $PARALELO | logs en $LOGS/$ETIQUETA"
 echo "   primaria: insignias/run | secundaria: >=2 insignias"
