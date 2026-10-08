@@ -42,7 +42,19 @@ set -u
 PEDIDAS="${1:-300}"
 REGION="${2:-Kanto}"
 TIMEOUT="${3:-1800}"
-MAX_PASOS=1500
+
+# **Runs simultaneos: 1, no 2.**
+#
+# Tres OOM en una noche, los tres matando a VS Code (oomd mata el cgroup mas
+# grande, y el mas grande era el editor). La cuenta del 07-10 a las 23:46:
+#   VS Code 2197 + opencode 544 + deno 413 + 2 runs ~1500 = ~4650 MB
+# sobre 7299 MB totales. El margen no existia.
+#
+# Bajar a 1 run NO cambia el experimento: los brazos siguen siendo A y B, el
+# mismo bot, el mismo hash. Solo cambia cuando se ejecutan. El coste es doble
+# de pared (26 h en vez de13) y el beneficio es que el lote no le mata el
+# editor a uno.
+PARALELO="${PARALELO:-1}"
 VIVACIDAD=600
 TICK=60
 
@@ -82,7 +94,7 @@ SALIDA="${SALIDA:-$LOGS/${ETIQUETA}.lanzador.log}"
 touch "$SALIDA" 2>/dev/null || true
 
 echo "== H17 · captura por nivel | A=1 B=0 | n=$PEDIDAS en total (~$((PEDIDAS/2)) por brazo) | $REGION | hash=$HASH =="
-echo "   timeout=${TIMEOUT}s vivacidad=${VIVACIDAD}s (tick ${TICK}s) | logs en $LOGS/$ETIQUETA"
+echo "   timeout=${TIMEOUT}s vivacidad=${VIVACIDAD}s (tick ${TICK}s) | en paralelo: $PARALELO | logs en $LOGS/$ETIQUETA"
 echo "   primaria: insignias/run | secundaria: >=2 insignias"
 
 if [ ! -f "$RAIZ/juegos/pokelike/scripts/jugar_pokelike.py" ]; then
@@ -165,6 +177,7 @@ resumen_brazo() {
 }
 
 lanzadas=0
+entrega=0
 # **Reanuda.** Las runs ya en disco cuentan como entregadas. Sin esto, cada
 # relanzamiento del supervisor empezaba en `lanzadas=0` y el launcher anunciaba
 # "entregadas 2/300" con 28 ficheros en disco: la contabilidad del launcher
@@ -174,15 +187,21 @@ for Z in A B; do
   n=$(ls "$LOGS/$ETIQUETA"/${ETIQUETA}-${Z}-*.txt 2>/dev/null | wc -l)
   lanzadas=$((lanzadas + n))
 done
+entrega=$lanzadas
 if [ "$lanzadas" -gt 0 ]; then
   echo "   reanudando: $lanzadas runs ya en disco (hash $HASH), quedan $((PEDIDAS - lanzadas))"
 fi
 while [ "$lanzadas" -lt "$PEDIDAS" ]; do
   PIDS=()
-  for K in 0 1; do
+  for _K in $(seq 1 "$PARALELO"); do
     [ "$lanzadas" -ge "$PEDIDAS" ] && break
     lanzadas=$((lanzadas + 1))
-    if [ "$K" -eq 0 ]; then BRAZO="A"; CPN=1; else BRAZO="B"; CPN=0; fi
+    # El brazo lo decide el contador de entregas, no el indice del hueco: con
+    # PARALELO=1 los brazos tienen que alternar A,B,A,B. Si el brazo dependiera
+    # del indice, con 1 en paralelo salen todos A primero y el lote entero es
+    # del mismo grupo hasta que A se agota.
+    entrega=$((entrega + 1))
+    if [ "$((entrega % 2))" -eq 1 ]; then BRAZO="A"; CPN=1; else BRAZO="B"; CPN=0; fi
     SALIDA="$LOGS/$ETIQUETA/${ETIQUETA}-${BRAZO}-$(date +%H%M%S)-$$-$lanzadas.txt"
     PKL_BRAZO="$BRAZO" \
     PKL_CAPTURA_POR_NIVEL="$CPN" \
