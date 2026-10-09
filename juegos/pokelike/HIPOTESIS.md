@@ -2663,3 +2663,61 @@ Que el bot llegue con el equipo sano **no garantiza** que gane: el nivel y los
 tipos no separaban nada, y aun asi hay打游戏 al 27% que se ganan. Si la
 confirmatoria baja y la primaria no, el arreglo es real pero insuficiente, y eso
 tambien es un resultado que hay que leer.
+
+## 09-10 · H18 RETRACTADO: el peso no era la restriccion
+
+Se lanzo a las 16:53 y se paro a las 18:20, con 4 runs. La premisa era que
+capturar (60) le ganaba a curar (58/50) y por eso el bot se gastaba la cura.
+**Falsa, y la comprobacion la hacia el propio codigo del log:**
+
+```
+centro de curacion:  score = 100.0   (37 veces)
+jefe:                score = -1.0    (135 veces, siempre "APLAZADO")
+```
+
+El centro ya puntua el doble que capturar. Subirlo de 50/58 a 62 no cambia una
+decision: el peso **no era la restriccion**. H18 queda retractado antes de datos.
+
+Y hay una segunda lectura, mas incomoda: **el score 100 no existe en el codigo de
+hoy**. En `planificador.py` no hay ningun 100.0 en las ramas de curacion. O sea
+que la cifra viene de otra parte, o mi parser volvio a emparejar la linea de
+decision con la de estado equivocada. **Es la cuarta vez hoy que un hallazgo mio se
+cae por emparejamiento mal de lineas.**
+
+## Lo que SI es solido, y sigue en pie
+
+De las 155 peleas de gimnasio con la foto completa (regexes verificadas contra el
+formato real del log, que ahi si cuadran):
+
+```
+llega con algun caido   18 de 66  (27%)   vida media 29%
+llega sin caidos        77 de 89  (87%)   vida media 82%
+
+nivel:  < rival 61%   >= rival 62%      <- no separa
+tipos:  >=1.5  61%   <1.5   57%        <- no separa
+```
+
+Y el nivel y los tipos son identicos entre los dos grupos (+1,5 vs +1,1; 1,95 vs
+1,96). **Llegar con el equipo vivo es lo que separa, y no se sabe por que el
+equipo llega asi.**
+
+## La respuesta honesta a "eso es pasar por el centro antes, no?"
+
+Si, y el bot **ya lo hace**: el 83% de las peleas que llegaban con caidos venian
+despues de curarse, y el centro esta en el grafo de forma obligatoria. Ese es
+justo el rompecabezas: el centro puntua mas que cualquier otra cosa y el bot, aun
+asi, entra al gimnasio con el equipo a la basura.
+
+La unica explicacion que queda, y no esta comprobada, es que **el centro se queda
+atras**: se cura en el centro que ya paso, y de ahi al jefe hay dos o tres peleas
+que vuelven a gastar al equipo. Eso explicaria las dos cosas a la vez, y tambien
+explicaria que subir el peso no arregle nada.
+
+**Para comprobarlo no hace falta otro lote: hace falta instrumentar.** Un log
+sencillo del camino (nodo -> peso -> vida del equipo tras la pelea) durante tres o
+cuatro runs responderia esto en veinte minutos. Es infinitamente mas barato que
+300 runs A/B sobre una mecanica que se acaba de demostrar que no es el cuello.
+
+Y esa es la leccion de hoy en una frase: **cuatro horas de lotes para descubrir que
+el cuello no era donde se mire.** Los lotes sirven para medir efectos, no para
+encontrar mecanismos. Para encontrar mecanismos hay que dejar el bot que hable.
