@@ -236,6 +236,55 @@ class Bot:
         except OSError:
             pass
 
+    def _traza_camino(self, m: dict, d, disponibles: list[str],
+                       insignias: int) -> None:
+        """UNA linea autocontenida por paso de mapa. Solo observa.
+
+        Existe por una razon concreta: cuatro veces esta noche un hallazgo se ha
+        caído porque el analisis emparejaba la linea de decision con la de estado
+        suponiendo que eran contiguas. Aqui no hay nada que emparejar: cada linea
+        lleva su propio contexto.
+
+        Lo que se quiere ver, y es la pregunta abierta desde H17: **por que llega
+        al gimnasio con el equipo gastado si el centro de curacion puntua mas que
+        ninguna otra cosa.** Con esto se responde mirando, sin lote.
+
+        Se registra SIEMPRE, no solo cuando hay caidos: el caso interesante es ver
+        la vida justo despues de curar y cuanto se gasta despues.
+        """
+        equipo = self.j.equipo()
+        vida = []
+        niveles = []
+        caidos = 0
+        for m2 in equipo:
+            ps = float(m2.get("ps") or 0)
+            psmax = float(m2.get("ps_max") or 0) or 1.0
+            vida.append(f"{(m2.get('nombre') or '?')}:{ps / psmax * 100:.0f}%")
+            niveles.append(int(m2.get("nivel") or 0))
+            if ps <= 0:
+                caidos += 1
+        media = (sum(float((m2.get('ps') or 0) /
+                           (float(m2.get('ps_max') or 0) or 1.0) * 100)
+                    for m2 in equipo) / len(equipo)) if equipo else 0.0
+        # El peso vive en `razon` con el formato "tipo score=W (motivo)". Se saca
+        # de ahi porque `Decision` no lo guarda como campo, y parsear el `__str__`
+        # entero era justo el tipo de emparejamiento fragil que esta traza viene a
+        # evitar. Si no esta, se deja como "?": una traza a medias vale mas que
+        # una traza con un numero inventado.
+        peso = "?"
+        try:
+            _c = d.razon.split("score=")[-1].split(" ")[0].strip("(")
+            float(_c)
+            peso = _c
+        except Exception:  # noqa: BLE001, S110
+            pass
+        self.log(
+            f"  TRAZA_CAMINO paso={self.pasos} mapa={m.get('info', '?')!r} "
+            f"ins={insignias} disp={sorted(set(disponibles))} "
+            f"vivos={len(equipo) - caidos}/{len(equipo)} caidos={caidos} "
+            f"vida_media={media:.0f}% vida={vida} niveles={niveles} "
+            f"elige={d.valor} peso={peso}")
+
     def anotar(self, d: P.Decision) -> None:
         self.decisiones.append(str(d))
         self.log(f"  {d}")
@@ -708,6 +757,7 @@ class Bot:
                       edges=m.get("edges") or [],
                       nodo_actual=m.get("actual"))
         self.anotar(d)
+        self._traza_camino(m, d, tipos_alcanzables, insignias)
         # Registro de qué nodos del mapa han ido apareciendo, para poder ver si
         # la ruta se queda sin nodos de exp o si simplemente no hay más.
         self.nodos_vistos.add((m.get("info") or "ruta?", str(d.valor)))
