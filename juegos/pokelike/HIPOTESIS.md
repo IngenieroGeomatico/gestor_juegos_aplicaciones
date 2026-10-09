@@ -2288,3 +2288,118 @@ target is well-powered in the primary.
 attacks under-leveled it may lose gyms it would have won later. The data says
 "later" is not better — the deficit is worse later — but that is the bet, and it
 is falsifiable in one run of the lot.
+
+## 09-10 · H17 leida, y dos autocomprobaciones que la desmontan
+
+Antes de proponer nada se intento la version que yo mismo maxiaba ("capear los
+aplazos a 1"). **Se cayo en el camino**, y lo que se.consiguio es mejor que lo
+que se iba a proponer. Queda escrito porque un error propio borrado es el
+peor precedente que existe en este cuaderno.
+
+**Error 1 — "el deficit no se cierra: se agranda".** Falso. El agrupaba por el
+*ultimo* gimnasio de cada run, asi que una run que aplazo en Brock y murio en
+Misty mezclaba los dos. Separando por el gimnasio de la **misma linea** del
+aplazo:
+
+```
+gimnasio   liston   nivel   deficit   pasan
+Brock        14,0     9,1      4,9     50%
+Misty        20,0    14,7      5,3     31%
+Lt. Surge    25,0    21,9      3,2     90%
+Erika        32,0    28,8      3,2     88%
+Koga         44,0    38,9      5,1     98%
+```
+
+El liston es **constante** (14, 20, 25, 32, 44: los niveles canonicos de Kanto).
+No sube nunca. Y **Koga tiene deficit 5,1 y pasa el 98%**, o sea que el deficit
+solo NO predice el resultado: lo que falla es el deficit *alto y temprano*
+(Brock 50%, Misty 31%), no el deficit en si.
+
+**Error 2 — "aplaza 2-4 veces, es un bucle".** MalAGRUPADO otra vez: eran 2-4
+*gimnasios distintos*, no 4 rondas del mismo. Con el par (run, gimnasion)
+agrupado de verdad:
+
+```
+Brock  1x:58  2x:114  3x:2  4x:5      Misty  1x:31  2x:69  3x:1  4x:3
+```
+
+Si que hay 2 aplazos en el mismo gimnasio, 121 runs en Brock y 73 en Misty.
+
+### Lo que si se sostiene, y es el hallazgo
+
+Entre el primer y el ultimo aplazo **del mismo gimnasio**, en esos runs:
+
+```
+Brock  121 runs:  nivel ganado -0,0   deficit reducido -0,0
+Misty   73 runs:  nivel ganado -0,1   deficit reducido -0,1
+```
+
+Y en esos mismos huecos el bot **si pelea**: 2,51 combates y 1,38 capturas por
+bucle. Pelea mucho, sube cero.
+
+La causa esta en el codigo y es una sola linea:
+
+```python
+if ctx.nivel_rival > tope_equipo + 1:      # planificador.py:411 (antes)
+    return VETO                              # "no es exp, es riesgo"
+```
+
+**Para cerrar 5,3 niveles hay que pelear contra mons mas fuertes, y el veto de
+entrenador prohibe exactamente eso.** Al equipo le falta nivel, el rival del
+nodo es mas fuerte, veto; no pelea; y lo unico que le queda es pelear con sus
+pares, que no dan nivel. El veto protege de perder la run —perder contra un
+entrenador la termina— pero aqui **entrar bajo de nivel al jefe la termina
+igual**: se esta pagando un coste que ya se esta pagando.
+
+Y no es teoria: en las 225 runs, `carry flojo` sale **0 veces**. Esa rama del
+codigo esta muerta en la practica, asi que hoy no se muere por vida: se muere
+por nivel, y el nivel no sube porque el veto no deja.
+
+## H18 · comprar nivel gastando riesgo
+
+**Intervencion**: con el jefe a la vista y deficit (`corto_de_nivel`), el veto
+pasa de `equipo + 1` a `equipo + 3`. Fuera de ahi no cambia nada: es quirurgico,
+no un afloje general del veto.
+
+Flag `PKL_VETO_XP`, default 0. Marcador de mecanismo: `deficit al jefe: se gasta
+riesgo en exp`, que solo puede salir con flag=1 **y** `corto_de_nivel=1` (verificado
+sobre la funcion, no a ojo).
+
+**Pre-registrado antes de mirar**:
+- primaria: `insignias/run` (misma que H17, comparable)
+- secundaria: `>= 2 insignias`
+- mecanismo: veces que se gasta riesgo en exp, y el deficit al entrar al jefe
+- n: 100 por brazo, **con mirada interina en 60 y 80**
+
+**Potencia**: pasar Misty del 31% a ~50% sube `insignias/run` de 1,25 a ~1,91
+(+0,66, d~0,6) = **97%**. Con la sd observada de 1,111, el umbral declarado de
++0,41 es d=0,369 → 82% a 100 por brazo. Este objetivo si esta bien powered, a
+diferencia de `>= 2 insignias`, que se rechazo como primaria (necesita +20 pp).
+
+### La parada adaptativa, pre-registrada (y por que va DENTRO del hash)
+
+Miradas en n=60, 80 y 100 por brazo. En cada una:
+- **futilidad**: parar si el IC **99%** de la primaria no llega a +0,41. Mas runs
+  no pueden devolver un efecto que ya se ha descartado al 99%.
+- **eficacia**: parar si el IC **99%** excluye 0 (p<0,01).
+
+Ambas al 99%, que es **mas estricto** que el criterio declarado del 95%, asi que
+mirar antes no infla nada: un p<0,01 que se ve antes y un p<0,05 que se ve al
+final cuentan igual. Lejos de ser un atajo, es lo contrario de Optional Stopping:
+lo que hace es **no gastar 17 h en una respuesta que ya esta**.
+
+El fichero `scripts/control_h18.py` va en `scripts/` y no en `scripts/medir/` a
+proposito: si la regla de cuanto se juega viviera fuera del hash, se podria
+retocar a mitad de tanda sin que el hash se movies. Es la parte del protocolo
+que mas caro sale dejar fuera, y el 09-10 se vio el precio: cuando se bajo el
+minimo de 150 a 100 solo se pudo hacer porque el analisis no estaba hasheado.
+Para H18 eso ya no es un accidente afortunado, es la norma.
+
+**Nada mas** autoriza a parar: ni por tiempo, ni por lo grande que se vea el
+efecto, ni por "ya se nota".
+
+### Dos en paralelo
+
+Decision del usuario el 09-10. El cuello medido es la **CPU** (4 nucleos, carga
+3,3 con **un** run), no la memoria: 2 runs caben de sobra en 3,4 GB libres. El
+coste probable es que cada run tarde algo mas, no que no se puedan ejecutar.

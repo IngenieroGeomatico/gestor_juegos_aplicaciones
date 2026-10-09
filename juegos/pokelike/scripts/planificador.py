@@ -276,6 +276,15 @@ PESO_VETO_NIVEL = -4.0
 PESO_INCOGNITA = 9.0
 
 
+# **H18 · comprar nivel gastando riesgo.** Default 0 = control. Ver la nota del
+# veto en `_veto_nivel`: solo aplica con `corto_de_nivel` (el jefe ofrece y al
+# equipo le falta nivel), que es donde medir que el aplazo no cierra nada.
+VETO_XP = os.environ.get("PKL_VETO_XP", "0").strip().lower() in ("1", "true", "si", "yes")
+# Margen que se concede sobre el nivel del equipo. +1 es el veto de siempre; +3
+# deja entrar al Ace Trainer dos niveles por encima del equipo.
+VETO_XP_MARGEN = int(os.environ.get("PKL_VETO_XP_MARGEN", "3"))
+
+
 @dataclass
 class Contexto:
     """Lo que el plan necesita saber del estado actual."""
@@ -408,11 +417,32 @@ def veto_nivel_entrenador(ctx: Contexto) -> tuple[float | None, float, str]:
     """
     niveles = _niveles(ctx.equipo)
     tope_equipo = (sum(niveles) / len(niveles)) if niveles else 0
-    if ctx.nivel_rival > 0 and tope_equipo and ctx.nivel_rival > tope_equipo + 1:
+    # **H18: el veto se relaja SOLO cuando el jefe ofrece y falta nivel.**
+    #
+    # Medido en 225 runs: con el jefe a la vista y deficit de 5,3 niveles, el
+    # bot aplaza, se va a buscar exp y VUELVE CON EL MISMO NIVEL (-0,0). No es
+    # que expire mal: es que no puede ganar nivel, porque la unica fuente de
+    # exp de verdad son los entrenadores por encima del equipo y este veto los
+    # prohibe. Pelea solo con sus pares (2,5 combates por bucle) y no saca nada.
+    #
+    # La cadena entera esta medida:
+    #   jefe pide liston 20 -> equipo en 14,7 -> aplaza
+    #   -> para cerrar 5,3 haria falta pelear 5 niveles por encima
+    #   -> el veto (equipo+1) lo impide -> exp ~0
+    #   -> entra igual, al mismo nivel, y pierde el 69% de las veces
+    #
+    # El veto protege de perder la run, pero cuando el jefe es la unica salida
+    # y el deficit no se cierra, entrar por debajo del nivel ES perder la run.
+    # Se esta pagando un coste que ya se esta pagando. Ahi el veto esta
+    # estorbando, y este es el unico sitio donde se relaja: con deficit
+    # (`corto_de_nivel`). Fuera de ahi el veto se queda como estaba.
+    margen = VETO_XP_MARGEN if (VETO_XP and ctx.corto_de_nivel) else 1
+    if ctx.nivel_rival > 0 and tope_equipo and ctx.nivel_rival > tope_equipo + margen:
         return (PESO_VETO_NIVEL, PENALIZACION_VETO_NIVEL,
                 f"entrenador vetado: rival Nv{ctx.nivel_rival} supera al "
-                f"el nivel del equipo (Nv{tope_equipo:.0f}+1) — no es exp, "
-                f"es riesgo")
+                f"el nivel del equipo (Nv{tope_equipo:.0f}+{margen})"
+                + (" | deficit al jefe: se gasta riesgo en exp" if margen > 1
+                   else " — no es exp, es riesgo"))
     return None, 0.0, ""
 
 
