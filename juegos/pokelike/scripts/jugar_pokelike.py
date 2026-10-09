@@ -733,19 +733,27 @@ class Bot:
                  for m in _eq]
         _roto = bool(_vida) and (min(_vida) <= 0.0
                                  or sum(_vida) / len(_vida) < 0.75)
-        if (self._rerolls < 3
-                and "jefe" in tipos_alcanzables
-                and not ({"entrenador", "batalla"} & set(tipos_alcanzables))
-                and (not REROLL_SOLO_ROTO or _roto)):
+        _se_puede = (self._rerolls < 3
+                     and "jefe" in tipos_alcanzables
+                     and not ({"entrenador", "batalla"} & set(tipos_alcanzables)))
+        # **El "no lo hago" se escribe FUERA del `if` que lo salta.** Estaba
+        # dentro, o sea que cuando el flag declinaba rerollear no salia nada, y
+        # entonces no habia forma de distinguir "a este no le tocaba" de "decidio
+        # no gastar la bala". Con el marcador dentro del bloque, el brazo A
+        # callaba justo en el caso que el experimento quiere medir. Es el mismo
+        # error de instrumentacion de hoy, la quinta vez: un marcador que no se
+        # puede ver desde fuera no verifica nada.
+        if _se_puede and REROLL_SOLO_ROTO and not _roto:
+            self.log(f"  ↻ H19: NO se gasta presupuesto, equipo entero "
+                     f"(vida {sum(_vida) / len(_vida):.0%}, "
+                     f"vivos {sum(1 for v in _vida if v > 0)}/{len(_vida)})")
+        if _se_puede and (not REROLL_SOLO_ROTO or _roto):
             self._rerolls += 1
             self.log(f"  ↻ reroll del mapa ({self._rerolls}/3): sin trainer ni "
                      f"combate y el jefe como única salida, la guía dice tirar "
                      f"el mapa para buscar trade o exp"
                      + (f" | H19: equipo roto (vida {sum(_vida) / len(_vida):.0%})"
-                        if REROLL_SOLO_ROTO and _roto else
-                        (f" | H19: NO se gasta presupuesto, equipo entero "
-                         f"({sum(_vida) / len(_vida):.0%})" if REROLL_SOLO_ROTO
-                         else "")))
+                        if REROLL_SOLO_ROTO else ""))
             try:
                 self.j.page.keyboard.press("r")
                 self.j.page.wait_for_timeout(600)
