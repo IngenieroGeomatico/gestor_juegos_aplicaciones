@@ -2145,3 +2145,64 @@ runs ya recogidas. Si algún día el hash incluyera el análisis, este cambio se
 un motivo de uro y esta decisión no habría sido posible tomarla sin tirar el
 lote. Conviene tener presente que el próximo lote que serious comparaciones
 entre versiones del análisis va a necesitar esto resuelto antes.
+
+## H17 · REFUTADA (09-10, n=114 A / 110 B)
+
+La primaria era `insignias/run` y el criterio, un efecto de **+0,41**. Resultado:
+
+| | A (capturar por nivel) | B (control) | dif | IC 95% | p |
+|---|---|---|---|---|---|
+| **insignias/run** | 1,211 | 1,300 | **−0,089** | [−0,409; +0,237] | 0,634 |
+| ≥2 insignias | 21,9% | 27,3% | −5,3 pp | [−16,8; +6,2] | 0,438 |
+
+Cohen d = −0,07. **No hay señal, y no es solo que falten partidas**: la parte
+alta del IC (**+0,237**) queda **por debajo del +0,41 que motivó la hipótesis**.
+O sea que el efecto del tamaño que se buscaba está excluido, no solamente sin
+detectar. Eso es una refutación, no una indeterminatez, y por eso el script dice
+"faltan partidas, no es igualdad" queriendo decir exactamente lo contrario de lo
+que parece.
+
+Distribuciones (prácticamente superpuestas):
+```
+A: 0→27  1→63  2→11  3→9  4→2  5→1  6→1  8→1
+B: 0→25  1→55  2→11  3→15 4→2  5→1  8→1
+```
+
+**El mecanismo sí ocurrió, y el efecto tampoco.** Esto es lo que hace el
+experimento informativo y no solo negativo:
+
+- el flag decidió **1.328 veces en A y 0 en B**: la intervención llegó
+- pero solo cambió capturas 3,13 → 2,95 (+0,18) y pasos 58,95 → 56,11 (−2,8)
+
+Y aquí está el diagnóstico, que ya estaba escrito desde el 07-10 y este lote
+confirma: **la rama solo existe cuando faltan >1 niveles Y el equipo tiene ≥3
+móns Y hay pokéball en pantalla.** En el 42% de las pantallas con entrenador
+disponible el equipo tiene menos de 3 móns, y ahí capturar ya ganaba por peso
+(60 > 36) sin que el flag tuviera nada que cambiar. El flag se aplicaba donde la
+decisión ya era la misma, y donde no se aplicaba porque la condición no se
+cumplía. Poca señal de intervención, casi nada de efecto.
+
+### Qué sigue, y estaba escrito de antemano
+
+La lectura declarada era:
+
+- **X**: insignias/run sube de +0,41 → el desperdicio de las 6,5 batallas sueltas
+  era cuello.
+- **Y**: nada se mueve → **el cuello no es la apertura, y toca mirar el tramo
+  posterior a Misty**, que nadie ha mirado todavía.
+
+Ha salido Y. TresATOR datos para la siguiente:
+
+1. **El opening no es el cuello.**Meter más presión en la apertura no mueve la
+   insignia, ni a favor ni en contra. Es la tercera vez que se toca el opening
+   (captura permisiva sí, troca no, esto no) y la única que no ha dado nada.
+2. **Las insignias se pierden después.** El 46% muere contra Brock y el 26%
+   contra Misty, pero las dos son abrir. Con 1,21 de media sobre 8 posibles,
+   la mayor parte del trabajo se pierde en el tramo que va de la 2ª a la 8ª
+   insignia, y ahí no se ha puesto nunca una hipótesis.
+3. **El punto estimates es negativo** (−0,089). No significa nada por sí solo,
+   pero descarta la lectura fácil de "capturar más siempre es mejor".
+
+Lo que **no** sale de este lote, y no se debe decir: que capturar por nivel sea
+malo. Con este n solo se puede decir que **no** mueve insignias por arriba, en un
+opening donde la decisión ya era la misma en la mayoría de las pantallas.
