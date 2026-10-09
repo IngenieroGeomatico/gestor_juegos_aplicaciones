@@ -2206,3 +2206,85 @@ Ha salido Y. TresATOR datos para la siguiente:
 Lo que **no** sale de este lote, y no se debe decir: que capturar por nivel sea
 malo. Con este n solo se puede decir que **no** mueve insignias por arriba, en un
 opening donde la decisión ya era la misma en la mayoría de las pantallas.
+
+## 09-10 · Lo que se pierde de verdad: Misty es la muralla, y aplazar es perder por construccion
+
+Foto, no experimento. 225 runs cerradas del lote H17 (A=115, B=110, juntas a
+propósito: aquí no importa el flag, importa el bot). Guion: `medir/tramo_post_misty.py`.
+
+### Dónde muere la masa
+
+```
+Brock    52   Misty 118   Erika 24   Koga 4   Sabrina 2   Lt. Surge 22
+```
+
+**Misty se lleva 118 de 225: más de la mitad de todas las muertes.** Y la tasa de
+passage condicional lo dice todo:
+
+| gimnasion | llegan | lo pasan | |
+|---|---|---|---|
+| Brock | 104 | 52 | 50% |
+| **Misty** | **170** | **52** | **31%** |
+| Erika | 194 | 170 | 88% |
+| Koga | 198 | 194 | 98% |
+| Sabrina | 200 | 198 | 99% |
+| Lt. Surge | 222 | 200 | 90% |
+
+Misty es la muralla, y **pasada Misty el bot casi no se atasca**: 88-99%. Quien
+pasa Misty acaba con media de **2,98 insignias**. Por eso la media general es
+1,25 de 8 posibles: no es que el bot pierda Homero, es que se queda en la puerta
+número 2.
+
+### Por qué: el déficit no se cierra, se agranda
+
+```
+Misty:  nivel  8,9 -> 10,9 ->  8,9 -> 13,5     deficit 5,4 -> 5,7 -> 6,2 -> 6,7
+Erika:  nivel 11,8 -> 17,6 -> 22,6 -> 24,7     deficit 3,2 -> 3,3 -> 3,0 -> 3,3
+```
+
+**Cada ronda de aplazo compra ~2 niveles, y el listón sube ~3.** El listón del
+rival no es una constante: sube conforme avanza la run. Por eso a Misty el bot
+pasa 4 rondasaplazando y llega **más atrás que cuando empezó**.
+
+Y aplaza mucho: 78 runs aplazan 2 veces y 57 aplazan 4. Aplazar no es una
+estrategia de espera, es una carrera que se pierde por construcción.
+
+El contraste con Erika lo confirma: allí el déficit es pequeño (3,2) y estable, y
+pasa el 88%. El problema no es "nivel bajo": es **nivel bajo cuando el listón
+sube**.
+
+Y no es que el bot se quede sin pasos: usa **55-59 de los 1500** disponibles.
+Mueren, no se agotan.
+
+### Nota sobre el opening
+
+Esto **contradice** lo que se写在 el 07-10 ("el 46% muere contra Brock y el 26%
+contra Misty"). Con 225 runs, Brock es el 23% y **Misty el 52%**. La proporción
+estaba mal porque se contaba por apariciones en pantalla y no por runs. Misty
+lleva el doble que Brock, no la mitad. La hipótesis H17 apuntaba al sitio
+equivocado por esa misma razón.
+
+## H18 · Hypothesis: cap the deferrals
+
+**Intervention**: cap boss deferrals at **1**. Today the bot defers 2-4 times
+and the deficit grows; the second deferral is already provably not paying. Test
+committing on the second opportunity instead.
+
+**Pre-registered, before looking**:
+- primary: `insignias/run` (same as H17, comparable, and well-powered)
+- secondary: `>= 2 insignias`
+- mechanism: deferrals per run (today 3, aim ~1) and deficit at the moment of
+  the boss attempt (today 5-7)
+
+**Power, computed before choosing**: `insignias/run` has sd 1,111, so the
+declared +0,41 is d=0,369 → 82% at n=100/arm. But passing Misty from 31% to 50%
+lifts insignias/run from 1,25 to ~1,91 (+0,66, d~0,6) → **97% power**. So this
+target is well-powered in the primary.
+
+`>= 2 insignias` was **rejected as primary**: at baseline 0,244 it needs
+0,244 → 0,45 (+20 pp) for 87% power. It stays secondary.
+
+**Risk, stated before running**: capping deferrals could be worse. If the bot
+attacks under-leveled it may lose gyms it would have won later. The data says
+"later" is not better — the deficit is worse later — but that is the bet, and it
+is falsifiable in one run of the lot.
