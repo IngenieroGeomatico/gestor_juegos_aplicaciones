@@ -52,11 +52,29 @@ LOGS = RAIZ / 'juegos/pokelike/log/h18'
 
 # --- lo pre-registrado. No tocar sin invalidar el lote. ---
 MIRADAS = (60, 80, 100)
-EFECTO_DECLARADO = 0.41
+EFECTO_DECLARADO = 0.10   # P(gana): de 0,61 a 0,71
 NIVEL_IC = 0.99
 
 pat_cab = re.compile(r'==\s*brazo=(\w)\s*\|.*?codigo=([0-9a-f]+)')
 pat_ins = re.compile(r'insignias\s*:\s*(\d+)')
+pat_gym = re.compile(r'estado: Gym Battle vs ')
+pat_out = re.compile(r'>>> COMBATE (GANADO|PERDIDO)')
+
+
+def _ganadas(t: str) -> list[int]:
+    """1 si gano esa pelea de gimnasio, 0 si no. Una unidad por pelea, no por
+    run: la intervencion actua justo en la pelea, y medirla ahi es medir donde
+   donde ocurre el efecto."""
+    out = []
+    ls = t.splitlines()
+    for i, ln in enumerate(ls):
+        if not pat_gym.search(ln):
+            continue
+        for l2 in ls[i + 1:i + 12]:
+            if (o := pat_out.search(l2)):
+                out.append(1 if o.group(1) == 'GANADO' else 0)
+                break
+    return out
 
 
 def leer() -> tuple[list[float], list[float]]:
@@ -74,9 +92,9 @@ def leer() -> tuple[list[float], list[float]]:
         hashes.add(cab.group(2))
         if cab.group(1) != m.group(1):
             continue
-        mi = pat_ins.search(t[t.rindex('RESUMEN'):])
-        if mi:
-            (a if m.group(1) == 'A' else b).append(float(mi.group(1)))
+        g = _ganadas(t)
+        if g:
+            (a if m.group(1) == 'A' else b).extend(float(x) for x in g)
     if len(hashes) > 1:
         raise SystemExit(f'ABORTA: varios codigos en la muestra: {sorted(hashes)}')
     return a, b

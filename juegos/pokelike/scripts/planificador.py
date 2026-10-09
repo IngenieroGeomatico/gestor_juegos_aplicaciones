@@ -609,9 +609,15 @@ def puntuar(tipo: str, ctx: Contexto) -> tuple[float, str]:
                 # que ganarle tambien a capturar (PESO_CAPTURA=60). Flag
                 # `PKL_CURA_ANTE_JEFE`, default 0 = control.
                 peso = PESO_CURA_ANTE_JEFE if CURA_ANTE_JEFE else 58.0
+                # **El peso va en el mensaje, y no por poco: sin esto el brazo A
+                # y el B imprimen exactamente la misma linea** (el unico cambio
+                # es 62 contra 58) y no hay forma de comprobar por el log que el
+                # flag llego. Un mecanismo que no se puede verificar no se puede
+                # dar por bueno, y ya se ha perdido una tanda entera asi.
+                marca = " | H18: cura por encima de capturar" if CURA_ANTE_JEFE else ""
                 return (peso,
                         f"curar: paso obligatorio hacia el jefe y hay "
-                        f"{caidos} caido(s)")
+                        f"{caidos} caido(s) (peso {peso:.0f}){marca}")
             if ctx.carry_ps < 98.0:
                 return (52.0,
                         f"curar: paso obligatorio hacia el jefe, carry al "
@@ -624,8 +630,15 @@ def puntuar(tipo: str, ctx: Contexto) -> tuple[float, str]:
         # la media: medido, el equipo estaba al 40% de media y aun así el
         # principal llegaba con 10 de 49 PS al gimnasio.
         if caidos:
-            return (PESO_CURA_CAIDOS,
-                    f"curar {caidos} caído(s): el jefe es salida forzada")
+            # **Segunda rama de curacion, y tambien estaba por debajo de
+            # capturar.** PESO_CURA_CAIDOS=50 frente a PESO_CAPTURA=60. La otra
+            # rama (la del waypoint) pesaba 58, y las dos perdian. Arreglar solo
+            # una habria dejado el bug en la otra mitad de los casos.
+            peso = PESO_CURA_ANTE_JEFE if CURA_ANTE_JEFE else PESO_CURA_CAIDOS
+            marca = " | H18: cura por encima de capturar" if CURA_ANTE_JEFE else ""
+            return (peso,
+                    f"curar {caidos} caído(s): el jefe es salida forzada "
+                    f"(peso {peso:.0f}){marca}")
         if ctx.carry_ps < 65.0:
             return (PESO_CURA_BAJO + 8.0,
                     f"curar: el carry está al {ctx.carry_ps:.0f}% "

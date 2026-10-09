@@ -122,7 +122,7 @@ else
   echo "$HASH" > "$MARCA"
 fi
 
-echo "== H18 · comprar nivel gastando riesgo | A=1 B=0 | n=$PEDIDAS en total (~$((PEDIDAS/2)) por brazo) | $REGION | hash=$HASH =="
+echo "== H18 · curar antes del jefe | A=1 B=0 | n=$PEDIDAS en total (~$((PEDIDAS/2)) por brazo) | $REGION | hash=$HASH =="
 echo "   timeout=${TIMEOUT}s vivacidad=${VIVACIDAD}s (tick ${TICK}s) | en paralelo: $PARALELO | logs en $LOGS/$ETIQUETA"
 echo "   primaria: insignias/run | secundaria: >=2 insignias"
 
@@ -265,7 +265,7 @@ while [ "$lanzadas" -lt "$PEDIDAS" ]; do
     if [ "$((entrega % 2))" -eq 1 ]; then BRAZO="A"; CPN=1; else BRAZO="B"; CPN=0; fi
     SALIDA="$LOGS/$ETIQUETA/${ETIQUETA}-${BRAZO}-$(date +%H%M%S)-$$-$lanzadas.txt"
     PKL_BRAZO="$BRAZO" \
-    PKL_VETO_XP="$CPN" \
+    PKL_CURA_ANTE_JEFE="$CPN" \
     PKL_HASH="$HASH" \
     timeout "$TIMEOUT" uv run --group dev python \
       juegos/pokelike/scripts/jugar_pokelike.py \
