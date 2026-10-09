@@ -2403,3 +2403,88 @@ efecto, ni por "ya se nota".
 Decision del usuario el 09-10. El cuello medido es la **CPU** (4 nucleos, carga
 3,3 con **un** run), no la memoria: 2 runs caben de sobra en 3,4 GB libres. El
 coste probable es que cada run tarde algo mas, no que no se puedan ejecutar.
+
+## 09-10 noche · H18 matada en 12 minutos, y la regla que sale de ahi
+
+H18 (relajar el veto de entrenador de +1 a +3 cuando falta nivel) se lanzo a las
+06:39 y se paro a las 06:51. **No llego a las 200 runs.** El motivo esta medido:
+
+```
+de 225 runs de H17, el veto de entrenador dispara 68 veces en 18 runs  (8%)
+```
+
+Con 100 por brazo, solo **8 runs del brazo A** recibirian el tratamiento. El
+efecto maximo teorico, si los 18 runs de H17 hubieran pasado de aplazar a ganar,
+es +0,08 insignias/run: **d = 0,07**. Sin potencia, por construccion.
+
+### Las cuatro hipotesis de esta noche, y por que cayeron
+
+| # | Hipotesis | Por que cayo |
+|---|---|---|
+| 1 | H17: capturar cuando falta nivel sube insignias | refutada: IC99 no llega a +0,41 |
+| 2 | Capear los aplazos a 1 | **no-op**: el bot ya aplaza 1-2 veces por gimnasion |
+| 3 | H18: relajar el veto | **no alcanza**: 8% de las runs |
+| 4 | El carry llega roto a Misty | **no**: `carry flojo` sale 0 veces en 225 runs |
+
+Ninguna era una buena idea por el motivo que se suponia. Y tres de las cuatro
+seDiscoverieron **midiendo si el mecanismo llega**, no pensando el mecanismo.
+
+### Lo que si esta medido, y es solido
+
+**El deficit de nivel no lo puede cerrar nadie, porque no hay exp que lo cierre:**
+
+```
+liston 14:  equipo  9,0   salvajes disponibles  4,0
+liston 20:  equipo 14,7   salvajes disponibles  7,0
+liston 25:  equipo 24,0   salvajes disponibles  9,0
+```
+
+El bot llega a la pantalla del jefe con **6,1 combates** ya hechos y esta a **5
+niveles de corto**. No es que pelee poco: **los salvajes que hay estan 5 a 15
+niveles POR DEBAJO de su equipo**, asi que pelear con ellos no da nada. Entre el
+primer y el ultimo aplazo del mismo gimnasio el nivel ganado es **-0,0**.
+
+Y el veto no era el culpable: disparaba en el 8% de las runs. Los contenedores
+que bloquean trainers por nivel son una causa **marginal**, no la causa. Se
+parecia a la causa porque era lo unico que se veia en el codigo.
+
+Ademas: **los pasos no son el recurso.** Usa 55-59 de los 1500 disponibles, y la
+run termina por muerte, no por agotamiento. Ahorrar pasos no compra nada.
+
+### La conclusion que toca
+
+Sehausto lo que se puede tocar con una **decision dentro del mapa**:
+
+1. **Nivel**: no hay exp a su altura para cerrar 5 niveles. Ningun peso lo arregla.
+2. **Riesgo**: relajar el veto no llega al 8% de las runs.
+3. **Paso**: no es el recurso; sobra paso de sobra.
+4. **Entrada al jefe**: el bot ya entra por debajo del nivel (aplaza 1-2 veces y
+   entra igual), asi que relajar el liston tampoco cambia nada.
+
+Lo que queda es lo unico que nadie ha mirado: **la calidad del equipo con la que
+se entra al jefe**, dado que el nivel no se puede tener. Y hay una pista en el
+propio codigo: `prep -> X rival T -> [equipo]` es el mecanismo de eleccion de
+equipo para el jefe, y en las 225 runs su salida es **rumorosa** (Erika figura
+como rival Electric y es Planta), o sea que **no se puede ni leer**. Un
+mecanismo que no se puede medir no se puede mejorar, y es lo primero que hay que
+arreglar.
+
+### LA REGLA
+
+**Antes de lanzar un A/B, medir en quantas runs dispara el mecanismo. Por debajo
+del 15% no se lanza: no hay potencia, y se pierden las horas.** El calculo sale
+en minutos sobre logs que ya existen, y es el mismo que habria evitado H17, H18 y
+las dos nighttime.
+
+Esto es exactamente lo que se hizo bien en H15 (se comprobo el mecanismo antes) y
+mal en H17 y H18 (se lanzo primero y se ckecko despues, cuando ya no habia que
+mirar). **Comprobar antes, no despues.**
+
+Y una segunda regla, mas comoda: **preferir un mecanismo que ya dispare en >50%
+de las runs y cambiarle el peso, antes que un mecanismo nuevo que solo dispense
+en el 8%.** El cuello no es un problema de pesos: es que los pesos no decide.
+
+H18 queda RETRACTADO sin llegar a datos. El codigo del flag se queda (es
+inocuo con default 0) y el trabajo no se tira: la regla de la parada adaptativa
+pre-registrada, que es lo bueno que salio de H18, se reutiliza tal cual en el
+siguiente experimento.
