@@ -2721,3 +2721,72 @@ cuatro runs responderia esto en veinte minutos. Es infinitamente mas barato que
 Y esa es la leccion de hoy en una frase: **cuatro horas de lotes para descubrir que
 el cuello no era donde se mire.** Los lotes sirven para medir efectos, no para
 encontrar mecanismos. Para encontrar mecanismos hay que dejar el bot que hable.
+
+## 09-10 18:00 · La instrumentacion responde en 20 minutos lo que 4 horas de lote no
+
+H18 se habia parado por premisa falsa. Antes de volver a lanzar nada se
+instrumento: una linea autocontenida por paso de mapa, con su propio contexto
+(`_traza_camino` en `jugar_pokelike.py`). Cuatro runs. Y la respuesta sale
+completa.
+
+### El hallazgo, literal
+
+```
+--- contra Misty, lo hace MAL ---
+paso=24  disp=['cura','entrenador']  vida=50%   peso=100.0   -> se cura (BIEN)
+paso=40  disp=['batalla',...]        vida=86%               -> pelea
+paso=43  disp=['entrenador','item']   vida=86%               -> pelea
+paso=45  disp=['entrenador','trade']  vida=74%               -> pelea
+paso=50  disp=['item']                vida=42%  caidos=1     -> se le muere un món
+paso=52  disp=['jefe']                vida=42%               -> entra al jefe
+
+--- contra Erika, lo hace BIEN ---
+paso=89  disp=['cura','incognita']   vida=38%   peso=100.0   -> se cura
+paso=90  disp=['jefe']                vida=100%              -> entra con vida llena
+```
+
+Y medido sobre todas las entradas al jefe con el jefe como unica salida:
+
+```
+cura a <=2 pasos antes : 3 entradas, vida media 100%
+cura lejos o ninguna  : 3 entradas, vida media  61%
+```
+
+**La causa: el pokecentro no esta siempre pegado al gimnasio.** Cuando esta a un
+paso, el bot lo hace perfecto: cura con peso 100 y entra con vida llena. Cuando
+esta lejos, camina tres o cuatro nodos de pelea forzada, se le gasta el equipo,
+y cuando por fin el jefe es lo unico en pantalla **ya no hay cura a la vista**:
+no es que el bot decida mal, es que la curacion se quedo atras y no hay vuelta
+atras.
+
+Eso explica de una vez los tres datos que llevaba dos noches sin encajar:
+
+1. por que el 83% de las peleas con caidos venian "despues de curarse": se
+   curaron, y el camino se lo deshizo
+2. por que subir el peso de la curacion (H18) no arreglaba nada: el peso ya era
+   100, y el problema no es la prioridad sino la **distancia**
+3. por que el nivel no separaba nada: no es que llegue bajo, es que llega **gastado
+   despues de un viaje**
+
+### Lo que NO es este arreglo
+
+No es "curar antes del jefe" — eso ya lo hace y lo hace bien cuando puede. Es que
+**entre una curacion lejana y el jefe hay peleas obligatorias que el bot paga con
+la vida del equipo**, y al final no le queda donde curarse.
+
+Las tres palancas que de aqui salen, sin escolher todavia:
+
+- **no gastar el equipo en el tramo entre una curacion y el gimnasio** (priorizar
+  el camino corto, o aceptar ir por debajo de nivel antes que entrar roto)
+- **curar en el punto mas cercano posible al jefe**, aunque el centro no este en
+  el camino obligatorio: hoy `en_camino_al_jefe` exige que este en el grafo
+- **revisar el mapa cuando el jefe queda como unica salida y el equipo esta
+  roto**: reroll, como ya se hace cuando no hay ni trainer ni batalla
+
+### La leccion de hoy, sin adornos
+
+Cuatro horas de lotes para descubrir que el cuello no era donde se mire. Los
+lotes miden efectos; no encuentran mecanismos. Y cuatro veces seguidas un
+"hallazgo" se cayo porque la medicion emparejaba mal dos lineas del log, que se
+enteraron por el camino de depurar. La instrumentacion que de verdad servia eran
+nueve lineas por run, y salio en veinte minutos.
