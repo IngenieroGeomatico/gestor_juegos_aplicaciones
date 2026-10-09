@@ -2790,3 +2790,65 @@ lotes miden efectos; no encuentran mecanismos. Y cuatro veces seguidas un
 "hallazgo" se cayo porque la medicion emparejaba mal dos lineas del log, que se
 enteraron por el camino de depurar. La instrumentacion que de verdad servia eran
 nueve lineas por run, y salio en veinte minutos.
+
+## 09-10 18:30 · H19: el presupuesto de reroll se gasta cuando toca
+
+### El bug, con la traza delante
+
+`jugar_pokelike.py` rerollea el mapa cuando el jefe es la unica salida y no hay ni
+entrenador ni batalla. El presupuesto son **3 por run**, y no estaba condicionado
+a nada mas.
+
+En la run instrumentada:
+
+```
+linea 88: ↻ reroll del mapa (1/3)   equipo 2 (vivos 2)  <- sano, no hacia falta
+linea 89: ↻ reroll del mapa (2/3)
+linea 90: ↻ reroll del mapa (3/3)
+```
+
+**Los tres se gastaron con el equipo entero**, y ademas **no sirvieron**: tras los
+tres el mapa seguia siendo `disp=['jefe']`. Veintiocho pasos despues:
+
+```
+paso=52  disp=['jefe']  vida=42%  caidos=1   -> entra al jefe roto, 0 rerolls
+```
+
+El presupuesto se lo gastó un momento en el que no额 hacía falta, y cuando hizo
+falta ya no había. Medido en los 4 runs de traza: **9 rerolls**, ~2,25 por run, y
+en el estado del equipo de esos momentos habiaCaidos y no habia, o sea que parte
+del gasto era en balde.
+
+**Intervencion**: el reroll solo se gasta con el equipo roto (algún món a 0, o
+vida media < 75%). Default 0 = control. `PKL_REROLL_SOLO_ROTO`.
+
+### Pre-registrado, con la potencia calculada ANTES de mirar
+
+- **primaria (mecanismo)**: `P(entra al jefe con algun caido)`. Base 0,42.
+  A 0,20 -> **92%** de potencia con 100 por brazo. A 0,30 -> solo 42%.
+- **confirmatoria (resultado)**: `P(gana la pelea de gimnasio)`. Base 0,61.
+  A 0,77 -> 69% con 100 por brazo.
+- n = **100 por brazo**, con la parada pre-registrada de `control_h18.py` en 60,
+  100 y 150. (El tope del launcher son 300 runs: 150 por brazo, y las miradas
+  cortan antes si la respuesta ya esta.)
+
+**Se declara por escrito que el efecto esperado es pequeno.** Un reroll salvado
+es un evento por run afectada, no una transformacion del bot. Si la primaria no
+se mueve de 0,42 a menos de ~0,20, la conclusion no es "el reroll no sirve" sino
+**que este arreglo es pequeno** y habria que ir a por lo de verdad: **no gastar
+el equipo en las peleas obligatorias del tramo entre una curacion lejana y el
+gimnasio**, que es donde la traza muestra que se pierde la run.
+
+### Y la palanca de verdad, por si esta falla
+
+La traza ya la ensena sin falta de espejo. Contra Misty, entre el paso 24 (se
+cura) y el 52 (entra), hay 4 peleas **obligatorias** porque solo hay 1-2 nodos en
+pantalla y son de pelea. No hay eleccion: no se puede elegir ir mas rapido ni
+curarse otra vez.
+
+La unica palanca real es **entrar al gimnasio por debajo de nivel pero entero**, en
+vez de a nivel y roto. Eso no es un peso: es cambiar el orden de las dos cosas que
+el codigo trata como separadas (el gate de nivel y la vida del equipo), y ahora
+si se puede plantear con la medida de la victoria por pelea encima de la mesa.
+
+Se queda anotado como H20, y no se lanza hasta que H19 diga algo.

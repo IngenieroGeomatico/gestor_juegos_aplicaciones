@@ -71,6 +71,20 @@ def _trade_activo() -> bool:
         "1", "true", "si", "yes")
 
 
+# **H19 · el presupuesto de reroll se gasta cuando toca.**
+#
+# El reroll del mapa solo tiene sentido si hay algo que arreglar: si el jefe es la
+# unica salida y el equipo esta entero, tirar el mapa es gastar una bala de las
+# tres a ciegas. Medido en una run instrumentada: los 3 rerolls se gastaron en un
+# paso donde el equipo estaba al 100% y sin caidos, y ademas no sirvieron (tras los
+# tres el mapa seguia siendo solo-jefe). Veintiocho pasos despues, con el equipo al
+# 42% y un mon caido y el jefe como unica salida, ya no quedaba ninguno.
+#
+# Con el flag, el reroll **solo** se gasta con el equipo roto. Default 0 = control.
+REROLL_SOLO_ROTO = os.environ.get("PKL_REROLL_SOLO_ROTO", "0").strip().lower() in (
+    "1", "true", "si", "yes")
+
+
 class Bot:
     # Intentos de recuperar un atasco **antes** de aceptar que la partida está
     # muerta. La run no se corta por un atasco: se escala el desbloqueo (teclas,
@@ -713,13 +727,25 @@ class Bot:
             except Exception as exc:  # noqa: BLE001
                 self.log(f"  !! busqueda de trade fallo: {exc}")
 
+        # **El equipo está roto?** Es lo que decide si tirar el mapa sirve de algo.
+        _eq = self.j.equipo()
+        _vida = [float(m.get("ps") or 0) / (float(m.get("ps_max") or 0) or 1.0)
+                 for m in _eq]
+        _roto = bool(_vida) and (min(_vida) <= 0.0
+                                 or sum(_vida) / len(_vida) < 0.75)
         if (self._rerolls < 3
                 and "jefe" in tipos_alcanzables
-                and not ({"entrenador", "batalla"} & set(tipos_alcanzables))):
+                and not ({"entrenador", "batalla"} & set(tipos_alcanzables))
+                and (not REROLL_SOLO_ROTO or _roto)):
             self._rerolls += 1
             self.log(f"  ↻ reroll del mapa ({self._rerolls}/3): sin trainer ni "
                      f"combate y el jefe como única salida, la guía dice tirar "
-                     f"el mapa para buscar trade o exp")
+                     f"el mapa para buscar trade o exp"
+                     + (f" | H19: equipo roto (vida {sum(_vida) / len(_vida):.0%})"
+                        if REROLL_SOLO_ROTO and _roto else
+                        (f" | H19: NO se gasta presupuesto, equipo entero "
+                         f"({sum(_vida) / len(_vida):.0%})" if REROLL_SOLO_ROTO
+                         else "")))
             try:
                 self.j.page.keyboard.press("r")
                 self.j.page.wait_for_timeout(600)
