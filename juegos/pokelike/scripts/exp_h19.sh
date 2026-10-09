@@ -124,7 +124,10 @@ fi
 
 echo "== H19 · reroll solo con el equipo roto | A=1 B=0 | n=$PEDIDAS en total (~$((PEDIDAS/2)) por brazo) | $REGION | hash=$HASH =="
 echo "   timeout=${TIMEOUT}s vivacidad=${VIVACIDAD}s (tick ${TICK}s) | en paralelo: $PARALELO | logs en $LOGS/$ETIQUETA"
-echo "   primaria: insignias/run | secundaria: >=2 insignias"
+echo "   PRIMARIA (mecanismo): P(llega a la pelea de gimnasion con algun mon a 0) | base 0,42"
+echo "   CONFIRMATORIA (resultado): P(gana la pelea de gimnasion) | base 0,61"
+echo "   insignia/run se calcula y se informa, pero NO decide: con el efecto"
+echo "   esperado tiene 19% de potencia y declararla primaria seria mentir."
 
 if [ ! -f "$RAIZ/juegos/pokelike/scripts/jugar_pokelike.py" ]; then
   echo "ABORTA: no encuentro jugar_pokelike.py" >&2
