@@ -255,10 +255,18 @@ fi
 if [ "$lanzadas" -gt 0 ]; then
   echo "   reanudando: $lanzadas runs ya en disco (hash $HASH), quedan $((PEDIDAS - lanzadas))"
 fi
+# **Lanzar a reponer, no a por tandas.** Antes era: lanzar PARALELO runs, hacer
+# `wait` de las PARALELO, y solo entonces lanzar la tanda siguiente. Con eso, una
+# run que se cuelga30 minutos (el `timeout` la mata) deja a **su pareja parada los
+# 30 minutos**, porque el `wait` espera a las dos. El producto se va a medias.
+#
+# Ahora: se mantiene el cupo lleno. En cuanto una run acaba —gane, pierda o la
+# mate el guard— se lanza la siguiente. El brazo lo decide el contador de
+# entregas, asi que el reparto A/B no se altera: sigue siendo A,B,A,B.
+PIDS=()
 while [ "$lanzadas" -lt "$PEDIDAS" ]; do
-  PIDS=()
-  for _K in $(seq 1 "$PARALELO"); do
-    [ "$lanzadas" -ge "$PEDIDAS" ] && break
+  # Rellenar los huecos que deja libres el turno anterior.
+  while [ "${#PIDS[@]}" -lt "$PARALELO" ] && [ "$lanzadas" -lt "$PEDIDAS" ]; do
     lanzadas=$((lanzadas + 1))
     # El brazo lo decide el contador de entregas, no el indice del hueco: con
     # PARALELO=1 los brazos tienen que alternar A,B,A,B. Si el brazo dependiera
@@ -278,9 +286,19 @@ while [ "$lanzadas" -lt "$PEDIDAS" ]; do
     echo "$PID_RUN $SALIDA" >> "$VIVOS"
     PIDS+=("$PID_RUN")
   done
-  # `wait` SOLO con los PIDs de las runs: sin argumentos esperaria tambien al
-  # watchdog, que no sale nunca porque su fichero existe hasta el final.
-  [ "${#PIDS[@]}" -gt 0 ] && wait "${PIDS[@]}"
+  # **Esperar a CUALQUIERA de las que siguen vivas**, no a todas. `wait -n` con
+  # la lista de PIDs: en cuanto una termina, el bucle vuelve a lanzar la que
+  # falta. Si se usara `wait` a secas, no habria forma de saber cual se libero y
+  # el cupo no se rellenaria.
+  if [ "${#PIDS[@]}" -gt 0 ]; then
+    wait -n "${PIDS[@]}" 2>/dev/null || wait "${PIDS[@]}" 2>/dev/null || true
+    # Limpiar los PIDs que ya no existen, para que `${#PIDS[@]}` sea el cupo real.
+    _VIVOS=()
+    for _p in "${PIDS[@]}"; do
+      kill -0 "$_p" 2>/dev/null && _VIVOS+=("$_p")
+    done
+    PIDS=("${_VIVOS[@]}")
+  fi
   A=$(ls "$LOGS/$ETIQUETA"/${ETIQUETA}-A-*.txt 2>/dev/null | wc -l)
   B=$(ls "$LOGS/$ETIQUETA"/${ETIQUETA}-B-*.txt 2>/dev/null | wc -l)
   MAT=$(grep -c 'sin escribir' "$LOG_GUARD" 2>/dev/null || echo 0)
@@ -303,6 +321,18 @@ while [ "$lanzadas" -lt "$PEDIDAS" ]; do
       break
     fi
   fi
+done
+
+# Vaciar lo que quede vivo. Cuando `lanzadas` llega a PEDIDAS el bucle de arriba
+# sale, pero pueden quedar runs en marcha, y sin este drenaje el lote se declara
+# terminado con runs a medias. Que es como se pierden las ultimas.
+while [ "${#PIDS[@]}" -gt 0 ]; do
+  wait -n "${PIDS[@]}" 2>/dev/null || break
+  _VIVOS=()
+  for _p in "${PIDS[@]}"; do
+    kill -0 "$_p" 2>/dev/null && _VIVOS+=("$_p")
+  done
+  PIDS=("${_VIVOS[@]}")
 done
 
 kill -9 "$WD_PID" 2>/dev/null
