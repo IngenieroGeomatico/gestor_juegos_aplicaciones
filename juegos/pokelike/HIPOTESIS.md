@@ -2488,3 +2488,91 @@ H18 queda RETRACTADO sin llegar a datos. El codigo del flag se queda (es
 inocuo con default 0) y el trabajo no se tira: la regla de la parada adaptativa
 pre-registrada, que es lo bueno que salio de H18, se reutiliza tal cual en el
 siguiente experimento.
+
+## 09-10 madrugada · Tres correcciones propias en una noche, y la regla que sale
+
+Antes de montar nada sobre la preparacion de equipo, tres veces segui un
+"descubrimiento" mio hasta el final y las tres se cayeron. Se escriben porque
+un error propio que se borra no deja rastro, y el patron es la parte que vale.
+
+### 1. "El bot pierde contra Misty porque pone a un món neutro delante"
+
+Falso, y el error mio fue de **criterio**. Mediia el multiplicador **medio** del
+món contra el rival y decia "deja en la cola un 0,50 y pone un 1,00".
+
+El codigo no elige el mejor **defensor**, elige el mejor **atacante**:
+
+```
+Goldeen  (Agua)         0,5 vs Agua   y 1,0 vs Psiquico
+Ivysaur  (Planta/Ven.)  2,0 vs Agua   y 1,0 vs Psiquico
+min(key=(-peor)) elige el multiplicador MAS ALTO
+```
+
+Y como **el bot no elige movimiento** (las batallas se auto-resuelven), pegar es
+lo unico que controla. Ivysaur pega 2,0 al Agua y a Misty le derrota: es el
+atacante correcto. **El codigo acierta y mi metrica no.**
+
+### 2. "El chart del juego esta mal: Grass vs Psychic da 1,0 y deberia 0,5"
+
+Falso por partida doble. Grass **no** resiste a Psiquico: lo canonico es 1,0, asi
+que el chart acierta. Y comparados de verdad los dos ficheros del repo,
+`chart_juego.json` contra `tipos.json`: **10 discrepancias de 324 celdas**, todas
+Dragon y Normal, que son desviacionesyas mismas del juego. Los dos ficheros
+concuerdan.
+
+La comparacion que sajo "0 discrepancias" la primera vez fue **falsa**: leeria
+contra una clave que no existe en el JSON y comparaba el vacio. Cero
+discrepancias porque no se compro nada.
+
+### 3. "El mecanismo `prep` es ilegible, Erika figura como Electric"
+
+Falso, y otra vez por agrupacion: juntaba la linea de prep con el **ultimo**
+gimnasio del log, y las preps de gimnas anteriores seguian ahi. Leyendolo bien:
+
+```
+204  Rock/Ground     = Brock        52  Electric      = Lt. Surge
+133  Water/Psychic   = Misty        31  Grass/Poison  = Erika
+```
+
+**El mecanismo funciona: 445 usos, 3 fallos, tipos correctos, alcance de 2 por
+run.** Era el mas sano de todo el bot y yo lo iba a desmontar.
+
+### Lo que si queda, que es poco pero es cierto
+
+La pantalla de prep del Elite Four **si** esta rota, segun admite el propio
+codigo: "los selectores estan adivinados y no funcionan". Y su herramientas de
+diagnostico no puede funcionar nunca por dos razones concretas:
+
+1. `_volcar_prep()` solo se llama cuando el prep **no cede**, y
+2. escribe en `/tmp/opencode/prep.json`, **que es de root desde el 07-10**.
+
+O sea: el unicoinstrumento que se escribio para arreglar esa pantalla no puede
+escribir. Eso si es un bug, y es de una linea.
+
+### LA REGLA, y es la segunda de esta noche
+
+**Antes de declarar un bug, comprobar que el criterio del codigo es el que se
+cree, y que la metrica propia mide lo mismo que el.**
+
+Tres veces esta noche segui una cifra hasta el final. En los tres casos el
+codigo estaba bien y la medicion mia no. Un hallazgo que sobrevive a la pregunta
+"¿el codigo esta optimizando esto, o otra cosa?" sigue siendo un hallazgo; uno
+que no la supera es ruido con formato de resultado.
+
+Y el corolario caro: **cuando tres hallazgos seguidos se caen por el mismo
+motivo, el problema deja de ser el hallazgo y pasa a ser el metodo.** Las tres
+veces perdi tiempo de lote y, peor, deje escrito en el cuaderno cosas que eran
+falsas.
+
+### El punto de partida real, que sigue siendo el de H17
+
+Nada de esta seccion cambia el diagnostico: **el deficit de nivel no se puede
+cerrar** porque los salvajes disponibles estan 5-15 niveles por debajo del
+equipo, y los pasos no son el recurso (55-59 de 1500). El bot aplaza 1-2 veces,
+vuelve al mismo nivel, entra por debajo y pierde. Y contra Misty entra **con el
+mejor atacante que tiene**, correctamente.
+
+Es decir: el bot no esta eligiendo mal. **Esta losing despite doing the right
+thing.** El proximo paso no es tocar pesos, es medir si el combate contra el
+jefe se pierde por nivel, por tipos o por otra cosa — y esa medicion aun no
+existe.
