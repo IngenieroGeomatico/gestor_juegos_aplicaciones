@@ -276,7 +276,23 @@ PESO_VETO_NIVEL = -4.0
 PESO_INCOGNITA = 9.0
 
 
-# **H18 · comprar nivel gastando riesgo.** Default 0 = control. Ver la nota del
+# **H18 · curar antes de entrar al jefe, por encima de capturar.**
+#
+# Medido en 225 runs: llegar al gimnasio con algun caido baja la victoria del
+# 87% al 27%, sin que cambien el nivel ni los tipos (nivel +1,1 vs +1,5; tipos
+# 1,96 vs 1,95). Y el 83% de esas peleas ya venia despues de curarse: el bot se
+# cura y luego se gasta peleando de camino. La causa es que capturar pesa 60 y
+# curar con caidos pesaba 58.
+#
+# Por encima de PESO_CAPTURA a proposito: solo cuando hay caidos y el jefe esta
+# en camino. Fuera de ahi no se toca nada.
+CURA_ANTE_JEFE = os.environ.get("PKL_CURA_ANTE_JEFE", "0").strip().lower() in (
+    "1", "true", "si", "yes")
+# Primer entero por encima de PESO_CAPTURA (60). Si un dia esa sube, esto sube.
+PESO_CURA_ANTE_JEFE = float(os.environ.get("PKL_CURA_ANTE_JEFE_PESO", "62"))
+
+
+# **H18-b · comprar nivel gastando riesgo.** Default 0 = control. Ver la nota del
 # veto en `_veto_nivel`: solo aplica con `corto_de_nivel` (el jefe ofrece y al
 # equipo le falta nivel), que es donde medir que el aplazo no cierra nada.
 VETO_XP = os.environ.get("PKL_VETO_XP", "0").strip().lower() in ("1", "true", "si", "yes")
@@ -570,12 +586,30 @@ def puntuar(tipo: str, ctx: Contexto) -> tuple[float, str]:
         # el nodo actual y el líder, asi que no es "curar o no": es que hay que
         # pasar por ahi, y al pasar se cura entero. Antes el bot lo saltaba y
         # llegaba al gimnasio con el carry al 19%.
-        # Prioridad de paso obligatorio: por encima del entrenador (36) y del
-        # cazar por nivel, y por debajo de capturar el primero (40), que es el
-        # paso 1 del libro de jugadas.
+        # **Comentario que estaba CADUCADO, y por eso H18 existe.** Decia "por
+        # debajo de capturar el primero (40)". PESO_CAPTURA no es 40: hoy es 60.
+        # O sea que una captura **ganaba** a este centro de curacion, y ahi esta
+        # la perdida:
+        #
+        #   - 155 peleas de gimnasio con foto completa (225 runs)
+        #   - llega con algun caido:  66  -> gana el 27%
+        #   - llega sin caidos:       89  -> gana el 87%
+        #   - y el 83% de las que llegan con caidos **ya se habian curado**
+        #
+        # El bot no olvida curarse: se cura y luego se deshace la cura, porque
+        # entre la curacion y el jefe pelea en el 22% de sus decisiones (batalla
+        # 13% + entrenador 9%), y capturar es una de ellas. Llega al gimnasio
+        # con el 39% de vida en vez del 83%.
+        #
+        # Con caidos, el centro de curacion tiene que ganarle a TODO, captura
+        # incluida. 62 es el primer entero por encima de PESO_CAPTURA=60.
         if ctx.en_camino_al_jefe:
             if caidos:
-                return (58.0,
+                # **H18**: con el jefe cerca y el equipo con caidos, curar tiene
+                # que ganarle tambien a capturar (PESO_CAPTURA=60). Flag
+                # `PKL_CURA_ANTE_JEFE`, default 0 = control.
+                peso = PESO_CURA_ANTE_JEFE if CURA_ANTE_JEFE else 58.0
+                return (peso,
                         f"curar: paso obligatorio hacia el jefe y hay "
                         f"{caidos} caido(s)")
             if ctx.carry_ps < 98.0:

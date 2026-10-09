@@ -2576,3 +2576,90 @@ Es decir: el bot no esta eligiendo mal. **Esta losing despite doing the right
 thing.** El proximo paso no es tocar pesos, es medir si el combate contra el
 jefe se pierde por nivel, por tipos o por otra cosa — y esa medicion aun no
 existe.
+
+## 09-10 · H18 (el bueno): curar por encima de capturar antes de entrar al jefe
+
+Esta es la primera hipotesis de la noche que survives a la pregunta "¿el codigo
+esta optimizando esto, o otra cosa?". Y se encontro **midiendo**, no pensando.
+
+### La medicion que faltaba
+
+`scripts/medir/por_que_se_pierde.py`. El log tiene una foto de cada pelea de
+gimnasio que llevaba dos noches sin usar:
+
+```
+estado: Gym Battle vs Brock! | niveles rivales 12-14
+enemigos=[('Geodude Lv12', '0/31', 12), ('Onix Lv14', '1/33', 14)]
+mios=[('Bulbasaur Lv9', '13/27', 9)]
+>>> COMBATE GANADO / COMBATE PERDIDO
+```
+
+155 peleas con foto completa. Y el resultado **no es el que se suponia**:
+
+```
+nivel: nuestro max < rival max    64 de 105  (61%)
+nivel: nuestro max >= rival max   31 de  50  (62%)    <- el nivel NO separa
+tipos: multiplicador >= 1.5        91 de 148  (61%)
+tipos: multiplicador < 1.5          4 de   7  (57%)    <- los tipos TAMPOCO
+```
+
+**Lo que separa es la vida con la que se entra:**
+
+```
+con algun caido    18 de  66  (27%)   vida media 29%
+sin caidos         77 de  89  (87%)   vida media 82%
+```
+
+Y no es un sintoma de run debil: los dos grupos son identicos en nivel (+1,5 vs
++1,1) y en tipos (1,95 vs 1,96). Lo unico que los separa es la vida.
+
+### La causa, y es un comentario caducado
+
+El **83%** de las peleas que llegan con caidos **ya se habian curado**. El bot no
+olvida curarse: **se cura y luego se deshace la cura**. Entre la curacion y el
+jefe pelea en el 22% de sus decisiones (batalla 13% + entrenador 9%), y una de
+ellas es capturar. Al entrar al gimnasio esta con el 39% de vida en vez del 83%.
+
+Y el motivo por el que capturar gana es un comentario que quedo viejo:
+
+```
+# el comentario decia: "por debajo de capturar el primero (40)"
+PESO_CAPTURA = 60          <-- no 40, es 60
+curar con caidos = 58      <-- pierde
+```
+
+El comentario describia un mundo en el que capturar valia 40. Cuando subio a 60,
+**el centro de curacion se quedo por debajo** y nadie se dio cuenta: el bot se
+curaba y acto seguido se gastaba en una captura.
+
+### La intervencion
+
+Con el jefe en camino y el equipo con caidos, el centro de curacion pesa **62**
+(primer entero por encima de PESO_CAPTURA=60). Solo ahi; fuera de esa situacion no
+se toca nada. Flag `PKL_CURA_ANTE_JEFE`, default 0.
+
+### Pre-registrado, y la potencia calculada ANTES de mirar
+
+ aqui esta el motivo de que el lote lleve 300 runs y no 200: la primaria de
+siempre no tiene potencia para este efecto.
+
+- **primaria**: `P(gana la pelea de gimnasio)`. Base medida 0,61.
+  A 0,77 -> 69% de potencia con 100 por brazo, **85% con 150**. A 0,85 -> 97%.
+- **confirmatoria**: `P(llega con caido al jefe)`. Base 0,42.
+  A 0,20 -> **92%** con 100 por brazo. Muy alimentada.
+- **secundaria**: `insignias/run`, **declarada sin potencia**: el efecto
+  estimado son +39 insignias en 225 runs = **+0,17/run** (d=0,15), que pide
+  n~1100 por brazo. Se informa, pero no puede decidir nada, asi que **no decide**.
+
+n = **150 por brazo** por lo que la primaria necesita. Miradas interinas en 60,
+100 y 150 con la regla de parada pre-registrada en `scripts/control_h18.py`
+(futilidad si el IC99% de la primaria no llega al efecto declarado; eficacia si el
+IC99% excluye 0). La regla esta dentro del hash, que es justo lo que hacia falta
+para que esto sea protocolo y no una promesa.
+
+### Lo que NO sale de este experimento
+
+Que el bot llegue con el equipo sano **no garantiza** que gane: el nivel y los
+tipos no separaban nada, y aun asi hay打游戏 al 27% que se ganan. Si la
+confirmatoria baja y la primaria no, el arreglo es real pero insuficiente, y eso
+tambien es un resultado que hay que leer.
