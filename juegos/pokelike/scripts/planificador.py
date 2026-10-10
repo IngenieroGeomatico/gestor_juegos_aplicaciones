@@ -13,11 +13,14 @@ mapa eran `[jefe]`: no se puede no-entrar. `listo_para_jefe` marcaba "no entres"
 y el bot entraba igual, a ciegas. La puerta correcta no es "no entres", es
 "entra con lo que tengas, y hazlo con el mejor orden posible".
 
-**3. El listón exacto al nivel del rival es inalcanzable.** Contra Erika
-(nivel 32) el bot llegó a 31 y el filtro dijo "no preparado" porque exigía 32.
-Un margen de 2-3 niveles por debajo es la zona real de victoria (el rival gana
-por tipos, no por nivel, cuando hay un 2x). El listón debe ser un rango, no un
-número exacto.
+**3. El listón no se puede alcanzar, y eso ya no es un ajuste de codigo.**
+Medido sobre 1830 pantallas por debajo del listón (`medir/hay_exp_que_sirva.py`):
+el rival más fuerte que el juego ofrece está de media **8 a 11 niveles por debajo
+del listón**, y solo el 2% de las veces está siquiera por encima del propio
+equipo. O sea que el deficit de ~5,9 niveles **no lo cierra ninguna politica de
+pesos**: no hay experiencia a esa altura. Consecuencia practica, y es la que
+gobierna el bot: **entrar al gimnasio por debajo de nivel pero entero**. La
+vida es el unico separador medido; el nivel es ruido al lado.
 
 El planificador no reemplaza `politica`: la usa para los datos (niveles de
 jefe, tipos del rival, chart). Solo decide **qué nodo del mapa visitar** y con
@@ -98,22 +101,32 @@ class Plan:
 #
 # Sin descuentos: la regla es paridad estricta, incluso con un 2x a favor. Se
 # dejo un margen de 3 niveles cuando hay ventaja de tipo y hacia que el bot
-# entrara 3 por debajo en todas las Details, que es justo lo que hay que
+# entrara 3 por debajo en todas las details, que es justo lo que hay que
 # evitar. Si un 2x no basta para ganar 3 niveles de disadvantage, no es un 2x
 # que valga.
-# Nivel frente al lider de gimnasio. Lo que acordo el usuario: hay que llegar a
-# su nivel, y se **asume que un 2x compensa 2 niveles por debajo**. Asi que la
-# base es la paridad exacta y el unico margen es por ventaja de tipo.
 #
-# La paridad estricta sin margen (lo que hubo antes) era inalcanzable en la
-# practica: el bot llegaba a la puerta del jefe 4 niveles corto y, como el jefe
-# es salida forzada, o entraba y perdia o se quedaba atascado.
+# Con `MARGEN_BASE = 0` el liston es la **paridad exacta** y no un rango:
+# `nivel_min == nivel_max` siempre, y el unico ajuste que existe es el +2 de
+# `nivel_min_para` cuando *todo* el equipo esta a x0.5 o menos contra el rival
+# (ahi el 2x esta del lado equivocado). Los comentarios que describen un margen
+# por tipo de 3 niveles describen un comportamiento que este codigo **no**
+# tiene: la rama que lo implementaba era un no-op con `MARGEN_BASE = 0`.
+#
+# Y la paridad estricta es inalcanzable en la practica, pero el arreglo no es
+# bajar el liston: es que **no hay experiencia a esa altura** (ver punto 3 del
+# modulo). El deficit no lo cierra ningun peso; lo que se decide es si se entra
+# con el equipo entero o gastado.
 MARGEN_BASE = 0
 
 # Flags de experimento, leidos del entorno. Van en un diccionario y no en
 # variables sueltas porque sobreescribir `globals()[nombre]` desde un bucle
 # era fragil (un nombre mal escrito creaba un atributo fantasma en vez de
 # fallar). Ver `experimento.py`.
+#
+# Todos son **booleanos**. La rama `else: float(v)` era inalcanzable (los
+# defaults son `bool`, asi que `isinstance` siempre era cierto) y hacia creer
+# que se podia declarar un flag numerico aqui; no se puede. Para un peso
+# numerico hay una constante con `os.environ` propio.
 def _flags_entorno() -> dict:
     out = {"veto_tipo": False, "cobertura": False, "escalera_riesgo": True,
            "veto_nivel": True, "item_huecos": False,
@@ -122,10 +135,7 @@ def _flags_entorno() -> dict:
         v = os.environ.get(f"PKL_{k.upper()}")
         if v is None:
             continue
-        if isinstance(out[k], bool):
-            out[k] = v.strip().lower() in ("1", "true", "si", "yes")
-        else:
-            out[k] = float(v)
+        out[k] = v.strip().lower() in ("1", "true", "si", "yes")
     return out
 
 EXP = _flags_entorno()
@@ -162,10 +172,20 @@ def nombre_jefe(region: str, insignias: int) -> str:
 
 
 def nivel_min_para(plan: Plan, equipo: list[dict]) -> int:
-    """Listón ajustado por tipo: si hay un 2x claro, se puede ir más abajo.
+    """Listón de entrada al jefe, ajustado **solo a la baja del lado malo**.
 
-    Con un món que pegue a 2x contra el rival, 3 niveles por debajo gana igual
-    que a nivel. Con todo neutral, hacen falta los 2 niveles de margen.
+    Lo que hace hoy, con `MARGEN_BASE = 0`:
+
+    - hay un 2x claro contra el rival -> listón = paridad (sin descuento)
+    - **todo** el equipo a 0.5x o menos -> listón = paridad + 2
+    - cualquier otro caso           -> listón = paridad
+
+    El descuento por 2x que describe la version anterior de este comentario
+    (3 niveles por debajo) **nunca estuvo activo**: `plan.nivel_min -
+    MARGEN_BASE` con margen 0 es `plan.nivel_min`, identico al `return` de
+    abajo. O sea que la rama era un no-op que solo existia para explicar un
+    margen que el codigo no concedia. Se conserva la rama (es explicita y no
+    cuesta nada) pero sin prometer un descuento que no ocurre.
     """
     if not equipo:
         return plan.nivel_min
@@ -178,9 +198,6 @@ def nivel_min_para(plan: Plan, equipo: list[dict]) -> int:
         return plan.nivel_min
     mejor = max((max((mult(t, r) for t in c for r in plan.tipos), default=1.0)
                  for c in combos), default=1.0)
-    if mejor >= 2.0:
-        # Con un 2x claro se puede pelear por debajo del nivel del rival.
-        return max(1, plan.nivel_min - MARGEN_BASE)
     if mejor <= 0.5:
         # Todo el equipo a 0.5x o menos: sin atajo de tipo hace falta MAS nivel
         # que la paridad, que es lo unico que puede compensar.
@@ -245,8 +262,8 @@ UMBRAL_PUERTA_JEFE = 0.75
 # pantallas el entrenador es el único nodo y el veto lo dejaba sin opciones.
 # Con la escalera, si no hay nada mejor pelea igual, pero con alternativa la
 # gana.
-UMBRAL_RIESGO_ALTO = 0.50    # equipo por debajo: ni cazar ni objeto
-UMBRAL_RIESGO_MEDIO = 0.75
+UMBRAL_RIESGO_ALTO = 0.50    # riesgo: 1 món en pie, pelear es perder la run
+UMBRAL_RIESGO_MEDIO = 0.75   # riesgo: 2 en pie, se gana de milagro
 # (móns en pie como máximo, peso del nodo, penalización sobre el score final)
 ESCALERA_RIESGO_ENTRENADOR = (
     (1, 0.5, -400.0),   # 1 món en pie: pelear es perder la run
@@ -276,29 +293,61 @@ PESO_VETO_NIVEL = -4.0
 PESO_INCOGNITA = 9.0
 
 
-# **H18 · curar antes de entrar al jefe, por encima de capturar.**
+# **H18 · RETRACTADO antes de mirar datos. La premisa era falsa.**
 #
-# Medido en 225 runs: llegar al gimnasio con algun caido baja la victoria del
-# 87% al 27%, sin que cambien el nivel ni los tipos (nivel +1,1 vs +1,5; tipos
-# 1,96 vs 1,95). Y el 83% de esas peleas ya venia despues de curarse: el bot se
-# cura y luego se gasta peleando de camino. La causa es que capturar pesa 60 y
-# curar con caidos pesaba 58.
-#
-# Por encima de PESO_CAPTURA a proposito: solo cuando hay caidos y el jefe esta
-# en camino. Fuera de ahi no se toca nada.
+# La idea era subir el peso de curar (50/58) por encima de capturar (60). Pero
+# el log del propio bot dice `centro score = 100.0` en 37 pantallas y
+# `jefe score = -1.0` en 135: el centro **ya** puntuaba mas que cualquier otra
+# cosa, y subirlo no cambia ninguna decision. El peso no era la restriccion.
+# El flag y su peso se conservan apagados (`default 0`) porque son inocuos y
+# permiten repetir la medida; la rama vive en `puntuar`.
 CURA_ANTE_JEFE = os.environ.get("PKL_CURA_ANTE_JEFE", "0").strip().lower() in (
     "1", "true", "si", "yes")
-# Primer entero por encima de PESO_CAPTURA (60). Si un dia esa sube, esto sube.
+# Por encima de PESO_CAPTURA (60) a proposito. **No** sube solo si
+# PESO_CAPTURA sube: es un literal, y el comentario anterior decia lo
+# contrario. Mantenerlos separados evita el acoplamiento silencioso.
 PESO_CURA_ANTE_JEFE = float(os.environ.get("PKL_CURA_ANTE_JEFE_PESO", "62"))
 
 
-# **H18-b · comprar nivel gastando riesgo.** Default 0 = control. Ver la nota del
-# veto en `_veto_nivel`: solo aplica con `corto_de_nivel` (el jefe ofrece y al
-# equipo le falta nivel), que es donde medir que el aplazo no cierra nada.
+# **H18-b · RETRACTADO antes de mirar datos.** Relajar el veto de entrenador de
+# +1 a +3 cuando falta nivel. El veto dispara en el **7%** de las runs (medido
+# con `medir/alcance_mecanismo.py`), o sea que como maximo 8 del lote lo
+# recibirian y el efecto teorico era d=0,07. Sin potencia por construccion: es
+# un mecanismo marginal, no una causa. Se deja el flag apagado.
 VETO_XP = os.environ.get("PKL_VETO_XP", "0").strip().lower() in ("1", "true", "si", "yes")
 # Margen que se concede sobre el nivel del equipo. +1 es el veto de siempre; +3
 # deja entrar al Ace Trainer dos niveles por encima del equipo.
 VETO_XP_MARGEN = int(os.environ.get("PKL_VETO_XP_MARGEN", "3"))
+
+
+# **H20 · con el equipo roto, la rama con menos combates gana.**
+#
+# El diagnostico completo esta en la seccion H20 de HIPOTESIS.md. En corto:
+# la vida del equipo es el unico separador medido (entrar al 0-50% de vida gana
+# el 25%; al 95-100%, el 99,7%), el bot **nunca** entra roto habiendo un centro
+# en pantalla (0 de 178), y el bono de ruta premia las ramas con mas combates
+# **incondicionalmente**. Ese bono es lo que mete al bot en la rama que le
+# acaba comiendo el equipo antes de llegar al jefe.
+#
+# Default 0 = control.
+RUTA_SIN_GASTO = os.environ.get("PKL_RUTA_SIN_GASTO", "0").strip().lower() in (
+    "1", "true", "si", "yes")
+# Cuanto vale cada combate por delante cuando el equipo esta roto. Va por
+# debajo de 1.0 a proposito: no es "dejar de premiar", es que la rama con
+# menos peleas tiene que **ganar**, no solo puntuar menos. El 3.5 del caso
+# corto_de_nivel esta medido como necesario para que el bono domine al
+# entrenador (34), asi que la contraparte debe dominar tambien.
+PESO_RUTA_SIN_GASTO = float(os.environ.get("PKL_RUTA_SIN_GASTO_PESO", "3.5"))
+# Cuanto vale un pokecenter que la rama deja por delante. Va **aparte** del
+# coste, y con el flag nunca se resta: el pokecenter es lo que el equipo roto
+# necesita, asi que restarlo era penalizar la unica salida buena.
+#
+# Antes valia 12 y estaba **sumado dentro de `extra`**, junto a los costes. Con
+# el flag se invertia el total, de modo que un centro por delante restaba
+# 12 * 3.5 = 42 puntos. Medido en `log/h20`: el pokecenter en pantalla caia de
+# 100 a 16, y la rama con cura perdia frente a la rama sin cura.
+PESO_CURA_POR_DELANTE = float(
+    os.environ.get("PKL_CURA_POR_DELANTE_PESO", "12"))
 
 
 @dataclass
@@ -314,16 +363,13 @@ class Contexto:
     # sin entrar. Medido: en varias rutas las únicas opciones eran [jefe], y
     # entrar a ciegas (con caídos y por debajo de nivel) era la muerte.
     es_jefe_unica_salida: bool = False
-    # ¿Hay un gimnasio al alcance? Si lo hay, curar sube por encima de buscar
-    # exp: entrar al jefe medio muerto es la forma más fácil de perder la run.
-    jefe_cerca: bool = False
     # ¿Este nodo está en el camino obligatorio al jefe? (waypoint tipo pokecenter)
     en_camino_al_jefe: bool = False
     # ¿Hay algún pokecenter accesible ahora mismo?
     hay_cura_disponible: bool = False
     caidos: int = 0
     # El mejor contragolpe contra el rival que toca, y con qué vida llega. Si
-    # viene por debajo del 40% de PS, el món que puede ganar la pelea entra
+    # viene por debajo del **50 %** de PS, el món que puede ganar la pelea entra
     # roto: se nota y se avisa en la traza del jefe.
     carry_ps: float = 100.0
     carry_debil: bool = False
@@ -340,15 +386,10 @@ class Contexto:
     tipos_por_sprite: dict = field(default_factory=dict)
     # Sprite del nodo que se está puntuando.
     sprite: str = ""
-    # ¿El nodo es un jefe? El jefe no entra en el veto de evitar.
-    es_jefe: bool = False
     # ¿Ya se ha cazado en esta pantalla? El libro de jugadas es
     # "captura uno al principio y luego a por nivel", asi que la primera captura
     # tiene prioridad sobre cualquier otra cosa, incluso sobre el entrenador.
     capturas_pantalla: int = 0
-    # Tipos del mapa a los que el equipo NO tiene respuesta (brazo C). Vive en
-    # el Contexto porque lo consume `puntuar`, que no ve las locals de `elegir`.
-    sin_respuesta: list = field(default_factory=list)
 
 
 def _niveles(equipo: list[dict]) -> list[int]:
@@ -356,11 +397,31 @@ def _niveles(equipo: list[dict]) -> list[int]:
 
 
 def _estado(equipo: list[dict]) -> tuple[float, int, int]:
-    """(ratio medio de PS, caídos, vivos) del equipo."""
+    """(ratio medio de PS, caídos, vivos) del equipo.
+
+    **El PS que llega aquí tiene que ser el REAL**, no el porcentaje del HUD.
+    El HUD marca 100 a un món caído, y H19 cometió justo eso: leía el equipo
+    crudo para decidir si el equipo estaba roto, de modo que el instrumento
+    decía "equipo entero" en el mismo paso en que la traza decía
+    `Bulbasaur:0%`. Un instrumento que describe mal el mundo es peor que no
+    tenerlo. El bot llama a `equipo_con_tipos()` por eso.
+    """
     ratios = [(m.get("ps") or 0) / max(m.get("ps_max") or 1, 1) for m in equipo]
     caidos = sum(1 for m in equipo if (m.get("ps") or 0) <= 0)
     vivos = sum(1 for m in equipo if (m.get("ps") or 0) > 0)
     return (sum(ratios) / len(ratios) if ratios else 0.0, caidos, vivos)
+
+
+def equipo_roto(equipo: list[dict]) -> bool:
+    """¿El equipo no puede pagar más peleas? Caído, o por debajo de la puerta.
+
+    El corte es el mismo que el de emergencia de `puntuar` (`caidos >= 1 or
+    ratio <= UMBRAL_PUERTA_JEFE`), y **no** una-media-corta: un solo món a 0
+    deja al equipo con cinco líneas de vida, y la pelea se decide por el món
+    que entra primero, no por la media.
+    """
+    ratio, caidos, _ = _estado(equipo)
+    return bool(caidos >= 1 or ratio <= UMBRAL_PUERTA_JEFE)
 
 
 def riesgo_entrenador(ctx: Contexto) -> tuple[float | None, float, str]:
@@ -481,6 +542,21 @@ def _equipo_responde_a(equipo: list[dict], tipo: str) -> bool:
     return False
 
 
+def tipos_sin_respuesta(equipo: list[dict], tipos_ruta: set[str]) -> list[str]:
+    """Tipos que hay en la ruta y contra los que el equipo no tiene respuesta.
+
+    Vive fuera de `elegir` a proposito: la version anterior de esto estaba
+    **dentro** de `if EXP["cobertura"] and "capturar" in tipos_disponibles`, y
+    `tipos_disponibles` solo contiene valores del vocabulario **interno**
+    (`batalla`, `entrenador`, `cura`...), entre los que `"capturar"` no existe.
+    La condicion era por lo tanto siempre falsa y toda la rama de cobertura
+    estaba muerta sin dar error. El filtro de V1 (veto por tipo) ya dio
+    p=0,020 a favor de desactivarlo, asi que esto no se usa todavia: se deja
+    como funcion medible, no como ramaWeights que nadie puede alcanzar.
+    """
+    return sorted(t for t in tipos_ruta if not _equipo_responde_a(equipo, t))
+
+
 def _tipos_del_entrenador(ctx: Contexto) -> list[str]:
     """Tipos del entrenador de **este** nodo, si se conocen.
 
@@ -586,34 +662,38 @@ def puntuar(tipo: str, ctx: Contexto) -> tuple[float, str]:
         # el nodo actual y el líder, asi que no es "curar o no": es que hay que
         # pasar por ahi, y al pasar se cura entero. Antes el bot lo saltaba y
         # llegaba al gimnasio con el carry al 19%.
-        # **Comentario que estaba CADUCADO, y por eso H18 existe.** Decia "por
-        # debajo de capturar el primero (40)". PESO_CAPTURA no es 40: hoy es 60.
-        # O sea que una captura **ganaba** a este centro de curacion, y ahi esta
-        # la perdida:
+        # **La medicion que importa, y que H18 leyo al reves.** De 934 peleas con
+        # foto completa (no 155; estas son todas, tambien de ruta):
         #
-        #   - 155 peleas de gimnasio con foto completa (225 runs)
-        #   - llega con algun caido:  66  -> gana el 27%
-        #   - llega sin caidos:       89  -> gana el 87%
-        #   - y el 83% de las que llegan con caidos **ya se habian curado**
+        #   vida 0-50%  -> gana el 25,0%
+        #   vida 50-75% -> gana el 88,5%
+        #   vida >95%   -> gana el 99,7%
         #
-        # El bot no olvida curarse: se cura y luego se deshace la cura, porque
-        # entre la curacion y el jefe pelea en el 22% de sus decisiones (batalla
-        # 13% + entrenador 9%), y capturar es una de ellas. Llega al gimnasio
-        # con el 39% de vida en vez del 83%.
+        # Y con algun món a 0 la victoria baja del 95,9% al 45,9%. El nivel y
+        # los tipos **no** separan casi nada (por debajo del rival se gana el
+        # 56,3%, al nivel o mas el 90,4%): lo que separa es llegar entero.
         #
-        # Con caidos, el centro de curacion tiene que ganarle a TODO, captura
-        # incluida. 62 es el primer entero por encima de PESO_CAPTURA=60.
+        # **El peso de curar no es la restriccion.** H18 lo subiria por encima
+        # de capturar y resulto ser un no-op: el log da `centro score = 100.0`
+        # en 37 pantallas, o sea que el centro ya gana a todo. Lo que hace que
+        # el equipo llegue roto es la **distancia**: de las 178 peleas
+        # empezadas con el equipo roto, **0 de 178 tenian un pokecenter en
+        # pantalla**. El bot cura bien cuando el centro esta a la vista (493
+        # pantallas con cura, 493 veces fue a curar) y luego se gasta el
+        # equipo en el tramo de peleas hasta el gimnasio. Eso lo ataca H20.
         if ctx.en_camino_al_jefe:
             if caidos:
-                # **H18**: con el jefe cerca y el equipo con caidos, curar tiene
-                # que ganarle tambien a capturar (PESO_CAPTURA=60). Flag
-                # `PKL_CURA_ANTE_JEFE`, default 0 = control.
+                # **H18, retractado**: subir este peso por encima de capturar
+                # era la solucion y resulto ser un no-op (el centro ya
+                # puntua 100 y gana a todo). Se conserva la rama porque el
+                # camino con jefe delante y caidos es real; lo que no se puede
+                # es creer que 62 frente a 58 cambia algo.
+                #
+                # **El peso va en el mensaje**: sin la marca, el brazo A y el B
+                # imprimen la misma linea y no hay forma de comprobar por el log
+                # que el flag llego. Un mecanismo que no se puede verificar no se
+                # puede dar por bueno, y ya se ha perdido una tanda entera asi.
                 peso = PESO_CURA_ANTE_JEFE if CURA_ANTE_JEFE else 58.0
-                # **El peso va en el mensaje, y no por poco: sin esto el brazo A
-                # y el B imprimen exactamente la misma linea** (el unico cambio
-                # es 62 contra 58) y no hay forma de comprobar por el log que el
-                # flag llego. Un mecanismo que no se puede verificar no se puede
-                # dar por bueno, y ya se ha perdido una tanda entera asi.
                 marca = " | H18: cura por encima de capturar" if CURA_ANTE_JEFE else ""
                 return (peso,
                         f"curar: paso obligatorio hacia el jefe y hay "
@@ -647,15 +727,12 @@ def puntuar(tipo: str, ctx: Contexto) -> tuple[float, str]:
                 f"curar: carry al {ctx.carry_ps:.0f}%, no hace falta")
 
     if tipo == "jefe":
-        # El listón es un rango con margen, y por encima del nivel del rival
-        # es imposible: se considera "listo" si el equipo alcanza el listón con
-        # margen y no hay caídos.
+        # "Listo" = sin caidos y con la media de nivel en el listón (paridad
+        # exacta: con `MARGEN_BASE = 0`, listón == nivel del rival).
         #
         # Pero estar "listo" no es motivo para pelear YA. El jefe solo se
-        #zekepea cuando es la única salida que queda; si hay Trainer o batalla
-        # disponibles, se sigue subiendo nivel, porque la prioridad pedida es
-        # "nivel igual o superior al del líder" y cada combate de más sube más
-        # el listón de la siguiente insignia.
+        # acepta cuando es la unica salida que queda; si hay Trainer o batalla
+        # disponibles se sigue subiendo nivel.
         if ctx.es_jefe_unica_salida:
             if not ctx.caidos and medio >= liston:
                 return (PESO_JEFE_LISTO,
@@ -666,23 +743,18 @@ def puntuar(tipo: str, ctx: Contexto) -> tuple[float, str]:
                 motivo.append(f"{ctx.caidos} caído(s)")
             if medio < liston:
                 motivo.append(f"medio {medio:.0f} < listón {liston}")
-            elif medio < plan.nivel_max:
-                motivo.append(f"medio {medio:.0f} < nivel del rival "
-                              f"{plan.nivel_max}")
             if ctx.carry_debil:
-                # El mejor contragolpe por los suelos. Es la causa medida de
-                # morir en el segundo gimnasio: el Goldeen (único 2x contra el
-                # Agua de Misty) entraba con 10 de 49 PS porque el bot lo sacaba
-                # al frente en todas las batallas de la ruta para nakedearlo.
+                # El mejor contragolpe por los suelos.
                 motivo.append(f"carry flojo ({ctx.carry_ps:.0f}%)")
             if medio < liston:
-                # **Por debajo del nivel del rival no se entra**, ni aunque sea
-                # la unica salida. Es la regla que fijo el usuario y la razon
-                # de que se perdia: entrar a ciegas contra un lider mas alto
-                # es perder la partida, mientras que buscar un nodo mas de
-                # experiencia solo cuesta un paso del mapa. Si el mapa no
-                # ofrece nada mas, se acepta el Empate tecnico (ATASCADO) en
-                # vez de regalar la insignia.
+                # **"APLAZADO" no significa que no se entre.** El jefe es
+                # salida forzada y lo mas que puede hacer el -1.0 es ganar a
+                # los nodos que puntúan menos (2-12) cuando hay alguno en
+                # pantalla. El log decia "se busca mas exp" y el bot entraba en
+                # el 98% de los casos: el texto afirmaba lo contrario de lo que
+                # hacia. Ademas,aplazar no compra nada: entre el primer y el
+                # ultimo aplazo del mismo gimnasio el nivel ganado es **-0,0**.
+                # Lo que de verdad separa ganar de perder es llegar entero.
                 return (-1.0,
                         f"jefe APLAZADO: hay {liston - medio:.0f} nivel(es) de "
                         f"faltan (listón {liston}, rival {plan.nivel_max}); "
@@ -725,16 +797,6 @@ def puntuar(tipo: str, ctx: Contexto) -> tuple[float, str]:
                 return (PESO_CAPTURA,
                         f"capturar: equipo de {len(equipo)}, hacen falta "
                         f"cuerpos antes que nivel")
-            # **La cobertura de tipos va POR DELANTE del nivel.** Con un
-            # equipo al nivel correcto pero sin respuesta de tipo, cazar es la
-            # unica palanca: es lo que evita pelear a x0.5. El veto de
-            # entrenador por tipo ya quedo probado insuficiente, porque el
-            # problema no es elegir la pelea sino no tener el món.
-            if ctx.sin_respuesta:
-                return (PESO_CAPTURA,
-                        f"capturar: falta respuesta de tipo para "
-                        f"{', '.join(ctx.sin_respuesta[:3])}; el nivel se recupera "
-                        f"después, el agujero de tipo no")
             if falta > 1:
                 if EXP["captura_por_nivel"]:
                     # **H17: cuando falta nivel y esta pantalla ofrece
@@ -793,18 +855,20 @@ def puntuar(tipo: str, ctx: Contexto) -> tuple[float, str]:
         # tipos, no por nivel, y no hay nivel que la arregle.
         #
         # El jefe **no** entra en este veto: contra el líder se juega siempre,
-        # porque no se puede evitar y porque es la única forma de pasar.
+        # porque no se puede evitar y porque es la única forma de pasar. El
+        # veto solo llega a nodos `entrenador`, que por definición no son jefe.
         #
         # Antes entraba a ciegas: medido, se perdió contra un
         # `team-rocket (Poison/Normal)` con Krabby x1, Ivysaur x0.5 y Clefairy,
         # sin nada que le ganara.
         tipos_riv = _tipos_del_entrenador(ctx)
-        # El veto por tipo es el experimento "desactivar_veto_tipo". Ver
-        # `experimento.py`: se midio que con el veto el bot pierde igual, pero
-        # sus.muertes tienen al equipo en x0.5 contra el rival, o sea que la
-        # regla le alejaba de la unica fuente de exp sin arreglar el problema
-        # de fondo (el equipo no tiene respuesta de tipo).
-        if tipos_riv and not ctx.es_jefe and EXP["veto_tipo"]:
+        # **V1 lo cerró como contraproducente y `PKL_VETO_TIPO` esta apagado por
+        # defecto.** 111 runs en tres brazos: media de insignias 0,64 con el
+        # veto contra 1,62 sin el (p=0,020) y 1,43 con el veto mas cobertura
+        # (p=0,024). El veto apartaba al bot de la unica fuente de exp que sube
+        # a todo el equipo y no arreglaba el problema de fondo. La rama se
+        # conserva apagada para poder repetir la medida, no como regla activa.
+        if tipos_riv and EXP["veto_tipo"]:
             if not _alguien_le_gana(ctx, tipos_riv):
                 return (-3.0,
                         f"entrenador evitable: nadie le gana por tipo "
@@ -977,18 +1041,17 @@ def elegir(equipo: list[dict], nodos: list[dict], ctx_extra: dict | None = None,
                          if n.get("clickable")
                          and str(n.get("id")) in ids_disponibles]
 
-    # **Cobertura de tipos (brazo C del experimento).**
-    # La medicion de 97 runs dio que en 21 de 26 muertes el mejor món del
-    # equipo era x0.5 contra el rival: el equipo no tenia respuesta de tipo.
-    # Este flag sube el peso del nodo de captura cuando al equipo le faltan
-    # respuestas para los tipos que hay en el mapa, para tapar el agujero antes
-    # de pelear en lugar de perder la pelea.
-    sin_respuesta: list[str] = []
-    if EXP["cobertura"] and "capturar" in tipos_disponibles:
-        por_sprite = extra.get("tipos_por_sprite") or {}
-        tipos_ruta = {t for ts in por_sprite.values() for t in ts}
-        sin_respuesta = sorted(t for t in tipos_ruta
-                               if not _equipo_responde_a(equipo, t))
+    # **Cobertura de tipos.** El flag `PKL_COBERTURA` esta apagado por defecto: V1
+    # lo midio contra el veto por tipo (p=0,020 a favor de desactivar) y B vs C
+    # fue p=0,837, o sea que el brazo de cobertura no aportaba nada medible.
+    # Se queda la funcion `tipos_sin_respuesta` para poder medirla, pero **no**
+    # hay rama en `puntuar` que la consuma: una rama inalcanzable es peor que
+    # ninguna, porque parece una regla y no lo es.
+
+    # ¿El equipo roto? Se calcula **una vez**, con el PS real, antes del bucle:
+    # el valor no cambia dentro de la pantalla (no se pelea al puntuarla) y
+    # H19_leía el HUD crudo aquí, por lo que daba "sano" con un món a 0.
+    roto = equipo_roto(equipo)
 
     es_jefe_unica_salida = extra.get("es_jefe_unica_salida")
     if es_jefe_unica_salida is None:
@@ -1036,12 +1099,10 @@ def elegir(equipo: list[dict], nodos: list[dict], ctx_extra: dict | None = None,
         tiene_bolsa=bool(extra.get("tiene_bolsa", True)),
         tutor_listo=bool(extra.get("tutor_listo", False)),
         es_jefe_unica_salida=bool(es_jefe_unica_salida),
-        jefe_cerca=bool("jefe" in tipos_disponibles),
         en_camino_al_jefe=bool(extra.get("en_camino_al_jefe")),
         hay_cura_disponible=("cura" in tipos_disponibles),
         caidos=_estado(equipo)[1],
         tipos_por_sprite=dict(extra.get("tipos_por_sprite") or {}),
-        sin_respuesta=sin_respuesta,
     )
 
     punt: list[tuple[float, dict, str]] = []
@@ -1106,9 +1167,35 @@ def elegir(equipo: list[dict], nodos: list[dict], ctx_extra: dict | None = None,
             # partida ofrece 35 nodos y 20 combates y llega al gimnasio 4, y
             # otra ofrece 13 y 4 y no llega ni al primero. Sin esto el bot elige
             # nodos uno a uno sin mirar la rama y se queda sin nivel.
+            #
+            # **PERO solo si al equipo le sirve la exp.** El bono es
+            # incondicional, y con el equipo roto premia una rama que le va a
+            # gastar la vida antes de llegar al jefe. Ver `bono_ruta`.
             if edges:
+                # **COSTE y BENEFICIO van separados, y no es cosmetico.**
+                #
+                # Antes los tres se sumaban en un solo `extra` y despues el signo
+                # de `extra` se invertia con H20. Como un pokecenter por delante
+                # estaba **sumado** ahi, invertir el total venia a restar la
+                # cura: la rama que passa por el centro salia penalizada. O
+                # sea que el mecanismo que se escribio para "elegir la rama que
+                # gasta menos" hacia justo lo contrario en el caso que mas le
+                # importaba, que es el equipo roto.
+                #
+                # El dato que lo delata son las cifras del propio marcador: los
+                # valores de `extra` en `log/h20` llegaban a **88, 105 y 56**, y
+                # `combates_por_delante` esta topado en 8. Un numero de peleas
+                # no puede ser 105: era 12 por cada pokecenter de la rama.
+                # Los dos pesos mezclados son 4.0 (entrenador) y 12.0 (centro), y
+                # el 12 solo puede venir de un pokecentro.
+                #
+                # - `coste` = peleas que el equipo tiene que **pagar** para llegar
+                #   al jefe. Es lo unico que H20 puede restar.
+                # - `cura` = pokecenters que la rama **ofrece**. Es un
+                #   beneficio, y con el equipo roto vale mas que nunca, asi que
+                #   **nunca** se resta: se suma siempre, y mas fuerte roto.
                 delante = P.combates_por_delante(nodos, edges, limpio)
-                extra = delante.get(str(n.get("id")), 0)
+                coste = delante.get(str(n.get("id")), 0)
                 # Los entrenadores pesan mas que cualquier otra cosa en la
                 # eleccion de rama, porque son lo unico que sube a todo el
                 # equipo. Una rama con dos entrenadores vale mas que una con
@@ -1116,8 +1203,8 @@ def elegir(equipo: list[dict], nodos: list[dict], ctx_extra: dict | None = None,
                 ent = P.entrenadores_por_delante(nodos, edges, limpio)
                 n_ent = ent.get(str(n.get("id")), 0)
                 if n_ent:
-                    extra += n_ent * 4.0
-                # **La cura va por delante de los levels cuando el equipo esta
+                    coste += n_ent * 4.0
+                # **La cura va por delante de los niveles cuando el equipo esta
                 # por debajo de la puerta del 75%.** Es la instruccion del
                 # usuario (pasar por el centro antes del lider) y medido era
                 # justo lo que no se cumplia: el peso de trainers (4x) se
@@ -1125,25 +1212,62 @@ def elegir(equipo: list[dict], nodos: list[dict], ctx_extra: dict | None = None,
                 # morian contra Brock sin haber pasado por uno. Por encima del
                 # 75% manda el nivel, que es la otra mitad de la regla.
                 _ratio_actual, _caidos_actual, _ = _estado(equipo)
+                n_centro = 0
                 if _ratio_actual <= UMBRAL_PUERTA_JEFE or _caidos_actual:
                     n_cur = P.centros_por_delante(nodos, edges, limpio)
                     n_centro = n_cur.get(str(n.get("id")), 0)
-                    if n_centro:
-                        extra += n_centro * 12.0
-                if extra:
+                if coste:
                     # El peso de la ruta tiene que **dominar** cuando falta
-                    # nivel, no solo sumar. Con 1.2 por combate noembly: un
-                    # entrenador puntúa 9-11, así que una rama con 5 combates
-                    # extra (+6) no ganaba a un entrenador tres pasos por
-                    # delante, y el bot se metía en un callejón sin salida
-                    # moría en el gimnasio por 3 niveles. El mapa es un DAG: lo
-                    # que no se elige en la bifurcación no se puede recuperar
-                    # después. Con el equipo al nivel, la ruta deja de importar
-                    # y el peso baja para no arrastrar al bot por rutas largas
-                    # que ya no necesita.
-                    peso_ruta = 3.5 if ctx.corto_de_nivel else 1.0
-                    s += extra * peso_ruta
-                    razon += f"; deja {extra} combate(s) al jefe"
+                    # nivel, no solo sumar: un entrenador puntúa 34, así que
+                    # una rama con 5 combates extra (peso 3.5) no ganaba a un
+                    # entrenador tres pasos por delante, y el bot se metía en
+                    # un callejón sin salida y moría en el gimnasio por 3
+                    # niveles. El mapa es un DAG: lo que no se elige en la
+                    # bifurcación no se puede recuperar después.
+                    #
+                    # **H20 · con el equipo roto, el bono se da la vuelta.**
+                    # Todo lo anterior supone que la vida del equipo es un
+                    # recurso infinito. Medido, no lo es: de 934 peleas con
+                    # foto completa, entrar con la vida al 0-50% gana el 25% y
+                    # entrar al 95-100% gana el 99,7%. Y de las 178 peleas que
+                    # el bot_entró roto, **0 de 178 tenían un pokecenter en
+                    # pantalla**: no fue una decision, fue que la cura se
+                    # quedo atras y el tramo hasta el gimnasio son peleas
+                    # obligatorias. El bono de ruta, incondicional, es
+                    # justamente lo que mete al bot en la rama mas larga
+                    # cuando ya no puede pagar las peleas.
+                    #
+                    # Con el flag, con el equipo roto (`roto`), la rama que
+                    # deje **menos** combates gana. Default 0 = control.
+                    if RUTA_SIN_GASTO and roto:
+                        s -= coste * PESO_RUTA_SIN_GASTO
+                        # La cura se queda **fuera** del signo: es lo que hace
+                        # falta, asi que roto tiene que atraerla mas fuerte,
+                        # nunca menos. Y se dice en el motivo con su propia
+                        # cifra, porque el marcador tiene que poder **separar**
+                        # "estaba penalizando la cura" de "no habia cura": si
+                        # no, un brazo que resta centros por delante y otro
+                        # que no imprime la misma linea y no hay medida (§5.7).
+                        s += n_centro * PESO_CURA_POR_DELANTE
+                        razon += (f"; H20: rama sin gasto "
+                                  f"({coste} combate(s) por delante, "
+                                  f"equipo roto)")
+                        if n_centro:
+                            razon += (f"; +{n_centro} pokecenter(s) por delante "
+                                      f"x{PESO_CURA_POR_DELANTE:.0f} (cura, "
+                                      f"nunca se resta)")
+                    else:
+                        peso_ruta = 3.5 if ctx.corto_de_nivel else 1.0
+                        s += coste * peso_ruta
+                        # El control tambien queria premiar la cura por delante
+                        # (medido: 26 equipos morian contra Brock sin pasar por
+                        # un centro), asi que el bono va en los dos brazos y lo
+                        # unico que H20 cambia es el signo del **coste**.
+                        s += n_centro * PESO_CURA_POR_DELANTE
+                        razon += f"; deja {coste} combate(s) al jefe"
+                        if n_centro:
+                            razon += (f"; +{n_centro} pokecenter(s) por delante "
+                                      f"x{PESO_CURA_POR_DELANTE:.0f}")
             # Escalera de riesgo sobre el score **final**, ya con el bono de
             # ruta dentro. Sin esto el unico efecto era bajar un peso de
             # 0.5-2.0 que el bono de 60-300 tapaba siempre: medido en 24 runs,

@@ -71,18 +71,18 @@ def _trade_activo() -> bool:
         "1", "true", "si", "yes")
 
 
-# **H19 · el presupuesto de reroll se gasta cuando toca.**
+# **H19 · RETRACTADO antes de mirar un solo dato.**
 #
-# El reroll del mapa solo tiene sentido si hay algo que arreglar: si el jefe es la
-# unica salida y el equipo esta entero, tirar el mapa es gastar una bala de las
-# tres a ciegas. Medido en una run instrumentada: los 3 rerolls se gastaron en un
-# paso donde el equipo estaba al 100% y sin caidos, y ademas no sirvieron (tras los
-# tres el mapa seguia siendo solo-jefe). Veintiocho pasos despues, con el equipo al
-# 42% y un mon caido y el jefe como unica salida, ya no quedaba ninguno.
+# La idea era gastar el presupuesto de reroll solo con el equipo roto. Se
+# descarta por la medicion previa que exige el cuaderno ("antes de lanzar un A/B,
+# medir en quantas runs dispara el mecanismo"): el marcador de "no se gasta
+# presupuesto" salio en **4 de 342 runs (1,2%)**. Un mecanismo que decide en el
+# 1% de las partidas no tiene potencia para medir nada, por mucho que la
+# intervencion suene razonable. El codigo del flag y su rama se borran; el
+# presupuesto de 3 rerolls se queda como estaba.
 #
-# Con el flag, el reroll **solo** se gasta con el equipo roto. Default 0 = control.
-REROLL_SOLO_ROTO = os.environ.get("PKL_REROLL_SOLO_ROTO", "0").strip().lower() in (
-    "1", "true", "si", "yes")
+# El reroll de mapa no es un cuello: el cuello esta en la vida del equipo al
+# entrar al jefe, y eso lo mide `medir/derrota_por_derrota.py`.
 
 
 class Bot:
@@ -714,8 +714,7 @@ class Bot:
         # insistir dos veces en el mismo sitio no lo hace aparecer: solo gasta
         # pasos y exp.
         if (not self._trade_hecho and self._rerolls_busqueda < 1
-                and "trade" not in tipos_alcanzables
-                and len(self.nodos_vistos) < 12):
+                and "trade" not in tipos_alcanzables):
             self._rerolls_busqueda += 1
             self.log(f"  ↻ buscando trade (intento {self._rerolls_busqueda}/1): "
                      f"no hay nodo de trade a la vista y la guia dice tirar el "
@@ -727,37 +726,21 @@ class Bot:
             except Exception as exc:  # noqa: BLE001
                 self.log(f"  !! busqueda de trade fallo: {exc}")
 
-        # **El equipo está roto?** Es lo que decide si tirar el mapa sirve de algo.
-        _eq = self.j.equipo()
-        _vida = [float(m.get("ps") or 0) / (float(m.get("ps_max") or 0) or 1.0)
-                 for m in _eq]
-        _roto = bool(_vida) and (min(_vida) <= 0.0
-                                 or sum(_vida) / len(_vida) < 0.75)
+        # **Tirar el mapa cuando no queda nada mas.** Solo tiene sentido si el
+        # jefe es la unica salida y no hay ni entrenador ni batalla: es el unico
+        # caso en el que redibujar los nodos puede cambiar lo que viene. Tres
+        # por partida, porque tirar sin parar pierde el progreso del momento.
         _se_puede = (self._rerolls < 3
                      and "jefe" in tipos_alcanzables
                      and not ({"entrenador", "batalla"} & set(tipos_alcanzables)))
-        # **El "no lo hago" se escribe FUERA del `if` que lo salta.** Estaba
-        # dentro, o sea que cuando el flag declinaba rerollear no salia nada, y
-        # entonces no habia forma de distinguir "a este no le tocaba" de "decidio
-        # no gastar la bala". Con el marcador dentro del bloque, el brazo A
-        # callaba justo en el caso que el experimento quiere medir. Es el mismo
-        # error de instrumentacion de hoy, la quinta vez: un marcador que no se
-        # puede ver desde fuera no verifica nada.
-        if _se_puede and REROLL_SOLO_ROTO and not _roto:
-            self.log(f"  ↻ H19: NO se gasta presupuesto, equipo entero "
-                     f"(vida {sum(_vida) / len(_vida):.0%}, "
-                     f"vivos {sum(1 for v in _vida if v > 0)}/{len(_vida)})")
-        if _se_puede and (not REROLL_SOLO_ROTO or _roto):
+        if _se_puede:
             self._rerolls += 1
             self.log(f"  ↻ reroll del mapa ({self._rerolls}/3): sin trainer ni "
                      f"combate y el jefe como única salida, la guía dice tirar "
-                     f"el mapa para buscar trade o exp"
-                     + (f" | H19: equipo roto (vida {sum(_vida) / len(_vida):.0%})"
-                        if REROLL_SOLO_ROTO else ""))
+                     f"el mapa para buscar trade o exp")
             try:
                 self.j.page.keyboard.press("r")
                 self.j.page.wait_for_timeout(600)
-                self._leer_mapa_cache = None
                 return "reroll: buscando un trade o un camino de exp"
             except Exception as exc:  # noqa: BLE001
                 self.log(f"  !! reroll falló: {exc}")
@@ -2225,7 +2208,7 @@ class Bot:
             try:
                 self.j.page.reload(wait_until="domcontentloaded")
                 self.j.page.wait_for_timeout(2500)
-                self._leer_mapa_cache = None
+
                 self._ps_real.clear()
                 self._activar_ajustes()
                 self._prep_fallos = 0
@@ -2267,9 +2250,23 @@ class Bot:
                   };
                 }"""
             )
-            destino = Path("/tmp/opencode/prep.json")
-            destino.write_text(json.dumps(datos, ensure_ascii=False, indent=2),
-                               encoding="utf-8")
+            # **El volcado va al repo, no a `/tmp/opencode`.** Ese directorio es de
+            # root desde el 07-10, asi que el `write_text` falla con
+            # "Permission denied" y el unico instrumento que se escribio para
+            # arreglar la pantalla del Elite Four no podia escribir nunca. Y
+            # como `_volcar_prep()` solo se llama cuando el prep **no cede**,
+            # el fallo caia justo en el caso para el que existia: en el
+            # camino que funciona no se llama, y en el que falla no se
+            # guarda nada. Un instrumento que no puede escribir no es un
+            # instrumento.
+            destino = DIR_BOT / "prep.json"
+            try:
+                destino.parent.mkdir(parents=True, exist_ok=True)
+                destino.write_text(json.dumps(datos, ensure_ascii=False, indent=2),
+                                   encoding="utf-8")
+            except OSError as exc:
+                self.log(f"  !! no se pudo escribir el volcado del prep: {exc}")
+                return
             nb = len(datos.get("botones", []) or [])
             self.log(f"  ⟂ volcado del prep -> {destino} "
                      f"({nb} boton(es), "
@@ -2688,7 +2685,7 @@ class Bot:
             try:
                 self.j.page.reload(wait_until="domcontentloaded")
                 self.j.page.wait_for_timeout(2500)
-                self._leer_mapa_cache = None
+
                 self._ps_real.clear()
                 self._activar_ajustes()
                 self._batalla_clavada = 0
@@ -2711,9 +2708,15 @@ class Bot:
         brazo = os.environ.get("PKL_BRAZO")
         if brazo:
             self.log(f"== brazo={brazo} | "
-                     f"PKL_MARGEN_BASE={os.environ.get('PKL_MARGEN_BASE', '?')} | "
+                     # **Los flags que se imprimen son los que existen.** Antes
+                     # salia `PKL_MARGEN_BASE` aqui, en `experimento.py` y en el
+                     # launcher, pero el codigo tiene `MARGEN_BASE = 0` escrito a
+                     # fuego: el flag no hacia nada desde que se fijo. Un flag
+                     # fantasma en la cabecera del log es peor que ninguno:
+                     # cualquiera que lea un loteTaken puede groupar por el.
                      f"PKL_ESCALERA_RIESGO={os.environ.get('PKL_ESCALERA_RIESGO', '1')} | "
                      f"PKL_TRADE={os.environ.get('PKL_TRADE', '1')} | "
+                     f"PKL_RUTA_SIN_GASTO={os.environ.get('PKL_RUTA_SIN_GASTO', '0')} | "
                      f"codigo={os.environ.get('PKL_HASH', '?')} ==")
         if max_pasos and max_pasos > 0:
             # R1: el presupuesto es solo informativo y para las pruebas cortas.
@@ -2907,7 +2910,6 @@ class Bot:
                     try:
                         self.j.page.reload(wait_until="domcontentloaded")
                         self.j.page.wait_for_timeout(2500)
-                        self._leer_mapa_cache = None
                         self._ps_real.clear()
                         vistos.clear()
                         anterior = None

@@ -7,21 +7,35 @@ Eres un **jugador experto de Pokelike** (https://pokelike.xyz), el roguelike de
 Pokémon jugado en el navegador, y el custodio del contenido de **Pokelike**
 guardado en este repositorio.
 
-## Antes de lanzar cualquier run: dos reglas de la máquina
+## Antes de lanzar cualquier run: tres reglas de la máquina
 
 Son de esta máquina y se incumplen sin avisar. **No las olvides**:
 
-1. **Máximo DOS runs simultáneas.** 7 GB de RAM y cada run abre su Firefox. Con
-   seis abiertas la sesión se queda sin memoria y las runs mueren a los doce
-   pasos por contención, no por juego. Los datos que sale son ruido.
-2. **Cerrar cualquier Firefox abierto antes de lanzar.** Si ya hay uno vivo, las
+1. **UN run simultáneo, no dos.** 7 GB de RAM y cada run abre su Firefox. Con
+   dos, el lote vive justo en el margen donde `systemd-oomd` empieza a matar, y
+   las cuatro veces que murió un lote completo fue porque `oomd` mataba a
+   **VS Code** (el cgroup más grande) y se llevaba el lote por delante: el lote
+   hereda el cgroup del proceso que lo lanza y `setsid` crea sesión pero **no
+   cambia el cgroup**. Por eso el lote va en su propia unidad de `systemd`.
+2. **El código se congela mientras corre un lote.** El launcher aborta si el
+   hash del código no coincide con el del directorio de logs. Editar a mitad
+   dejó 56 de 111 runs con versión distinta en un lote anterior.
+3. **Cerrar cualquier Firefox abierto antes de lanzar.** Si ya hay uno vivo, las
    nuevas instancias se enganchan a su proceso y el bot juega a medias.
 
-Usa el lanzador, que cumple las dos y baja el número de runs si no hay memoria:
+Lanzar el lote como unidad propia, con techo de memoria:
 
 ```bash
-uv run --group dev python juegos/pokelike/scripts/lanzar_tanda.py --runs 2
+RAIZ=/home/radi/Proyectos/Github/gestor_juegos_aplicaciones
+systemd-run --user --unit=pokelike-h20 --collect \
+  --property=MemoryHigh=1500M --property=MemoryMax=2000M \
+  --property=MemorySwapMax=1G \
+  bash $RAIZ/juegos/pokelike/scripts/supervisor_lote.sh \
+       log/h20 45 bash $RAIZ/juegos/pokelike/scripts/exp_h20.sh 300 Kanto 1800
 ```
+
+**Ruta absoluta**: `systemd-run` no hereda el directorio de trabajo, y con ruta
+relativa la unidad moría con `status=127` en el mismo segundo y sin más pista.
 
 Limpieza manual, **nunca con `pkill -f jugar_pokelike.py`** (el patrón está en
 la línea de órdenes del propio shell y lo mata):
@@ -29,6 +43,23 @@ la línea de órdenes del propio shell y lo mata):
 ```bash
 pkill -9 -f "scripts/jugar_pokelike.py"; pkill -9 -x firefox; pkill -9 -f firefox-bin
 ```
+
+## Antes de proponer una hipótesis: mira `HIPOTESIS.md`
+
+Ese fichero tiene **todo lo que ya se midió**, con los números y el script que
+lo reproduce. Re-descubrir una cosa ya resuelta cuesta un lote entero, que es
+justo lo que pasó con H15, H17, H18 y H19.
+
+Las tres reglas que más caro sale saltarse:
+
+1. **Antes de lanzar un A/B, mide en cuántas runs dispara el mecanismo**
+   (`scripts/medir/alcance_mecanismo.py`). **Por debajo del 15% no se lanza.**
+   H18 (8%) y H19 (1,2%) se gastaron en eso.
+2. **La primaria se declara antes de mirar, y tiene que tener potencia.** La
+   única con potencia razonable es `insignias/run`.
+3. **Los lotes miden efectos; no encuentran mecanismos.** Cuatro horas de lote
+   para descubrir que el cuello no era donde se miraba. Para encontrar un
+   mecanismo, instrumentar: sale en veinte minutos.
 
 ## Guías de la comunidad (léelas antes de tocar la política)
 
@@ -142,14 +173,22 @@ equipo: lo habitual es que el equipo tuviera móns inútiles contra ese tipo.
 ### Mejorar al bot (no a la partida)
 
 Un `GAME_OVER` no se arregla reintentando: la estrategia vive en
-`juegos/pokelike/scripts/politica.py`. Ahí se tocan la elección de starter, el
-puntaje de los nodos del mapa, el filtro de capturas y la puerta de jefe. Cada
-cambio se prueba con una partida corta (`--max-pasos 200`) antes de lanzarla
-larga.
+`juegos/pokelike/scripts/planificador.py` (qué nodo del mapa visitar) y
+`politica.py` (qué mónsale delante y a quién capturar). Cada cambio se prueba
+con una partida corta (`--max-pasos 200`) antes de lanzarla larga, y se
+comprueba el marcador del mecanismo en el log: **un mecanismo que no se puede
+ver desde fuera no verifica nada**.
 
-El estado fiable del sitio está en la skill `pokelike`, en "Trampas conocidas".
-No vuelvas a descubrir ahí cómo funciona el juego: son detalle del HTML y cada
-descubrimiento cuesta una partida entera.
+Antes de tocar nada, lee `HIPOTESIS.md`. Y el cuello está medido y **no es el
+nivel**:
+
+| Pregunta | Respuesta |
+|---|---|
+| ¿Qué separa ganar de perder? | **la vida del equipo**: al 0-50% se gana el 25%, al 95-100% el 99,7% |
+| ¿Se puede cerrar el déficit de nivel? | **No**: el rival disponible está 8-11 niveles bajo el listón, y solo el 2% de las pantallas tiene exp útil |
+| ¿El bot se come la vida por mala decisión? | **No es decisión**: de 178 peleas con el equipo roto, **0** tenían un pokecenter en pantalla |
+
+Es decir: se entra al gimnasio por debajo de nivel **sí**, pero **entero**.
 
 ## Reglas de oro
 

@@ -1283,11 +1283,11 @@ def test_el_nodo_de_objeto_ya_no_esta_invertido() -> None:
     La guía dice lo contrario dos veces: "item nodes beat fight nodes early" y el
     Lucky Egg "outscales the route".
     """
-    plan = PL.plan_para("Kanto", 1)
     equipo = [{"nombre": "Ivysaur", "tipos": ["Planta", "Veneno"], "nivel": 21,
                "ps": 40, "ps_max": 40},
               {"nombre": "Poliwag", "tipos": ["Agua"], "nivel": 20,
                "ps": 40, "ps_max": 40}]
+    plan = PL.plan_para("Kanto", 2)
     con_hueco = PL.Contexto(equipo=equipo, plan=plan, tiene_bolsa=True)
     sin_hueco = PL.Contexto(equipo=equipo, plan=plan, tiene_bolsa=False)
 
@@ -2081,10 +2081,19 @@ def _prueba_veto(PLAN, m) -> None:
     check("entra si alguien le gana por tipo",
           "evitable" not in r_hiker, f"-> {r_hiker}")
 
-    _, r_jefe = PLAN.puntuar("entrenador", replace(
-        ctx, sprite="boss", es_jefe=True,
-        tipos_por_sprite={"boss": ["Fuego"]}))
-    check("el jefe se juega siempre", "evitable" not in r_jefe, f"-> {r_jefe}")
+    # El jefe se juega siempre, y **no** porque un flag lo proteja: `es_jefe`
+    # era un campo de `Contexto` que `elegir` nunca ponia a True, asi que el
+    # test de abajo afirmaba una garantia que el codigo no tenia. Lo que
+    # protege al jefe es que su tipo es `jefe` y el veto vive en la rama
+    # `entrenador`: no lo alcanza.
+    _, r_jefe = PLAN.puntuar("jefe", replace(
+        ctx, plan=PLAN.plan_para("Kanto", 1)))
+    check("el jefe se juega siempre",
+          "evitable" not in r_jefe, f"-> {r_jefe}")
+    check("el veto por tipo solo alcanza a nodos 'entrenador'",
+          "evitable" in PLAN.puntuar("entrenador", replace(
+              ctx, sprite="fire", tipos_por_sprite={"fire": ["Fuego"]}))[1],
+          "-> si el veto se filtrara al jefe, esto no seria 'evitable'")
 
     caido = m("Squirtle", ["Agua"], 314, 14)
     caido["ps"] = 0
@@ -2178,18 +2187,27 @@ def test_la_etiqueta_de_version_va_en_el_log() -> None:
           "codigo=" in txt,
           "-> el hash se calcula pero no llega al log")
 
-    check("el launcher de linea base pide un numero exacto de runs",
-          "linea_base.sh" in (SCRIPTS / "test_integridad.py").name
-          or (SCRIPTS / "linea_base.sh").exists(),
-          "-> no hay launcher para la linea base")
-    if (SCRIPTS / "linea_base.sh").exists():
-        sh = (SCRIPTS / "linea_base.sh").read_text(encoding="utf-8")
-        check("el launcher de linea base lleva timeout por run",
-              "timeout -k 30" in sh,
+    # Este chequeo apuntaba a `linea_base.sh`, que se archivó con el resto de
+    # las hipótesis cerradas. **Lo que se comprobaba no era ese fichero**: era
+    # que el launcher de un lote tiene las tres garantias que lo hacen fiable.
+    # Se comprueba ahora sobre `exp_h20.sh`, que es el launcher vivo, porque un
+    # test que se queda apuntando a un fichero archivado vuelve a ser decorativo
+    # en cuanto el fichero cambia.
+    launcher = SCRIPTS / "exp_h20.sh"
+    check("hay un launcher de lote vivo",
+          launcher.exists(),
+          f"-> no hay launcher en {launcher}")
+    if launcher.exists():
+        sh = launcher.read_text(encoding="utf-8")
+        check("el launcher lleva timeout por run",
+              'timeout "$TIMEOUT"' in sh,
               "-> una run colgada tumba el lote entero")
-        check("el launcher de linea base cuenta las que lanza",
-              "lanzadas=$((lanzadas + 2))" in sh,
+        check("el launcher cuenta las que lanza de verdad",
+              'lanzadas=$((lanzadas + 1))' in sh,
               "-> el plan y la realidad se separan sin avisar")
+        check("el launcher aborta si el codigo del lote no es el suyo",
+              "ABORTA" in sh and "$HASH" in sh,
+              "-> se mezclarian runs de dos versiones en la misma muestra")
 
 
 def test_la_escalera_gana_al_bono_de_ruta() -> None:
@@ -2278,6 +2296,224 @@ def test_la_escalera_gana_al_bono_de_ruta() -> None:
     check("la escalera no ata al bot cuando el entrenador es lo unico",
           d_solo.tipo == "entrenador",
           f"-> eligio {d_solo.tipo}: el bot se quedaria sin nada que pulsar")
+
+
+def test_h20_la_ruta_se_da_la_vuelta_con_el_equipo_roto() -> None:
+    """**H20**: con el equipo roto, la rama que gasta menos tiene que GANAR.
+
+    El mecanismo a batir es el bono de ruta, que es `combates_por_delante *
+    3.5` mas `entrenadores * 4`, **incondicional**: premia la rama larga
+    aunque el equipo no pueda pagar las peleas. La medicion que lo justifica:
+
+    - entrar a pelear con el equipo al 0-50% de vida gana el **25%**;
+      al 95-100% gana el **99,7%** (934 peleas con foto completa)
+    - de las 178 peleas empezadas con el equipo roto, **0 de 178** tenian un
+      pokecenter en pantalla: no fue una decision mal tomada, fue que la
+      cura se quedo atras y el tramo son peleas obligatorias
+
+    El test monta justo esa pantalla: dos ramas, una con 8 combates por delante
+    y otra con 1, y el equipo con un món a 0.
+    """
+    # Dos ramas desde el nodo actual: `a` deja una **cadena** de 8 combates por
+    # delante y `b` deja 1. Los dos nodos son de combate, o sea que la unica
+    # diferencia entre ellos es lo que cuesta llegar al jefe.
+    #
+    # La rama es una cadena y no un abanico a proposito:
+    # `combates_por_delante` suma el nodo mas el **maximo** de sus hijos, o sea
+    # que cuenta el camino mas profundo, no el total. Un abanico de 8 salidas
+    # paralelas contaria igual que una de 1.
+    nodos: list[dict] = [
+        {"id": "a", "atajo": "a", "tipo": "battle", "clickable": True,
+         "nivel": 8},
+        {"id": "b", "atajo": "b", "tipo": "battle", "clickable": True,
+         "nivel": 8},
+    ]
+    edges: list = []
+    anterior = "a"
+    for i in range(7):
+        nodo = f"larga{i}"
+        nodos.append({"id": nodo, "tipo": "battle"})
+        edges.append([anterior, nodo])
+        anterior = nodo
+    nodos.append({"id": "corta", "tipo": "battle"})
+    edges.append(["b", "corta"])
+
+    def _equipo(sano: bool) -> list[dict]:
+        ps = 100 if sano else 0
+        return [{"nombre": "Bulbasaur", "nivel": 6, "ps": ps, "ps_max": 100,
+                 "tipos": ["Planta"], "baseStats": {"hp": 100}},
+                {"nombre": "Pidgey", "nivel": 6, "ps": 100, "ps_max": 50,
+                 "tipos": ["Normal"], "baseStats": {"hp": 100}}]
+
+    previo = PL.RUTA_SIN_GASTO
+    try:
+        PL.RUTA_SIN_GASTO = False
+        d_control = PL.elegir(_equipo(False), nodos, {"hay_cura": False},
+                              region="Kanto", insignias=0, edges=edges)
+        d_control_sano = PL.elegir(_equipo(True), nodos, {"hay_cura": False},
+                                   region="Kanto", insignias=0, edges=edges)
+        PL.RUTA_SIN_GASTO = True
+        d_trat = PL.elegir(_equipo(False), nodos, {"hay_cura": False},
+                           region="Kanto", insignias=0, edges=edges)
+        d_trat_sano = PL.elegir(_equipo(True), nodos, {"hay_cura": False},
+                                region="Kanto", insignias=0, edges=edges)
+    finally:
+        PL.RUTA_SIN_GASTO = previo
+
+    check("sin el flag, la rama larga gana por el bono de ruta",
+          d_control.valor == "a",
+          f"-> el control eligio '{d_control.valor}'; deberia ser 'a' (8 "
+          f"combates por delante)")
+    check("H20: con el equipo roto se elige la rama corta",
+          d_trat.valor == "b",
+          f"-> eligio '{d_trat.valor}'; con un món a 0 deberia ir a 'b' "
+          f"(1 combate por delante)")
+    check("H20 cambia de verdad la decision",
+          d_control.valor != d_trat.valor,
+          f"-> los dos brazos acaban en '{d_control.valor}': el flag no hace nada")
+    check("H20 NO toca nada con el equipo entero",
+          d_trat_sano.valor == d_control_sano.valor,
+          f"-> sano eligio '{d_trat_sano.valor}' y el control '{d_control_sano.valor}'")
+    check("el marcador de H20 sale en el motivo",
+          "H20" in d_trat.razon,
+          f"-> sin la marca no se puede comprobar por el log que el flag llego")
+
+    # Y lo que lo hace seguro: sin nada barato en pantalla se pelea igual. Un
+    # veto duro dejaria al bot sin opcion, que es como se perdia antes.
+    solo = [{"id": "a", "atajo": "a", "tipo": "battle",
+            "clickable": True, "nivel": 8}]
+    try:
+        PL.RUTA_SIN_GASTO = True
+        d_solo = PL.elegir(_equipo(False), solo, {"hay_cura": False},
+                           region="Kanto", insignias=0, edges=[])
+    finally:
+        PL.RUTA_SIN_GASTO = previo
+    check("H20 no ata al bot cuando no hay rama sin peleas",
+          d_solo.valor == "a",
+          f"-> eligio '{d_solo.valor}': el bot se quedaria sin nada que pulsar")
+
+    # **La propiedad que mas importa**: con el equipo roto y un pokecenter en
+    # pantalla, la cura tiene que ganar **tambien** con H20. El corte de
+    # emergencia devuelve -5.0 y el bono de ruta se suma encima, asi que un
+    # signo mal puesto en la penalizacion podria dejar al bot peleando con el
+    # equipo al 30% mientras el centro puntua -100. Esta es la unica linea que
+    # no se puede romper: medido, 493 de 493 pantallas con cura fueron a curar.
+    cura = [{"id": "p", "atajo": "p", "tipo": "pokecenter", "clickable": True}]
+    cura += nodos
+    edges_cura = edges + [["p", "la0"], ["p", "corta"]]
+    try:
+        PL.RUTA_SIN_GASTO = True
+        d_cura = PL.elegir(_equipo(False), cura, {"hay_cura": True},
+                           region="Kanto", insignias=0, edges=edges_cura)
+    finally:
+        PL.RUTA_SIN_GASTO = previo
+    check("H20 no puede hacer que el bot se pelee en vez de curarse",
+          d_cura.valor == "p",
+          f"-> eligio '{d_cura.valor}' ({d_cura.tipo}) con el equipo roto y un "
+          f"centro en pantalla: la penalizacion de ruta se ha comido la cura")
+
+
+def test_h20_no_resta_la_cura_que_va_por_delante() -> None:
+    """El pokecentro que la rama ofrece **no** puede contar como coste.
+
+    Este es el fallo que hacia que H20 midiera lo contrario de lo que decia.
+    Antes los tres sumandos iban a un solo `extra` (peleas + 4x entrenador +
+    **12x pokecentro**) y despues H20 restaba `extra` entero. O sea que el
+    mecanismo de "la rama que gasta menos gana" **restaba la cura**, que es
+    justo lo que el equipo roto necesita.
+
+    El caso que lo destapa es el de §1.3: el pokecentro **no** esta en pantalla
+    (la cura se quedo atras), solo se ve al elegir la rama correcta. Los tests
+    anteriores de H20 montaban el centro como nodo clicable, y ahi dispara el
+    corte de emergencia, que devuelve -5.0 antes de llegar al bono de ruta: el
+    bug quedaba tapado por un camino que en la partida real casi no se da.
+
+    El numero que lo delata son las cifras del propio marcador: en `log/h20`,
+    `extra` valia **88, 105 y 56**, y `combates_por_delante` esta topado en 8.
+    Un total de peleas no puede ser 105: era 12 por cada centro de la rama.
+    """
+    # `corta` deja 1 combate y **un pokecentro** por delante; `larga` deja 3 y
+    # ninguno. Los dos nodos visibles son de combate, para que lo unico que los
+    # distinga sea lo que cuesta y lo que cura la rama.
+    nodos: list[dict] = [
+        {"id": "larga", "atajo": "larga", "tipo": "battle", "clickable": True,
+         "nivel": 8},
+        {"id": "corta", "atajo": "corta", "tipo": "battle", "clickable": True,
+         "nivel": 8},
+        {"id": "centro", "atajo": "centro", "tipo": "pokecenter",
+         "clickable": False},
+        {"id": "jefe", "atajo": "jefe", "tipo": "boss", "clickable": True},
+    ]
+    edges: list = [["larga", "x1"], ["x1", "x2"], ["x2", "jefe"],
+                   ["corta", "centro"], ["centro", "jefe"]]
+    for i in ("x1", "x2"):
+        nodos.append({"id": i, "tipo": "battle"})
+
+    roto = [{"nombre": "Bulbasaur", "nivel": 6, "ps": 0, "ps_max": 100,
+             "tipos": ["Planta"], "baseStats": {"hp": 100}},
+            {"nombre": "Pidgey", "nivel": 6, "ps": 30, "ps_max": 50,
+             "tipos": ["Normal"], "baseStats": {"hp": 100}}]
+
+    previo = PL.RUTA_SIN_GASTO
+    try:
+        PL.RUTA_SIN_GASTO = True
+        d = PL.elegir(roto, nodos, {"hay_cura": False}, region="Kanto",
+                      insignias=0, edges=edges)
+    finally:
+        PL.RUTA_SIN_GASTO = previo
+
+    check("H20 elige la rama que pasa por el pokecentro, no la que mas pelea",
+          d.valor == "corta",
+          f"-> eligio '{d.valor}': con el equipo roto, la rama con cura por "
+          f"delante tiene que ganarle a la de 3 combates y ningun centro")
+    check("el motivo separa el coste de la cura",
+          "pokecenter(s) por delante" in d.razon or "centro" in d.razon.lower(),
+          f"-> el motivo no dice quantos centros hay delante, asi que no se puede "
+          f"saber si los esta restando: {d.razon[:160]}")
+    check("ningun pokecentro por delante resta puntos",
+          "-12" not in d.razon.split("H20")[-1],
+          f"-> el motivo parece restar los centros por delante: {d.razon[:160]}")
+
+    # Y la mitad que faltaba del contrato: la cura por delante tiene que **sumar**
+    # con el equipo roto. Con el codigo roto, el marcador que imprimia `extra`
+    # entero restaba 12*3.5 = 42 en vez de sumar 12.
+    fuente = Path(SCRIPTS / "planificador.py").read_text(encoding="utf-8")
+    check("el codigo resta `coste`, no el total mezclado",
+          "s -= coste * PESO_RUTA_SIN_GASTO" in fuente,
+          "-> se esta restando un acumulador que incluye los pokecenters")
+    check("la cura por delante se suma fuera del signo",
+          "s += n_centro * PESO_CURA_POR_DELANTE" in fuente,
+          "-> el pokecenter por delante no suma en ningun brazo")
+
+
+def test_h20_usa_el_ps_real_y_no_el_del_hud() -> None:
+    """El "equipo roto" tiene que salirse del PS real, no del HUD.
+
+    El HUD marca **100 a un món caído**. H19 leia `j.equipo()` (el HUD crudo)
+    para decidir si el equipo estaba roto, y por eso su marcador imprimia
+    "equipo entero, vida 100%, vivos 2/2" en el mismo paso en que la traza de
+    mapa decia `Bulbasaur:0%`. Un instrumento que describe mal el mundo hace
+    que toda la medida posterior sea basura, y fue justo lo que paso con H19.
+    """
+    fuente = Path(SCRIPTS / "jugar_pokelike.py").read_text(encoding="utf-8")
+    check("el HUD crudo no se usa para decidir el estado del equipo",
+          "self.j.equipo()" not in fuente or "_ps_real" in fuente,
+          "-> `j.equipo()` sin `equipo_con_tipos()` devuelve el porcentaje del "
+          "HUD, que marca 100 a un món caido")
+
+    sano = [{"nombre": "Bulbasaur", "nivel": 6, "ps": 100, "ps_max": 100},
+            {"nombre": "Pidgey", "nivel": 6, "ps": 90, "ps_max": 100}]
+    caido = [{"nombre": "Bulbasaur", "nivel": 6, "ps": 0, "ps_max": 100},
+             {"nombre": "Pidgey", "nivel": 6, "ps": 100, "ps_max": 100}]
+    caido = [{"nombre": "Bulbasaur", "nivel": 6, "ps": 0, "ps_max": 100},
+             {"nombre": "Pidgey", "nivel": 6, "ps": 100, "ps_max": 100}]
+    check("un solo món a 0 ya es equipo roto",
+          PL.equipo_roto(caido),
+          "-> con un món a 0 el equipo no puede pagar otra pelea, aunque la "
+          "media de vida sea del 50%")
+    check("un equipo entero no esta roto",
+          not PL.equipo_roto(sano),
+          "-> 100% y 90% estan por encima de la puerta del 75%")
 
 
 def test_el_brazo_de_control_no_hereda_la_escalera() -> None:
@@ -2712,6 +2948,9 @@ def main() -> int:
     test_el_riesgo_no_se_dispara_si_hay_cura()
     test_la_riesgo_de_exp_con_caidos_ya_no_existe()
     test_la_escalera_gana_al_bono_de_ruta()
+    test_h20_la_ruta_se_da_la_vuelta_con_el_equipo_roto()
+    test_h20_usa_el_ps_real_y_no_el_del_hud()
+    test_h20_no_resta_la_cura_que_va_por_delante()
     test_el_brazo_de_control_no_hereda_la_escalera()
     test_el_veto_de_nivel_gana_al_bono_de_ruta()
     test_el_trade_se_cierra_con_el_atajo()

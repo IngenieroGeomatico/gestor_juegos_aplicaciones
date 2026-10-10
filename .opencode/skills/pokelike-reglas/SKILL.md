@@ -50,8 +50,19 @@ datos. Hasta entonces va en `HIPOTESIS.md` como abierta, que es donde están.
 
 ### Estado actual
 
-Media **0,64 insignias** por partida, mejor 4 (sobre datos contaminados: sirve
-como línea base, no como medida buena). Objetivo: `CHAMPION`.
+Media **1,14 insignias** por partida sobre 284 runs (8 posibles), y hay
+**1 `CHAMPION`** en el repo: la run que ganó pasó los 8 gimnasios y el Elite
+Four con 239 pasos y **0 combates perdidos**. Objetivo: que el `CHAMPION` deje
+de ser un accidente.
+
+Lo que separa ganar de perder **no es el nivel**: de 934 peleas con foto de PS
+reales, entrar con el equipo al 0-50% de vida gana el **25%** y al 95-100%
+gana el **99,7%**. Y el déficit de nivel no lo cierra nadie, porque el rival
+más fuerte que el juego ofrece está 8-11 niveles por debajo del listón y solo
+está por encima del equipo en el 2% de las pantallas.
+
+Por tanto la regla que gobierna el bot es: **entrar por debajo de nivel sí,
+entrar gastado no**. Detalle y método en `juegos/pokelike/HIPOTESIS.md`.
 
 ### R1 tiene una única excepción
 
