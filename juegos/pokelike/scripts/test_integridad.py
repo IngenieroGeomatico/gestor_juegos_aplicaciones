@@ -2456,6 +2456,46 @@ def test_h20_no_resta_la_cura_que_va_por_delante() -> None:
           "-> `coste`/`extra` arrastran los pokecenters: es el bug original")
 
 
+def test_el_prep_del_jefe_usa_el_ps_real() -> None:
+    """El orden contra el jefe tiene que usar el PS **real**, no el del HUD.
+
+    El HUD marca 100 a un món caido y marca 100 a todo el mundo tras una cura.
+    Si el `prep` del jefe leyera el HUD crudo, `orden_para_entrenador` recibiria
+    `ps=100` para los tres y el desempate lo acabaria decidiendo el nivel en
+    vez de la vida real.
+
+    **Se sospecho de un bug aqui y NO lo habia** (10-10). Se leyo el caso del
+    log de `h20_ABORTADO_CURA_RESTADA_1010_1116`, run B-202105: el bot entra
+    contra Brock con el equipo al 100% y sale Poliwag al frente. Se concluyo
+    que el chart estaba mal (`Agua -> Roca` salia x2). **La tabla de
+    referencia usada para comprobarlo estaba mal, no el chart**: en el juego
+    Agua contra Roca es x2 de verdad, igual que Planta, asi que los dos
+    empatan y el orden es discutible pero no erroneo.
+
+    Queda el test porque la invariante es real y el sitio es de una sola linea:
+    si alguien vuelve a leer el HUD crudo aqui, el orden pasa a decidirse por
+    nivel sin que nada falle.
+    """
+    import jugar_pokelike as JUG
+    fuente = Path(JUG.__file__).read_text(encoding="utf-8")
+    cuerpo = fuente[fuente.index("def _preparar_contra_el_rival"):]
+    cuerpo = cuerpo[:cuerpo.index("\n    def ", 10)]
+    check("el prep del jefe usa el PS real",
+          "self.equipo_con_tipos()" in cuerpo,
+          "-> sin `equipo_con_tipos()` el orden va con los porcentajes del HUD, "
+          "que marcan 100 a un món caido y a todo el mundo tras una cura")
+
+    # Y el caso del log, con el chart REAL del juego: Agua contra Roca es x2,
+    # igual que Planta. Los dos empatan en ofensa y decide el aguante, asi que
+    # el orden NO es un bug. Este check fija ese numero para que no se vuelva
+    # a "encontrar" un chart roto que no lo está.
+    rival = ["Roca", "Tierra"]
+    check("Agua contra Roca es x2 en el chart del juego (no x0,5)",
+          PL.P.utilidad_contra(["Agua"], "Roca")[0] == 2.0,
+          "-> si esto baja a 0,5 es que el chart se ha 'arreglado' al Gen 6 "
+          "oficial, que NO es lo que hace el juego (ver AGENT.md)")
+
+
 def test_h21_deja_de_premiar_al_salvaje_y_no_toca_al_trainer() -> None:
     """Con el equipo roto, el salvage deja de premiarse. El trainer no se toca.
 
@@ -3038,6 +3078,7 @@ def main() -> int:
     test_el_bono_de_ruta_sigue_premiando_al_control()
     test_h20_usa_el_ps_real_y_no_el_del_hud()
     test_h20_no_resta_la_cura_que_va_por_delante()
+    test_el_prep_del_jefe_usa_el_ps_real()
     test_h21_deja_de_premiar_al_salvaje_y_no_toca_al_trainer()
     test_salvajes_y_entrenadores_se_cuentan_por_separado()
     test_el_brazo_de_control_no_hereda_la_escalera()

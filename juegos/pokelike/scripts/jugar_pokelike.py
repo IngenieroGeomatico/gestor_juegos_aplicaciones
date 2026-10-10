@@ -2290,7 +2290,20 @@ class Bot:
         tipos = self._tipos_del_rival_en_prep()
         if not tipos:
             return "sin datos del rival"
-        equipo = self.j.equipo()
+        # **`equipo_con_tipos()`, no `self.j.equipo()`.** El HUD marca 100 a
+        # un món caído y marca 100 a todo el mundo tras una cura, así que con
+        # el crudo `orden_para_entrenador` recibe `ps=100` para los tres y el
+        # desempate lo acaba decidiendo el **nivel** en vez de la vida real.
+        # Aquí se decide el orden de salida del jefe, o sea que es la misma
+        # puerta que §1.1 exige para la vida del equipo.
+        #
+        # **No hay bug conocido en este punto** (10-10): se sospechó y no lo
+        # había. El caso que loENCendió —`h20-B-202105`, Poliwag delante de
+        # Bulbasaur contra Brock con el equipo al 100%— resulted ser correcto:
+        # Agua contra Roca es **x2** en el chart del juego, igual que Planta, y
+        # los dos empatan en ofensa. Lo que no se puede hacer es "arreglar" el
+        # chart al Gen 6 oficial: ver AGENT.md.
+        equipo = self.equipo_con_tipos()
         nombres = [m.get("nombre") for m in equipo]
         con_tipos = [{**m, "tipos": self._tipos_de_m(m.get("nombre"))}
                      for m in equipo]
