@@ -163,81 +163,66 @@ resultado**, y volver a intentarlo cuesta un lote entero.
 
 ### H20 · Con el equipo roto, la rama que gasta menos debe ganar
 
-Abierta el **10-10**, con el diagnóstico ya medido (§1.1, §1.3) y la
-intervención sobre la mesa.
+**RETRACTADA a los 26 runs.** No es una hipótesis refutada: es una hipótesis
+**al revés de lo que hacía falta**, y su prevision se cumplió.
 
-> **H20-a · El primer lote de H20 estaba contaminado por un bug** (10-10)
->
-> Las 8 runs de `log/h20_ABORTADO_CURA_RESTADA_1010/` **no miden nada**: el
-> brazo A ejecutó la versión que **restaba la cura**. No es una hipótesis
-> refutada, es un código roto. El lote se tiró entero y se relanzó.
->
-> **El bug**: los tres sumandos del bono de ruta iban a un solo `extra` —
-> peleas, `4 × entrenadores` y **`12 × pokecenters`** — y H20 restaba `extra`
-> entero. Como el pokecentro estaba *sumado* ahí, invertir el signo **restaba
-> la cura**: la rama que pasa por el centro salía penalizada. El mecanismo
-> escrito para "elegir la rama que gasta menos" hacía lo contrario justo en el
-> caso que justificaba su existencia.
->
-> **Cómo se ve, sin llegar al código**: el marcador imprimía valores de **88,
-> 105 y 56** "combates por delante", y `combates_por_delante` está **topado en
-> 8**. Un total de peleas no puede ser 105: eran 12 por cada centro de la
-> rama. Regla §5.7 aplicada al revés: *el marcador se vio, y fue lo que delató
-> el bug*.
->
-> **Por qué los tests no lo pillaron**: los tests de H20 montaban el pokecentro
-> como nodo **clicable**, y ahí dispara el corte de emergencia, que devuelve
-> −5.0 antes de llegar al bono de ruta. El bug quedaba tapado por un camino
-> que en la partida real casi no se da: el pokecenter que §1.3 describe está
-> **por delante de una rama, no en pantalla**. Añadido
-> `test_h20_no_resta_la_cura_que_va_por_delante`, que monta justo ese caso.
->
-> **El arreglo**: `coste` (peleas + entrenadores) y `cura` (pokecenters) van en
-> variables separadas. H20 invierte **solo el coste**; la cura se suma
-> siempre, y con su propia cifra en el motivo para que se pueda distinguir
-> "estaba restando el centro" de "no había centro". El control también la suma:
-> esa preferencia ya estaba medida y no es lo que se está probando.
->
-> **Guard de integridad**: `control_h20.py` aborta si ve el flag H20 activo y
-> **ninguna** decisión imprime los pokecenters por delante. Ese es el
-> discriminador **estructural**: el código correcto los imprime siempre, y el
-> que los restaba dentro del coste no los imprime nunca. Medido: **0** en el
-> lote viejo, **74** en el nuevo.
->
-> **El primer guard se hizo con un tope numérico y tiró el lote bueno.** Se
-> puso "más de 40 combates por delante es imposible" y abortó en la cuarta run
-> — del código **ya corregido** —, porque el coste no está topado en 8: es
-> `combates_por_delante` (tope 8) **más 4 por entrenador**, y los entrenadores
-> no llevan tope. Hay una rama de 52 en el lote bueno. Un guard que topa por un
-> supuesto equivocado es peor que no tener guard: mata el trabajo que sí vale
-> (§5.5). **La cifra no dice qué código se ejecutó; lo dice la estructura.**
+La premisa era que el bono de ruta (incondicional) metía al bot en ramas que
+gastaban la vida del equipo antes del jefe. Lo que pasó es que la regla se
+cumplió **literalmente** y por eso quedó mal:
 
-**Intervención**: con el equipo roto (algún món a 0, o media ≤ 75%), el bono de
-ruta se **da la vuelta**: la rama con menos combates por delante resta en vez
-de sumar. Con el equipo entero no cambia absolutamente nada.
+| | A (H20) | B (control) |
+|---|---|---|
+| pasos por run | **10** | 21 |
+| paso al morir (mediana) | **29** | 52 |
+| nivel máximo | **11,8** | 18,7 |
+| muere sin 1ª insignia | **62%** | 31% |
+| trainers elegidos | **1,7/run** | 5,2/run |
+| insignias/run | 0,46 | 1,23 (p=0,070) |
 
-Flag `PKL_RUTA_SIN_GASTO`, default 0 = control.
+El bot **recorría el mapa al doble de velocidad**, llegaba antes a los jefes y
+moría antes. Y el motivo está medido: **una pelea contra un entrenador da
++2,00 niveles y contra un salvaje +1,00** (154 peleas ganadas, medianas).
+H20 restaba `combates_por_delante` a los dos **por igual**, o sea que le decía
+al bot «descarta también los entrenadores» — que son el doble de exp. Y §1.2
+ya dice que la exp **no se recupera**: el rival está 8-11 niveles por debajo
+del listón, siempre.
 
-**Por qué esta y no otra**: es el único mecanismo que ataca el cuello medido
-(§1.1) y que el bot puede cambiar con una decisión de mapa. No es un peso más:
-invierte el signo de un término que hoy prima la rama larga sin importar si el
-equipo puede pagarla.
+> **Lo que H20 sí acertó, y se conserva**: la cura por delante **nunca** se
+> resta. Ese era el bug de las 8 primeras runs (§H20-a) y el arreglo se queda.
 
-- **Medida (mecanismo)**: proportion de pasos con equipo roto en los que la
-  rama elegida tiene menos combates por delante.
-- **Medida (resultado)**: `P(entra a la pelea de gimnasio con vida > 75%)`.
-  Base medida: **0,35** (el inverso de 178/764 ≈ 0,23 con algún caído).
-- **Declarado antes de mirar**: primaria = inscribed de entrada **entera**.
-- **Medida de potencia**: el cuello mueve ~1 insignia de 8. Con la varianza
-  observada (sd ≈ 1,1) eso es d ≈ 0,4–0,6, es decir **82–97% de potencia a
-  100 por brazo**. Es la primera candidata que llega con potencia declarada.
+### H21 · Con el equipo roto, dejar de premiar al salvaje
 
-**Lo que NO se hace aquí**:
-- No se toca `PESO_CAPTURA`, `PESO_ENTRENADOR` ni el corte de emergencia: §1.4
-  dice que funcionan.
-- No se mira el resultado antes de tener n declarado.
+Abierta el **10-10**, saliendo de H20 con el mecanismo ya acotado.
 
-### H21 · El trade es el único atajo de nivel: ¿y si se busca más?
+**Intervención**: el bono de ruta se aplica **igual que en el control** y
+encima se resta el **salvaje** por delante (`3,5` cada uno). El trainer
+conserva su prima entera —los `4.0` por entrenador que ya van dentro de
+`coste`—.
+
+**Por qué así y no al revés**: H20 enseñó que el error es tratar igual lo que
+no vale igual. La exp medida dice +2 (trainer) contra +1 (salvaje), y con la
+vida como cuello (§1.1) la cura ya se suma aparte. Lo único que sobra en el
+tramo es el **salvaje**: gasta vida y da la mitad de exp.
+
+Flag `PKL_RUTA_POR_EXP`, default 0 = control.
+
+- **Medida (mecanismo)**: el marcador `H21: sin -N salvaje(s)` con su cuenta
+  de trainers intactos. Verificable desde el log sin ambigüedad.
+- **Medida (resultado)**: `insignias/run`. Es la única con potencia (§5.3), y
+  es la que H20 dejó a medias por ir en la dirección contraria.
+- **Alcance medido antes de lanzar**: el gate `roto` salta en el **36,9%** de
+  los pasos de mapa (152 de 412, medido sobre `TRAZA_CAMINO`, que lleva la vida
+  real). Por encima del 15% mínimo de §1.5.
+- **Declarado antes de mirar**: primaria = `insignias/run`. Con la sd de 0,44
+  medida y ~150 por brazo, se detecta un efecto de **+0,4/run**, que es menos
+  de la mitad de la brecha que H20 dejó abierta.
+
+**Lo que NO se toca**: `PESO_CAPTURA`, `PESO_ENTRENADOR`, la escalera de riesgo,
+el veto por nivel y el corte de emergencia. §1.4 dice que funcionan, y en el
+test de H21 se apagan **por separado** para que el efecto sea atribuible
+(§5.8).
+
+### H22 · El trade es el único atajo de nivel: ¿y si se busca más?
 
 **Abierta, sin intervención todavía.** Es la pregunta con más rendimiento
 esperado y la menos medida.

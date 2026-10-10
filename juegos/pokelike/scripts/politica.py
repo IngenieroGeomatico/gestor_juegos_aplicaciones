@@ -1378,6 +1378,55 @@ def combates_por_delante(nodos: list[dict], edges: list,
     return {nid: min(v, tope) for nid, v in memo.items()}
 
 
+def salvajes_por_delante(nodos: list[dict], edges: list,
+                          tope: int = 8) -> dict[str, int]:
+    """Cuántas peleas contra **salvajes** deja cada rama. Los de `entrenador` no.
+
+    Existe porque `combates_por_delante` cuenta las dos cosas como 1 y H20 las
+    penalizaba igual, siendo que **no valen lo mismo**. Medido sobre 154 peleas
+    ganadas de 26 runs:
+
+        entrenador = +2,00 niveles (mediana, n=79)
+        salvaje    = +1,00 niveles (mediana, n=75)
+
+    El entrenador vale el doble, y §1.2 dice que la exp **no se recupera**: el
+    rival siempre esta 8-11 niveles por debajo del liston. Descartar
+    entrainadores por "gastar menos" deja al equipo sin nivel justo cuando ya
+    no lo va a recuperar. Por eso el contador va separado.
+    """
+    por_id = {str(n["id"]): n for n in nodos if n.get("id")}
+    hijos: dict[str, list[str]] = {}
+    for e in edges:
+        if isinstance(e, dict):
+            origen, destino = e.get("from"), e.get("to")
+        else:
+            origen = e[0] if len(e) > 0 else None
+            destino = e[1] if len(e) > 1 else None
+        if origen is not None and destino is not None:
+            # `edges` va de padre a hijo.
+            hijos.setdefault(str(origen), []).append(str(destino))
+
+    memo: dict[str, int] = {}
+    en_curso: set[str] = set()
+
+    def valor(nid: str, prof: int = 0) -> int:
+        if nid in memo:
+            return memo[nid]
+        if nid in en_curso or prof > 14:
+            return 0
+        en_curso.add(nid)
+        n = por_id.get(nid)
+        propio = 1 if (n and tipo_de_estado(n.get("tipo")) == "batalla") else 0
+        mejor = max((valor(h, prof + 1) for h in hijos.get(nid, [])), default=0)
+        en_curso.discard(nid)
+        memo[nid] = propio + mejor
+        return memo[nid]
+
+    for nid in por_id:
+        valor(nid)
+    return {nid: min(v, tope) for nid, v in memo.items()}
+
+
 # ---------------------------------------------------------------- decisiones triviales
 
 def decidir_batalla(tiene_auto: bool) -> Decision:

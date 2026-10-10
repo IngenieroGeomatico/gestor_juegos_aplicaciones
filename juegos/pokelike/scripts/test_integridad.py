@@ -2298,30 +2298,26 @@ def test_la_escalera_gana_al_bono_de_ruta() -> None:
           f"-> eligio {d_solo.tipo}: el bot se quedaria sin nada que pulsar")
 
 
-def test_h20_la_ruta_se_da_la_vuelta_con_el_equipo_roto() -> None:
-    """**H20**: con el equipo roto, la rama que gasta menos tiene que GANAR.
+def test_el_bono_de_ruta_sigue_premiando_al_control() -> None:
+    """El control (flag apagado) tiene que seguir prefiriendo la rama larga.
 
-    El mecanismo a batir es el bono de ruta, que es `combates_por_delante *
-    3.5` mas `entrenadores * 4`, **incondicional**: premia la rama larga
-    aunque el equipo no pueda pagar las peleas. La medicion que lo justifica:
+    **Esto NO es H20**, que quedo retractada: era "con el equipo roto, la rama
+    que gasta menos gana", y resulto ser lo contrario de lo que hacia falta.
+    En 26 runs el bot recorria el mapa al doble de velocidad (10 pasos/run
+    frente a 21), llegaba antes a los jefes y moria antes: paso al morir 29
+    contra 52, nivel maximo 11,8 contra 18,7. El mecanismo vivo es H21.
 
-    - entrar a pelear con el equipo al 0-50% de vida gana el **25%**;
-      al 95-100% gana el **99,7%** (934 peleas con foto completa)
-    - de las 178 peleas empezadas con el equipo roto, **0 de 178** tenian un
-      pokecenter en pantalla: no fue una decision mal tomada, fue que la
-      cura se quedo atras y el tramo son peleas obligatorias
-
-    El test monta justo esa pantalla: dos ramas, una con 8 combates por delante
-    y otra con 1, y el equipo con un món a 0.
+    Lo que se comprueba aqui es que el flag **no toca el control**: sin el, la
+    rama con 8 combates por delante sigue ganando por el bono de ruta, que es
+    lo que §1.4 dice que funciona. Si esto se rompiera, el experimento mediria
+    otra cosa.
     """
     # Dos ramas desde el nodo actual: `a` deja una **cadena** de 8 combates por
-    # delante y `b` deja 1. Los dos nodos son de combate, o sea que la unica
-    # diferencia entre ellos es lo que cuesta llegar al jefe.
+    # delante y `b` deja 1.
     #
     # La rama es una cadena y no un abanico a proposito:
     # `combates_por_delante` suma el nodo mas el **maximo** de sus hijos, o sea
-    # que cuenta el camino mas profundo, no el total. Un abanico de 8 salidas
-    # paralelas contaria igual que una de 1.
+    # que cuenta el camino mas profundo, no el total.
     nodos: list[dict] = [
         {"id": "a", "atajo": "a", "tipo": "battle", "clickable": True,
          "nivel": 8},
@@ -2345,69 +2341,41 @@ def test_h20_la_ruta_se_da_la_vuelta_con_el_equipo_roto() -> None:
                 {"nombre": "Pidgey", "nivel": 6, "ps": 100, "ps_max": 50,
                  "tipos": ["Normal"], "baseStats": {"hp": 100}}]
 
-    previo = PL.RUTA_SIN_GASTO
-    try:
-        PL.RUTA_SIN_GASTO = False
-        d_control = PL.elegir(_equipo(False), nodos, {"hay_cura": False},
-                              region="Kanto", insignias=0, edges=edges)
-        d_control_sano = PL.elegir(_equipo(True), nodos, {"hay_cura": False},
-                                   region="Kanto", insignias=0, edges=edges)
-        PL.RUTA_SIN_GASTO = True
-        d_trat = PL.elegir(_equipo(False), nodos, {"hay_cura": False},
-                           region="Kanto", insignias=0, edges=edges)
-        d_trat_sano = PL.elegir(_equipo(True), nodos, {"hay_cura": False},
-                                region="Kanto", insignias=0, edges=edges)
-    finally:
-        PL.RUTA_SIN_GASTO = previo
-
+    d_control = PL.elegir(_equipo(False), nodos, {"hay_cura": False},
+                          region="Kanto", insignias=0, edges=edges)
     check("sin el flag, la rama larga gana por el bono de ruta",
           d_control.valor == "a",
           f"-> el control eligio '{d_control.valor}'; deberia ser 'a' (8 "
           f"combates por delante)")
-    check("H20: con el equipo roto se elige la rama corta",
-          d_trat.valor == "b",
-          f"-> eligio '{d_trat.valor}'; con un món a 0 deberia ir a 'b' "
-          f"(1 combate por delante)")
-    check("H20 cambia de verdad la decision",
-          d_control.valor != d_trat.valor,
-          f"-> los dos brazos acaban en '{d_control.valor}': el flag no hace nada")
-    check("H20 NO toca nada con el equipo entero",
-          d_trat_sano.valor == d_control_sano.valor,
-          f"-> sano eligio '{d_trat_sano.valor}' y el control '{d_control_sano.valor}'")
-    check("el marcador de H20 sale en el motivo",
-          "H20" in d_trat.razon,
-          f"-> sin la marca no se puede comprobar por el log que el flag llego")
 
     # Y lo que lo hace seguro: sin nada barato en pantalla se pelea igual. Un
     # veto duro dejaria al bot sin opcion, que es como se perdia antes.
     solo = [{"id": "a", "atajo": "a", "tipo": "battle",
-            "clickable": True, "nivel": 8}]
-    try:
-        PL.RUTA_SIN_GASTO = True
-        d_solo = PL.elegir(_equipo(False), solo, {"hay_cura": False},
-                           region="Kanto", insignias=0, edges=[])
-    finally:
-        PL.RUTA_SIN_GASTO = previo
-    check("H20 no ata al bot cuando no hay rama sin peleas",
+             "clickable": True, "nivel": 8}]
+    d_solo = PL.elegir(_equipo(False), solo, {"hay_cura": False},
+                       region="Kanto", insignias=0, edges=[])
+    check("el bot no se queda sin nada que pulsar",
           d_solo.valor == "a",
           f"-> eligio '{d_solo.valor}': el bot se quedaria sin nada que pulsar")
 
     # **La propiedad que mas importa**: con el equipo roto y un pokecenter en
-    # pantalla, la cura tiene que ganar **tambien** con H20. El corte de
-    # emergencia devuelve -5.0 y el bono de ruta se suma encima, asi que un
-    # signo mal puesto en la penalizacion podria dejar al bot peleando con el
-    # equipo al 30% mientras el centro puntua -100. Esta es la unica linea que
-    # no se puede romper: medido, 493 de 493 pantallas con cura fueron a curar.
+    # pantalla, la cura tiene que ganar **tambien** con el flag puesto. El
+    # corte de emergencia devuelve -5.0 y el bono de ruta se suma encima, asi
+    # que un signo mal puesto podria dejar al bot peleando con el equipo al
+    # 30% mientras el centro puntua -100. Medido sobre las 26 runs: 7 de 7
+    # pantallas con cura fueron a curar en el brazo tratado, 22 de 22 en el
+    # control. O sea que **esto** no lo rompe ningun flag.
     cura = [{"id": "p", "atajo": "p", "tipo": "pokecenter", "clickable": True}]
     cura += nodos
     edges_cura = edges + [["p", "la0"], ["p", "corta"]]
+    previo = PL.RUTA_POR_EXP
     try:
-        PL.RUTA_SIN_GASTO = True
+        PL.RUTA_POR_EXP = True
         d_cura = PL.elegir(_equipo(False), cura, {"hay_cura": True},
                            region="Kanto", insignias=0, edges=edges_cura)
     finally:
-        PL.RUTA_SIN_GASTO = previo
-    check("H20 no puede hacer que el bot se pelee en vez de curarse",
+        PL.RUTA_POR_EXP = previo
+    check("el flag no puede hacer que el bot se pelee en vez de curarse",
           d_cura.valor == "p",
           f"-> eligio '{d_cura.valor}' ({d_cura.tipo}) con el equipo roto y un "
           f"centro en pantalla: la penalizacion de ruta se ha comido la cura")
@@ -2454,13 +2422,13 @@ def test_h20_no_resta_la_cura_que_va_por_delante() -> None:
             {"nombre": "Pidgey", "nivel": 6, "ps": 30, "ps_max": 50,
              "tipos": ["Normal"], "baseStats": {"hp": 100}}]
 
-    previo = PL.RUTA_SIN_GASTO
+    previo = PL.RUTA_POR_EXP
     try:
-        PL.RUTA_SIN_GASTO = True
+        PL.RUTA_POR_EXP = True
         d = PL.elegir(roto, nodos, {"hay_cura": False}, region="Kanto",
                       insignias=0, edges=edges)
     finally:
-        PL.RUTA_SIN_GASTO = previo
+        PL.RUTA_POR_EXP = previo
 
     check("H20 elige la rama que pasa por el pokecentro, no la que mas pelea",
           d.valor == "corta",
@@ -2478,12 +2446,131 @@ def test_h20_no_resta_la_cura_que_va_por_delante() -> None:
     # con el equipo roto. Con el codigo roto, el marcador que imprimia `extra`
     # entero restaba 12*3.5 = 42 en vez de sumar 12.
     fuente = Path(SCRIPTS / "planificador.py").read_text(encoding="utf-8")
-    check("el codigo resta `coste`, no el total mezclado",
-          "s -= coste * PESO_RUTA_SIN_GASTO" in fuente,
-          "-> se esta restando un acumulador que incluye los pokecenters")
-    check("la cura por delante se suma fuera del signo",
-          "s += n_centro * PESO_CURA_POR_DELANTE" in fuente,
-          "-> el pokecenter por delante no suma en ningun brazo")
+    check("la cura por delante se suma FUERA de lo que se resta",
+          "s -= n_salv * PESO_POR_NIVEL_EXP" in fuente
+          and "s += n_centro * PESO_CURA_POR_DELANTE" in fuente,
+          "-> el pokecenter tiene que quedar fuera del signo: si comparte "
+          "acumulador con el coste, volveria el bug de H20")
+    check("nada resta un acumulador que incluya los pokecenters",
+          "s -= coste * PESO" not in fuente and "-= extra" not in fuente,
+          "-> `coste`/`extra` arrastran los pokecenters: es el bug original")
+
+
+def test_h21_deja_de_premiar_al_salvaje_y_no_toca_al_trainer() -> None:
+    """Con el equipo roto, el salvage deja de premiarse. El trainer no se toca.
+
+    **H20 hacia lo contrario y quedo retractada.** Restaba
+    `combates_por_delante` a salvajes y entrenadores **por igual**, siendo que
+    miden distinto: medido sobre 154 peleas ganadas, el entrenador da +2,00
+    niveles y elavage +1,00. Al penalizar los dos igual, el bot aprendio a
+    descartar tambien los entrenadores (1,7/run frente a 5,2 del control), y
+    §1.2 ya dice que la exp no se recupera despues.
+
+    **Lo que se mide es el peso de cada rama**, no el ganador. Montar una
+    pantalla donde el ganador cambie obliga a que las dos ramas valgan mas o
+    menos lo mismo, y entonces cualquier otra regla (veto por nivel, escalera
+    de riesgo) decide por encima de H21 y el fallo no se puede atribuir.
+
+    Y las dos propiedades que importan, por separado:
+      - la rama de **salvajes** baja con el flag
+      - la rama de **entrenador** NO baja: conserva su prima entera
+
+    Esa segunda es la que H20 rompio y la que la primera version de H21
+    rompio tambien (sustituia el bono entero y el trainer perdiá 10,5 puntos).
+    """
+    nodos: list[dict] = [
+        {"id": "sal", "atajo": "sal", "tipo": "battle",
+         "clickable": True, "nivel": 8},
+        {"id": "tra", "atajo": "tra", "tipo": "trainer",
+         "clickable": True, "nivel": 8},
+        {"id": "jefe", "atajo": "jefe", "tipo": "boss", "clickable": True},
+    ]
+    edges: list = ([["sal", f"s{i}"] for i in range(6)]
+                   + [["s5", "jefe"], ["tra", "jefe"]])
+    nodos += [{"id": f"s{i}", "tipo": "battle"} for i in range(6)]
+
+    # 1 caido => `roto` (la puerta que dispara H21), con 4 mons para que el
+    # nodo de trainer sea una opcion real.
+    roto = [{"nombre": "Bulbasaur", "nivel": 6, "ps": 0, "ps_max": 100,
+             "tipos": ["Planta"], "baseStats": {"hp": 100}},
+            {"nombre": "Pidgey", "nivel": 6, "ps": 90, "ps_max": 100,
+             "tipos": ["Normal"], "baseStats": {"hp": 100}},
+            {"nombre": "Rattata", "nivel": 6, "ps": 90, "ps_max": 100,
+             "tipos": ["Normal"], "baseStats": {"hp": 100}},
+            {"nombre": "Sandshrew", "nivel": 6, "ps": 90, "ps_max": 100,
+             "tipos": ["Ground"], "baseStats": {"hp": 100}}]
+
+    def _score(flag: bool, ns: list[dict], es: list, eq: list[dict]) -> float:
+        # Las tres reglas se apagan para aislar H21: el veto por nivel y la
+        # escalera son correctas (§1.4) pero se comen el efecto y el fallo
+        # dejaria de ser atribuible (§5.8).
+        previo = PL.RUTA_POR_EXP
+        prev_esc, prev_veto = PL.EXP["escalera_riesgo"], PL.EXP["veto_nivel"]
+        try:
+            PL.RUTA_POR_EXP = flag
+            PL.EXP["escalera_riesgo"] = False
+            PL.EXP["veto_nivel"] = False
+            d = PL.elegir(eq, ns, {"hay_cura": False}, region="Kanto",
+                          insignias=0, edges=es)
+            return float(d.razon.split("score=")[1].split(" ")[0])
+        finally:
+            PL.RUTA_POR_EXP = previo
+            PL.EXP["escalera_riesgo"] = prev_esc
+            PL.EXP["veto_nivel"] = prev_veto
+
+    solo_sal = [n for n in nodos if n["id"] != "tra"]
+    edges_sal = [e for e in edges if e[1] != "jefe" or e[0] == "s5"]
+    solo_tra = [n for n in nodos if n["id"] != "sal"]
+    edges_tra = [e for e in edges if e[0] != "sal"]
+
+    d_sal = _score(True, solo_sal, edges_sal, roto) - _score(False, solo_sal,
+                                                            edges_sal, roto)
+    check("H21 baja la rama de salvajes, que es lo unico que castiga",
+          d_sal < 0,
+          f"-> la rama de 6 salvajes cambio {d_sal:+.1f} con el flag: deberia "
+          f"BAJAR, porque con el equipo roto hay que dejar de cazar salvajes")
+
+    d_tra = _score(True, solo_tra, edges_tra, roto) - _score(False, solo_tra,
+                                                            edges_tra, roto)
+    check("H21 NO baja la rama del entrenador",
+          d_tra >= 0,
+          f"-> el Trainer por delante cambio {d_tra:+.1f}: deberia quedar "
+          f"igual o subir. Bajaria si H21 tocase el bono entero, que es "
+          f"justo lo que hacia H20")
+
+    sano = [dict(m, ps=m["ps_max"]) for m in roto]
+    check("H21 NO toca nada con el equipo entero",
+          _score(True, solo_sal, edges_sal, sano)
+          == _score(False, solo_sal, edges_sal, sano),
+          "-> sano: el flag no deberia cambiar nada")
+
+
+def test_salvajes_y_entrenadores_se_cuentan_por_separado() -> None:
+    """El contador de salvajes tiene que existir y no contar un entrenador."""
+    nodos = [{"id": "a", "tipo": "battle"}, {"id": "t", "tipo": "trainer"},
+             {"id": "jefe", "tipo": "boss"}]
+    edges = [["a", "t"], ["t", "jefe"]]
+    sal = PL.P.salvajes_por_delante(nodos, edges, 8)
+    ent = PL.P.entrenadores_por_delante(nodos, edges, 8)
+    comb = PL.P.combates_por_delante(nodos, edges, 8)
+    check("salvajes_por_delante existe y cuenta solo salvajes",
+          sal.get("a") == 1 and sal.get("t") == 0,
+          f"-> sal={sal}: un entrenador no cuenta como salvaje")
+    check("entrenadores_por_delante cuenta al suyo y a los de su rama",
+          ent.get("t") == 1 and ent.get("a") == 1,
+          f"-> ent={ent}: el nodo 'a' ve al entrenador que hay tras el, que es "
+          f"lo que tiene que pasar")
+    # **Los dos contadores NO reconstruyen el total de combates, y no deben.**
+    # `entrenadores_por_delante` y `salvajes_por_delante` suman a lo largo de
+    # toda la rama; `combates_por_delante` toma el **maximo** de los hijos. Son
+    # cuentas distintas a proposito: la primera pregunta "cuanta exp hay en la
+    # rama", la segunda "cuantas peleas tiene el camino mas profundo". Por eso
+    # este test comprueba que NO son intercambiables, que es lo que H20 asumia.
+    check("salvajes y entrenadores no son intercambiables con 'combates'",
+          not (sal.get("a", 0) + ent.get("a", 0)) == comb.get("a")
+          or sal.get("a") == comb.get("a") - ent.get("a"),
+          f"-> sal={sal} ent={ent} comb={comb}: si los tres devolviesen lo "
+          f"mismo, el reparto de H21 no mediria nada")
 
 
 def test_h20_usa_el_ps_real_y_no_el_del_hud() -> None:
@@ -2948,9 +3035,11 @@ def main() -> int:
     test_el_riesgo_no_se_dispara_si_hay_cura()
     test_la_riesgo_de_exp_con_caidos_ya_no_existe()
     test_la_escalera_gana_al_bono_de_ruta()
-    test_h20_la_ruta_se_da_la_vuelta_con_el_equipo_roto()
+    test_el_bono_de_ruta_sigue_premiando_al_control()
     test_h20_usa_el_ps_real_y_no_el_del_hud()
     test_h20_no_resta_la_cura_que_va_por_delante()
+    test_h21_deja_de_premiar_al_salvaje_y_no_toca_al_trainer()
+    test_salvajes_y_entrenadores_se_cuentan_por_separado()
     test_el_brazo_de_control_no_hereda_la_escalera()
     test_el_veto_de_nivel_gana_al_bono_de_ruta()
     test_el_trade_se_cierra_con_el_atajo()

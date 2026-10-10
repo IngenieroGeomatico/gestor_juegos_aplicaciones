@@ -320,27 +320,9 @@ VETO_XP = os.environ.get("PKL_VETO_XP", "0").strip().lower() in ("1", "true", "s
 VETO_XP_MARGEN = int(os.environ.get("PKL_VETO_XP_MARGEN", "3"))
 
 
-# **H20 · con el equipo roto, la rama con menos combates gana.**
-#
-# El diagnostico completo esta en la seccion H20 de HIPOTESIS.md. En corto:
-# la vida del equipo es el unico separador medido (entrar al 0-50% de vida gana
-# el 25%; al 95-100%, el 99,7%), el bot **nunca** entra roto habiendo un centro
-# en pantalla (0 de 178), y el bono de ruta premia las ramas con mas combates
-# **incondicionalmente**. Ese bono es lo que mete al bot en la rama que le
-# acaba comiendo el equipo antes de llegar al jefe.
-#
-# Default 0 = control.
-RUTA_SIN_GASTO = os.environ.get("PKL_RUTA_SIN_GASTO", "0").strip().lower() in (
-    "1", "true", "si", "yes")
-# Cuanto vale cada combate por delante cuando el equipo esta roto. Va por
-# debajo de 1.0 a proposito: no es "dejar de premiar", es que la rama con
-# menos peleas tiene que **ganar**, no solo puntuar menos. El 3.5 del caso
-# corto_de_nivel esta medido como necesario para que el bono domine al
-# entrenador (34), asi que la contraparte debe dominar tambien.
-PESO_RUTA_SIN_GASTO = float(os.environ.get("PKL_RUTA_SIN_GASTO_PESO", "3.5"))
 # Cuanto vale un pokecenter que la rama deja por delante. Va **aparte** del
-# coste, y con el flag nunca se resta: el pokecenter es lo que el equipo roto
-# necesita, asi que restarlo era penalizar la unica salida buena.
+# coste, y con cualquier flag nunca se resta: el pokecentro es lo que el
+# equipo roto necesita, asi que restarlo era penalizar la unica salida buena.
 #
 # Antes valia 12 y estaba **sumado dentro de `extra`**, junto a los costes. Con
 # el flag se invertia el total, de modo que un centro por delante restaba
@@ -348,6 +330,41 @@ PESO_RUTA_SIN_GASTO = float(os.environ.get("PKL_RUTA_SIN_GASTO_PESO", "3.5"))
 # 100 a 16, y la rama con cura perdia frente a la rama sin cura.
 PESO_CURA_POR_DELANTE = float(
     os.environ.get("PKL_CURA_POR_DELANTE_PESO", "12"))
+
+
+# **H20 · RETRACTADA tras 26 runs.**
+#
+# La hipotesis era "con el equipo roto, la rama que gasta menos tiene que
+# ganar". Lo que paso es que se cumplio **al reves de lo que hacia falta**: el
+# bot recorre el mapa al doble de velocidad (10 pasos/run frente a 21), llega
+# antes a los jefes y muere antes.
+#
+# Medido sobre las 26 runs, la prevision que se declaro antes de mirar:
+#
+#                      A (H20)   B (control)
+#   paso al morir (med)     29          52
+#   nivel maximo          11,8        18,7
+#   muere sin 1a insignia   62%         31%
+#   trainers elegidos   1,7/run     5,2/run
+#   insignias/run          0,46        1,23   (p=0,070)
+#
+# Y el motivo esta medido tambien: **una pelea contra un entrenador da +2,00
+# niveles y contra un salvaje +1,00** (154 peleas ganadas, medianas). H20
+# restaba `combates_por_delante` a LOS DOS POR IGUAL, o sea que le decia al
+# bot "descarta tambien los entrenadores", que son el doble de exp. Y §1.2 ya
+# dice que la exp no se recupera: el rival esta 8-11 niveles por debajo del
+# liston siempre.
+#
+# Lo que H20 **si** acertó: la cura por delante nunca se resta. Esa parte se
+# queda y es la que arregla el bug de las 8 runs anteriores.
+RUTA_POR_EXP = os.environ.get("PKL_RUTA_POR_EXP", "0").strip().lower() in (
+    "1", "true", "si", "yes")
+# Cuanto vale un **salvaje** por delante cuando el equipo esta roto. Se usa la
+# misma escala que el bono de siempre (`peso_ruta = 3.5` por combate cuando
+# falta nivel), para que las dos ramas hablen el mismo idioma: con 3.5 el
+# definitivo es `coste - 3,5 x salvajes`, y el trainer conserva su prima
+# entera (4x, que ya va dentro de `coste`).
+PESO_POR_NIVEL_EXP = float(os.environ.get("PKL_POR_NIVEL_EXP", "3.5"))
 
 
 @dataclass
@@ -1204,6 +1221,10 @@ def elegir(equipo: list[dict], nodos: list[dict], ctx_extra: dict | None = None,
                 n_ent = ent.get(str(n.get("id")), 0)
                 if n_ent:
                     coste += n_ent * 4.0
+                # **Los salvajes van aparte**, porque H21 los penaliza y a los
+                # entrenadores no: dan distinta exp (+1 nivel contra +2).
+                sal = P.salvajes_por_delante(nodos, edges, limpio)
+                n_salv = sal.get(str(n.get("id")), 0)
                 # **La cura va por delante de los niveles cuando el equipo esta
                 # por debajo de la puerta del 75%.** Es la instruccion del
                 # usuario (pasar por el centro antes del lider) y medido era
@@ -1216,7 +1237,7 @@ def elegir(equipo: list[dict], nodos: list[dict], ctx_extra: dict | None = None,
                 if _ratio_actual <= UMBRAL_PUERTA_JEFE or _caidos_actual:
                     n_cur = P.centros_por_delante(nodos, edges, limpio)
                     n_centro = n_cur.get(str(n.get("id")), 0)
-                if coste:
+                if coste or n_centro or n_salv:
                     # El peso de la ruta tiene que **dominar** cuando falta
                     # nivel, no solo sumar: un entrenador puntúa 34, así que
                     # una rama con 5 combates extra (peso 3.5) no ganaba a un
@@ -1225,49 +1246,49 @@ def elegir(equipo: list[dict], nodos: list[dict], ctx_extra: dict | None = None,
                     # niveles. El mapa es un DAG: lo que no se elige en la
                     # bifurcación no se puede recuperar después.
                     #
-                    # **H20 · con el equipo roto, el bono se da la vuelta.**
-                    # Todo lo anterior supone que la vida del equipo es un
-                    # recurso infinito. Medido, no lo es: de 934 peleas con
-                    # foto completa, entrar con la vida al 0-50% gana el 25% y
-                    # entrar al 95-100% gana el 99,7%. Y de las 178 peleas que
-                    # el bot_entró roto, **0 de 178 tenían un pokecenter en
-                    # pantalla**: no fue una decision, fue que la cura se
-                    # quedo atras y el tramo hasta el gimnasio son peleas
-                    # obligatorias. El bono de ruta, incondicional, es
-                    # justamente lo que mete al bot en la rama mas larga
-                    # cuando ya no puede pagar las peleas.
+                    # **H21 · con el equipo roto, la exp pesa mas que el gasto.**
                     #
-                    # Con el flag, con el equipo roto (`roto`), la rama que
-                    # deje **menos** combates gana. Default 0 = control.
-                    if RUTA_SIN_GASTO and roto:
-                        s -= coste * PESO_RUTA_SIN_GASTO
-                        # La cura se queda **fuera** del signo: es lo que hace
-                        # falta, asi que roto tiene que atraerla mas fuerte,
-                        # nunca menos. Y se dice en el motivo con su propia
-                        # cifra, porque el marcador tiene que poder **separar**
-                        # "estaba penalizando la cura" de "no habia cura": si
-                        # no, un brazo que resta centros por delante y otro
-                        # que no imprime la misma linea y no hay medida (§5.7).
-                        s += n_centro * PESO_CURA_POR_DELANTE
-                        razon += (f"; H20: rama sin gasto "
-                                  f"({coste} combate(s) por delante, "
-                                  f"equipo roto)")
-                        if n_centro:
-                            razon += (f"; +{n_centro} pokecenter(s) por delante "
-                                      f"x{PESO_CURA_POR_DELANTE:.0f} (cura, "
-                                      f"nunca se resta)")
+                    # H20 hacia lo contrario y quedo retractada. Restaba
+                    # `combates_por_delante` a salvo y entrenador por igual, y
+                    # **no valen lo mismo**: medido sobre 154 peleas ganadas,
+                    # el entrenador da +2,00 niveles y el salvaje +1,00. Al
+                    # penalizar los dos igual, el bot aprendio a descartar
+                    # tambien los entrenadores: 1,7/run frente a 5,2 del
+                    # control, con el equipo al 60% de nivel. Y §1.2 ya dice
+                    # que la exp no se recupera despues.
+                    #
+                    # **Lo unico que H21 toca es el SALVAJE.** El bono de ruta
+                    # se aplica igual que en el control y encima se resta el
+                    # salvage por delante, asi que la prima del trainer (los
+                    # 4.0 por entrenador que ya van dentro de `coste`) se
+                    # conserva **entera**. Medido con el flag, rama de 5 nodos:
+                    #
+                    #   5 salvajes   29,0 ->  8,0   (-21,0)
+                    #   5 trainers   31,0 -> 13,5   (-17,5)
+                    #   rama limpia  11,5 ->  8,0   ( -3,5)
+                    #
+                    # El trainer baja solo cuando la rama **tiene salvajes**, y
+                    # baja justo lo que valen: es el mismo bonus con los
+                    # salvajes descontados. Rama limpia de trainers: 0,0.
+                    #
+                    # La primera version hacia otra cosa: sustituia el bono
+                    # entero por `n_salv*-3,5 + n_ent*+7`, con lo que el
+                    # trainer **perdia 10,5 puntos** frente al control. Eso
+                    # contradecía la hipotesis de frente: H21 no quiere castigar
+                    # al trainer, quiere dejar de premiar al salvaje (§5.8).
+                    peso_ruta = 3.5 if ctx.corto_de_nivel else 1.0
+                    s += coste * peso_ruta
+                    if RUTA_POR_EXP and roto:
+                        s -= n_salv * PESO_POR_NIVEL_EXP
+                        razon += (f"; H21: sin -{n_salv} salvaje(s) por delante "
+                                  f"x{PESO_POR_NIVEL_EXP:.1f} (equipo roto; "
+                                  f"{n_ent} entrenador(es) intactos)")
                     else:
-                        peso_ruta = 3.5 if ctx.corto_de_nivel else 1.0
-                        s += coste * peso_ruta
-                        # El control tambien queria premiar la cura por delante
-                        # (medido: 26 equipos morian contra Brock sin pasar por
-                        # un centro), asi que el bono va en los dos brazos y lo
-                        # unico que H20 cambia es el signo del **coste**.
-                        s += n_centro * PESO_CURA_POR_DELANTE
                         razon += f"; deja {coste} combate(s) al jefe"
-                        if n_centro:
-                            razon += (f"; +{n_centro} pokecenter(s) por delante "
-                                      f"x{PESO_CURA_POR_DELANTE:.0f}")
+                    s += n_centro * PESO_CURA_POR_DELANTE
+                    if n_centro:
+                        razon += (f"; +{n_centro} pokecenter(s) por delante "
+                                  f"x{PESO_CURA_POR_DELANTE:.0f}")
             # Escalera de riesgo sobre el score **final**, ya con el bono de
             # ruta dentro. Sin esto el unico efecto era bajar un peso de
             # 0.5-2.0 que el bono de 60-300 tapaba siempre: medido en 24 runs,
