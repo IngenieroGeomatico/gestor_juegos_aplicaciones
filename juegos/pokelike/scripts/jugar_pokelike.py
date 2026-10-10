@@ -162,6 +162,7 @@ class Bot:
         # restar y saber cuánto costó. Sin esto nace AttributeError en la
         # primera pelea.
         self._ps_al_abrir: int | None = None
+        self._equipo_al_abrir: str = ""
         # Quién se ha visto CAÍDO. Sobrevive a la invalidación del
         # porcentaje: un món a 0 sigue a 0 hasta que lo curan.
         self._caidos_conocidos: set[str] = set()
@@ -1206,12 +1207,18 @@ class Bot:
                 # correlación. Nueve líneas por run, cero CPU.
                 self._ps_al_abrir = sum(
                     a for a, b in (_ps_fraccion(m) for m in eb["mios"]) if b)
+                # **El `equipo` de la pelea ANTERIOR, no el de ahora.** Con el
+                # de ahora la resta daba 0 siempre: se comparaba el mismo
+                # numero consigo mismo. El detalle se guarda entero, porque el
+                # equipo cambia entre peleas (capturas y caidos) y sin el no se
+                # puede comprobar que la resta sea legitima.
+                self._equipo_al_abrir = " ".join(
+                    f"{m.get('nombre')}:{_ps_fraccion(m)[0]}/"
+                    f"{_ps_fraccion(m)[1]}" for m in eb["mios"])
                 self.traza("ps_abre", tipo="entrenador" if es_entrenador
                            else "salvaje", rival=titulo,
                            ps_total=self._ps_al_abrir,
-                           equipo=" ".join(
-                               f"{m.get('nombre')}:{_ps_fraccion(m)[0]}/"
-                               f"{_ps_fraccion(m)[1]}" for m in eb["mios"]))
+                           equipo=self._equipo_al_abrir)
 
             # El nivel puede viajar como TEXTO: `max()` sobre una mezcla de
             # `"15"` y `15` lanza `'>' not supported between 'str' and 'int'`.
@@ -1260,13 +1267,30 @@ class Bot:
             # `ps_abre` de esta misma pelea lleva el de ahora. La resta entre
             # el `ps_abre` de la N y el `ps_cierra` de la N+1 es el coste de la
             # N. Es aritmética, no correlación (§5.8).
+            # **Lo que este bloque NO puede hacer** (medido, 10-10): medir el
+            # coste de la pelea. El combate se auto-resuelve con un clic de
+            # `auto-battle` y en **un solo paso**: `estado_batalla()` se lee
+            # una vez, ya empezada, y el siguiente paso esta en el mapa. O sea
+            # que el bot **nunca ve el PS despues de pelear**. Por eso
+            # `ps_abre` y `ps_cierra` dan el mismo numero en las 12 peleas de
+            # la run: no hay "despues" que leer.
+            #
+            # El dano de cada pelea es real (se ve en el `mios` de la pelea
+            # siguiente: `Bulbasaur Lv5 23/23` -> `Poliwag Lv11 9/29`), pero se
+            # acumula **fuera de la vista del bot**. Y eso es el hallazgo: el
+            # bot elige la siguiente pelea sin saber cuanto le costo la
+            # anterior.
+            #
+            # Para medirlo haria falta el PS del HUD **antes** de la pelea, que
+            # si se ve (`TRAZA_CAMINO` lo escribe en cada paso de mapa), y
+            # emparejarlo con el `mios` de la pelea siguiente. Eso es un
+            # emparejamiento por tiempo, no por numero de linea.
             abierto = self._ps_al_abrir
             if ficha and abierto is not None:
                 self.traza("ps_cierra", tipo="entrenador" if es_entrenador
                            else "salvaje", ps_total=abierto,
-                           equipo=" ".join(
-                               f"{m.get('nombre')}:{_ps_fraccion(m)[0]}/"
-                               f"{_ps_fraccion(m)[1]}" for m in eb["mios"]))
+                           equipo=getattr(self, "_equipo_al_abrir", ""),
+                           nota="estado ya empezada: no es el PS de despues")
             if ficha:
                 self.traza("combate",
                            rival=titulo[:44],
