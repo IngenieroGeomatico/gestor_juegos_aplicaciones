@@ -282,6 +282,10 @@ con horas o con un lote entero.
 7. **Un marcador que no se puede ver desde fuera no verifica nada.** El "no lo
    hago" va **fuera** del `if` que lo salta, y el peso va **dentro** del
    motivo: si el brazo A y el B imprimen la misma línea, no hay medida.
+   **Y al revés**: un marcador con una cifra **imposible** delata un bug más
+   rápido que cualquier test. El de H20 salió por aquí (`extra` valía 105
+   "combates" con un tope de 8), no leyendo el código.
+
 
 8. **Antes de declarar un bug, comprobar que el criterio del código es el que
    se cree, y que la medida propia mide lo mismo que él.** Tres hallazgos
@@ -293,6 +297,14 @@ con horas o con un lote entero.
 10. **Los lotes miden efectos; no encuentran mecanismos.** Cuatro horas de
     lote para descubrir que el cuello no era donde se miraba. Para encontrar un
     mecanismo, instrumentar: nueve líneas por run y veinte minutos.
+
+11. **Un test que monta el caso fácil tapa el bug difícil.** Los tests de H20
+    ponían el pokecentro como nodo **clicable**, donde el corte de emergencia
+    cortocircuita la lógica nueva. El caso que de verdad ocurre es el
+    pokecenter **por delante de una rama**, no en pantalla. Un test que pasa no
+    es un test que cubre: pregunta *qué caso del mundo* monta, no *qué línea
+    ejecuta*. Y antes de fiarse de una suite entera, comprobar **qué caso
+    monta**: 336 comprobaciones en verde y un bug de 42 puntos en producción.
 
 ---
 
@@ -313,9 +325,27 @@ systemd-run --user --unit=pokelike-<lote> --collect \
        log/<lote> 45 bash $RAIZ/juegos/pokelike/scripts/exp_<lote>.sh 300 Kanto 1800
 ```
 
+**Antes de nada: matar el lote anterior.** Si ya hay un Firefox vivo, las
+instancias nuevas se enganchan a su proceso y el bot juega a medias:
+
+```bash
+pkill -9 -f "scripts/jugar_pokelike.py"; pkill -9 -x firefox; pkill -9 -f firefox-bin
+```
+
+**Nunca con `pkill -f jugar_pokelike.py`**: el patrón está en la línea de órdenes
+del propio shell y se mata a sí mismo.
+
 Máquina: 7 GB y 4 núcleos. **Un run en paralelo**, nunca dos: con dos, el lote
 vive en el margen de memoria justo donde `oomd` empieza a matar.
 
 La cuenta de verdad es `ls log/<lote>/*.txt | wc -l`, **no** lo que el launcher
 diga. Las tres primeras veces el launcher anunció una cuenta que no era la
 real; la cuarta no lo detectó nadie porque no había quien mirara.
+
+### Los ficheros que entran en el hash
+
+El hash del lote se calcula sobre `scripts/*.py` y `scripts/*.sh`, **y el glob no
+es recursivo**. Por eso el código de las hipótesis cerradas está en
+`scripts/archivo/`: fuera del hash, sin poder invalidar un lote en curso, y sin
+borrar el guion con el que se lanzó cada tanda. El `README.md` de `archivo/`
+dice qué es cada cosa y por qué ya no se usa.
