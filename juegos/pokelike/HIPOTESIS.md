@@ -198,9 +198,19 @@ intervención sobre la mesa.
 > "estaba restando el centro" de "no había centro". El control también la suma:
 > esa preferencia ya estaba medida y no es lo que se está probando.
 >
-> **Guard de integridad**: `control_h20.py` aborta si ve más de 40 combates
-> por delante, que es imposible con el tope de 8. Un lote con el bug en el
-> código no puede volver a colarse en una muestra.
+> **Guard de integridad**: `control_h20.py` aborta si ve el flag H20 activo y
+> **ninguna** decisión imprime los pokecenters por delante. Ese es el
+> discriminador **estructural**: el código correcto los imprime siempre, y el
+> que los restaba dentro del coste no los imprime nunca. Medido: **0** en el
+> lote viejo, **74** en el nuevo.
+>
+> **El primer guard se hizo con un tope numérico y tiró el lote bueno.** Se
+> puso "más de 40 combates por delante es imposible" y abortó en la cuarta run
+> — del código **ya corregido** —, porque el coste no está topado en 8: es
+> `combates_por_delante` (tope 8) **más 4 por entrenador**, y los entrenadores
+> no llevan tope. Hay una rama de 52 en el lote bueno. Un guard que topa por un
+> supuesto equivocado es peor que no tener guard: mata el trabajo que sí vale
+> (§5.5). **La cifra no dice qué código se ejecutó; lo dice la estructura.**
 
 **Intervención**: con el equipo roto (algún món a 0, o media ≤ 75%), el bono de
 ruta se **da la vuelta**: la rama con menos combates por delante resta en vez
@@ -290,6 +300,13 @@ con horas o con un lote entero.
 8. **Antes de declarar un bug, comprobar que el criterio del código es el que
    se cree, y que la medida propia mide lo mismo que él.** Tres hallazgos
    seguidos cayeron por esto, y en los tres el código estaba bien.
+
+   **Y al escribir un guard: que mire la estructura, no la cifra.** El guard
+   que detecta el código viejo se puso como "más de 40 es imposible" y abortó
+   contra el código **bueno**, porque el coste es `peleas (tope 8) + 4 ×
+   entrenadores` y los entrenadores no llevan tope: hay una rama legítima de
+   52. Un guard que topa por un supuesto equivocado es peor que no tener
+   guard, porque además de no avisar **tira el trabajo que sí vale**.
 
 9. **Cuando tres hallazgos seguidos se caen por el mismo motivo, el problema
    deja de ser el hallazgo y pasa a ser el método.**

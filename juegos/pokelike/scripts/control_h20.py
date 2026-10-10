@@ -80,13 +80,20 @@ pat_mios = re.compile(r"mios=\[(.*?)\]")
 pat_mio = re.compile(r"'([^']+?)\s*Lv(\d+)',\s*'(\d+)/(\d+)'")
 pat_out = re.compile(r">>> COMBATE (GANADO|PERDIDO)")
 pat_h20 = re.compile(r"H20: rama sin gasto")
-# El mecanismo correcto imprime **cuantos pokecenters hay por delante** en el
-# mismo motivo. Con el bug, el marcador reporting `extra` entero (que incluia
-# 12 por cada centro) y restaba la cura: los valores llegaban a 88, 105 y 56
-# siendo `combates_por_delante` un maximo de 8. Si aqui sale un numero que no
-# cabe en un tope de 8, el lote es del codigo viejo y no mide nada.
+# El mecanismo correcto imprime **cuantos pokecenters hay por delante**, y ese
+# termino va **fuera** del coste. Ese es el discriminador estructural, y es el
+# que se usa: con el bug, `coste` era `extra` entero (peleas + 4x entrenador +
+# **12x pokecentro**), la cura iba restada y **nunca salia impresa**.
+#
+# **Por que no se usa un tope numerico.** Se puso un tope ("mas de 40 son
+# imposibles") y **tiraba el lote bueno**: el coste no esta topado en 8, es
+# `combates_por_delante` (topo 8) **mas 4 por entrenador**, y
+# `entrenadores_por_delante` no esta topado. Una rama con 4 entrenadores ya da
+# 16, y el lote actual tiene una de 52 con el codigo **bien**. Un numero que se
+# topa por un supuesto equivocado es un guard que mata el trabajo bueno, que es
+# peor que no tener guard (§5.5). La cifra no dice que codigo se ejecuto; lo
+# que lo dice es si la cura aparece como termino **separado**.
 pat_cura = re.compile(r"\+(\d+) pokecenter\(s\) por delante")
-pat_coste = re.compile(r"H20: rama sin gasto \((\d+(?:\.\d+)?) combate")
 
 
 def _peleas(t: str) -> list[tuple[int, int, int]]:
@@ -132,8 +139,8 @@ def leer() -> tuple[list[float], list[float], list[float], list[float], int,
     b_gan: list[float] = []
     hashes: set[str] = set()
     marcador = 0
-    coste_imposible = 0
     cura_delante = 0
+    h20 = 0
     for p in sorted(LOGS.glob("h20-*.txt")):
         m = re.match(r"h20-([AB])-", p.name)
         if not m:
@@ -147,13 +154,13 @@ def leer() -> tuple[list[float], list[float], list[float], list[float], int,
             continue
         if pat_h20.search(t):
             marcador += 1
-        # El numero de peleas por delante **no puede pasar de 8**: es el tope de
-        # `combates_por_delante`, mas 4 por entrenador. Un valor mayor solo cabe
-        # si el acumulador arrastraba los pokecenters, que era el bug.
-        for cm in pat_coste.findall(t):
-            if float(cm) > 40.0:
-                coste_imposible += 1
+        # **Discriminador estructural**: el codigo corregido imprime la cura
+        # por delante como termino separado. El buggy, no: la metia en el
+        # coste y la restaba. O sea que `cura == 0` con H20 activo significa,
+        # sin ambiguedad, que el lote es del codigo viejo.
         cura_delante += len(pat_cura.findall(t))
+        if cab.group(1) == "A" and pat_h20.search(t):
+            h20 += 1
         for vida, gano, _caido in _peleas(t):
             # La primaria: entrar con el equipo por encima de la puerta del 75%.
             entero = 1.0 if vida > 75 else 0.0
@@ -161,7 +168,7 @@ def leer() -> tuple[list[float], list[float], list[float], list[float], int,
             (a_gan if m.group(1) == "A" else b_gan).append(float(gano))
     if len(hashes) > 1:
         raise SystemExit(f"ABORTA: varios codigos en la muestra: {sorted(hashes)}")
-    return a_vida, b_vida, a_gan, b_gan, marcador, coste_imposible, cura_delante
+    return a_vida, b_vida, a_gan, b_gan, marcador, cura_delante, h20
 
 
 def ic(a: list[float], b: list[float]) -> tuple[float, float, float]:
@@ -175,21 +182,22 @@ def ic(a: list[float], b: list[float]) -> tuple[float, float, float]:
 
 
 def main() -> int:
-    a_v, b_v, a_g, b_g, marcador, imposibles, cura = leer()
+    a_v, b_v, a_g, b_g, marcador, cura, h20 = leer()
     n = min(len(a_v), len(b_v))
     print(f"[control] peleas por brazo: A={len(a_v)} B={len(b_v)}  "
           f"(miradas en {MIRADAS} peleas)")
     print(f"[control] MECANISMO: {marcador} runs de A con el marcador "
           f"'H20: rama sin gasto'")
     print(f"[control]   cura por delante sumada en el motivo: {cura} decisiones")
-    # El guard de integridad del arreglo: con el bug, `extra` arrastraba los
-    # pokecenters y salia en decenas. Si aparece, el lote mezcla el codigo
-    # viejo con el nuevo y no mide nada (ver §1.3 de HIPOTESIS.md).
-    if imposibles:
-        print(f"[control] ABORTA: {imposibles} decisiones con mas de 40 "
-              f"combates por delante. `combates_por_delante` esta topado en 8: "
-              f"eso solo cabe si el acumulador arrastra los pokecenters, que es "
-              f"el bug ya corregido. El lote es del codigo viejo.")
+    # **Guard de version del codigo.** El bug restaba la cura y la escondia
+    # dentro del coste; el codigo corregido la imprime siempre que haya un
+    # pokecentro por delante. asi que `h20 > 0 y cura == 0` no es un dato raro,
+    # es la firma del codigo viejo: el lote no mide nada.
+    if h20 and not cura:
+        print(f"[control] ABORTA: {h20} pantallas con el flag H20 y **ninguna** "
+              f"imprime los pokecenters por delante. El codigo correcto los "
+              f"imprime siempre; el que los restaba dentro del coste no los "
+              f"imprime nunca. Este lote es del codigo viejo y no mide nada.")
         return 2
     if n == 0:
         return 0
