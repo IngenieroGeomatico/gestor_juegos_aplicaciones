@@ -192,37 +192,99 @@ del listón, siempre.
 
 ### H21 · Con el equipo roto, dejar de premiar al salvaje
 
-Abierta el **10-10**, saliendo de H20 con el mecanismo ya acotado.
+**RETRACTADA antes de mirar el resultado: mecanismo inerte.** No es una
+hipótesis refutada, es una intervención que **no puede cambiar nada** en el
+escenario que pretendía atacar.
 
-**Intervención**: el bono de ruta se aplica **igual que en el control** y
-encima se resta el **salvaje** por delante (`3,5` cada uno). El trainer
-conserva su prima entera —los `4.0` por entrenador que ya van dentro de
-`coste`—.
+Se paró a las 2 runs. El marcador del flag salía (73 pantallas), pero el
+marcador dice **cuántos salvajes hay por delante**, y en el 89% eran cero:
+la rama iba a un entrenador, no a un salvaje. Con el equipo roto la pantalla
+es:
 
-**Por qué así y no al revés**: H20 enseñó que el error es tratar igual lo que
-no vale igual. La exp medida dice +2 (trainer) contra +1 (salvaje), y con la
-vida como cuello (§1.1) la cura ya se suma aparte. Lo único que sobra en el
-tramo es el **salvaje**: gasta vida y da la mitad de exp.
+| tipo de nodo | % |
+|---|---|
+| **entrenador** | **41,4%** |
+| **cura** | **41,4%** |
+| batalla (salvaje) | 7,1% |
+| item | 5,7% |
+| tutor | 4,3% |
 
-Flag `PKL_RUTA_POR_EXP`, default 0 = control.
+**Alcance real**: gate `roto` (36,9%) × ramas con salvajes (11%) = **4,1%**.
+Muy por debajo del 15% de §1.5, en la misma franja que H18 (8%), el veto por
+nivel (7%) y H19 (1,2%) — los tres que gastaron horas para nada.
 
-- **Medida (mecanismo)**: el marcador `H21: sin -N salvaje(s)` con su cuenta
-  de trainers intactos. Verificable desde el log sin ambigüedad.
-- **Medida (resultado)**: `insignias/run`. Es la única con potencia (§5.3), y
-  es la que H20 dejó a medias por ir en la dirección contraria.
-- **Alcance medido antes de lanzar**: el gate `roto` salta en el **36,9%** de
-  los pasos de mapa (152 de 412, medido sobre `TRAZA_CAMINO`, que lleva la vida
-  real). Por encima del 15% mínimo de §1.5.
-- **Declarado antes de mirar**: primaria = `insignias/run`. Con la sd de 0,44
-  medida y ~150 por brazo, se detecta un efecto de **+0,4/run**, que es menos
-  de la mitad de la brecha que H20 dejó abierta.
+**Lo que sí queda de H21**, y se conserva:
+- `salvajes_por_delante` en `politica.py`, que faltaba y separa lo que
+  `combates_por_delante` mezclaba.
+- El arreglo del bug de la cura: **la cura por delante nunca se resta**.
 
-**Lo que NO se toca**: `PESO_CAPTURA`, `PESO_ENTRENADOR`, la escalera de riesgo,
-el veto por nivel y el corte de emergencia. §1.4 dice que funcionan, y en el
-test de H21 se apagan **por separado** para que el efecto sea atribuible
-(§5.8).
+**Por qué se falló**, que es la parte que importa: monté la intervención
+sobre una medición correcta pero mal preguntada. Es cierto que el
+entrenador da **+2,00 niveles** y el salvaje **+1,00** (154 peleas
+ganadas). Pero la tasa de trainers de H20 (1,7/run vs 5,2) era un síntoma
+de otra cosa: el bot **corría más rápido**, no es que evitasse la exp. La
+exp no era el cuello.
 
-### H22 · El trade es el único atajo de nivel: ¿y si se busca más?
+> **La medición que de verdad separa, con n=155 peleas y foto de PS reales**
+> (`log/h17`, parser por bloques). En cubos de 10 puntos, que es como hay que
+> mirarla — agrupada en tres tramos, la curva parecía plana por encima del
+> 75% y no lo era:
+>
+> | vida de entrada | n | gana |
+> |---|---|---|
+> | 0–9% | 31 | **0,0%** |
+> | 20–29% | 4 | 0,0% |
+> | 30–39% | 4 | 50,0% |
+> | 40–49% | 7 | 71,4% |
+> | 50–59% | 10 | 70,0% |
+> | 60–69% | 14 | **92,9%** |
+> | 70–79% | 29 | 75,9% |
+> | 80–89% | 21 | 76,2% |
+> | 90–99% | 34 | **88,2%** |
+>
+> Es monótona y el cuello sigue siendo la vida (§1.1 confirmado con dato
+> fresco), pero **el salto grande está en 60-69%**, no en 75%. Con 0-9% el
+> bot gana **ninguna** de 31.
+
+**Y la vía de la cura está cerrada**: con trainer **y** cura en pantalla y el
+equipo roto, el bot eligió cura **26 de 26 veces (100%)**. No hay decisión
+que arreglar ahí; §1.4 decía que cura bien y es cierto.
+
+### H23 · Qué hace el bot ENTRE una cura y el gimnasio
+
+**Abierta el 10-10, y es la que toca. Instrumentar, no lanzar.**
+
+Tres mediciones cierran las vías que quedan, y por eso no hay hipótesis de
+política que lanzar ahora mismo:
+
+| vía | medición | veredicto |
+|---|---|---|
+| elegir la cura | 26 de 26 con trainer+cura a la vista y el equipo roto | **cerrada**: acierta el 100% |
+| castigar la exp (H21) | 4,1% de alcance, 89% inerte | **cerrada**: no puede fires |
+| subir el nivel (H1) | el rival está 8-11 por debajo del listón (§1.2) | **cerrada**: no hay exp |
+
+Queda una, y es la de §1.3: **no es una decisión, es la distancia**. Entre
+el pokecentro y el gimnasio hay nodos de pelea obligatoria y no hay vuelta
+atrás. El bot cura bien y aun así llega gastado.
+
+**Lo que falta es el dato, y sale instrumentando** (§5.10: los lotes miden
+efectos, no encuentran mecanismos). Una línea por paso que ya existe
+(`TRAZA_CAMINO`) tiene todo lo necesario y **no se está usando**: falta
+emparejarla con la pelea de gimnasio, que es donde se rompe.
+
+La pregunta, en una frase: **entre la última cura y la pelea de gimnasio,
+¿cuántos pasos hay y qué tipo de nodo se elige en cada uno?**
+
+Instrumentación que hace falta (nueve líneas, una por paso, sin lote):
+- `d_gym = paso_ultima_cura -> paso_gimnasio` y el tipo de nodo de cada paso
+  intermedio
+- vida del equipo **antes y después** de cada nodo intermedio
+- si el pokecentro estaba en la rama pero se pasó de largo
+
+Con eso se responde en **veinte minutos** sobre las 26 runs que ya existen,
+sin lanzar nada.
+
+### H22 · El trade es el único atajo de nivel (abierta, sin tocar): ¿y si se busca más?
 
 **Abierta, sin intervención todavía.** Es la pregunta con más rendimiento
 esperado y la menos medida.
