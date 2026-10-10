@@ -114,9 +114,10 @@ fi
 
 echo "== H21 · ruta por exp con el equipo roto | A=1 B=0 | n=$PEDIDAS en total (~$((PEDIDAS/2)) por brazo) | $REGION | hash=$HASH =="
 echo "   timeout=${TIMEOUT}s vivacidad=${VIVACIDAD}s (tick ${TICK}s) | en paralelo: $PARALELO | logs en $LOGS/$ETIQUETA"
-echo "   PRIMARIA: P(entra a la pelea de gimnasio con vida > 75%) | base medida 0,65"
-echo "   INFORMA: insignias/run, P(gana la pelea de gimnasio), P(llega con caido)"
-echo "   El mecanismo se comprueba por el marcador 'H21: rama sin gasto' en el"
+echo "   PRIMARIA: insignias/run (A-B) | sd medida 0,44 | 150 por brazo detectan +0,4"
+echo "   INFORMA: trainers/run y pasos/run -- H20 fallo por llegar antes y morir antes,"
+echo "           asi que el mecanismo exacto de H21 esta en si vuelve a pasar"
+echo "   El mecanismo se comprueba por el marcador 'H21: sin -N salvaje(s)' en el"
 echo "   motivo de la decision: si no sale, el flag no llego y nada se mide."
 
 if [ ! -f "$RAIZ/juegos/pokelike/scripts/jugar_pokelike.py" ]; then
