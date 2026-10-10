@@ -2456,6 +2456,40 @@ def test_h20_no_resta_la_cura_que_va_por_delante() -> None:
           "-> `coste`/`extra` arrastran los pokecenters: es el bug original")
 
 
+def test_la_traza_de_consume_ps() -> None:
+    """La traza de H24 tiene que **leer el campo que existe**.
+
+    El volcado de `estado_batalla()` trae la vida como **una sola cadena**
+    `"5/26"` y **no trae `ps_max`**: sale del `textContent` de `[class*=hp]`.
+    La primera versión de `_ps_fraccion` leía `m["ps_max"]`, que no existe, y
+    como el `except` devolvía 0 la suma salía **siempre 0** — con las líneas
+    de la traza perfectamente normales, que es lo peor que puede pasar: un
+    instrumento que dice "cuesta 0" y no falla.
+
+    Es la tercera vez en este repo que un campo inexistente más un `except`
+    ancho dan un número falso en silencio (el recuento de móns vivos, y ahora
+    el consumo por pelea). Por eso el test mira **el valor**, no que la función
+    exista: que devuelva `(0, 0)` para una fracción válida es el bug.
+    """
+    import jugar_pokelike as JUG
+    check("una fraccion real se lee bien",
+          JUG._ps_fraccion({"ps": "5/26"}) == (5, 26),
+          f"-> la funcion devolvio "
+          f"{JUG._ps_fraccion({'ps': '5/26'})}: el campo `ps` es una cadena "
+          f"fraccion y no hay `ps_max` en el volcado")
+    check("un món a 0 conserva su maximo",
+          JUG._ps_fraccion({"ps": "0/31"}) == (0, 31),
+          "-> sin el denominador no se puede saber cuanto costo la pelea")
+    check("basura no revienta",
+          JUG._ps_fraccion({"ps": None}) == (0, 0)
+          and JUG._ps_fraccion({"ps": "xx"}) == (0, 0),
+          "-> un valor ilegible tiene que dar 0, no lanzar")
+    fuente = Path(JUG.__file__).read_text(encoding="utf-8")
+    check("`_ps_al_abrir` nace en __init__",
+          "self._ps_al_abrir: int | None = None" in fuente,
+          "-> AttributeError en la primera pelea de la primera run")
+
+
 def test_el_prep_del_jefe_usa_el_ps_real() -> None:
     """El orden contra el jefe tiene que usar el PS **real**, no el del HUD.
 
@@ -3078,6 +3112,7 @@ def main() -> int:
     test_el_bono_de_ruta_sigue_premiando_al_control()
     test_h20_usa_el_ps_real_y_no_el_del_hud()
     test_h20_no_resta_la_cura_que_va_por_delante()
+    test_la_traza_de_consume_ps()
     test_el_prep_del_jefe_usa_el_ps_real()
     test_h21_deja_de_premiar_al_salvaje_y_no_toca_al_trainer()
     test_salvajes_y_entrenadores_se_cuentan_por_separado()

@@ -71,6 +71,34 @@ def _trade_activo() -> bool:
         "1", "true", "si", "yes")
 
 
+def _ps_fraccion(m: dict) -> tuple[int, int]:
+    """`(ps, ps_max)` de un món del volcado de combate.
+
+    El volcado de `estado_batalla()` trae la vida como **una sola cadena**
+    `"5/26"` y **no trae `ps_max`**: sale del `textContent` de `[class*=hp]`.
+    La primera versión de esta función leía `m["ps_max"]`, que no existe, y
+    con el `except` devolviendo 0 la suma salía **siempre 0** — en silencio y
+    con las líneas de la traza perfectamente normales. Ya había pasado dos
+    veces en este repo (el recuento de móns vivos y ahora el consumo por
+    pelea): un campo que no existe y un `except` ancho son un ticket a 0.
+
+    El denominador importa aunque el món esté caído: para saber cuánto costó
+    la pelea hay que compararlo con su vida máxima, no solo con lo que le
+    quedaba.
+    """
+    ps = m.get("ps")
+    if isinstance(ps, str) and "/" in ps:
+        a_txt, _, b_txt = ps.partition("/")
+        try:
+            return int(a_txt.strip() or 0), int(b_txt.strip() or 0)
+        except (TypeError, ValueError):
+            return 0, 0
+    try:
+        return int(ps or 0), int(m.get("ps_max") or 0)
+    except (TypeError, ValueError):
+        return 0, 0
+
+
 # **H19 · RETRACTADO antes de mirar un solo dato.**
 #
 # La idea era gastar el presupuesto de reroll solo con el equipo roto. Se
@@ -130,6 +158,10 @@ class Bot:
         self._trade_hecho = False
         # PS real por món, aprendido en la pantalla de combate ("0/19").
         self._ps_real: dict[str, tuple[int, int]] = {}
+        # **H24**: PS total del equipo al abrir la pelea en curso, para poder
+        # restar y saber cuánto costó. Sin esto nace AttributeError en la
+        # primera pelea.
+        self._ps_al_abrir: int | None = None
         # Quién se ha visto CAÍDO. Sobrevive a la invalidación del
         # porcentaje: un món a 0 sigue a 0 hasta que lo curan.
         self._caidos_conocidos: set[str] = set()
@@ -1157,6 +1189,29 @@ class Bot:
                     self.peleas_entrenador += 1
                 else:
                     self.peleas_salvaje += 1
+                # **H24 · dónde se va la vida, pelea a pelea.**
+                #
+                # Todo lo medido dice que la vida de ENTRADA al gimnasio es lo
+                # único que separa (0-9% gana 0 de 31; 90-99% gana el 88%), y
+                # que el bot cura bien cuando tiene la cura delante (26 de 26).
+                # Lo que **nunca** se ha medido es dónde se gasta la vida por el
+                # camino. `TRAZA_CAMINO` da la vida en cada paso de mapa, pero
+                # no qué combate la consumió, así que emparejar "consumo" con
+                # "causa" obligaba aheurística de regex y ya salió mal cuatro
+                # veces en este repo.
+                #
+                # Aquí se anota el equipo **al abrir** cada pelea. Cerrando el
+                # par con la línea de al abrir de la siguiente, cada línea dice
+                # cuánto costó ese combate exacto, y es una resta, no una
+                # correlación. Nueve líneas por run, cero CPU.
+                self._ps_al_abrir = sum(
+                    a for a, b in (_ps_fraccion(m) for m in eb["mios"]) if b)
+                self.traza("ps_abre", tipo="entrenador" if es_entrenador
+                           else "salvaje", rival=titulo,
+                           ps_total=self._ps_al_abrir,
+                           equipo=" ".join(
+                               f"{m.get('nombre')}:{_ps_fraccion(m)[0]}/"
+                               f"{_ps_fraccion(m)[1]}" for m in eb["mios"]))
 
             # El nivel puede viajar como TEXTO: `max()` sobre una mezcla de
             # `"15"` y `15` lanza `'>' not supported between 'str' and 'int'`.
@@ -1192,6 +1247,26 @@ class Bot:
             else:
                 self._pelea_volcada = firma
                 ficha = True
+            # **H24 · cierre del consumo de la pelea ANTERIOR.**
+            #
+            # Esto va aquí y no junto al `ps_abre` a propósito: `estado_batalla()`
+            # se relee en varios pasos de la misma pelea, y el `ps_cierra` tiene
+            # que corresponde a la pelea que se acaba de terminar, no a la que
+            # empieza ahora. La primera versión lo imprimió junto al `ps_abre` y
+            # salió **desplazado una pelea**, con lo que el coste medido salía
+            # 0 en todas: se comparaba el equipo consigo mismo.
+            #
+            # El `ps_cierra` lleva el PS que se vio **antes** de esta pelea; el
+            # `ps_abre` de esta misma pelea lleva el de ahora. La resta entre
+            # el `ps_abre` de la N y el `ps_cierra` de la N+1 es el coste de la
+            # N. Es aritmética, no correlación (§5.8).
+            abierto = self._ps_al_abrir
+            if ficha and abierto is not None:
+                self.traza("ps_cierra", tipo="entrenador" if es_entrenador
+                           else "salvaje", ps_total=abierto,
+                           equipo=" ".join(
+                               f"{m.get('nombre')}:{_ps_fraccion(m)[0]}/"
+                               f"{_ps_fraccion(m)[1]}" for m in eb["mios"]))
             if ficha:
                 self.traza("combate",
                            rival=titulo[:44],
