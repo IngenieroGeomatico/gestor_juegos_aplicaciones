@@ -45,6 +45,70 @@ El nivel, al lado, **casi no separa**:
 **Conclusión operativa**: entrar por debajo de nivel se acepta; entrar **gastado**
 no. Ese es el cuello, y es el único sitio donde hay algo que hacer.
 
+### 1.1-bis El cuello NO es la vida media: es tener un món a 0
+
+**§1.1 estaba mal, y el error era de agregación.** Decía "la vida del equipo
+es lo único que separa" con 934 peleas de `log/h17`. Con **1.229 peleas de
+todo el corpus** y el PS real de **cada món**, no:
+
+**Por la vida media del equipo** (lo que decía §1.1):
+
+| media al entrar | n | gana |
+|---|---|---|
+| < 75% | 685 | 49,5% |
+| ≥ 75% | 544 | **82,2%** |
+
+**Por el món que abre, medido como mínimo:**
+
+| mínimo por món | n | gana |
+|---|---|---|
+| 0–9% | 618 | 41,9% |
+| 10–19% | 42 | 85,7% |
+| 30–39% | 46 | 95,7% |
+| 60–69% | 64 | 73,4% |
+| 90–99% | 108 | 92,6% |
+
+La curva del mínimo es **casi plana por encima del 10%** (83-92%) y solo se
+hunde en el tramo 0-9%. Ese tramo tiene 618 peleas, la mitad de la muestra, y
+casi todo dentro es "hay un món a 0".
+
+**Por número de móns a 0**, que es lo que queda limpio:
+
+| caídos al entrar | n | gana |
+|---|---|---|
+| **0** | 636 | **85,7%** |
+| 1 | 257 | 65,4% |
+| 2 | 115 | 39,1% |
+| 3 | 95 | 21,1% |
+| 4 | 70 | 10,0% |
+| 5 | 30 | 3,3% |
+| 6 | 26 | **0,0%** |
+
+Sin caídos contra 1 caído: **+20,3 puntos**, se = 3,3, o sea **d = 6,2** con
+636 contra 257. Es el separador más fuerte medido en este repo, y no es el que
+se estaba mirando.
+
+**Y el control que lo confirma**: dentro de cada número de caídos, la vida
+media **no** explica nada, y sale incluso al revés:
+
+| caídos | media <75% | media ≥75% | diferencia |
+|---|---|---|---|
+| 0 | 91,2% (n=137) | 84,2% (n=499) | **−7,1** |
+| 1 | 68,8% (n=77) | 63,9% (n=180) | **−4,9** |
+| 2 | 36,2% (n=58) | 42,1% (n=57) | +5,9 |
+
+Con más vida media se gana **peor** en dos de los tres tramos. O sea que la
+media del equipo es una **mala статистика de resumen**: diluye al món que
+decide. Un equipo con cinco móns llenos y uno a 5/23 tiene media alta y es
+una pelea perdida.
+
+> **Lo que esto cambia**: `UMBRAL_PUERTA_JEFE` y `equipo_roto()` usan
+> `ratio <= 0.75` **y** `caidos >= 1`, o sea que ya miran el caído. Pero
+> `derrota_por_derrota.py` y todo lo escrito en §1.1 está en clave de
+> **media**, y por esougen la conclusión de "la vida" cuando lo que separa es
+> **el caído**. La próxima hipótesis que se abra tiene que ir contra el caído,
+> no contra la media.
+
 ### 1.2 El déficit de nivel no lo cierra ninguna política de pesos
 
 1.830 pantallas por debajo del listón (`hay_exp_que_sirva.py`):
