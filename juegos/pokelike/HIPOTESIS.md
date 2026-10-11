@@ -462,9 +462,41 @@ todas las peleas ya se pelean "con ventaja", y aun así el 35% se pierde.
 correcta como principio de orden pero **inerte contra el cuello real**, porque
 la ventaja ya está ahí en el 93% de los casos. Lo que decide es lo que ocurre
 dentro del combate (aguante, vida real al entrar, turnos), no quién abre ni el
-tipos de quien abre. La siguiente medición tiene que ir al **PS real con el
-que entra el equipo al gimnasio**, que hasta ahora solo está en 1.906 pasos de
-`paso.vida` (runs modernos) — aún insuficiente para cerrar el número.
+tipos de quien abre.
+
+### 1.8 El PS real al entrar al gimnasio (151 peleas, runs modernos)
+
+Cruzando cada pelea de gimnasio con la vida media real del paso anterior
+(`paso.vida_media`, el único dato de PS fiable):
+
+| vida media al entrar | n | gana |
+|---|---|---|
+| 95–100% | 105 | 76,2% |
+| 75–95% | 13 | 100% |
+| 50–75% | 14 | 64,3% |
+| 0–50% | 19 | 36,8% |
+
+| caídos al entrar | n | gana |
+|---|---|---|
+| sin caídos | 127 | **76,4%** |
+| con caídos | 24 | **50,0%** |
+
+**Hay dos cuellos, no uno**:
+
+1. El conocido de §1.1: entrar con caídos (o muy gastado) → se pierde la mitad.
+   El pokecenter antes del gimnasio ya está resuelto (el bot lo elige el 100%
+   de las veces que está disponible), así que este cuello es residual.
+2. **El nuevo**: con el equipo entero y al 95–100% de vida se sigue perdiendo
+   el 24%. No es vida, no es nivel, no es el orden, no son los tipos. Es la
+   pelea automática en sí, y **no se mide desde fuera**: el bot solo pulsa
+   auto-battle y lee el resultado. Para cerrarlo harían falta los turnos
+   (daño por turno), que es lo que aún no se ha instrumentado en el log.
+
+**Siguiente paso medible**: instrumentar el primer turno de cada pelea de
+gimnasio (con qué abre el rival, cuánto daño entra al abridor) para separar
+"el rival pega un 2x" de "el abridor aguanta poco". Esa es la medición que
+falta para decidir si el cuello 2 es de orden defensivo (quién abre) o de
+nivel dentro del combate.
 
 Queda descartado que el orden por ventaja de tipos arregle Misty/Erika: los
 jefes donde Bulbasaur no tiene ventaja (Surge, Koga, Sabrina, Blaine) no son
