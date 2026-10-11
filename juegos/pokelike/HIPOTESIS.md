@@ -351,22 +351,31 @@ en el paso 47, pero la traza (ground truth) muestra 0 caídos y 100%.
 **Consecuencia:** el cuello del gimnasio no es la entrada rota. Es otra cosa
 (quizá el nivel, la cobertura de tipos, o la gestión de la pelea misma).
 
-#### El hallazgo real: no hay pokecenter antes del gimnasio
+#### El cuello real: caídos al abrir la pelea
 
-En los 23 gimnasios con `ps_abre` (ground truth del texto):
+Medido sobre el corpus (3153 batallas de gimnasio):
 
-| métrica | valor |
-|---|---|
-| `cura_disp=False` (no hay pokecenter disponible) | **23/23 (100%)** |
-| `eligio=True` (el bot eligió cura antes) | 19/23 (83%) |
-| distancia al último pokecenter (mediana) | ~19 nodos |
+| gimnasio | victorias | diff_nivel | caidos_al_abrir |
+|---|---|---|---|
+| Blaine | 100% | +7.5 | **0.4** |
+| Brock | 87% | -3.4 | **0.6** |
+| Giovanni | 88% | +6.5 | **1.2** |
+| Koga | 74% | +1.5 | **1.5** |
+| Lt. Surge | 73% | +2.6 | **1.8** |
+| Misty | 54% | -1.8 | **1.5** |
+| Erika | 51% | +4.1 | **2.3** |
+| Sabrina | 66% | +9.5 | **2.5** |
 
-**El bot no puede curar justo antes del gimnasio porque no hay pokecenter
-en la ruta cercana.** El pokecenter está a ~20 nodos. Pero esto **no es el
-problema** — el bot llega sano al gimnasio.
+**El cuello no es el nivel — es cuántos móns caídos hay al abrir la pelea.**
 
-Es un problema de **diseño del mapa**, no de política del bot. No hay decisión
-que tomar: no hay pokecenter justo antes del gimnasio.
+Brock tiene el peor nivel (-3.4) pero 87% victorias (solo 0.6 caídos).
+Sabrina tiene el mejor nivel (+9.5) pero 66% victorias (2.5 caídos).
+
+**La pelea del gimnasio mata a 1-3 móns en los primeros turnos.** Eso es el
+cuello. El bot llega sano al gimnasio, pero la pelea misma es difícil.
+
+La cobertura de tipos no es medible con los datos disponibles (el pool del
+corpus solo tiene 20 Pokémon).
 
 #### El HUD miente con los caídos (el docstring tenía razón)
 
