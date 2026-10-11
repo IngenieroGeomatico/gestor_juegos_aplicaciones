@@ -273,6 +273,26 @@ a la realidad:
   `mios` (0,0%).
 - En la pantalla de mapa trae **el equipo entero**, no solo al que peleó.
 
+#### El arreglo: la traza ya lee el equipo corregido
+
+Cambio en `f995ee3`: `_traza_camino` usa `equipo_con_tipos()` (el mismo equipo
+que usa la política, con `_ps_real` y `_caidos_conocidos`) en vez de
+`self.j.equipo()`. No toca el comportamiento del bot ni un byte —solo lo que
+registra—, pero **todas las trazas anteriores al cambio están sesgadas**: el
+`caidos` y la `vida_media` que hay en `corpus.db` hasta ese commit salen de la
+barra mentirosa.
+
+Validado en una run real de la sonda (`log-2026-10-11_11-48-28_p45614.txt`),
+paso a paso contra el texto de la misma run:
+
+```
+paso  traza corregida                  texto (#player-side)         coincide
+ 16   Bulbasaur:28%  media=64          Bulbasaur 7/25               SI
+ 25   caidos=2 Clefairy:0% Paras:0%    Clefairy 0/19, Paras 0/20    SI
+      media=12
+ 9 pasos comparados: 9 coinciden (100%)
+```
+
 
 #### La cura: 100% y revive
 
