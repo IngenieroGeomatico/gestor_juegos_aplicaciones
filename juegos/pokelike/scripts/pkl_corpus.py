@@ -124,6 +124,7 @@ CREATE TABLE run (
   peleas_entrenador INTEGER, nv_entrenador INTEGER,
   peleas_salvaje INTEGER, nv_salvaje INTEGER,
   capturas INTEGER, tutores INTEGER, objetos INTEGER, centros INTEGER,
+  visitas_tutor INTEGER,
   equipo_final TEXT, equipo_final_rango TEXT, traza_path TEXT
 );
 CREATE TABLE paso (
@@ -277,9 +278,14 @@ def _miembros(cuerpo: str) -> list[dict]:
     return out
 
 
-def parsear(ruta: Path) -> dict:
-    """Todo lo de un log, en estructuras listas para insertar."""
-    rel = ruta.relative_to(LOGS)
+def parsear(ruta: Path, raiz: Path = LOGS) -> dict:
+    """Todo lo de un log, en estructuras listas para insertar.
+
+    `raiz` es la carpeta de logs, solo para calcular el lote. Recibe la ruta
+    desde `construir()` en vez de usar la constante global: con `--logs` la
+    constante apunta a otro sitio y `relative_to` reventaba.
+    """
+    rel = ruta.relative_to(raiz)
     lote = rel.parts[0] if len(rel.parts) > 1 else "(suelto)"
     run = {
         "ruta": str(rel), "archivo": ruta.name, "lote": lote,
@@ -293,6 +299,7 @@ def parsear(ruta: Path) -> dict:
         "combates_perdidos": None, "peleas_entrenador": None,
         "nv_entrenador": None, "peleas_salvaje": None, "nv_salvaje": None,
         "capturas": None, "tutores": None, "objetos": None, "centros": None,
+        "visitas_tutor": None,
         "equipo_final": None, "equipo_final_rango": None, "traza_path": None,
     }
     pasos, nodos, peleas, eventos = [], [], [], []
@@ -550,6 +557,11 @@ def _resumen_campo(run: dict, clave: str, valor: str) -> None:
         run["insignias"] = _int(valor)
     elif k in ("capturas", "tutores", "objetos", "centros"):
         run[k] = _int(valor)
+    elif k == "visitas tutor":
+        # `tutores` es cuantas veces se MOVIO un tutor de los que hay; `visitas
+        # tutor` es cuantas veces se paso por el. Son cosas distintas y el
+        # resumen las trae las dos, asi que se guardan las dos.
+        run["visitas_tutor"] = _int(valor)
     elif k == "traza":
         run["traza_path"] = valor
     elif k == "equipo":
@@ -611,7 +623,7 @@ def construir(db: Path, logs: Path = LOGS) -> dict:
     # archivaron en un lote; dejarlos fuera perdia 500 runs de un plumazo.
     rutas = sorted(logs.glob("*/*.txt")) + sorted(logs.glob("*.txt"))
     for ruta in rutas:
-        p = parsear(ruta)
+        p = parsear(ruta, logs)
         run = p["run"]
         cols = list(run.keys())
         cur.execute(f"INSERT INTO run ({','.join(cols)}) "
@@ -662,9 +674,14 @@ def construir(db: Path, logs: Path = LOGS) -> dict:
              for x in p["eventos"]])
         cont["eventos"] += len(p["eventos"])
 
-    # La sonda de DOM, si la hay, se mete aparte: no sale del log.
-    sonda_dir = Path(os.environ.get("PKL_SONDA_DOM") or "/tmp/opencode/sonda")
-    if sonda_dir.exists():
+    # La sonda de DOM, si la hay, se mete aparte: no sale del log. El env var
+    # admite varios directorios separados por `:` (se junta lo de varias runs).
+    direcciones = [d for d in (os.environ.get("PKL_SONDA_DOM")
+                               or "/tmp/opencode/sonda").split(os.pathsep) if d]
+    for direccion in direcciones:
+        sonda_dir = Path(direccion)
+        if not sonda_dir.exists():
+            continue
         for f in sorted(sonda_dir.glob("*.jsonl")):
             for ln in f.read_text(encoding="utf-8").splitlines():
                 if not ln.strip():

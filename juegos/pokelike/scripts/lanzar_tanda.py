@@ -115,6 +115,10 @@ def main() -> int:
                     help=f"cuántas runs (máximo {MAXIMO})")
     ap.add_argument("--region", default="Kanto")
     ap.add_argument("--max-pasos", type=int, default=0)
+    ap.add_argument("--tope-pasos", type=int, default=0,
+                    help="corta cada run en el paso N (0 = sin corte). Sirve "
+                         "para una tanda de prueba acotada, p.ej. una run de "
+                         "sonda de 60 pasos, sin tocar la política.")
     ap.add_argument("--pausa", type=float, default=0.25)
     ap.add_argument("--perfil", default=None,
                     help="perfil de Firefox; sin esto usa el del bot")
@@ -207,6 +211,8 @@ def main() -> int:
         "--region", args.region, "--reset",
         "--max-pasos", str(args.max_pasos), "--pausa", str(args.pausa),
     ]
+    if args.tope_pasos:
+        cmd_base += ["--tope-pasos", str(args.tope_pasos)]
     if args.perfil:
         cmd_base += ["--perfil", args.perfil]
     if args.visible:

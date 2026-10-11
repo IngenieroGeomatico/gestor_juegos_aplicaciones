@@ -139,27 +139,29 @@ y por dos motivos distintos que se han ido cayendo uno detrás de otro:
    hay rama larga, ni pelea obligatoria intermedia, ni nada que elegir. La frase
    "uno a doce nodos de pelea obligatoria" era falsa: la rama larga que el bono
    de ruta premia está **antes** del pokecentro, no después.
-2. **El "equipo roto" era en buena parte artefacto de emparejamiento.** Ver
-   §1.6. `mios` (el texto de la pelea) y la traza (la barra del mapa) se leen en
-   **momentos distintos**, y en las 4 peleas de gimnasio con traza previa donde
-   discrepan, discrepan **en las dos direcciones**: dos veces porque entre la
-   traza y la pelea hubo **una cura**, y dos veces porque **la propia pelea** se
-   llevó un món por delante.
+2. **El "equipo roto" se medía con la barra del HUD, que miente.** Ver §1.6. La
+   traza saca `caidos` de `equipo()` (`#team-bar .hp-bar-fill`), y esa barra
+   marca **100% a móns que están al 0**: leído el texto de `#player-side` en el
+   mismo volcado, 11 de 76 móns discrepan y **las 11 veces en la misma
+   dirección**. Encima, al perder, `nos quedan:` lista cinco móns al 100% en una
+   derrota 13-1. Por tanto **todo `caidos` que salga de la traza es un suelo**,
+   no una medida.
 
-Medido sobre el corpus (`corpus.db`, 97 peleas de gimnasio con traza previa),
-el estado de **entrada** es mucho mejor de lo que decía el 48,3%:
+Medido así, el estado de **entrada** no es ni el 48,3% de `mios` ni el 12,4% de
+la traza:
 
 ```
-ENTRADA con >=1 caido (traza, pantalla de mapa):  12,4%   (12 de 97)
-mios dice >=1 caido (pantalla de combate):         8,2%   ( 8 de 97)
+entrada con >=1 caído (traza, barra)   :  12,4%   (12 de 97)  <- suelo
+entrada con >=1 caído (texto, mapa)    :  31%     ( 9 de 29)  <- sonda, 1 run
+mios (combate)                         :  48,3%   <- techo: incluye bajas de la pelea
 ```
 
-Con dos avisos honestos: la muestra son 97 peleas de los 5 lotes que tienen
-traza (y todas ganadas, así que no sirve para medir victoria), y **el 48,3% de
-`76ee140` sigue en pie como predictor** —lo que no se sostiene es el relato
-causal "llega roto al gimnasio"—. Y sigue abierto qué mide exactamente `mios`,
-porque el propio bot anota en `ps_cierra`: `nota=estado ya empezada: no es el PS
-de despues`.
+Con tres avisos honestos: las muestras son pequeñas y de lotes distintos (97
+peleas de gimnasio de 5 lotes con traza, y **todas ganadas**, así que no sirven
+para medir victoria); **el 48,3% de `76ee140` sigue en pie como predictor** —lo
+que no se sostiene es el relato causal "llega roto al gimnasio"—; y `mios` sigue
+sin estar caracterizado del todo, porque el propio bot anota en `ps_cierra`:
+`nota=estado ya empezada: no es el PS de despues`.
 
 Lo que **sí** queda demostrado y es lo que ataca H20 (§4): la puerta de curación
 no se dispara cuando debería. En `log-2026-10-11_10-39-37_p14744.txt` el bot
@@ -199,38 +201,78 @@ potencia y se pierden las horas.
 
 ---
 
-### 1.6 Las DOS lecturas de PS, y el corpus en SQLite
+### 1.6 La barra del HUD MIENTE, y es la fuente de toda la traza
 
-#### El hallazgo: la traza y `mios` se leen en momentos distintos
+#### El hallazgo
 
-El bot tiene **dos** fuentes de vida y no son la misma medida:
+El bot tiene **dos** lecturas de vida:
 
-| fuente | de dónde sale | en qué pantalla está viva |
+| fuente | de dónde sale | quién la usa |
 |---|---|---|
-| traza `vida` / `caidos` | `#team-bar .hp-bar-fill`, un **ancho en %** (`equipo()`) | mapa |
-| `mios` | el **texto** de `#player-side` (`"0/35"`) | combate |
+| **la barra** | `#team-bar .hp-bar-fill`, un **ancho en %** | `navegador.equipo()` → toda la política, y la traza (`vida`, `caidos`) |
+| **el texto** | el texto de `#player-side` (`"0/35"`) | `mios`, `DEC ps_abre`, y el `lado` de la sonda |
 
 `sonda_dom` (en `jugar_pokelike.py`, apagada por defecto, se abre con
-`PKL_SONDA_DOM=<dir>`) volcó las dos lecturas **en el mismo instante** durante
-una run real. Resultado, món a món:
+`PKL_SONDA_DOM=<dir>`) lee **las dos a la vez** y guarda el HTML crudo. En 48
+volcados de una run real, leídas en el mismo instante:
 
 ```
-registros de COMBATE: 5 de 38 mons discrepan  (13%)  -> la barra del HUD se quedo a 100%
-registros de MAPA   : 14 de 61 mons discrepan  (23%)  -> el texto se quedo con lo viejo
+48 volcados: 29 en map-screen y 19 en battle-screen
+mons leídos a la vez: 76
+  discrepan: 11 (14%)  -> y las 11 SIEMPRE en la misma dirección:
+                          la barra dice 100% y el texto dice otra cosa
 ```
 
-Cada elemento solo está vivo **en su propia pantalla**. Por eso emparejar la
-traza con `mios` —que es lo que hacía el repo— compara **dos instantes**, y en
-las 4 peleas de gimnasio donde se puede comprobar discrepan en **las dos
-direcciones**. La consecuencia práctica: **ni la traza ni `mios` sirven para
-decir "con qué entraba el equipo"** salvo que se lea la pantalla correcta.
+Ejemplos, y son de las **dos** pantallas:
 
-Lo que **sí** queda claro de `mios`:
+```
+mapa  paso 54   Ivysaur   barra=100%   texto=0/49   (0%)
+mapa  paso 76   Omanyte   barra=100%   texto=6/64   (9%)
+mapa  paso 76   Staryu    barra=100%   texto=0/37   (0%)
+pelea paso 78   Staryu    barra=100%   texto=0/37   (0%)
+```
+
+**La barra marca 100% a móns que están al 0.** No es que una lectura esté en
+otro instante: están en el **mismo volcado**. Y hay una segunda prueba, fuera de
+la sonda: al perder, el log escribe `nos quedan:` con la barra, y en una derrota
+**13-1** lista los cinco móns **al 100%**.
+
+Que la barra *a veces* sí diga 0 (hay 11 lecturas al 0% en los mismos volcados)
+solo significa que el fallo es **intermitente**, que es la peor forma de fallar.
+
+#### Consecuencia 1: la traza no sirve para medir cómo llega el equipo
+
+`TRAZA_CAMINO` saca `vida` y `caidos` de `equipo()`, o sea **de la barra**. Si la
+barra esconde un caído, la traza lo esconde también. Medido en los mismos
+volcados, con el texto como referencia:
+
+```
+entrada con >=1 caído (traza, barra):   12,4%   <- lo que se venía usando
+entrada con >=1 caído (texto, mapa):      31%   (9 de 29 volcados)
+mios (combate, mezcla bajas de la pelea): 48,3%
+```
+
+Los tres números son de muestras distintas y pequeñas, pero van en el orden que
+dice el mecanismo: **la traza es un suelo y `mios` un techo.** El §1.3 corregido
+hay que leerlo con esto en la mano.
+
+#### Consecuencia 2: el bot no sabe que va roto
+
+La política decide con `equipo()`. Si `equipo()` le dice que todos están al 100%,
+`equipo_roto()` no ve nada roto y la **puerta de curación no se dispara**. Esto
+es una **hipótesis viva**, no un hecho —hay que medir cuántas decisiones
+cambiarían si `equipo()` leyera el texto— pero es coherente con lo que se ve en
+los logs: el bot entra a pelear con tres caídos y elige `batalla`.
+
+Lo que **sí** queda claro del texto (`#player-side`), que es la lectura que sigue
+a la realidad:
 
 - **No está congelado**: 3 de 4740 pares de peleas consecutivas tienen el `mios`
   idéntico (0,1%).
 - **Refleja la cura**: 0 de 961 pares con un pokecentro entre medias repiten
   `mios` (0,0%).
+- En la pantalla de mapa trae **el equipo entero**, no solo al que peleó.
+
 
 #### La cura: 100% y revive
 

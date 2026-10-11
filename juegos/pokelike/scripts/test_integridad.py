@@ -3049,6 +3049,178 @@ def test_el_trade_no_acepta_a_ciegas() -> None:
           f"-> devolvio {res!r}: se ha inventado un trade que no ha ocurrido")
 
 
+def _log_de_prueba(dir: Path, nombre: str, cuerpo: str) -> Path:
+    ruta = dir / nombre
+    ruta.parent.mkdir(parents=True, exist_ok=True)
+    ruta.write_text(cuerpo, encoding="utf-8")
+    return ruta
+
+
+# Un log sintético con los formatos **copiados literales** de un log real. Si
+# el bot cambia un formato, este test tiene que caer: es su única razón de ser.
+_LOG_CON_DERROTA = """[10:00:00] pokedex cargado: 767 especies
+[10:00:00] == brazo=test | PKL_TRADE=1 | codigo=deadbeef ==
+[10:00:00] == run Kanto | presupuesto 1500 pasos (solo para pruebas: agotado NO corta la run) ==
+[10:00:01]   [nueva_run -> True] Story
+[10:00:02]   TRAZA_CAMINO paso=6 mapa='Route 1: vs Brock (Rock)' ins=0 disp=['batalla'] vivos=1/1 caidos=0 vida_media=100% vida=['Bulbasaur:100%'] niveles=[5] elige=1 peso=193.0
+[10:00:02]   DEC nodo mapa=Route 1: vs Brock (Rock) nodo=n0_0 tipo=batalla crudo=catch atajo=1 equipo=1 vivos=1 niv=5-5 insignias=0 disponibles=catch,battle capturas_pantalla=0 razon=batalla score=193.0 (capturar: equipo de 1)
+[10:00:03]   DEC combate rival=Wild Pidgey appeared! tipo=salvaje nuestro_niv=6 rival_niv=3 nuestros=1 suyo=1 insignias=0
+[10:00:05]   estado: Wild Pidgey appeared! | niveles rivales 3-3
+[10:00:05]   enemigos=[('Pidgey Lv3', '12/12', 3)]
+[10:00:05]   mios=[('Bulbasaur Lv6', '19/19', 6)]
+[10:00:06]   >>> COMBATE GANADO (continuamos en map-screen) | 2-0
+[10:00:10]   DEC combate rival=Gym Battle vs Misty! tipo=entrenador nuestro_niv=9 rival_niv=14 nuestros=2 suyo=2 insignias=1
+[10:00:20]   estado: Gym Battle vs Misty! | niveles rivales 14-14
+[10:00:20]   enemigos=[('Staryu Lv14', '30/30', 14)]
+[10:00:20]   mios=[('Bulbasaur Lv9', '0/27', 9), ('Pidgey Lv9', '25/25', 9)]
+[10:00:30]   >>> COMBATE PERDIDO contra Gym Battle vs Misty! | nos quedan: Bulbasaur(100/100), Pidgey(100/100) | 4-1
+[10:00:31]   RESUMEN Kanto
+[10:00:31]   resultado       : GAME_OVER
+[10:00:31]   pasos           : 20
+[10:00:31]   insignias       : 1
+[10:00:31]   combates        : 1 ganados / 1 perdidos
+[10:00:31]   peleas entrain. : 1 (+2 nv)
+[10:00:31]   peleas salvaje  : 1 (+1 nv)
+[10:00:31]   capturas        : 2
+[10:00:31]   tutores         : 0
+[10:00:31]   objetos         : 1
+[10:00:31]   centros         : 1
+[10:00:31]   equipo          : 2 (9-9)
+[10:00:31]   traza           : /tmp/traza.json
+[10:00:31]   visitas tutor   : 0
+"""
+
+_SIN_RESUMEN = """[11:00:00] == run Kanto | presupuesto 1500 pasos (solo para pruebas: agotado NO corta la run) ==
+[11:00:02]   [nueva_run -> True] Story
+{
+  "region": "Kanto",
+  "pasos": 33,
+  "resultado": "PRUEBA",
+  "insignias": 2,
+  "equipo": [
+    {"n": "Bulbasaur", "lv": 11, "ps": 30},
+    {"n": "Pidgey", "lv": 14, "ps": 41}
+  ]
+}
+"""
+
+
+def test_la_ingesta_no_pierde_las_derrotas() -> None:
+    """`pkl_corpus.py`: la victoria y la derrota NO se escriben igual.
+
+    La primera versión de la ingesta daba **16.929 victorias y 0 derrotas**,
+    porque el regex solo casaba `>>> COMBATE GANADO (...) | 14-0`. La derrota
+    trae el rival y la vida: `>>> COMBATE PERDIDO contra X | nos quedan: ... |
+    6-1`. Y como una BBDD congela el parseo, el error se habría guardado con
+    toda la autoridad de una BBDD: cualquier consulta por resultado habría
+    dicho que el bot no pierde nunca.
+    """
+    import tempfile
+
+    import pkl_corpus as C
+
+    with tempfile.TemporaryDirectory() as tmp:
+        raiz = Path(tmp)
+        _log_de_prueba(raiz, "loteA/log-1.txt", _LOG_CON_DERROTA)
+        _log_de_prueba(raiz, "h21_ABORTADO_bucle/log-2.txt", _LOG_CON_DERROTA)
+        _log_de_prueba(raiz, "log-suelto.txt", _SIN_RESUMEN)
+        a = C.parsear(raiz / "loteA/log-1.txt", raiz)
+        abortado = C.parsear(raiz / "h21_ABORTADO_bucle/log-2.txt", raiz)
+        suelto = C.parsear(raiz / "log-suelto.txt", raiz)
+
+    p = a["peleas"]
+    check("la ingesta ve las DOS peleas del log", len(p) == 2, f"-> {len(p)}")
+    if len(p) != 2:
+        return
+    ganada, perdida = p[0], p[1]
+    check("la victoria se lee como GANADO", ganada["resultado"] == "GANADO",
+          f"-> {ganada['resultado']!r}")
+    check("la DERROTA se lee como PERDIDO", perdida["resultado"] == "PERDIDO",
+          f"-> {perdida['resultado']!r}: el regex solo casa la victoria")
+    check("el rival de la derrota sale de la propia linea de derrota",
+          perdida["rival_perdido"] == "Gym Battle vs Misty!",
+          f"-> {perdida['rival_perdido']!r}")
+    check("el marcador de la derrota es 4-1",
+          (perdida["marcador_a"], perdida["marcador_b"]) == (4, 1),
+          f"-> {perdida['marcador_a']}-{perdida['marcador_b']}")
+    check("el marcador de la victoria es 2-0",
+          (ganada["marcador_a"], ganada["marcador_b"]) == (2, 0),
+          f"-> {ganada['marcador_a']}-{ganada['marcador_b']}")
+    check("la victoria dice en que pantalla se continua",
+          ganada["continuamos_en"] == "map-screen",
+          f"-> {ganada['continuamos_en']!r}")
+    check("`nos quedan` se guarda (es la foto del HUD al perder)",
+          perdida["nos_quedan"] == "Bulbasaur(100/100), Pidgey(100/100)",
+          f"-> {perdida['nos_quedan']!r}")
+    check("el caido del `mios` queda con ps 0 y ps_max 27",
+          json.loads(perdida["mios"])[0]["ps"] == 0
+          and json.loads(perdida["mios"])[0]["ps_max"] == 27,
+          f"-> {perdida['mios']}")
+
+    r = a["run"]
+    check("el resultado del resumen es GAME_OVER", r["resultado"] == "GAME_OVER",
+          f"-> {r['resultado']!r}")
+    check("los pasos del resumen se leen", r["pasos"] == 20, f"-> {r['pasos']}")
+    check("las insignias del resumen se leen", r["insignias"] == 1,
+          f"-> {r['insignias']}")
+    check("ganados/perdidos se separan (no se pierde ninguno)",
+          (r["combates_ganados"], r["combates_perdidos"]) == (1, 1),
+          f"-> {r['combates_ganados']}/{r['combates_perdidos']}")
+    check("las peleas de entrenador traen su experiencia",
+          (r["peleas_entrenador"], r["nv_entrenador"]) == (1, 2),
+          f"-> {r['peleas_entrenador']} (+{r['nv_entrenador']} nv)")
+    check("las peleas salvajes traen su experiencia",
+          (r["peleas_salvaje"], r["nv_salvaje"]) == (1, 1),
+          f"-> {r['peleas_salvaje']}")
+    check("el equipo final se separa del rango de niveles",
+          (r["equipo_final"], r["equipo_final_rango"]) == (2, "9-9"),
+          f"-> {r['equipo_final']} {r['equipo_final_rango']!r}")
+    check("`visitas tutor` no se pierde", r["visitas_tutor"] == 0,
+          f"-> {r['visitas_tutor']!r}")
+    check("la traza se cuenta", r["tiene_traza"] == 1 and len(a["pasos"]) == 1,
+          f"-> traza={r['tiene_traza']} pasos={len(a['pasos'])}")
+    check("un lote normal es valido", r["valido"] == 1, f"-> {r['valido']}")
+    check("un lote ABORTADO queda marcado como no valido",
+          abortado["run"]["valido"] == 0,
+          "-> un lote ABORTADO volveria a colarse en una media (h21)")
+    check("el lote se guarda tal cual", r["lote"] == "loteA", f"-> {r['lote']!r}")
+    check("los logs sueltos de arriba no se pierden",
+          suelto["run"]["lote"] == "(suelto)", f"-> {suelto['run']['lote']!r}")
+
+    s = suelto["run"]
+    check("sin RESUMEN, el JSON final da el resultado",
+          s["resultado"] == "PRUEBA", f"-> {s['resultado']!r}")
+    check("sin RESUMEN, el JSON final da los pasos y las insignias",
+          (s["pasos"], s["insignias"]) == (33, 2),
+          f"-> {s['pasos']} pasos, {s['insignias']} insignias")
+    check("sin RESUMEN, el equipo final sale del JSON",
+          s["equipo_final"] == 2 and s["equipo_final_rango"] == "11-14",
+          f"-> {s['equipo_final']} {s['equipo_final_rango']!r}")
+    check("el JSON final se guarda entero para no rederivarlo",
+          s["fin_json"] is not None and '"PRUEBA"' in s["fin_json"],
+          "-> sin el JSON habria que reparsear los logs para cada pregunta")
+
+
+def test_la_ingesta_no_revienta_con_una_linea_rara() -> None:
+    """`_tipo_generico` se comía un `ValueError` con un log sin dos puntos.
+
+    Venía de `re.split(r"[ :]", txt, 1)`, que en Python 3.14 avisa por
+    posicional; el tercer argumento es `maxsplit` solo si se nombra.
+    """
+    import pkl_corpus as C
+
+    check("una linea sin espacios no revienta el clasificador",
+          C._tipo_generico("CUALQUIERCOSA") == "CUALQUIERCOSA",
+          f"-> {C._tipo_generico('CUALQUIERCOSA')!r}")
+    check("una linea con espacios se corta por el primero",
+          C._tipo_generico("algo pasa aqui") == "algo",
+          f"-> {C._tipo_generico('algo pasa aqui')!r}")
+    _run: dict = {"visitas_tutor": None}
+    C._resumen_campo(_run, "visitas tutor.", "7")
+    check("`visitas tutor.` con punto final tambien se lee",
+          _run["visitas_tutor"] == 7, f"-> {_run['visitas_tutor']!r}")
+
+
 def main() -> int:
     test_la_etiqueta_de_version_va_en_el_log()
     test_sacar_el_tipo_repetido()
@@ -3130,6 +3302,8 @@ def main() -> int:
     test_las_peleas_se_cuentan_sin_muestreo()
     test_capturar_es_mas_barato_que_rechazar()
     test_el_volcado_de_combate_normaliza_el_nivel()
+    test_la_ingesta_no_pierde_las_derrotas()
+    test_la_ingesta_no_revienta_con_una_linea_rara()
     test_no_hay_codigo_muerto()
 
     for o in OKS:
