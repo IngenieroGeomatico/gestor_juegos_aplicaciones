@@ -299,7 +299,19 @@ class Bot:
         Se registra SIEMPRE, no solo cuando hay caidos: el caso interesante es ver
         la vida justo despues de curar y cuanto se gasta despues.
         """
-        equipo = self.j.equipo()
+        # **`equipo_con_tipos()`, no `self.j.equipo()`.** La barra del HUD marca
+        # 100% a un mon caido (lo dice el propio docstring de `_apuntar_ps_real`,
+        # y la sonda lo midio: 11 de 76 mones leidos en el MISMO volcado, y las
+        # 11 veces la barra decia 100% mientras el texto de `#player-side` decia
+        # `0/49`, `6/64` o `0/37`). Al perder sale tambien a la vista: `nos
+        # quedan:` lista cinco mones al 100% en una derrota 13-1.
+        #
+        # La traza sacaba `vida` y `caidos` de la barra cruda, asi que
+        # **subestimaba los caidos** y todo lo medido con ella salia sesgado
+        # (el "12,4% entra roto al gimnasio" era un suelo artificial). La
+        # politica ya usa la version corregida desde `equipo_con_tipos()`: la
+        # traza era el unico sitio que seguia leyendo el dato malo.
+        equipo = self.equipo_con_tipos()
         vida = []
         niveles = []
         caidos = 0

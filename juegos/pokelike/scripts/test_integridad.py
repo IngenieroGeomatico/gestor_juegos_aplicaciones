@@ -3221,6 +3221,31 @@ def test_la_ingesta_no_revienta_con_una_linea_rara() -> None:
           _run["visitas_tutor"] == 7, f"-> {_run['visitas_tutor']!r}")
 
 
+def test_la_traza_no_lee_la_barra_cruda() -> None:
+    """`TRAZA_CAMINO` no puede volver a leer `self.j.equipo()`.
+
+    Esa es la barra del HUD, y la sonda midió que marca **100% a un món que
+    está al 0** (11 de 76 móns leídos en el mismo volcado, las 11 veces en esa
+    dirección; y `nos quedan:` con cinco móns al 100% en una derrota 13-1). La
+    política ya usaba la versión corregida desde `equipo_con_tipos()`, pero la
+    traza se quedó con el dato crudo: subestimaba los caídos y todo lo medido
+    con ella salía sesgado.
+    """
+    fuente = (SCRIPTS / "jugar_pokelike.py").read_text(encoding="utf-8")
+    cuerpo = fuente.split("def _traza_camino", 1)[1].split("\n    def ", 1)[0]
+    # Sin comentarios: el comentario del arreglo **cita** `self.j.equipo()`
+    # para explicar por qué no se usa, y el test se disparaba con su propia
+    # explicación.
+    codigo = "\n".join(ln for ln in cuerpo.splitlines()
+                       if not ln.strip().startswith("#"))
+    check("la traza lee el equipo corregido",
+          "equipo_con_tipos()" in codigo,
+          "-> la traza vuelve a leer la barra cruda, que marca 100% a un caído")
+    check("la traza ya no llama a self.j.equipo()",
+          "self.j.equipo()" not in codigo,
+          "-> `self.j.equipo()` es el porcentaje de la barra, no la vida real")
+
+
 def main() -> int:
     test_la_etiqueta_de_version_va_en_el_log()
     test_sacar_el_tipo_repetido()
@@ -3304,6 +3329,7 @@ def main() -> int:
     test_el_volcado_de_combate_normaliza_el_nivel()
     test_la_ingesta_no_pierde_las_derrotas()
     test_la_ingesta_no_revienta_con_una_linea_rara()
+    test_la_traza_no_lee_la_barra_cruda()
     test_no_hay_codigo_muerto()
 
     for o in OKS:
