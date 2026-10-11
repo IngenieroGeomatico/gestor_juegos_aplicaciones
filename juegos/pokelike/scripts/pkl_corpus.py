@@ -676,6 +676,17 @@ def construir(db: Path, logs: Path = LOGS) -> dict:
 
     # La sonda de DOM, si la hay, se mete aparte: no sale del log. El env var
     # admite varios directorios separados por `:` (se junta lo de varias runs).
+    #
+    # **Asociar la sonda a su run por el PID.** Los archivos de sonda se llaman
+    # `sonda_<pid>.jsonl` y los logs `log-<fecha>_<pid>.txt`, así que el PID es
+    # la clave. Sin esto, `sonda.run_id` iba a NULL y no se podía cruzar el
+    # volcado de DOM con el corpus.
+    por_pid: dict[str, int] = {}
+    for rid, archivo in cur.execute("SELECT id, archivo FROM run"):
+        m = re.search(r"_p(\d+)\.txt$", archivo or "")
+        if m:
+            por_pid[m.group(1)] = rid
+
     direcciones = [d for d in (os.environ.get("PKL_SONDA_DOM")
                                or "/tmp/opencode/sonda").split(os.pathsep) if d]
     for direccion in direcciones:
@@ -683,6 +694,8 @@ def construir(db: Path, logs: Path = LOGS) -> dict:
         if not sonda_dir.exists():
             continue
         for f in sorted(sonda_dir.glob("*.jsonl")):
+            m = re.search(r"sonda_p(\d+)\.jsonl$", f.name)
+            rid = por_pid.get(m.group(1)) if m else None
             for ln in f.read_text(encoding="utf-8").splitlines():
                 if not ln.strip():
                     continue
@@ -694,7 +707,7 @@ def construir(db: Path, logs: Path = LOGS) -> dict:
                     "INSERT INTO sonda (run_id,etiqueta,paso,pantalla,hora,"
                     "barra,lado,enemigos,barra_html,lado_html) VALUES "
                     "(?,?,?,?,?,?,?,?,?,?)",
-                    (None, r.get("etiqueta"), r.get("paso"), r.get("pantalla"),
+                    (rid, r.get("etiqueta"), r.get("paso"), r.get("pantalla"),
                      r.get("hora"),
                      json.dumps(r.get("barra"), ensure_ascii=False),
                      json.dumps(r.get("lado"), ensure_ascii=False),
