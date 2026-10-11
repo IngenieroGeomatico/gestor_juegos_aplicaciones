@@ -395,9 +395,80 @@ Bulbasaur (Planta/Veneno) es débil contra:
 - Misty (Agua): Planta es débil contra Agua (x2)
 - Erika (Planta): Veneno es débil contra Planta (x2)
 
-**El cuello del gimnasio es el orden del equipo: Bulbasaur abre y es débil
-contra el líder.** La solución sería cambiar el orden para que otro món abra,
-o capturar un món fuerte contra el líder.
+#### "Bulbasaur abre y es débil" queda REFUTADO por el chart del juego
+
+El chart de Pokelike NO es el oficial Gen6. Medido fila a fila, Bulbasaur
+(Planta/Veneno) contra los jefes de Kanto:
+
+| Jefe | Multiplicadores | ¿Ventaja? |
+|---|---|---|
+| Brock (Roca) | Grass x2 | ✅ |
+| Misty (Agua) | **Grass x2** | ✅ |
+| Lt. Surge (Eléctrico) | x1 | ❌ |
+| Erika (Planta) | **Poison x2** | ✅ |
+| Koga (Veneno) | x0.5 | ❌ |
+| Sabrina (Psíquico) | x1 | ❌ |
+| Blaine (Fuego) | Grass x0.5 | ❌ |
+| Giovanni (Tierra) | Grass x2 | ✅ |
+
+Bulbasaur tiene ventaja **exactamente contra los dos cuellos medidos** (Misty,
+Erika). La premisa "abre y es débil contra el líder" es falsa en tipos; el
+cuello del gimnasio no es la ventaja de tipos del abridor.
+
+#### La estrategia "solo pelear con ventaja": alcance real medido
+
+El usuario propuso reservar a Bulbasaur cuando no tiene ventaja. Implementado
+en `politica.py`: `_reservar_sin_ventaja()` (pone al final a los móns sin
+ventaja de tipos contra el rival), integrado en `orden_para_entrenador` y con
+test en `test_integridad.py` (387 correctas).
+
+Medido sobre el corpus (derrotas de gimnasio con Bulbasaur en `mios`, caído
+al abrir):
+
+| métrica | valor |
+|---|---|
+| derrotas Gym con Bulbasaur | 199 |
+| **caído al abrir** | **131** |
+| de esas, contra Brock/Misty (Bulbasaur con ventaja x2) | **129** |
+| contra líderes sin ventaja (Koga/Blaine…) | 2 |
+
+**La reserva por ventaja no habría salvado 129 de las 131 caídas**: Bulbasaur
+cae *teniendo* ventaja de tipos. Dos lecturas posibles, ambas medibles:
+
+- *H-a*: el abridor sufre el primer golpe aunque tenga ventaja ofensiva → la
+  cura no es el orden, es quién aguanta el 2x de vuelta (ver §1.6 "caídos al
+  abrir" por gimnasio y nivel).
+- *H-b*: el cuello real es el nivel/aguante del equipo al llegar, no el abridor.
+
+### 1.7 El cuello del gimnasio, medido sobre 513 peleas de Kanto
+
+Las tres mediciones juntas cierran el diagnóstico:
+
+**(1) El equipo llega entero casi siempre.** De las 513 peleas de gimnasio con
+Bulbasaur en el equipo, en **442 (86,2%) el equipo estaba entero en pie** al
+elegir el nodo. De esas, gana el 67,0%. El bot no llega al gimnasio roto: el
+cuello **no** es llegar gastado.
+
+**(2) Cuando Bulbasaur cae, cae sin motivo de tipos.** En 80 de esas 442
+(18,1%), Bulbasaur cae al abrir **a pesar de que el equipo entero estaba en
+pie** y de tener ventaja x2 contra el líder.
+
+**(3) La ventaja de tipos del abridor casi siempre ya está cubierta.** En las
+peleas de gimnasio donde se sabe el tipo del líder, el abridor tiene x2 en 486
+casos y gana el 64,6%; tiene x1 en 33 casos y gana el 51,5%. Es decir: casi
+todas las peleas ya se pelean "con ventaja", y aun así el 35% se pierde.
+
+**Conclusión operativa**: la reserva por ventaja de tipos (implementada) es
+correcta como principio de orden pero **inerte contra el cuello real**, porque
+la ventaja ya está ahí en el 93% de los casos. Lo que decide es lo que ocurre
+dentro del combate (aguante, vida real al entrar, turnos), no quién abre ni el
+tipos de quien abre. La siguiente medición tiene que ir al **PS real con el
+que entra el equipo al gimnasio**, que hasta ahora solo está en 1.906 pasos de
+`paso.vida` (runs modernos) — aún insuficiente para cerrar el número.
+
+Queda descartado que el orden por ventaja de tipos arregle Misty/Erika: los
+jefes donde Bulbasaur no tiene ventaja (Surge, Koga, Sabrina, Blaine) no son
+los cuellos (Erika 51%, Misty 54% son los peores y tienen ventaja).
 
 #### El HUD miente con los caídos (el docstring tenía razón)
 

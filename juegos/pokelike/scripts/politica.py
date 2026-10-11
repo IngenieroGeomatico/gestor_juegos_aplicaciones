@@ -1002,7 +1002,8 @@ def orden_para_entrenador(equipo: list[dict], tipos_rival: list[str],
     con_puntos.sort(
         key=lambda x: (x[0], x[1], x[2], x[3], x[4], x[5], x[6]),
         reverse=True)
-    return [x[7].get("nombre") or "" for x in con_puntos if x[7].get("nombre")]
+    candidatos = [x[7] for x in con_puntos if x[7].get("nombre")]
+    return _reservar_sin_ventaja(candidatos, tipos_rival)
 
 
 def _reservar_heridos(candidatos: list[dict]) -> list[str]:
@@ -1025,6 +1026,37 @@ def _reservar_heridos(candidatos: list[dict]) -> list[str]:
         ratio_m = (m.get("ps") or 0) / max(m.get("ps_max") or 0, 1)
         (heridos_orden if ratio_m < 0.5 else sanos_orden).append(m)
     return [m.get("nombre") or "" for m in sanos_orden + heridos_orden]
+
+
+def _reservar_sin_ventaja(candidatos: list[dict], tipos_rival: list[str],
+                          chart: dict | None = None) -> list[str]:
+    """Mete al final a los móns que NO tienen ventaja contra el rival.
+
+    Extensión de `_reservar_heridos`: no solo se reserva a los heridos,
+    sino también a los que no tienen ventaja de tipos. Así Bulbasaur no
+    abre contra Misty (Agua) ni contra Erika (Planta/Veneno): otro món
+    abre, y Bulbasaur entra último, donde gana experiencia sin riesgo.
+
+    `chart[atacante][defensor]` es el multiplicador de daño del juego.
+    """
+    if not tipos_rival:
+        return [m.get("nombre") or "" for m in candidatos if m.get("nombre")]
+    if chart is None:
+        chart_path = Path(__file__).resolve().parents[1] / "data/chart_juego.json"
+        chart = json.loads(chart_path.read_text(encoding="utf-8"))
+    con_ventaja: list[dict] = []
+    sin_ventaja: list[dict] = []
+    for m in candidatos:
+        if not m:
+            continue
+        tipos_m = m.get("tipos") or []
+        if not tipos_m:
+            sin_ventaja.append(m)
+            continue
+        # ¿Tiene ventaja? chart[tipo_m][tipo_rival] > 1
+        tiene = any(chart.get(t, {}).get(r, 1) > 1 for t in tipos_m for r in tipos_rival)
+        (con_ventaja if tiene else sin_ventaja).append(m)
+    return [m.get("nombre") or "" for m in con_ventaja + sin_ventaja]
 
 
 def orden_deseado(equipo: list[dict], insignias: int, region: str,

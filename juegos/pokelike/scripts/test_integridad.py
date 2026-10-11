@@ -3246,6 +3246,43 @@ def test_la_traza_no_lee_la_barra_cruda() -> None:
           "-> `self.j.equipo()` es el porcentaje de la barra, no la vida real")
 
 
+def test_reservar_sin_ventaja_pone_al_final() -> None:
+    """`_reservar_sin_ventaja`: el món sin ventaja va último.
+
+    El chart del juego NO es el oficial Gen6: en Pokelike Grass->Water es x2
+    y Grass->Rock es x2. Bulbasaur (Planta/Veneno) tiene ventaja contra Agua
+    y Roca, pero NO contra Fuego (Grass->Fire es x0.5).
+
+    Pikachu (Eléctrico) NO tiene ventaja contra Roca (Electric->Rock x1).
+    """
+    import politica as PP
+
+    chart = json.loads(
+        (SCRIPTS.parent / "data/chart_juego.json").read_text(encoding="utf-8")
+    )
+
+    equipo = [
+        {"nombre": "Bulbasaur", "tipos": ["Grass", "Poison"], "ps": 30, "ps_max": 30},
+        {"nombre": "Pikachu", "tipos": ["Electric"], "ps": 30, "ps_max": 30},
+    ]
+
+    # Contra Roca: Bulbasaur tiene ventaja (Grass->Rock x2), Pikachu no
+    orden_roca = PP._reservar_sin_ventaja(equipo, ["Rock"], chart)
+    check("Bulbasaur va primero contra Roca",
+          orden_roca[0] == "Bulbasaur",
+          f"-> {orden_roca}: Grass->Rock es x2, tiene que abrir")
+    check("Pikachu va al final contra Roca",
+          orden_roca[-1] == "Pikachu",
+          f"-> {orden_roca}: Electric->Rock es x1, no tiene ventaja")
+
+    # Contra Agua: ambos tienen ventaja en el chart del juego
+    # (Grass->Water x2 y Electric->Water x2), así que se mantiene el orden
+    orden_agua = PP._reservar_sin_ventaja(equipo, ["Water"], chart)
+    check("Contra Agua se mantiene el orden (ambos con ventaja)",
+          orden_agua == ["Bulbasaur", "Pikachu"],
+          f"-> {orden_agua}: Grass->Water y Electric->Water son x2")
+
+
 def test_invariantes_de_ingesta() -> None:
     """La BBDD tiene que cuadrar consigo misma.
 
@@ -3442,6 +3479,7 @@ def main() -> int:
     test_la_ingesta_no_pierde_las_derrotas()
     test_la_ingesta_no_revienta_con_una_linea_rara()
     test_la_traza_no_lee_la_barra_cruda()
+    test_reservar_sin_ventaja_pone_al_final()
     test_invariantes_de_ingesta()
     test_no_hay_codigo_muerto()
 
