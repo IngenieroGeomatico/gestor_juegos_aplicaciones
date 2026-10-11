@@ -183,9 +183,14 @@ def main() -> int:
 
     if not args.sin_humo:
         print("prueba de humo (12 pasos) antes de gastar la tanda...")
+        # El humo usa `--tope-pasos` (duro) y NO `--max-pasos` (blando). Con
+        # `--max-pasos 12` la partida seguia jugando — es un presupuesto, no un
+        # corte — y el `timeout` mataba el proceso a los 420 s con la prueba a
+        # medias, abortando la tanda entera. Medido: una prueba de humo llego al
+        # paso 77 y murio en el `prep` de Lt. Surge.
         humo = subprocess.run(
             [sys.executable, "-u", str(SCRIPT), "--region", args.region,
-             "--reset", "--max-pasos", "12", "--pausa", "0.2"]
+             "--reset", "--tope-pasos", "12", "--pausa", "0.2"]
             + (["--perfil", args.perfil] if args.perfil else []),
             capture_output=True, text=True, timeout=420)
         salida = (humo.stdout or "") + (humo.stderr or "")

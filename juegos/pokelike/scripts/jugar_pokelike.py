@@ -331,6 +331,9 @@ class Bot:
             f"vivos={len(equipo) - caidos}/{len(equipo)} caidos={caidos} "
             f"vida_media={media:.0f}% vida={vida} niveles={niveles} "
             f"elige={d.valor} peso={peso}")
+        # Sonda: la lectura de mapa, en el momento exacto de la traza, para
+        # emparejarla con la de la pelea por HORA y no por linea.
+        self._sonda_dom("mapa")
 
     def anotar(self, d: P.Decision) -> None:
         self.decisiones.append(str(d))
@@ -1140,6 +1143,78 @@ class Bot:
         if motivo in ("pokecenter", "swap"):
             self._caidos_conocidos.clear()
 
+    def _sonda_dom(self, etiqueta: str) -> None:
+        """Sonda de PS: vuelca las DOS lecturas del mismo dato, a la vez.
+
+        Es un diagnostico de una sola pregunta, abierto con
+        `PKL_SONDA_DOM=<directorio>` y **apagado por defecto**. Solo escribe:
+        no toca ninguna decision.
+
+        Por que existe: la traza de mapa lee `#team-bar .hp-bar-fill` y saca un
+        **ancho en %** (`equipo()`), mientras que `mios` lee el **texto** de
+        `#player-side` ("0/35"). En la pelea de Misty de `log/h24/h24-1.txt`
+        los dos discrepan sobre el mismo mon:
+
+            traza (mapa):  Pikachu:100%
+            mios (pelea):  ('Pikachu Lv15', '0/35')
+
+        Y un mon a 0 no se rellena solo, asi que **uno de los dos miente**. Las
+        dos medidas se hacen desde sitios distintos y en pantallas distintas,
+        asi que emparejarlas por el log es justo el emparejamiento fragil que
+        ha fallado cuatro veces en este repo. Aqui se leen en el mismo instante
+        y se guarda el HTML crudo, para no volver a adivinar selectores.
+        """
+        destino = os.environ.get("PKL_SONDA_DOM")
+        if not destino:
+            return
+        try:
+            datos = self.j.page.evaluate(
+                r"""() => {
+                  const txt = (e) => (e ? (e.textContent || '').trim() : '');
+                  const bar = document.getElementById('team-bar');
+                  const delBar = bar ? [...bar.querySelectorAll('.team-slot')].map(s => {
+                    const hp = s.querySelector('.hp-bar-fill');
+                    return {
+                      nombre: (s.querySelector('.team-sprite')?.getAttribute('alt'))
+                              || txt(s.querySelector('.team-slot-name')),
+                      ancho: hp ? (hp.getAttribute('style') || '') : null,
+                      hp_texto: txt(s.querySelector('[class*=hp]')),
+                      lv: txt(s.querySelector('.team-slot-lv')),
+                    };
+                  }) : [];
+                  const lado = document.getElementById('player-side');
+                  const delLado = lado ? [...lado.querySelectorAll('[class*=mon], .team-slot')].map(e => ({
+                    nombre: txt(e.querySelector('[class*=name]')),
+                    hp: txt(e.querySelector('[class*=hp]')),
+                    lv: txt(e.querySelector('[class*=lvl],[class*=level]')),
+                    clase: e.className,
+                  })) : [];
+                  const ene = document.getElementById('enemy-side');
+                  const delEne = ene ? [...ene.querySelectorAll('[class*=mon]')].map(e => ({
+                    nombre: txt(e.querySelector('[class*=name]')),
+                    hp: txt(e.querySelector('[class*=hp]')),
+                  })) : [];
+                  return {
+                    barra: delBar, lado: delLado, enemigos: delEne,
+                    barra_html: bar ? bar.outerHTML : null,
+                    lado_html: lado ? lado.outerHTML : null,
+                  };
+                }""")
+        except Exception as exc:  # noqa: BLE001
+            self.log(f"  sonda dom no legible: {exc}")
+            return
+        try:
+            ruta = Path(destino)
+            ruta.mkdir(parents=True, exist_ok=True)
+            reg = {"etiqueta": etiqueta, "paso": self.pasos,
+                   "pantalla": self.j.pantalla(),
+                   "hora": time.strftime("%H:%M:%S"), **datos}
+            with (ruta / f"sonda_p{os.getpid()}.jsonl").open(
+                    "a", encoding="utf-8") as f:
+                f.write(json.dumps(reg, ensure_ascii=False) + "\n")
+        except OSError as exc:
+            self.log(f"  sonda dom no escrita: {exc}")
+
     def _batalla(self) -> str:
         d = P.decidir_batalla(self.j.visible("#btn-auto-battle"))
         self.anotar(d)
@@ -1219,6 +1294,9 @@ class Bot:
                            else "salvaje", rival=titulo,
                            ps_total=self._ps_al_abrir,
                            equipo=self._equipo_al_abrir)
+                # Sonda: en el MISMO instante en que se lee `mios`, para poder
+                # comparar su texto con lo que dice la barra del HUD.
+                self._sonda_dom("pelea")
 
             # El nivel puede viajar como TEXTO: `max()` sobre una mezcla de
             # `"15"` y `15` lanza `'>' not supported between 'str' and 'int'`.
@@ -2806,7 +2884,8 @@ class Bot:
                 self.log(f"  !! recarga fallo: {exc}")
         return False
 
-    def jugar(self, max_pasos: int, pausa: float = 0.5) -> None:
+    def jugar(self, max_pasos: int, pausa: float = 0.5,
+              tope_pasos: int = 0) -> None:
         # **R1 (regla del usuario): la run nunca se corta automaticamente.**
         # Solo termina por perdida (`GAME_OVER`) o por completar la region
         # (`CHAMPION`). Ni el presupuesto de pasos ni un atasco la cortan: un
@@ -2858,7 +2937,23 @@ class Bot:
         # pasos, si se pasa, **no** termina la partida: deja de contar pasos y
         # sigue jugando. Antes `--max-pasos` cortaba la partida a mitad con
         # `PRESUPUESTO_AGOTADO`, que no es ganar ni perder.
+        # **Tope duro solo para pruebas.** R1 dice que la run de verdad no se
+        # corta sola, y se mantiene: `max_pasos` sigue siendo un presupuesto
+        # blando. Pero eso rompia la prueba de humo de `lanzar_tanda.py`, que
+        # lanzaba `--max-pasos 12` esperando que la partida acabara ahi: como
+        # ya no la corta, el humo seguia jugando hasta que el `timeout` de
+        # 420 s mataba el proceso, y **la tanda entera se abortaba** con la
+        # prueba a medias. Medido: una prueba de humo llego al paso 77 y murio
+        # en el `prep` del gimnasio de Lt. Surge.
+        #
+        # `tope_pasos` es la escotilla que faltaba: corta la *prueba*, no la
+        # run. Solo lo usa `lanzar_tanda.py` para el humo, con 0 = sin tope.
         while self.resultado == "EN_CURSO":
+            if tope_pasos and self.pasos >= tope_pasos:
+                self.log(f"== prueba: tope duro de {tope_pasos} pasos "
+                         f"(no es un final de partida) ==")
+                self.resultado = "PRUEBA"
+                break
             try:
                 hecho = self.paso()
             except Exception as exc:  # noqa: BLE001
@@ -3065,7 +3160,8 @@ def _barra(i: int, total: int, ancho: int = 24) -> str:
     return "#" * llenos + "-" * (ancho - llenos)
 
 
-def seguir_en_vivo(bot, max_pasos: int, pausa: float, cada: int) -> None:
+def seguir_en_vivo(bot, max_pasos: int, pausa: float, cada: int,
+                   tope_pasos: int = 0) -> None:
     """Juega la partida enseñando el log en directo, pantalla a pantalla.
 
     No es un `tail -f`: el bot va escribiendo en `juegos/pokelike/log/log-<pid>.txt` y aquí se
@@ -3077,6 +3173,11 @@ def seguir_en_vivo(bot, max_pasos: int, pausa: float, cada: int) -> None:
     visto = 0
     # R1: en vivo tampoco se corta por presupuesto, igual que `jugar()`.
     while bot.resultado == "EN_CURSO":
+        if tope_pasos and bot.pasos >= tope_pasos:
+            bot.log(f"== prueba: tope duro de {tope_pasos} pasos "
+                    f"(no es un final de partida) ==")
+            bot.resultado = "PRUEBA"
+            break
         bot.paso()
         if bot.pasos % max(1, cada) != 0 and bot.resultado == "EN_CURSO":
             time.sleep(pausa)
@@ -3128,10 +3229,17 @@ def principal() -> int:
                          "(modo normal en el bot: sin ventana, en headless)")
     ap.add_argument("--max-pasos", type=int, default=0,
                     help="0 = sin presupuesto: la partida acaba sola "
-                         "(ganar, perder o atascarse). Un numero positivo es "
-                         "un tope de pasos que corta la partida sin que esta "
-                         "haya terminado.")
+                         "(ganar, perder o atascarse). Un numero positivo solo "
+                         "avisa de un presupuesto: **no corta la run** (regla "
+                         "R1). Para cortar de verdad una prueba, usar "
+                         "--tope-pasos.")
     ap.add_argument("--pausa", type=float, default=0.5, help="segundos entre pasos")
+    ap.add_argument("--tope-pasos", type=int, default=0, metavar="N",
+                    help="corta la partida en el paso N (0 = sin tope). Es un "
+                         "tope DURO pensado solo para pruebas cortas: a "
+                         "diferencia de --max-pasos, que es un presupuesto "
+                         "blando y no corta la run, este sí la corta y deja el "
+                         "resultado en PRUEBA. Lo usa el humo de lanzar_tanda.")
     ap.add_argument("--silencioso", action="store_true", help="no imprime el progreso")
     ap.add_argument("--reset", action="store_true",
                     help="juega en un perfil temporal: run nueva desde cero")
@@ -3170,9 +3278,10 @@ def principal() -> int:
         bot.pokedex = juego.pokedex()
         bot.log(f"pokedex cargado: {len(bot.pokedex)} especies")
         if args.seguir:
-            seguir_en_vivo(bot, args.max_pasos, args.pausa, args.seguir)
+            seguir_en_vivo(bot, args.max_pasos, args.pausa, args.seguir,
+                           args.tope_pasos)
         else:
-            bot.jugar(args.max_pasos, args.pausa)
+            bot.jugar(args.max_pasos, args.pausa, args.tope_pasos)
         print(json.dumps(bot.resumen(), ensure_ascii=False, indent=2))
         return 0 if bot.resultado == "CHAMPION" else 1
     finally:

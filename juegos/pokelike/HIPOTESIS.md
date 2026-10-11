@@ -127,24 +127,46 @@ solo el **2%** de las veces está siquiera por encima del propio equipo.
 > entero al gimnasio**, y el listón de nivel es un número que ya no se puede
 > mover desde dentro del mapa.
 
-### 1.3 El equipo llega roto por distancia, no por mal criterio
+### 1.3 CORREGIDA · El tramo pokecentro→gimnasio no ofrece elección
 
-`entrar_roto.py` empareja cada pelea con la pantalla que la decidió:
+Lo que decía esta sección (`entrar_roto.py`: 178 peleas empezadas con el equipo
+roto, 0 con un pokecenter en pantalla, luego "es distancia") **estaba mal medido**,
+y por dos motivos distintos que se han ido cayendo uno detrás de otro:
+
+1. **No hay distancia que recorrer.** `tramo_al_jefe.py` mide el mapa de verdad:
+   entre el último pokecentro y la pelea de gimnasio hay **1 pantalla**, y en
+   **1096 de 1099 (99,7%)** esa pantalla ofrecía **un solo nodo: el jefe**. No
+   hay rama larga, ni pelea obligatoria intermedia, ni nada que elegir. La frase
+   "uno a doce nodos de pelea obligatoria" era falsa: la rama larga que el bono
+   de ruta premia está **antes** del pokecentro, no después.
+2. **El "equipo roto" era en buena parte artefacto de emparejamiento.** Ver
+   §1.6. `mios` (el texto de la pelea) y la traza (la barra del mapa) se leen en
+   **momentos distintos**, y en las 4 peleas de gimnasio con traza previa donde
+   discrepan, discrepan **en las dos direcciones**: dos veces porque entre la
+   traza y la pelea hubo **una cura**, y dos veces porque **la propia pelea** se
+   llevó un món por delante.
+
+Medido sobre el corpus (`corpus.db`, 97 peleas de gimnasio con traza previa),
+el estado de **entrada** es mucho mejor de lo que decía el 48,3%:
 
 ```
-peladas empezadas con el equipo roto   : 178
-  ...con un pokecenter en pantalla     :   0     (0,0%)
-  ...sin pokecenter en pantalla        : 178     (100%)
-pantallas con cura a la vista → fue a curar : 493 de 493
+ENTRADA con >=1 caido (traza, pantalla de mapa):  12,4%   (12 de 97)
+mios dice >=1 caido (pantalla de combate):         8,2%   ( 8 de 97)
 ```
 
-El bot **cura siempre que puede**. Lo que hace mal es lo que viene después:
-entre el pokecenter y el gimnasio hay uno a doce nodos de pelea obligatoria, y
-no hay vuelta atrás. Y el bono de ruta (`combates_por_delante × 3.5 +
-entrenadores × 4`) es **incondicional**: premia la rama larga aunque el equipo
-no pueda pagarla.
+Con dos avisos honestos: la muestra son 97 peleas de los 5 lotes que tienen
+traza (y todas ganadas, así que no sirve para medir victoria), y **el 48,3% de
+`76ee140` sigue en pie como predictor** —lo que no se sostiene es el relato
+causal "llega roto al gimnasio"—. Y sigue abierto qué mide exactamente `mios`,
+porque el propio bot anota en `ps_cierra`: `nota=estado ya empezada: no es el PS
+de despues`.
 
-Eso es exactamente lo que ataca **H20**.
+Lo que **sí** queda demostrado y es lo que ataca H20 (§4): la puerta de curación
+no se dispara cuando debería. En `log-2026-10-11_10-39-37_p14744.txt` el bot
+entra a un gimnasio con **3 caídos** y elige `batalla` porque no hay cura a la
+vista; cuando por fin aparece (`disponibles=['cura','entrenador']`) la toma y la
+cura sana **3 caídos → 6/6 al 100% en un solo paso**.
+
 
 ### 1.4 Lo que el bot hace bien y no hay que tocar
 
@@ -174,6 +196,114 @@ potencia y se pierden las horas.
 
 > H17 y H18 se gastaron horas en mecanismo del 8% y del 1%. Este cuadro sale
 > en **minutos** sobre logs que ya existen.
+
+---
+
+### 1.6 Las DOS lecturas de PS, y el corpus en SQLite
+
+#### El hallazgo: la traza y `mios` se leen en momentos distintos
+
+El bot tiene **dos** fuentes de vida y no son la misma medida:
+
+| fuente | de dónde sale | en qué pantalla está viva |
+|---|---|---|
+| traza `vida` / `caidos` | `#team-bar .hp-bar-fill`, un **ancho en %** (`equipo()`) | mapa |
+| `mios` | el **texto** de `#player-side` (`"0/35"`) | combate |
+
+`sonda_dom` (en `jugar_pokelike.py`, apagada por defecto, se abre con
+`PKL_SONDA_DOM=<dir>`) volcó las dos lecturas **en el mismo instante** durante
+una run real. Resultado, món a món:
+
+```
+registros de COMBATE: 5 de 38 mons discrepan  (13%)  -> la barra del HUD se quedo a 100%
+registros de MAPA   : 14 de 61 mons discrepan  (23%)  -> el texto se quedo con lo viejo
+```
+
+Cada elemento solo está vivo **en su propia pantalla**. Por eso emparejar la
+traza con `mios` —que es lo que hacía el repo— compara **dos instantes**, y en
+las 4 peleas de gimnasio donde se puede comprobar discrepan en **las dos
+direcciones**. La consecuencia práctica: **ni la traza ni `mios` sirven para
+decir "con qué entraba el equipo"** salvo que se lea la pantalla correcta.
+
+Lo que **sí** queda claro de `mios`:
+
+- **No está congelado**: 3 de 4740 pares de peleas consecutivas tienen el `mios`
+  idéntico (0,1%).
+- **Refleja la cura**: 0 de 961 pares con un pokecentro entre medias repiten
+  `mios` (0,0%).
+
+#### La cura: 100% y revive
+
+`log-2026-10-11_10-39-37_p14744.txt`, en un solo paso:
+
+```
+[nodo -> 2] cura score=70.0 (curar: ... y hay 3 caido(s))
+TRAZA_CAMINO paso=77 ... vivos=6/6 caidos=0 vida_media=100% vida=[todos 100%]
+```
+
+3 caídos → 6/6 al 100%. **La cura es completa y revive.** El "36% → 36%" que
+hizo dudar antes era el bucle del lote `h21`, que está marcado `ABORTADO`.
+
+#### El HUD miente con los caídos (el docstring tenía razón)
+
+Al perder, el log escribe `nos quedan:` con el **porcentaje del HUD**, y ahí se
+ve el fallo:
+
+```
+Gym Battle vs Lt. Surge!   marcador 13-1
+  nos quedan: Butterfree(100/100), Venonat(100/100), Jigglypuff(100/100),
+              Ivysaur(100/100), Pikachu(100/100)
+```
+
+Una derrota **13-1**, con el equipo entero caído, y el HUD marca **100% a los
+cinco**. Es exactamente lo que avisa `_apuntar_ps_real`: el porcentaje del HUD no
+sirve para un món caído.
+
+#### Dónde se pierde de verdad (Kanto, 18.871 peleas)
+
+| gimnasio | G / P | victoria |
+|---|---|---|
+| Brock | 1384 / 207 | **87,0%** |
+| Misty | 498 / 427 | **53,8%** |
+| Lt. Surge | 241 / 88 | **73,3%** |
+| Erika | 92 / 90 | **50,5%** |
+| Koga | 50 / 18 | **73,5%** |
+| Sabrina | 21 / 11 | **65,6%** |
+
+Los dos muros son **Misty (53,8%)** y **Erika (50,5%)**, dos monedas al aire. Y en
+las derrotas contra Misty los móns que más aparecen son los que peor encajan:
+**Bulbasaur (179), Ivysaur (68)** —Planta es 2x débil a Psíquico— y **Sandshrew
+(68)** —Tierra es 2x débil a Agua—. Es literalmente el caso de "móns inútiles
+contra ese tipo" que describe la guía del bot.
+
+#### El corpus en SQLite
+
+`pkl_corpus.py` hace el parseo **una vez** y lo deja consultable:
+
+```
+uv run --group dev python juegos/pokelike/scripts/pkl_corpus.py
+```
+
+Tablas: `run` (2190) · `paso` (1708, las trazas) · `nodo` (30798) · `pelea`
+(18871) · `evento` (291085, con la **línea cruda** de todo lo demás) · `sonda`.
+
+Cada `run` lleva `lote`, `valido` y `tiene_traza`: `valido` sale del nombre del
+directorio (`_ABORTADO_`, `_ROTO`, `TIMEOUT`…), y es lo que impide que un lote
+`ABORTADO` vuelva a colarse en una media como hizo `h21`.
+
+Elegir SQLite no fue por velocidad (94 MB y 600k líneas son calderilla) sino
+porque **el parseo se escribe una vez y se testea**, en lugar de reescribir un
+parser en cada pregunta —que es de donde salieron los cuatro fallos de una sola
+sesión: el `parents[3]`, el `dist = len(prev) - k`, el `placeholder` vacío y el
+lote `h21` en la media—.
+
+**Aviso, y es el importante:** una base de datos **congela el parseo**. Si un
+campo se lee mal, se guarda mal y encima parece autoritativo. Prueba de ello: la
+primera versión de la ingesta daba **16.929 victorias y 0 derrotas** porque la
+derrota tiene otro formato (`>>> COMBATE PERDIDO contra X | nos quedan: ... | 6-1`)
+y el regex solo casaba la victoria. Se arregló y salieron las 1.942 derrotas, que
+cuadran exactamente con los 1.942 `GAME_OVER` del corpus. Sin esa comprobación,
+la BBDD habría mentido con toda la autoridad de una BBDD.
 
 ---
 

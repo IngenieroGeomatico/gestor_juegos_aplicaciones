@@ -261,3 +261,6 @@ juegos/heroquest/rag/documentos/
 
 # Base de datos y vectorizador del RAG ligero (se generan con indexar_lite.py)
 juegos/heroquest/rag/chroma_db_lite/
+
+# Corpus de logs de Pokelike: regenerable, no se versiona.
+juegos/pokelike/log/corpus.db
