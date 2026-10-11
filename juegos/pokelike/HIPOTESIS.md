@@ -377,6 +377,28 @@ cuello. El bot llega sano al gimnasio, pero la pelea misma es difícil.
 La cobertura de tipos no es medible con los datos disponibles (el pool del
 corpus solo tiene 20 Pokémon).
 
+#### El cuello real: Bulbasaur abre la pelea y es débil
+
+En las derrotas contra Misty y Erika:
+
+| quién abre la pelea | veces |
+|---|---|
+| **Bulbasaur (caído)** | **71** |
+| Bulbasaur (sano) | 31 |
+| Venonat (caído) | 27 |
+| Ivysaur (caído) | 25 |
+
+**Bulbasaur siempre abre la pelea** (es el primer món del equipo). En las
+derrotas, Bulbasaur cae en los primeros turnos (71 veces).
+
+Bulbasaur (Planta/Veneno) es débil contra:
+- Misty (Agua): Planta es débil contra Agua (x2)
+- Erika (Planta): Veneno es débil contra Planta (x2)
+
+**El cuello del gimnasio es el orden del equipo: Bulbasaur abre y es débil
+contra el líder.** La solución sería cambiar el orden para que otro món abra,
+o capturar un món fuerte contra el líder.
+
 #### El HUD miente con los caídos (el docstring tenía razón)
 
 Al perder, el log escribe `nos quedan:` con el **porcentaje del HUD**, y ahí se
