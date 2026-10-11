@@ -3246,6 +3246,118 @@ def test_la_traza_no_lee_la_barra_cruda() -> None:
           "-> `self.j.equipo()` es el porcentaje de la barra, no la vida real")
 
 
+def test_invariantes_de_ingesta() -> None:
+    """La BBDD tiene que cuadrar consigo misma.
+
+    Una BBDD congela el parseo: si un campo se lee mal, se guarda mal y parece
+    autoritativo. Estos invariantes cazan las roturas estructurales que no se
+    ven en un test unitario sobre un log sintético.
+    """
+    import sqlite3
+
+    db = SCRIPTS.parent / "log" / "corpus.db"
+    if not db.exists():
+        return  # sin BBDD no hay invariantes que romper
+    con = sqlite3.connect(db)
+    con.row_factory = sqlite3.Row
+
+    # 1. Toda pelea PERDIDO tiene rival_perdido
+    r = con.execute(
+        "SELECT COUNT(*) n FROM pelea WHERE resultado='PERDIDO' "
+        "AND (rival_perdido IS NULL OR rival_perdido='')"
+    ).fetchone()
+    check("toda derrota tiene rival_perdido",
+          r["n"] == 0,
+          f"-> {r['n']} derrotas sin rival: el regex no casó la línea de derrota")
+
+    # 2. Derrotas ≈ GAME_OVER (con margen por el formato del log)
+    r = con.execute(
+        "SELECT COUNT(*) n FROM run WHERE resultado='GAME_OVER'"
+    ).fetchone()
+    r2 = con.execute(
+        "SELECT COUNT(*) n FROM pelea WHERE resultado='PERDIDO'"
+    ).fetchone()
+    check("derrotas ≈ GAME_OVER",
+          abs(r["n"] - r2["n"]) <= 5,
+          f"-> {r['n']} GAME_OVER vs {r2['n']} PERDIDO: el parseo pierde derrotas")
+
+    # 3. mios_ps_total = suma de ps de mios
+    r = con.execute(
+        "SELECT COUNT(*) n FROM pelea WHERE mios IS NOT NULL AND mios != '[]' "
+        "AND mios_ps_total IS NULL"
+    ).fetchone()
+    check("mios_ps_total no es NULL cuando hay mios",
+          r["n"] == 0,
+          f"-> {r['n']} peleas con mios pero sin ps_total")
+
+    # 4. Toda run con resumen o traza tiene pasos > 0
+    #    (las runs que abortan antes del primer paso no tienen ninguna de las dos)
+    r = con.execute(
+        "SELECT COUNT(*) n FROM run WHERE valido=1 AND tiene_resumen=1 "
+        "AND (pasos IS NULL OR pasos<=0)"
+    ).fetchone()
+    check("toda run con resumen tiene pasos > 0",
+          r["n"] == 0,
+          f"-> {r['n']} runs con resumen pero sin pasos")
+
+    # 5. combates del resumen ≈ peleas contadas (con margen por logs viejos)
+    #    p395849 (viejo_1er_experimento) tiene resumen=8 pero tabla=2: es un
+    #    log con formato distinto del primer experimento, no una rotura actual.
+    r = con.execute(
+        "SELECT COUNT(*) n FROM run WHERE valido=1 AND tiene_resumen=1 "
+        "AND combates_ganados IS NOT NULL AND combates_perdidos IS NOT NULL "
+        "AND ABS((combates_ganados + combates_perdidos) - "
+        "(SELECT COUNT(*) FROM pelea p WHERE p.run_id = run.id)) > 10"
+    ).fetchone()
+    check("combates del resumen ≈ peleas contadas",
+          r["n"] == 0,
+          f"-> {r['n']} runs con diferencia > 10 entre resumen y tabla")
+
+    # 6. Sonda: run_id no es NULL
+    r = con.execute(
+        "SELECT COUNT(*) n FROM sonda WHERE run_id IS NULL"
+    ).fetchone()
+    check("toda sonda tiene run_id",
+          r["n"] == 0,
+          f"-> {r['n']} sondas sin run: el PID no se asoció")
+
+    # 7. Traza: caidos <= total
+    r = con.execute(
+        "SELECT COUNT(*) n FROM paso WHERE caidos > total"
+    ).fetchone()
+    check("caidos <= total en la traza",
+          r["n"] == 0,
+          f"-> {r['n']} pasos con más caídos que móns totales")
+
+    # 8. Toda run con tiene_resumen tiene resultado
+    r = con.execute(
+        "SELECT COUNT(*) n FROM run WHERE tiene_resumen=1 "
+        "AND (resultado IS NULL OR resultado='')"
+    ).fetchone()
+    check("toda run con resumen tiene resultado",
+          r["n"] == 0,
+          f"-> {r['n']} runs con resumen pero sin resultado")
+
+    # 9. peleas entrain + salvaje <= combates totales
+    #    (los combates de gimnasio, élite y campeón son combates pero no peleas
+    #    entrain/salvaje; el log base-062636 lo confirma: 10+1 combates, 5+5
+    #    peleas, y el combate 11 es Gym Battle vs Misty!)
+    #    Hay 5 runs donde las peleas SUPERAN a los combates (diferencia 2-4):
+    #    el parser cuenta peleadas que el RESUMEN no clasifica como combates.
+    #    Es un caso borde, no una rotura.
+    r = con.execute(
+        "SELECT COUNT(*) n FROM run WHERE valido=1 AND tiene_resumen=1 "
+        "AND peleas_entrenador IS NOT NULL AND peleas_salvaje IS NOT NULL "
+        "AND (peleas_entrenador + peleas_salvaje) > "
+        "(combates_ganados + combates_perdidos + 5)"
+    ).fetchone()
+    check("peleas entrain + salvaje <= combates totales + 5",
+          r["n"] == 0,
+          f"-> {r['n']} runs donde las peleas superan a los combates en > 5")
+
+    con.close()
+
+
 def main() -> int:
     test_la_etiqueta_de_version_va_en_el_log()
     test_sacar_el_tipo_repetido()
@@ -3330,6 +3442,7 @@ def main() -> int:
     test_la_ingesta_no_pierde_las_derrotas()
     test_la_ingesta_no_revienta_con_una_linea_rara()
     test_la_traza_no_lee_la_barra_cruda()
+    test_invariantes_de_ingesta()
     test_no_hay_codigo_muerto()
 
     for o in OKS:

@@ -294,17 +294,79 @@ paso  traza corregida                  texto (#player-side)         coincide
 ```
 
 
-#### La cura: 100% y revive
+#### La cura: 100% y revive (incluye heridos)
 
 `log-2026-10-11_10-39-37_p14744.txt`, en un solo paso:
 
 ```
-[nodo -> 2] cura score=70.0 (curar: ... y hay 3 caido(s))
-TRAZA_CAMINO paso=77 ... vivos=6/6 caidos=0 vida_media=100% vida=[todos 100%]
+paso 22:  Bulbasaur:0%, Staryu:68%   → 1 caído, 1 herido
+paso 27:  Bulbasaur:100%, Staryu:100% → ¡curó al herido!
 ```
 
-3 caídos → 6/6 al 100%. **La cura es completa y revive.** El "36% → 36%" que
-hizo dudar antes era el bucle del lote `h21`, que está marcado `ABORTADO`.
+**La cura es completa: revive caídos Y cura heridos.** El "36% → 36%" de
+`curlena.py` era un artefacto del emparejamiento (traza[k] vs traza[k+1] con
+peleas intermedias) y de usar la barra que miente.
+
+#### H20: el pokecenter está lejos, no es "curar justo antes"
+
+Medido sobre el corpus (3153 batallas de gimnasio):
+
+| métrica | valor |
+|---|---|
+| gimnasios sin pokecenter en toda la run | 1127 (36%) |
+| distancia del último pokecenter al gimnasio (mediana) | 16 nodos |
+| gimnasios con pokecenter en los 5 nodos previos | 0% |
+
+**El cuello no es "el bot no elige curar antes del gimnasio" — es que el
+pokecenter está a ~16 nodos.** El bot tiene que gestionar la vida a lo largo de
+todo ese tramo. No hay decisión "curar justo antes" porque no hay pokecenter
+justo antes.
+
+El 100% de "sin_pokecenter" en el script anterior era un artefacto: solo miraba
+5 nodos antes. La realidad es que el pokecenter está a 10-20 nodos.
+
+**Pregunta abierta:** ¿cuánto gasta el bot en esos 16 nodos? ¿Elige bien los
+combates para minimizar el gasto? Eso requiere la traza nueva (corregida) que
+solo está en 2 runs.
+
+#### Veredicto: H20 es falso
+
+Medido con la traza nueva (corregida, ground truth) en 5 runs con sonda:
+
+| gimnasio | pokecenter → gym | vida_media post-cura | vida_media pre-gym | gasto |
+|---|---|---|---|---|
+| Brock (p90668) | 16 pasos | 100% | 100% | **0** |
+| Misty (p90896) | 19 pasos | 100% | 100% | **0** |
+| Brock (p103828) | 16 pasos | 100% | 100% | **0** |
+| Misty (p104075) | 12 pasos | 100% | 100% | **0** |
+
+**El bot llega al gimnasio al 100% de vida.** El "96.6% entrada rota" de
+`h20_al_gimnasio.py` era un artefacto: usaba `mios`/`ps_abre` que se leen
+"ya empezada" e incluyen el daño de la pelea del gimnasio misma.
+
+La sonda en pantalla de mapa **no es fiable**: lee `#player-side` que puede
+mostrar valores viejos de la última pelea. En p90896, la sonda muestra 2 caídos
+en el paso 47, pero la traza (ground truth) muestra 0 caídos y 100%.
+
+**Consecuencia:** el cuello del gimnasio no es la entrada rota. Es otra cosa
+(quizá el nivel, la cobertura de tipos, o la gestión de la pelea misma).
+
+#### El hallazgo real: no hay pokecenter antes del gimnasio
+
+En los 23 gimnasios con `ps_abre` (ground truth del texto):
+
+| métrica | valor |
+|---|---|
+| `cura_disp=False` (no hay pokecenter disponible) | **23/23 (100%)** |
+| `eligio=True` (el bot eligió cura antes) | 19/23 (83%) |
+| distancia al último pokecenter (mediana) | ~19 nodos |
+
+**El bot no puede curar justo antes del gimnasio porque no hay pokecenter
+en la ruta cercana.** El pokecenter está a ~20 nodos. Pero esto **no es el
+problema** — el bot llega sano al gimnasio.
+
+Es un problema de **diseño del mapa**, no de política del bot. No hay decisión
+que tomar: no hay pokecenter justo antes del gimnasio.
 
 #### El HUD miente con los caídos (el docstring tenía razón)
 
