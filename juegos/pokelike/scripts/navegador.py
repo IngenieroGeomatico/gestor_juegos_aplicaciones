@@ -132,7 +132,7 @@ class Juego:
                 subtitulo: txt('#battle-subtitle'),
                 etiqueta_enemigo: txt('#enemy-side-label'),
                 enemigos: leer('#enemy-side [class*=mon], #enemy-side > *'),
-                mios: leer('#player-side [class*=mon], .team-slot'),
+                mios: leer('#player-side [class*=mon], #player-side .team-slot'),
                 movimientos,
                 botones: [...document.querySelectorAll('#battle-screen button')]
                   .filter((b) => b.offsetParent)
