@@ -3395,7 +3395,586 @@ def test_invariantes_de_ingesta() -> None:
     con.close()
 
 
+def test_el_nodo_de_captura_gana_a_la_batalla_suelta() -> None:
+    """Con equipo corto, la captura tiene que ganarle a la batalla de al lado.
+
+    **El caso del mundo, no el fácil.** `catch` y `battle` se traducen los dos
+    a `"batalla"` (`politica.TIPO_ESTADO`), y `puntuar` solo recibia ese tipo
+    interno. Con `capturas_pantalla == 0` los dos nodos entraban por la misma
+    rama y los dos se llevaban `PESO_CAPTURA`: el desempate lo acababa
+    decidiendo el bono de ruta, y el bot se iba a cazar.
+
+    Medido en el lote de 121 runs: **196 pantallas** con `catch` disponible y
+    `capturas_pantalla == 0` en las que eligio `battle`. De ahi salen las 28
+    runs que mueren antes del paso 30 con un unico món a nivel 5-9: el log
+    `log-2026-10-13_08-08-13_p176311.txt` decia `opc: batalla=252 batalla=210`
+    — los dos nodos con el mismo peso base — y se fue al de 252.
+
+    Aqui se monta esa pantalla exacta: la rama de la batalla tiene **mas
+    combates por delante**, que es lo que hacia que ganase antes. El equipo es
+    de uno, o sea la rama de `len(equipo) < 3`.
+    """
+    def _equipo() -> list[dict]:
+        return [{"nombre": "Bulbasaur", "nivel": 5, "ps": 100, "ps_max": 100,
+                 "tipos": ["Planta", "Veneno"], "baseStats": {"hp": 100}}]
+
+    # La rama del nodo de batalla tiene 8 combates por delante; la de captura,
+    # ninguno. Con el bug, los dos nodos vale 60 y gana el de batalla (60+8x3.5).
+    # `atajo` es lo que devuelve la decision, asi que es por donde se mira cual
+    # nodo gano.
+    nodos = [{"id": "c", "atajo": "1", "tipo": "catch", "clickable": True,
+              "sprite": "pokeball"},
+             {"id": "b", "atajo": "2", "tipo": "battle", "clickable": True,
+              "sprite": "pokeball"}]
+    for i in range(8):
+        nodos.append({"id": f"co{i}", "tipo": "battle"})
+    edges = [["b", f"co{i}"] for i in range(8)]
+
+    d = PL.elegir(_equipo(), nodos, {"capturas_pantalla": 0},
+                  region="Kanto", insignias=0, edges=edges)
+    check("con equipo de 1 se elige el nodo de captura, no la batalla",
+          str(d.valor) == "1",
+          f"-> eligio el atajo {d.valor!r} ({d.razon}): el nodo `catch` y el "
+          "nodo `battle` se puntuan como si fueran el mismo y gana el de la "
+          "rama mas larga")
+
+    # Y al reves: si ya se capturo en esta pantalla, la captura **no** se
+    # vuelve a puntuar como captura y la batalla queda libre. Sin esto, el bot
+    # podria quedarse capturando en el mismo nodo para siempre.
+    d2 = PL.elegir(_equipo(), nodos, {"capturas_pantalla": 1},
+                   region="Kanto", insignias=0, edges=edges)
+    check("capturado ya en pantalla, la batalla queda disponible",
+          str(d2.valor) == "2",
+          f"-> eligio el atajo {d2.valor!r}: con capturas_pantalla=1 el nodo de "
+          "captura tiene que puntuar como batalla normal")
+
+    # Sin tipo crudo no se inventa nada: se comporta como antes.
+    sin_tipo = [{"id": "x", "atajo": "1", "tipo": None, "clickable": True,
+                 "sprite": "pokeball"}]
+    d3 = PL.elegir(_equipo(), sin_tipo, {"capturas_pantalla": 0},
+                   region="Kanto", insignias=0)
+    check("sin tipo crudo no se rompe la decision",
+          str(d3.valor) == "1",
+          f"-> eligio el atajo {d3.valor!r}: el juego no dio `tipo` y el nodo "
+          "se perdio")
+
+    # **El caso que hizo falta el segundo arreglo**, con las cifras del log
+    # `log-2026-10-13_14-01-04_p241381.txt`: `opc: batalla=558 batalla=434`.
+    # Arreglando solo el peso, el nodo de captura pasa de 60 a 60 y el de
+    # batalla de 60 a 15, pero su rama tiene 138 combates frente a 107: el bono
+    # son 483 puntos contra una diferencia de 45, y **gana el de batalla**.
+    # Con un solo món esa exp es inalcanzable (si cae, se acaba la partida), así
+    # que la captura tiene que decidir por encima del score.
+    largos = [{"id": "c", "atajo": "1", "tipo": "catch", "clickable": True,
+               "sprite": "pokeball"},
+              {"id": "b", "atajo": "2", "tipo": "battle", "clickable": True,
+               "sprite": "pokeball"}]
+    for i in range(107):
+        largos.append({"id": f"cc{i}", "tipo": "battle"})
+    for i in range(138):
+        largos.append({"id": f"bb{i}", "tipo": "battle"})
+    edges_largos = ([["b", f"bb{i}"] for i in range(138)]
+                    + [["c", f"cc{i}"] for i in range(107)])
+    d4 = PL.elegir(_equipo(), largos, {"capturas_pantalla": 0},
+                   region="Kanto", insignias=0, edges=edges_largos)
+    check("con el equipo de 1 la captura gana aunque la rama sea mas larga",
+          str(d4.valor) == "1",
+          f"-> eligio el atajo {d4.valor!r} ({d4.razon[:90]}): el bono de ruta "
+          "(+3.5 por combate) pesa mas que los 45 puntos de PESO_CAPTURA y el "
+          "bot se va a cazar con un unico món en el equipo")
+
+    # Y con equipo de 3 o mas la captura **no** es prioritaria: el bono de ruta
+    # manda, que es como se haMedido siempre. Este es el control que evita
+    # arreglar lo de arriba rompiendo la eleccion de rama.
+    eq3 = _equipo() + [{"nombre": "Pidgey", "nivel": 5, "ps": 100, "ps_max": 50,
+                        "tipos": ["Normal"], "baseStats": {"hp": 100}},
+                       {"nombre": "Caterpie", "nivel": 4, "ps": 100, "ps_max": 45,
+                        "tipos": ["Planta"], "baseStats": {"hp": 100}}]
+    d5 = PL.elegir(eq3, largos, {"capturas_pantalla": 0},
+                   region="Kanto", insignias=0, edges=edges_largos)
+    check("con equipo de 3 la rama larga sigue mandando",
+          str(d5.valor) == "2",
+          f"-> eligio el atajo {d5.valor!r}: la captura prioritaria solo es para "
+          "el equipo corto, con 3 móns el bono de ruta tiene que decidir")
+
+
+def test_la_batalla_ganada_y_clavada_se_recupera() -> None:
+    """Rival a 0 PS y pantalla sin avanzar: hay que recuperar, no pulsar.
+
+    El caso medido (`/tmp/opencode/atascada_125762.txt`): contra un `Hiker` con
+    Sandshrew y Diglett, los dos enemigos se quedan a `0/42` y `0/29`, el
+    equipo entero al 100%, y el mismo estado se repite cada 13 segundos. La
+    pelea esta ganada pero no pasa al resultado, y pulsar continuar no la saca.
+
+    **Por que este test mira lo que se pulso y no un string.** Habia un
+    detector que comparaba `hecho == CONTINUAR_BATALLA`, pero `_batalla`
+    devuelve `f"batalla ({via})"`: ese literal nunca se devolvio, la rama era
+    codigo muerto y la recuperacion no se disparo **nunca**, sin dar ningun
+    error. Es el fallo de "una rama muerta sin error" de la skill
+    pokelike-reglas, vestido de detector de atasco.
+
+    Y no vale con contar pulsaciones: en un gimnasio son normales 12-13. Lo que
+    separa el atasco es que **la firma no cambia y el rival ya no tiene a nadie
+    en pie**.
+    """
+    import jugar_pokelike as JUG
+
+    class _FalsoJ:
+        """Lo mínimo que `_batalla` toca en una pelea ya resuelta."""
+        def __init__(self, enemigos: list[dict]) -> None:
+            self.enemigos = enemigos
+            self.activaciones: list[str] = []
+
+        def visible(self, sel: str) -> bool:
+            return sel == "#btn-auto-battle"
+
+        def activar(self, sel: str) -> str:
+            self.activaciones.append(sel)
+            return sel
+
+        def esperar_boton(self, *a, **k) -> bool:
+            return True
+
+        def insignias(self) -> int:
+            return 0
+
+        class page:  # noqa: D106
+            @staticmethod
+            def wait_for_timeout(_ms: int) -> None:
+                return None
+
+        def estado_batalla(self) -> dict:
+            return {"titulo": "Hiker wants to battle!", "mios": [], "enemigos": self.enemigos}
+
+    class _FalsoJ:
+        """Lo mínimo que `_batalla` toca en una pelea ya resuelta."""
+        def __init__(self, enemigos: list[dict]) -> None:
+            self.enemigos = enemigos
+
+        def visible(self, sel: str) -> bool:
+            return sel == "#btn-auto-battle"
+
+        def activar(self, sel: str) -> str:
+            return sel
+
+        def esperar_boton(self, *a, **k) -> bool:
+            return True
+
+        def insignias(self) -> int:
+            return 0
+
+        class page:  # noqa: D106
+            @staticmethod
+            def wait_for_timeout(_ms: int) -> None:
+                return None
+
+        def estado_batalla(self) -> dict:
+            return {"titulo": "Hiker wants to battle!",
+                    "mios": [], "enemigos": self.enemigos}
+
+    def _bot_con(enemigos: list[dict]) -> tuple[object, list[int]]:
+        """Un `Bot` real sin navegador, con lo que `_batalla` necesita.
+
+        Se usa la clase de verdad (`__new__` para saltar al `__init__`, que
+        abre el navegador) y se sustituye `j` por el falso: el test tiene que
+        ejecutar el metodo real, no una reimplementacion que se parece.
+        """
+        b = JUG.Bot.__new__(JUG.Bot)
+        cuentas = [0]
+        b.j = _FalsoJ(enemigos)
+        b.decisiones = []
+        b.lineas = []
+        b.log = b.lineas.append
+        b.anotar = b.decisiones.append
+        b.traza = lambda *a, **k: None
+        b.pokedex = {}
+        b.nivel_enemigo_max = 0
+        b.enemigos_max_vistos = 0
+        b._ps_real = {}
+        b._errores = {}
+        b._pelea_abierta = None
+        b._pelea_volcada = None
+        b._firma_batalla = None
+        b._batalla_clavada = 0
+        b._n_batalla = 0
+        b.peleas = 0
+        b.peleas_entrenador = 0
+        b.peleas_salvaje = 0
+        b.consumo_ps = []
+        b.pelea_consumo = []
+        b.insignias_actual = 0
+        b.ignoras = None
+
+        def _recupera() -> bool:
+            cuentas[0] += 1
+            b._batalla_clavada = 0
+            return True
+
+        b._recuperar_batalla_clavada = _recupera
+        return b, cuentas
+
+    caidos = [{"nombre": "Sandshrew", "ps": "0/42", "nivel": 16},
+              {"nombre": "Diglett", "ps": "0/29", "nivel": 16}]
+
+    # 1. Rival a 0 PS y estado repetido: recupera. Se dan varias vueltas
+    # porque hacen falta dos lecturas con la misma firma **despues** de
+    # memorizarla, que es lo que pasa en el log real (repite cada 13 s).
+    b, cuentas = _bot_con(caidos)
+    for _ in range(4):
+        b._batalla()
+    check("rival a 0 PS con la pantalla clavada dispara la recuperacion",
+          cuentas[0] >= 1,
+          "-> el log repite Sandshrew 0/42 y Diglett 0/29 indefinidamente: la "
+          "pelea esta ganada pero no pasa al resultado")
+
+    # 2. Rival **en pie**: es una pelea normal y no se toca nada. Si este caso
+    # disparara la recuperacion, se aria al bot en mitad de cada gimnasio.
+    b2, cuentas2 = _bot_con([{"nombre": "Sandshrew", "ps": "17/42", "nivel": 16}])
+    for _ in range(6):
+        b2._batalla()
+    check("una pelea que avanza no se recupera",
+          cuentas2[0] == 0,
+          f"-> {cuentas2[0]} recuperaciones con el rival vivo: en un "
+          "gimnasio son normales 12-13 pulsaciones de auto-battle")
+
+
+def test_el_reordenado_reintenta_cuando_el_hud_se_mueve() -> None:
+    """Un arrastre que no surte efecto no puede ser un fallo seco.
+
+    **El caso del mundo, no el fácil.** Medido: 157 fallos de 729 intentos
+    (21%), y el **87% con equipo de 2-3 móns**, que es justo cuando el HUD
+    acaba de re-renderizar tras una captura. El arrastre de puntero cae en
+    tierra si el slot se está moviendo.
+
+    Antes solo se comprobaba el orden **al final** de la pasada: si el primer
+    arrastre fallaba, el resto se hacia igual y el resultado era un fallo seco.
+    Con eso el bot entraba al jefe con el món equivocado delante, que es
+    justo donde §1.7 sitúa el cuello:
+
+        [prep -> Magikarp] rival Rock/Ground -> ['Krabby', 'Bulbasaur', 'Magikarp']
+        ⋯ no se pudo reordenar (quedó ['Magikarp', 'Krabby', 'Bulbasaur'])
+
+    Krabby es Agua y le pega x2 a Roca; se peleó con Magikarp (Normal) y perdió.
+
+    Aqui el arrastre **falla dos veces y luego funciona**, que es lo que hace
+    el juego cuando el HUD se está reconstruyendo. Con la version de una
+    sola pasada esto devuelve `False`.
+    """
+    import navegador as NAV
+
+    class _Slots:
+        def __init__(self, nombres: list[str], fallos: list[int]) -> None:
+            self.nombres = list(nombres)
+            self.fallos = fallos
+            self.intentos = 0
+
+    class _J:
+        def __init__(self, nombres: list[str], fallos: int) -> None:
+            self.slots = _Slots(nombres, [fallos])
+            self.arrastres = 0
+
+        def orden_equipo(self) -> list[str]:
+            return list(self.slots.nombres)
+
+        def _arrastrar_slot(self, origen: int, destino: int) -> bool:
+            self.arrastres += 1
+            if self.arrastres <= self.slots.fallos[0]:
+                return True          # "hizo zoom": no movio nada
+            nom = self.slots.nombres.pop(origen)
+            self.slots.nombres.insert(destino, nom)
+            return True
+
+    # Un arrastre que no hace nada (el HUD moviendose) y el siguiente sí.
+    j = _J(["Magikarp", "Krabby", "Bulbasaur"], 1)
+    nav = NAV.Juego.__new__(NAV.Juego)  # noqa: SLF001
+    nav.orden_equipo = j.orden_equipo
+    nav._arrastrar_slot = j._arrastrar_slot
+
+    ok = nav.reordenar_equipo(["Krabby", "Bulbasaur", "Magikarp"])
+    check("el reordenado reintenta y acaba poniendo al contrasaliente delante",
+          ok and j.orden_equipo() == ["Krabby", "Bulbasaur", "Magikarp"],
+          f"-> devolvio {ok} y quedo {j.orden_equipo()}: el primer arrastre no "
+          "movio nada y el orden se dio por bueno al final sin reintentar")
+
+    # **El caso del `prep`**, que es lo que motivo bajar de 3 pasadas a 2: alli
+    # el arrastre no cuela nunca (hay un modal encima), asi que reintentar se
+    # come el prep entero y el detector de bucles se lleva la run. Con 2
+    # pasadas se rinde en ~12 s, **lo dice** y no se hace el sordo.
+    avisos: list[str] = []
+    j4 = _J(["Magikarp", "Krabby", "Bulbasaur"], 99)
+    nav4 = NAV.Juego.__new__(NAV.Juego)  # noqa: SLF001
+    nav4.orden_equipo = j4.orden_equipo
+    nav4._arrastrar_slot = j4._arrastrar_slot
+    nav4.log = avisos.append
+    ok4 = nav4.reordenar_equipo(["Krabby", "Bulbasaur", "Magikarp"])
+    check("si el arrastre nunca cuela, se rinde avisando y no en silencio",
+          ok4 is False and len(avisos) >= 1,
+          f"-> devolvio {ok4} con {len(avisos)} avisos: el `prep` se queda "
+          "mudo ~12 s y el detector de bucles lo confunde con un cuelgue "
+          "(mato `atascada_257751.txt` y `atascada_262874.txt`)")
+
+    # Y el caso normal: sin fallos, el reintento no se paga. Este caso es un
+    # ciclo de 3 (Magikarp 0->2, Krabby 1->0, Bulbasaur 2->1), y un ciclo de 3
+    # son **2** arrastres, no 1: por eso se comprueba que no haga mas de los
+    # que hacen falta, que es lo que un bucle de reintentos mal puesto haria.
+    j2 = _J(["Magikarp", "Krabby", "Bulbasaur"], 0)
+    nav2 = NAV.Juego.__new__(NAV.Juego)  # noqa: SLF001
+    nav2.orden_equipo = j2.orden_equipo
+    nav2._arrastrar_slot = j2._arrastrar_slot
+    ok2 = nav2.reordenar_equipo(["Krabby", "Bulbasaur", "Magikarp"])
+    check("sin fallos no se pagan arrastres de mas",
+          ok2 and j2.arrastres == 2,
+          f"-> devolvio {ok2} con {j2.arrastres} arrastres: un ciclo de 3 son 2 "
+          "arrastres, y el reintento no puede convertirse en un bucle")
+
+    # Y si de verdad no se puede, lo dice: no se disimula con un True.
+    j3 = _J(["Magikarp", "Krabby", "Bulbasaur"], 99)
+    nav3 = NAV.Juego.__new__(NAV.Juego)  # noqa: SLF001
+    nav3.orden_equipo = j3.orden_equipo
+    nav3._arrastrar_slot = j3._arrastrar_slot
+    check("si el arrastre no funciona nunca, lo dice",
+          nav3.reordenar_equipo(["Krabby", "Bulbasaur", "Magikarp"]) is False,
+          "-> devolvio True sin haber movido nada: el bot creeria que el "
+          "equipo esta en el orden pedido cuando no lo esta")
+
+
+def test_el_prep_no_se_puede_quedar_mudo() -> None:
+    """El `prep` tiene que dejar rastro aunque todo falle.
+
+    **Dos bugs en el mismo sitio, y los dos cuestan runs.** Justo antes de cada
+    gimnasio el bot reordena el equipo y usa la bolsa. Si eso falla y no escribe
+    nada, el `prep` se queda mudo 40-60 s: el detector de bucles de
+    `lote_100.py` ve el mismo estado cinco veces y mata la partida.
+
+    Las dos runs que se perdieron así iban bien:
+
+        atascada_267357.txt   paso 27, equipo al 100%, 0 combates perdidos
+        atascada_267587.txt   paso 31, 4 móns vivos, Preparing vs Brock
+
+    El segundo bug lo escondía un `print()`: el fallo del flujo de equipar se
+    reportaba a **stdout**, no al log del bot, así que ni el detector ni el
+    análisis del log veían nada. Un marcador que no se ve desde fuera no
+    verifica nada.
+
+    Aquí se comprueba lo que de verdad importa: que pase lo que pase, el `prep`
+    **dice algo**, y que la bolsa tiene techo de tiempo.
+    """
+    import jugar_pokelike as JUG
+
+    fuente = Path(JUG.__file__).read_text(encoding="utf-8")
+    check("la bolsa tiene presupuesto de tiempo",
+          "PRESUPUESTO_BOLSA" in fuente
+          and "time.monotonic() > _limite" in fuente,
+          "-> sin techo, un objeto fallido son 3 clics de 3 s mas dos volcados "
+          "y la bolsa llena se come el prep entero antes de un gimnasio")
+
+    import navegador as NAV
+    fuente_nav = Path(NAV.__file__).read_text(encoding="utf-8")
+    check("los fallos del flujo de objeto van al log, no a stdout",
+          "[EQUIP]" not in fuente_nav and "el clic no sirvio" in fuente_nav,
+          "-> con `print()` el fallo salia por stdout y no llegaba al log: el "
+          "prep se quedaba mudo y lo mataba el detector de bucles")
+
+    check("el navegador tiene una via para avisar",
+          "def _avisar" in fuente_nav and "self._avisar(" in fuente_nav,
+          "-> sin `_avisar` el reordenado y el fallo de objeto no pueden "
+          "dejar linea en el log del bot")
+
+    check("el bot engancha su log al navegador",
+          "juego.log = self.log" in fuente,
+          "-> `Juego._avisar` no tiene a quien escribir: el aviso se pierde y "
+          "vuelve a pasar lo mismo")
+
+
+def test_el_prep_no_reordena_donde_el_arrastre_no_cuela() -> None:
+    """En el `prep` el reordenado no funciona: no se intenta.
+
+    El orden del jefe lo aplica la pantalla de **mapa**, un paso antes
+    (`⋯ reordenado: ... (para jefe)`), y ahí el arrastre sí cuela. Dentro del
+    `prep` hay un modal que se come el puntero: medido sobre 6 preps, acierta
+    **1 de 6** (17%), y cada intento fallido son ~30 s antes de un gimnasio.
+
+    Esos 30 s no son gratis: el `prep` se queda sin escribir nada y el detector
+    de bucles de `lote_100.py` ve el mismo estado cinco veces. Se pagó con cinco
+    runs que iban bien, todas cortadas en `⋯ prep:`:
+    `atascada_257751`, `atascada_262874`, `atascada_267357`, `atascada_267587`
+    y `atascada_273329`.
+
+    La comprobacion es sobre el **cuerpo de la funcion**, no sobre una cadena:
+    que el `prep` llame a `ordenar_equipo` es el bug.
+    """
+    import jugar_pokelike as JUG
+    import inspect
+
+    cuerpo = inspect.getsource(JUG.Bot._preparar_contra_el_rival)
+    check("el prep reordena en la Liga, que es el unico sitio posible",
+          "if es_elite or es_campeon:" in cuerpo
+          and "self.j.reordenar_equipo(orden)" in cuerpo,
+          "-> los cuatro combates del Alto Mando van seguidos, con ~14 s entre "
+          "uno y otro y SIN pantalla de mapa en medio: el orden se aplica una "
+          "vez antes de Lorelei y los otros tres pelean con ese (medido en "
+          "`log-2026-10-16_16-07-42_p107103.txt`)")
+
+    check("el prep usa el orden del contador, no el fijo de la serie",
+          "self._orden_de_liga(con_tipos, insignias)" in cuerpo,
+          "-> con el orden fijo de la serie los cuatro miembros reciben la "
+          "misma formación, que es justo lo que se quería evitar")
+    check("el prep no reordena contra gimnasios",
+          "ordenar_equipo" not in cuerpo
+          or "if es_elite or es_campeon:" in cuerpo,
+          "-> el `prep` reordena en TODAS las pantallas: el modal se come el "
+          "arrastre, acierta 1 de 6 y se come ~30 s antes de cada gimnasio "
+          "(5 runs cortadas en `⋯ prep:`). Solo puede hacerlo en la Liga, que "
+          "es donde no hay pantalla de mapa entre combates")
+
+    # Y el detector de bucles tiene que ver TODO el log, no solo las lineas
+    # `DEC`: los avisos del navegador son los que dicen que el bot esta vivo.
+    fuente_lote = (SCRIPTS / "medir" / "lote_100.py").read_text(encoding="utf-8")
+    check("el detector de bucles mira el log entero",
+          '"DEC" in ln or "estado" in ln' not in fuente_lote,
+          "-> filtrando por `DEC`/`estado`, los avisos del navegador no cuentan "
+          "y un `prep` que trabaja se confunde con uno colgado")
+
+
+def test_el_jefe_aplazado_tira_mas_mapa_si_falta_nivel() -> None:
+    """Si al jefe se llega por debajo de su nivel, hay que tirar más mapa.
+
+    **El caso del mundo, no el fácil.** En el lote del 14-10, 101 de 153 runs
+    se quedaron con **1 insignia**, y 6 de las 12 muertes de ese grupo fueron
+    contra Misty. Todas con el equipo por debajo del rival:
+
+        nuestro_niv 13 / rival_niv 20   -> pierde
+        nuestro_niv 14 / rival_niv 20   -> pierde
+        nuestro_niv 18 / rival_niv 20   -> pierde
+
+    El tope de rerolls era **3 fijos**, y el −1.0 de "jefe APLAZADO" solo gana
+    a nodos que puntúan 2-12: si no hay ninguno en pantalla, el bot entra al
+    gimnasio y pierde la partida. Perder sin haber Restado nada.
+
+    Antes de subir el tope hay que poder **comprobar** si sirve, porque el
+    comentario del planificador afirma que "aplazar no compra nada" (nivel
+    ganado −0,0 entre el primer y el último aplazo). Eso se midió con el
+    código viejo: desde entonces la captura con equipo corto es prioritaria, y
+    la captura da experiencia **solo al món capturado** mientras el entrenador
+    da +2 a **todo** el equipo.
+
+    Por eso el test comprueba las dos cosas: que sube el tope **solo** cuando
+    falta nivel, y que el nivel de entrada **se escribe en el log** (sin el
+    dato no hay forma de refutar la hipótesis, que es lo que pasó).
+    """
+    import jugar_pokelike as JUG
+    import inspect
+
+    fuente = inspect.getsource(JUG.Bot._mapa)
+    # **El tope sigue en 3 aunque falte nivel.** Se probó con 8 y se midió:
+    # 7 de 7 runs llegaron igual de por debajo y la media bajó de 1,40 a 1,00.
+    # Este check está para que nadie lo vuelva a subir creyendo que así gana
+    # experiencia: no la gana. Lo que falta es trainers ANTES del gimnasio.
+    check("el tope de rerolls sigue en 3 aunque falte nivel",
+          "_tope = 3" in fuente and "self._rerolls < _tope" in fuente,
+          "-> subir el tope a 8 cuando falta nivel se midió y empeoró: 7 de 7 "
+          "llegaron igual de cortos y la media bajó de 1,40 a 1,00. El reroll "
+          "redibuja nodos, no inventa entrenadores")
+
+    check("el nivel al entrar al jefe se escribe en el log",
+          "⟂ nivel al jefe" in inspect.getsource(JUG.Bot._preparar_contra_el_rival),
+          "-> sin el dato no se puede comparar 'aplazar un gimnasio' con "
+          "'aplazar el siguiente', y la hipótesis se queda sin comprobar")
+
+    check("el nivel al entrar nace en __init__",
+          "_nivel_al_entrar" in inspect.getsource(JUG.Bot.__init__),
+          "-> sin inicializar, AttributeError en el primer prep de jefe")
+
+
+def test_las_capturas_no_roban_la_exp_de_equipo() -> None:
+    """Con 2 móns la captura **deja de ser prioritaria**.
+
+    **Este arreglo arregló una cosa y rompió otra.** Era `< 3`, y su premisa
+    ("con un solo món la exp es inalcanzable: si caes, se acabó") era cierta
+    para 1 y **falsa para 2**. Con dos móns el bot ya aguanta la ruta, así que
+    la captura sí es alcanzable, y lo que hace es **robar la exp de equipo**: la
+    captura da experiencia solo al món capturado, el entrenador da +2 a todo.
+
+    Medido en el lote del 15-10, 46 runs:
+
+        Entrenadores por run     8,1  ->  7,3
+        Media de insignias      1,40  ->  0,95
+        Runs con 0 insignias     34%  ->  50%
+        Muertes contra Brock          ->  10 (la primera insignia)
+
+    La regla se queda en `< 2`: el caso de 1 món sigue resuelto (sin captura,
+    la partida se acaba en el paso 22), y el de 2 vuelve a pelear por puntuación
+    normal, que es lo que devuelve los entrenadores.
+    """
+    import planificador as PL
+    import inspect
+
+    fuente = inspect.getsource(PL.puntuar)
+    check("con 2 móns la captura no es prioritaria",
+          "if len(equipo) < 2:" in fuente,
+          "-> con `< 3` la captura roba la exp de equipo (la unica que sube a "
+          "todo el equipo): 8,1 -> 7,3 entrenadores por run, y la media cayo "
+          "de 1,40 a 0,95 con 10 muertes contra Brock")
+
+    fuente_elegir = inspect.getsource(PL.elegir)
+    check("el filtro de captura prioritaria usa el mismo umbral",
+          "and len(equipo) < 2)" in fuente_elegir,
+          "-> los dos sitios tienen que coincidir: si `puntuar` dice 2 y "
+          "`elegir` dice 3, el veto gana y la captura sigue siendo prioritaria")
+
+    check("el arreglo del caso de 1 món sigue en pie",
+          "hacen falta " in fuente and "cuerpos antes que nivel" in fuente,
+          "-> sin captura con 1 món la partida muere en el paso 22, que es "
+          "justo lo que este arreglo original arreglaba")
+
+
+def test_el_delantero_de_la_liga_cubre_lorelei_y_lance() -> None:
+    """La posición 1 tiene que servir para el primer miembro **y** el último.
+
+    **Por qué los dos.** El orden de la Liga no se puede cambiar entre
+    combates: los cuatro van seguidos, sin pantalla de mapa en medio, y dentro
+    del `prep` el arrastre no cuela (17 intentos, 0 aciertos, medido el 16-10).
+    El mismo plan vale para los cinco combates, así que el delantero tiene que
+    aguantar al primero y al último.
+
+    Con el plan anterior —posición 1 = mejor contra Lorelei y nada más— el bot
+    **caía siempre en Lance**, el cuarto: venció a Lorelei, Bruno y Agatha con
+    ese orden exacto y perdió contra el siguiente
+    (`log-2026-10-16_06-56-01_p84591.txt`, 216 pasos, equipo a 60-73).
+    """
+    import politica as P
+    import inspect
+    inspect_src = inspect.getsource(P.orden_para_elite_four)
+    check("el delantero de la Liga se mide contra los dos extremos",
+          "_puente" in inspect_src and "_idx == 0" in inspect_src,
+          "-> la posicion 1 solo se media contra Lorelei y el bot caia en "
+          "Lance (el 4º) tras vencer a los tres primeros")
+
+    # Y que de verdad ordena: con un equipo de Pokémon con tipos claros, el
+    # primero tiene que ser eficaz contra Hielo (Lorelei) y contra Dragón
+    # (Lance), no solo contra Hielo.
+    eq = [{"nombre": "Lapras", "tipos": ["Agua", "Hielo"], "ps": 100,
+           "ps_max": 100, "nivel": 60},
+          {"nombre": "Charizard", "tipos": ["Fuego", "Volador"], "ps": 100,
+           "ps_max": 100, "nivel": 60},
+          {"nombre": "Alakazam", "tipos": ["Psiquico"], "ps": 100,
+           "ps_max": 100, "nivel": 60}]
+    orden = P.orden_para_elite_four(eq, "Kanto")
+    check("el orden de la Liga sale completo y con el delante delagua",
+          len(orden) == 3 and orden[0] == "Lapras",
+          f"-> salio {orden}: Lapras (Agua/Hielo) va el primero porque es el "
+          "que aguanta a Lorelei y a Lance a la vez")
+
+
 def main() -> int:
+    test_el_delantero_de_la_liga_cubre_lorelei_y_lance()
+    test_las_capturas_no_roban_la_exp_de_equipo()
+    test_el_jefe_aplazado_tira_mas_mapa_si_falta_nivel()
+    test_el_prep_no_reordena_donde_el_arrastre_no_cuela()
+    test_el_prep_no_se_puede_quedar_mudo()
+    test_el_reordenado_reintenta_cuando_el_hud_se_mueve()
+    test_el_nodo_de_captura_gana_a_la_batalla_suelta()
+    test_la_batalla_ganada_y_clavada_se_recupera()
     test_la_etiqueta_de_version_va_en_el_log()
     test_sacar_el_tipo_repetido()
     test_tipos_de_nodo()

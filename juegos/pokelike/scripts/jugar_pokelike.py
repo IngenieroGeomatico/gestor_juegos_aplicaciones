@@ -124,9 +124,19 @@ class Bot:
     # referencia como nombre no definido y ese aviso esconde bugs reales.
     MAX_INTENTOS_ATASCO = 3
 
+    # Segundos que se puede gastar la bolsa dentro del `prep`. Ver
+    # `_usar_bolsa`: sin este techo la run se queda muda antes de cada
+    # gimnasio y el detector de bucles la mata.
+    PRESUPUESTO_BOLSA = 15.0
+
     def __init__(self, juego: nb.Juego, region: str, verbose: bool = True,
                  reset: bool = False) -> None:
         self.j = juego
+        # El navegador avisa de sus propios reintentos (ver `Juego._avisar`).
+        # Sin esto, un reordenado lento es indistinguible de uno colgado: el
+        # detector de bucles de `lote_100.py` mato dos runs que iban bien
+        # porque el `prep` se pasa ~6 s por pasada sin escribir nada.
+        juego.log = self.log
         self.reset = reset
         self.tipo_lider: str | None = None
         # Nombre del starter elegido. Vacío hasta que se elija. El trade nunca
@@ -138,6 +148,17 @@ class Bot:
         # un trade o un mejor camino de exp).
         self._rerolls = 0
         self._rerolls_busqueda = 0
+        # **Nivel del equipo al entrar a un gimnasio, y el rival que esperaba.**
+        # Es `(medio_equipo, nivel_rival, rerolls_gastados)`. Sin esto no se
+        # puede comprobar la afirmación de "aplazar no compra nada" (que se
+        # midió con el código viejo): hacía falta el dato de entrada para
+        # comparar dos Tactics. Va al log en cada prep de jefe.
+        self._nivel_al_entrar: tuple | None = None
+        # **Cuántos combates de Liga lleva.** Es lo único que dice a qué
+        # miembro del Alto Mando (o al campeón) le toca, porque `insignias` se
+        # queda en 8 durante los cinco. Medido el 16-10: la run que venció a
+        # Lorelei, Bruno y Agatha y murió contra Lance marcaba `insignias: 8`.
+        self._preps_liga = 0
         # Nodo en el que se gastaron los rerolls de búsqueda de trade: al
         # cambiar de nodo se vuelve a poder buscar (antes se gastaban en la
         # primera pantalla de la partida y no volvían a activarse nunca).
@@ -778,14 +799,52 @@ class Bot:
         # jefe es la unica salida y no hay ni entrenador ni batalla: es el unico
         # caso en el que redibujar los nodos puede cambiar lo que viene. Tres
         # por partida, porque tirar sin parar pierde el progreso del momento.
-        _se_puede = (self._rerolls < 3
+        #
+        # **El tope sube a 8 si falta nivel para el jefe.** Antes eran 3 fijos y
+        # el bot entraba igual (el −1.0 de "jefe APLAZADO" solo gana a nodos que
+        # puntúan 2-12, y si no hay ninguno, entra). Con eso se perdía la partida
+        # **sin haber Restado nada**: 6 de 12 muertes con 1 insignia fueron
+        # Misty, y todas con el equipo por debajo:
+        #
+        #     nuestro_niv 13 / rival_niv 20   -> pierde
+        #     nuestro_niv 14 / rival_niv 20   -> pierde
+        #     nuestro_niv 18 / rival_niv 20   -> pierde
+        #
+        # El comentario de `planificador.py` afirma que "aplazar no compra nada"
+        # (nivel ganado −0,0 entre el primer y el último aplazo). Eso se midió
+        # **con el código viejo**: desde entonces la captura con equipo corto es
+        # prioritaria y las capturas dan experiencia **solo al món capturado**,
+        # mientras que el entrenador da +2 niveles a **todo** el equipo. Si la
+        # afirmación sigue valiendo, los 5 rerolls extra dan 0 y la hipótesis
+        # queda muerta. Si no, dan niveles y。这里的 techo es el experimento.
+        _ins = self.j.insignias()
+        _niv_rival = P.nivel_del_jefe(self.region, _ins)[0]
+        _niv_medio = (sum(m.get("nivel") or 0 for m in equipo) / len(equipo)
+                      if equipo else 0)
+        _falta_nivel = _niv_medio < _niv_rival
+        # **El tope se ha medido: 3, y no es negociable.** Se probó subirlo a 8
+        # cuando falta nivel (lote del 15-10, 7 de 7 mediciones):
+        #     equipo  9 vs rival 14 (-5), con 8 rerolls
+        #     equipo 14 vs rival 20 (-6), con 8 rerolls
+        #     equipo 18 vs rival 25 (-7), con 8 rerolls
+        #     equipo 20 vs rival 20 (+0), con 8 rerolls
+        # Ni uno ganó un nivel y la media **bajó de 1,40 a 1,00**. La frase de
+        # "aplazar no compra nada" era cierta: el reroll redibuja los nodos pero
+        # no hace aparecer un entrenador donde no lo había. Los 5 extra solo
+        # gastaban pasos. El cuello se arregla eligiendo ruta, no tirando mapa.
+        _tope = 3
+        self._nivel_al_entrar = (_niv_medio, _niv_rival, self._rerolls)
+        _se_puede = (self._rerolls < _tope
                      and "jefe" in tipos_alcanzables
                      and not ({"entrenador", "batalla"} & set(tipos_alcanzables)))
         if _se_puede:
             self._rerolls += 1
-            self.log(f"  ↻ reroll del mapa ({self._rerolls}/3): sin trainer ni "
-                     f"combate y el jefe como única salida, la guía dice tirar "
-                     f"el mapa para buscar trade o exp")
+            self.log(f"  ↻ reroll del mapa ({self._rerolls}/{_tope}): sin trainer "
+                     f"ni combate y el jefe como única salida"
+                     + (f" | falta nivel: equipo {int(_niv_medio)} vs jefe "
+                        f"{_niv_rival}, se busca exp"
+                        if _falta_nivel else
+                        " la guía dice tirar el mapa para buscar trade o exp"))
             try:
                 self.j.page.keyboard.press("r")
                 self.j.page.wait_for_timeout(600)
@@ -1424,8 +1483,48 @@ class Bot:
                          f"{max(niv_enem) if niv_enem else '?'}")
                 self.log(f"  enemigos={[(e['nombre'], e['ps'], e['nivel']) for e in eb['enemigos']]}")
                 self.log(f"  mios={[(m['nombre'], m['ps'], m['nivel']) for m in eb['mios'] if m['ps']]}")
+        # **Batalla ganada que no avanza.**
+        #
+        # El caso medido (`atascada_125762.txt`): contra un `Hiker` con
+        # Sandshrew y Diglett, los dos enemigos se quedan a `0/42` y `0/29`, el
+        # equipo entero al 100%, y la pantalla repite el mismo estado cada 13
+        # segundos indefinidamente. La pelea esta ganada pero no pasa al
+        # resultado, y pulsar continuar no la saca.
+        #
+        # **Por que se mira el estado y no el texto de la accion.**Habia un
+        # detector por string (`CONTINUAR_BATALLA`) que comparaba
+        # `hecho == "[continuar -> True] ..."`, pero `_batalla` devuelve
+        # `f"batalla ({via})"`: ese literal **nunca se devolvia**, la rama era
+        # codigo muerto y la recuperacion no se disparo nunca. Es el fallo de la
+        # skill pokelike-reglas ("una rama muerta sin error") dressado de
+        # detector.
+        #
+        # Y no se puede usar el numero de pulsaciones: en un combate de
+        # gimnasio son normales 12-13 pulsaciones de auto-battle. Lo que
+        # distingue el atasco es que **la firma no cambia y el rival ya no
+        # tiene a nadie en pie**: eso no pasa en una pelea que avanza.
+        if eb:
+            _firma = "|".join(f"{e['nombre']}:{e['ps']}" for e in eb["enemigos"])
+            _todos_caidos = bool(eb["enemigos"]) and all(
+                _ps(e) <= 0 for e in eb["enemigos"])
+            if _firma == getattr(self, "_firma_batalla", None) and _todos_caidos:
+                self._batalla_clavada = getattr(self, "_batalla_clavada", 0) + 1
+                if self._batalla_clavada >= 2:
+                    self.log("  batalla ganada pero la pantalla no avanza "
+                             f"(rival a 0 PS, {self._batalla_clavada} intentos): recupero")
+                    if self._recuperar_batalla_clavada():
+                        return "batalla (recuperada)"
+            else:
+                self._firma_batalla = _firma
+                self._batalla_clavada = 0
         self._n_batalla = getattr(self, "_n_batalla", 0) + 1
         # `btn-continue-battle` y `btn-auto-battle` llevan data-shortcut="Space".
+        # **Auto-battle primero.** Si se intenta `continue-battle` primero y es
+        # visible, se activa y nunca se llega a `auto-battle`: la batalla no
+        # termina (el enemigo sigue vivo) y el bot se queda en un bucle de
+        # "continuar" que no avanza. Medido en `run_prep_debug3.log`: contra
+        # Brock, Geodude a 0/31 HP y Onix a 33/33, el bot pulsaba continue
+        # indefinidamente sin terminar la pelea.
         for sel in ("#btn-continue-battle", "#btn-auto-battle"):
             if self.j.visible(sel):
                 via = self.j.activar(sel)
@@ -1462,6 +1561,28 @@ class Bot:
         # reserva al principal en segundo, dejando al frente un món que se come
         # un 2x. El tipo del líder del mapa es la mejor pista disponible para un
         # combate salvaje, así que se le pasa.
+        #
+        # **La Liga se ordena AQUÍ, no en el prep.** El prep calcula el orden
+        # óptimo (ver `prep ELITE FOUR` en el log) pero **no puede aplicarlo**: el
+        # arrastre no cuela dentro del modal, así que se pelea con el orden que
+        # quedó en el HUD. Medido el 16-10 en la run `p84591`, que llegó a la
+        # Liga y venció a Lorelei, Bruno y Agatha:
+        #
+        #   rival Water/Ice/Psychic    (Lorelei) -> ['Golem','Dugtrio',...]
+        #   rival Rock/Ground/Fighting (Bruno)   -> ['Golem','Dugtrio',...]
+        #   rival Ghost/Poison/Flying  (Agatha)  -> ['Golem','Dugtrio',...]
+        #
+        # Cuatro miembros, **el mismo orden**: el del HUD, no el calculado. La
+        # estrategia de la Liga estaba escrita a medias y por eso no se notaba.
+        #
+        # `insignias` no sirve para saber a qué miembro toca: **se queda en 8**
+        # durante toda la Liga (medido: la run que murió contra Lance, el 4º,
+        # marcaba 8). Así que va un contador de preps de Liga, que se incrementa
+        # en `_preparar_contra_el_rival` y va desde 0 (Lorelei) a 4 (Gary).
+        _datos = P.regiones().get(self.region, {})
+        _jefes = _datos.get("jefes", [])
+        if insignias >= len(_jefes) and not orden:
+            orden = self._orden_de_liga(equipo, insignias)
         deseado = orden or P.orden_deseado(equipo, insignias, self.region,
                                             tipo_nodo, tipos_rival)
         deseado = [n for n in deseado if n]
@@ -1479,6 +1600,34 @@ class Bot:
         elif self._reordenes_fallidos < 3:
             self._reordenes_fallidos += 1
             self.log(f"  ⋯ no se pudo reordenar (quedó {self.j.orden_equipo()})")
+
+    def _orden_de_liga(self, equipo: list[dict], insignias: int) -> list[str]:
+        """Orden del equipo para el miembro de la Liga que toca.
+
+        **Un contador, no `insignias`.** El contador de insignias se queda en 8
+        durante toda la Liga —medido en la run `p84591`, que murió contra Lance,
+        el cuarto miembro, y marcaba `insignias: 8`—, así que no dice a quién le
+        toca. Lo dice `_preps_liga`, que se incrementa en cada prep y va de 0
+        (Lorelei) a 4 (el campeón).
+
+        Con `i < 4` se usa el orden 1-2-3-4 de la Liga: la posición 1 es el
+        món más eficaz contra el miembro `i`, y así sucesivamente. Con `i == 4`
+        es el campeón y toca el emparejamiento 1-a-1 (el suyo contra el nuestro,
+        en el mismo orden).
+        """
+        datos = P.regiones().get(self.region, {})
+        elite = datos.get("elite_four_datos") or []
+        i = getattr(self, "_preps_liga", 0)
+        con_tipos = [{**m, "tipos": self._tipos_de_m(m.get("nombre"))}
+                     for m in equipo]
+        if i >= len(elite):
+            orden = P.orden_para_campeon(con_tipos, self.region)
+            quien = (datos.get("campeon") or "el campeón")
+        else:
+            orden = P.orden_para_elite_four(con_tipos, self.region)
+            quien = (elite[i].get("nombre") if i < len(elite) else f"miembro {i}")
+        self.log(f"  ⟂ orden de Liga #{i}: contra {quien} -> {orden}")
+        return orden
 
     def tipo_lider_actual(self) -> str | None:
         """`#map-info` dice "Route 1: vs Brock (Rock)"; de ahí sale el tipo."""
@@ -2496,14 +2645,93 @@ class Bot:
         nombres = [m.get("nombre") for m in equipo]
         con_tipos = [{**m, "tipos": self._tipos_de_m(m.get("nombre"))}
                      for m in equipo]
-        elegido = P.mejor_contragolpe(con_tipos, tipos)
+
+        # **Estrategia de la Elite Four**: si ya tenemos las 8 insignias,
+        # calcular el orden óptimo para toda la Elite Four de una vez.
+        # Esto solo se hace en el primer prep de la Elite Four.
+        insignias = self.j.insignias()
+        region_datos = P.regiones().get(self.region, {})
+        jefes = region_datos.get("jefes", [])
+        es_elite = insignias >= len(jefes)
+        es_campeon = insignias >= len(jefes) + len(region_datos.get("elite_four", []))
+
+        # **El dato que faltaba para medir si aplazar el jefe sirve.** Se escribe
+        # en CADA prep de jefe: `(nivel medio, nivel del rival, rerolls)`. Con
+        # esto se puede comparar "cuánto nivel se gana entre el reroll 3 y el 8"
+        # y decidir si la hipótesis de que aplazar no compra nada sigue en pie.
+        # Antes solo decía "se busca más exp" y no dejaba ningún número, que es
+        # justo por lo que carried 3APLazamientos sin comprobar nada.
+        if self._nivel_al_entrar is not None:
+            _me, _ri, _rr = self._nivel_al_entrar
+            self.log(f"  ⟂ nivel al jefe: equipo {int(_me)} vs rival {_ri} "
+                     f"({int(_me) - _ri:+d}), con {_rr} reroll(s) gastados")
+
+        if es_campeon:
+            # En el combate contra el campeón, reordenar 1-a-1
+            orden = P.orden_para_campeon(con_tipos, self.region)
+            elegido = orden[0] if orden else None
+            self.log(f"  ⋯ prep CAMPEÓN: rival {'/'.join(tipos)} -> {orden}")
+        elif es_elite:
+            # **El mismo orden que pone el mapa**, no el fijo de la serie. El
+            # contador va desde 0 (Lorelei) a 4 (el campeón), y en `i == 4` sale
+            # el emparejamiento 1-a-1. Con el orden fijo de antes, los cuatro
+            # recibían la misma formación.
+            orden = self._orden_de_liga(con_tipos, insignias)
+            elegido = orden[0] if orden else None
+            # **Contador de Liga.** Es lo que dice a qué miembro toca, porque
+            # `insignias` se queda en 8 durante los cinco combates. Se sube
+            # **después** de calcular el orden, que es el del miembro actual.
+            self._preps_liga = getattr(self, "_preps_liga", 0) + 1
+            self.log(f"  ⋯ prep ELITE FOUR: rival {'/'.join(tipos)} -> {orden}")
+        else:
+            # Para gimnasios y entrenadores, usar la estrategia normal
+            elegido = P.mejor_contragolpe(con_tipos, tipos)
+            orden = P.orden_para_entrenador(con_tipos, tipos)
+            self.log(f"  ⋯ prep: rival {'/'.join(tipos)} -> {orden}")
+
         destino = nombres.index(elegido) if elegido in nombres else 0
-        orden = P.orden_para_entrenador(con_tipos, tipos)
         self.anotar(P.Decision("prep", elegido,
                                f"rival {'/'.join(tipos)} -> {orden}"))
-        self.log(f"  ⋯ prep: rival {'/'.join(tipos)} -> {orden}")
-        # Reordenar en el prep: los slots del HUD también salen en esta pantalla.
-        self.ordenar_equipo(con_tipos, self.j.insignias(), "jefe", orden)
+        # **No se reordena dentro del `prep`.** El orden ya se aplicó en la
+        # pantalla de mapa, un paso antes de entrar (`⋯ reordenado: ... (para
+        # jefe)`), y aquí el arrastre **no funciona**: el modal se come el
+        # puntero. Medido sobre 6 preps: acierta **1 de 6** (17%), y cada
+        # intento fallido son ~30 s de prep antes de un gimnasio.
+        #
+        # Coste de dejarlo: dos runs perdidas por el detector de bucles, que
+        # veía el mismo estado cinco veces (`atascada_273329.txt`, paso 32 con
+        # el equipo al 73%; `atascada_257751.txt`, paso 56 con 1 insignia).
+        # El orden del jefe ya está puesto de antes, así que lo que se pierde es
+        # un reintento que casi nunca puede funcionar.
+        self.log(f"  ⋯ prep: sin reordenar (el orden ya está puesto desde el "
+                 f"mapa y aquí el arrastre no cuela): {orden}")
+
+        # **… salvo en la Liga, donde sí hace falta y no hay otro sitio.**
+        #
+        # Los cuatro combates del Alto Mando van **seguidos**, con ~14 s entre
+        # uno y otro y **sin pantalla de mapa en medio** (medido el 16-10 en
+        # `log-2026-10-16_16-07-42_p107103.txt`):
+        #
+        #   16:25:18  prep ELITE FOUR  Water/Ice/Psychic      (Lorelei)
+        #   16:25:32  prep ELITE FOUR  Rock/Ground/Fighting   (Bruno)
+        #   16:25:46  prep ELITE FOUR  Ghost/Poison/Flying    (Agatha)
+        #   16:26:00  prep ELITE FOUR  Water/Flying/Dragon     (Lance)
+        #
+        # Así que el orden se aplica **una vez**, en el mapa, antes de Lorelei,
+        # y los otros tres se pelean con ese: el contador de Liga se quedaba en
+        # `#0` las cuatro veces. Ponerlo en el mapa no basta; aquí es donde
+        # tocaba desde el principio.
+        #
+        # Antes esto no se intentaba porque el arrastre dentro del modal fallaba
+        # (1 de 6) y costaba ~30 s antes de cada gimnasio. Lo que cambia no es
+        # el arrastre sino **el gasto**: una sola pasada, con verificación por
+        # posición —igual que el mapa, que ahí sí acierta— y sin reintentos a
+        # ciegas. Y **solo en la Liga**, donde es el único sitio disponible: en
+        # los gimnasios el mapa ya lo puso y repetir aquí soloSlows things down.
+        if es_elite or es_campeon:
+            if self.j.reordenar_equipo(orden):
+                self.log(f"  ⋯ prep: reordenado en la Liga -> "
+                         f"{self.j.orden_equipo()}")
         objeto = self._usar_bolsa(destino, nombres)
         return f"rival {'/'.join(tipos)}, delante {elegido}, {objeto}"
 
@@ -2553,7 +2781,24 @@ class Bot:
             return f"bolsa: {len(bolsa)} sin objetos conocidos"
 
         hechos: list[str] = []
+        # **Presupuesto de tiempo para la bolsa.** El `prep` es el momento más
+        # caro de la run (justo antes de un gimnasio) y cada objeto puede gastar
+        # hasta 3 clics de 3 s más dos volcados del DOM. Con la bolsa llena,
+        # todo eso son 40-60 s **sin escribir nada**, porque el fallo del flujo
+        # se reportaba con `print()` a stdout y no al log del bot: el detector
+        # de bucles de `lote_100.py` veía el mismo estado y mataba la partida.
+        # Costó dos runs que iban bien (`atascada_267357.txt`, paso 27 con el
+        # equipo al 100%; `atascada_267587.txt`, paso 31 con 4 móns vivos).
+        #
+        # Un objeto es una optimización; quedarse colgado antes de un
+        # gimnasio es perder la run. El presupuesto corta la bolsa, no el paso.
+        _limite = time.monotonic() + self.PRESUPUESTO_BOLSA
         for indice, j, nombre, motivo in plan:
+            if time.monotonic() > _limite:
+                self.log(f"  ⋯ bolsa: se acaba el presupuesto de "
+                         f"{self.PRESUPUESTO_BOLSA:.0f} s, quedan "
+                         f"{len(plan) - len(hechos)} sin intentar")
+                break
             # **El índice se recalcula en cada uso.** `plan` guarda índices
             # sobre el snapshot de `bolsa` del principio, pero `usar_item`
             #-indexa el DOM **vivo** (`#elite-prep-items .item-badge`).nth(i)).

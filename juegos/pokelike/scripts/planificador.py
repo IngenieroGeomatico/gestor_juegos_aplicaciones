@@ -615,12 +615,23 @@ def _alguien_le_gana(ctx: Contexto, tipos_rival: list[str]) -> bool:
     return False
 
 
-def puntuar(tipo: str, ctx: Contexto) -> tuple[float, str]:
+def puntuar(tipo: str, ctx: Contexto, es_captura: bool = False) -> tuple[float, str]:
     """Puntúa un tipo de nodo con el plan a la vista.
 
     La idea es no mirar "qué es este nodo" sino "qué me falta": nivel, vida o
     el listón del jefe. Por eso el mismo nodo `batalla` vale 10 con el equipo
     por debajo de nivel y 4 con el equipo a nivel.
+
+    `es_captura` dice si **este** nodo es el de captura (`catch` del juego).
+    Hace falta porque `catch` y `battle` se traducen los dos a `"batalla"`
+    (ver `politica.TIPO_ESTADO`) y sin esto los dos entraban por la misma rama
+    y los dos recibian `PESO_CAPTURA`: el desempate lo acababa decidiendo el
+    bono de ruta y el bot se iba a cazar en vez de a capturar. Medido en el
+    lote de 121 runs: 196 pantallas con `catch` disponible y
+    `capturas_pantalla == 0` en las que eligio `battle`. De ahi salen las 28
+    runs que mueren antes del paso 30 con un unico món a nivel 5-9.
+
+    `None` = el juego no dio el tipo crudo, y se puntúa como antes.
     """
     equipo, plan = ctx.equipo, ctx.plan
     if not equipo:
@@ -795,7 +806,12 @@ def puntuar(tipo: str, ctx: Contexto) -> tuple[float, str]:
         # solo pierde contra cualquier trainer. Antes el bot lo vetaba por
         # falta de nivel y se quedaba con un unico món: medido, perdiendo
         # contra un Grunt del Team Rocket con el món a 100 de PS.
-        if ctx.capturas_pantalla == 0:
+        # `es_captura is not False` y no `es_captura`: `None` significa que el
+        # juego no dio el tipo crudo, y en ese caso se puntua como se puntuaba
+        # antes. La diferencia entre `False` (es una batalla suelta) y `None`
+        # (no se sabe) es la que arregla el empate sin romper los mapas sin
+        # tipo.
+        if ctx.capturas_pantalla == 0 and es_captura is not False:
             # Cazar uno por pantalla, pero **con la condición que evita la
             # trampa**: cada captura avanza de pantalla y pone el contador a
             # cero, asi que con la captura sin condiciones el bot caza, avanza,
@@ -810,7 +826,32 @@ def puntuar(tipo: str, ctx: Contexto) -> tuple[float, str]:
             # El filtro de calidad (nivel y stats) vive en `elegir_captura`, asi
             # que cazar no significa coger basura: significa coger el primero
             # que sirva de verdad.
-            if len(equipo) < 3:
+            if len(equipo) < 2:
+                # **Con UN món sí, con dos no.** Este era `< 3` y fue un
+                # desastre medido. La premisa del arreglo original —"con un
+                # solo món la exp es inalcanzable: si caes, se acabó"— era
+                # cierta para 1 y **falsa para 2**: con dos móns el bot ya
+                # aguanta la ruta, así que la captura sí es alcanzable y lo que
+                # hace es **robar la exp de equipo**, que es la única que sube
+                # a todo el equipo a la vez.
+                #
+                # La captura da experiencia **solo al món capturado**; el
+                # entrenador da **+2 a todo el equipo**. Forzar capturas con
+                # equipo de 2-3 metió al bot en la economía mala, y se ve:
+                #
+                #     entrenadores/run   8,1 -> 7,3
+                #     media insignias   1,40 -> 0,95
+                #     nivel al gimnasio -3 a -8   (7 de 7 mediciones)
+                #     0 insignias       34% -> 50% de las runs
+                #
+                # y las muertes se Concentraron donde tiene sentido: **10 de las
+                # muertes fueron contra Brock**, el primer gimnasio.
+                #
+                # El arreglo que sigue haciendo falta es el suyo: con 1 món, sin
+                # captura, la partida se acaba en el paso 22. Ese caso se
+                # conserva; el de 2 móns, no. Lo que hay que vigilar es que el
+                # equipo de 2 no vuelva a ser 1 món empobrecido: eso lo vigila
+                # `elegir_captura` por nivel y stats.
                 return (PESO_CAPTURA,
                         f"capturar: equipo de {len(equipo)}, hacen falta "
                         f"cuerpos antes que nivel")
@@ -1054,6 +1095,22 @@ def elegir(equipo: list[dict], nodos: list[dict], ctx_extra: dict | None = None,
         return (P.tipo_de_estado(n.get("tipo")) if n.get("tipo")
                 else P.tipo_de_nodo(n.get("sprite", "")))
 
+    def _es_captura(n) -> bool | None:
+        """¿Este nodo concreto es el de captura, y no una batalla suelta?
+
+        `catch` y `battle` se traducen los dos a `"batalla"`, así que el tipo
+        interno no los distingue. Se mira el **crudo del juego** (`tipo`), que
+        es lo unico que sabe cual de los dos es.
+
+        Devuelve `None` cuando el juego no dio tipo, y `puntuar` lo trata como
+        "no lo sé": se comporta como antes. Un dato que falta no debe cambiar
+        la decisión, porque aqui lo que falta es lo que hace el bot.
+        """
+        crudo = str(n.get("tipo") or "").strip().lower()
+        if not crudo:
+            return None
+        return crudo == "catch"
+
     tipos_disponibles = [_tipo(n) for n in nodos
                          if n.get("clickable")
                          and str(n.get("id")) in ids_disponibles]
@@ -1123,6 +1180,19 @@ def elegir(equipo: list[dict], nodos: list[dict], ctx_extra: dict | None = None,
     )
 
     punt: list[tuple[float, dict, str]] = []
+    # **Regla 2 como prioridad, no como puntuacion.** Con el equipo corto la
+    # captura no compite: es un paso previo. El motivo es que el bono de ruta
+    # (`coste * 3.5`, hasta +500 con una rama larga) se leia como "mas exp",
+    # pero con un solo món esa exp es **inalcanzable**: si el bot cae, la
+    # partida se acaba y no hay nadie que la gaste. Medido el 14-10 con el
+    # peso ya arreglado: `opc: batalla=558 batalla=434` — el nodo de captura
+    # puntua 60 y el de batalla 15, y aun asi gana el de batalla porque su
+    # rama tiene 138 combates mas (483 puntos de bono por 45 de diferencia).
+    #
+    # De ahi salen las 28 runs que mueren antes del paso 30 con un unico món
+    # a nivel 5-9. Se marca aqui y se decide despues del bucle, que es donde
+    # se sabe si habia un nodo de captura pendiente.
+    captura_prioritaria: tuple[dict, str] | None = None
     # Si el filtro de alcanzables deja la lista vacía se reintenta sin él, y si
     # tampoco hay nada se coge el primer nodo clicable. Devolver una decisión
     # sin nodo (`valor=None`) hacía que el bot no pulsara nada y se colgara:
@@ -1177,7 +1247,10 @@ def elegir(equipo: list[dict], nodos: list[dict], ctx_extra: dict | None = None,
                     # el veto de entrenador por nivel se desactivaba justo en
                     # los nodos donde hacía falta, sin ningún error visible.
                     ctx_n = replace(ctx_n, en_camino_al_jefe=en_camino)
-            s, razon = puntuar(tipo, ctx_n)
+            s, razon = puntuar(tipo, ctx_n, es_captura=_es_captura(n))
+            if (_es_captura(n) is True and ctx.capturas_pantalla == 0
+                    and len(equipo) < 2):
+                captura_prioritaria = (n, razon)
             # Cuántos combates deja la rama hacia el jefe. El mapa es un DAG y
             # solo se recorre un camino, así que **elegir la rama con más
             # combates es la palanca de exp más grande que hay**: medido, una
@@ -1328,6 +1401,24 @@ def elegir(equipo: list[dict], nodos: list[dict], ctx_extra: dict | None = None,
                                     if primero.get("tipo")
                                     else P.tipo_de_nodo(primero.get("sprite", ""))))
         return P.Decision("nodo", None, "no hay nodos clicables", tipo="ninguno")
+
+    # **La captura del equipo corto manda sobre el score.** Se comprueba que el
+    # nodo marcado sea de los que se llegaron a puntuar (o sea, que la pantalla
+    # lo ofrecía de verdad) antes de tomarlo.
+    if captura_prioritaria is not None:
+        _n, _razon = captura_prioritaria
+        _id = str(_n.get("id"))
+        if any(str(x[1].get("id")) == _id for x in punt):
+            _opc_c = " ".join(f"{_tipo(n)}={s:.0f}" for s, n, _r
+                              in sorted(punt, key=lambda x: -x[0])[:6])
+            return P.Decision(
+                "nodo", _n.get("atajo"),
+                f"capturar {_razon} | equipo de {len(equipo)}: la captura va antes "
+                f"que la ruta, porque su experiencia es inalcanzable sin equipo"
+                + (f" | mapa: {info_mapa}" if info_mapa else "")
+                + f" | plan: {plan.resumen()}"
+                + f" | opc: {_opc_c}",
+                tipo="batalla")
 
     mejor_s, mejor, mejor_razon = max(punt, key=lambda x: x[0])
     tipo_mejor = (P.tipo_de_estado(mejor.get("tipo")) if mejor.get("tipo")

@@ -29,14 +29,19 @@ número de runs** si no da:
 uv run --group dev python juegos/pokelike/scripts/lanzar_tanda.py --runs 2
 ```
 
-Limpieza manual si hace falta. **Ojo: `pkill -f jugar_pokelike.py` mata también
-el propio shell**, porque el patrón aparece en la línea de órdenes del `bash`:
+Limpieza manual si hace falta:
 
 ```bash
-pkill -9 -f "scripts/jugar_pokelike.py"
-pkill -9 -x firefox
-pkill -9 -f firefox-bin
+bash juegos/pokelike/scripts/matar_bot.sh
 ```
+
+**Ojo: `pkill -f jugar_pokelike.py` mata también el propio shell**, porque el
+patrón aparece en la línea de órdenes del `bash`. Y **nunca** con
+`ps -eo pid,args | grep firefox | xargs kill -9`: el servidor MCP de Firefox de
+OpenCode (`node .../firefox-devtools-mcp`) tiene "firefox" en su línea de órdenes
+y muere con él, dejando el MCP marcado como *failed*. A mano, sólo con
+`pkill -9 -f "scripts/jugar_pokelike.py"`, `pkill -9 -x firefox` (por nombre de
+proceso) y `pkill -9 -f firefox-bin`.
 
 ## Cómo funciona el juego (medido, no supuesto)
 

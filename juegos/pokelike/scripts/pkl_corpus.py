@@ -613,7 +613,10 @@ def construir(db: Path, logs: Path = LOGS) -> dict:
     db.parent.mkdir(parents=True, exist_ok=True)
     if db.exists():
         db.unlink()
-    con = sqlite3.connect(db)
+    con = sqlite3.connect(db, timeout=30)
+    con.execute("PRAGMA journal_mode=WAL")
+    con.execute("PRAGMA busy_timeout=30000")
+    con.execute("PRAGMA synchronous=NORMAL")
     con.executescript(ESQUEMA)
     cur = con.cursor()
     cont = {"runs": 0, "pasos": 0, "nodos": 0, "peleas": 0, "eventos": 0,
@@ -622,14 +625,29 @@ def construir(db: Path, logs: Path = LOGS) -> dict:
     # (`log-<fecha>_<hora>_p<pid>.txt`). Los sueltos son runs que nunca se
     # archivaron en un lote; dejarlos fuera perdia 500 runs de un plumazo.
     rutas = sorted(logs.glob("*/*.txt")) + sorted(logs.glob("*.txt"))
+    # Cargar IDs existentes para idempotencia: no duplicar runs ya ingestadas
+    existentes = {r[0]: r[1] for r in cur.execute(
+        "SELECT id, ruta FROM run")}
     for ruta in rutas:
         p = parsear(ruta, logs)
         run = p["run"]
         cols = list(run.keys())
-        cur.execute(f"INSERT INTO run ({','.join(cols)}) "
-                    f"VALUES ({','.join('?' * len(cols))})",
-                    [run[k] for k in cols])
-        rid = cur.lastrowid
+        if run["ruta"] in existentes:
+            # Run ya existe: actualizar en vez de duplicar
+            rid = existentes[run["ruta"]]
+            cur.execute(f"DELETE FROM paso WHERE run_id={rid}")
+            cur.execute(f"DELETE FROM nodo WHERE run_id={rid}")
+            cur.execute(f"DELETE FROM pelea WHERE run_id={rid}")
+            cur.execute(f"DELETE FROM evento WHERE run_id={rid}")
+            sets = ", ".join(f"{c}=?" for c in cols)
+            cur.execute(f"UPDATE run SET {sets} WHERE id={rid}",
+                        [run[k] for k in cols])
+        else:
+            cur.execute(f"INSERT INTO run ({','.join(cols)}) "
+                        f"VALUES ({','.join('?' * len(cols))})",
+                        [run[k] for k in cols])
+            rid = cur.lastrowid
+            existentes[run["ruta"]] = rid
         cont["runs"] += 1
         cur.executemany(
             "INSERT INTO paso (run_id,orden,paso,mapa,ins,disp,vivos,total,"

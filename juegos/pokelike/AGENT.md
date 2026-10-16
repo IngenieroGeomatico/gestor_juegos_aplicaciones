@@ -37,12 +37,22 @@ systemd-run --user --unit=pokelike-h20 --collect \
 **Ruta absoluta**: `systemd-run` no hereda el directorio de trabajo, y con ruta
 relativa la unidad moría con `status=127` en el mismo segundo y sin más pista.
 
-Limpieza manual, **nunca con `pkill -f jugar_pokelike.py`** (el patrón está en
-la línea de órdenes del propio shell y lo mata):
+Limpieza manual con el script, que sabe qué matar y qué no:
 
 ```bash
-pkill -9 -f "scripts/jugar_pokelike.py"; pkill -9 -x firefox; pkill -9 -f firefox-bin
+bash juegos/pokelike/scripts/matar_bot.sh
 ```
+
+**NUNCA con `pkill -f jugar_pokelike.py`** (el patrón está en la línea de órdenes
+del propio shell y lo mata) ni, sobre todo, con
+`ps -eo pid,args | grep firefox | xargs kill -9`: el servidor MCP de Firefox de
+OpenCode es `node .../firefox-devtools-mcp`, lleva "firefox" en su línea de
+órdenes y se lleva por delante el `kill -9`. El SIGKILL no se puede capturar, su
+cierre ordenado no corre y OpenCode lo marca como *failed* (`Connection closed:
+MCP server process exited`), tirando además el servidor MCP de Playwright
+(`--browser firefox`) en el mismo instante. Si hay que matar a mano, sólo con
+`pkill -9 -f "scripts/jugar_pokelike.py"`, `pkill -9 -x firefox` (por **nombre**
+de proceso: el MCP es `node`) y `pkill -9 -f firefox-bin`.
 
 ## Antes de proponer una hipótesis: mira `HIPOTESIS.md`
 

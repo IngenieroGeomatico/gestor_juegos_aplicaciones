@@ -148,6 +148,21 @@ class Juego:
                  .map(s => (s.querySelector('.team-slot-name')?.textContent || '').trim())"""
         )
 
+    def _avisar(self, texto: str) -> None:
+        """Escribe una linea de progreso si hay un log conectado.
+
+        El reordenado del `prep` tarda ~6 s por pasada y el detector de bucles
+        de `lote_100.py` mata a los 50 s sin ver lineas nuevas: dos runs que
+        iban bien se perdieron asi. Sin esta linea, un reordenado que va lento
+        es **indistinguible** de uno que se ha colgado.
+        """
+        destino = getattr(self, "log", None)
+        if callable(destino):
+            try:
+                destino(texto)
+            except Exception:  # noqa: BLE001
+                pass
+
     def reordenar_equipo(self, nombres: list[str]) -> bool:
         """Reordena el equipo arrastrando slots. `nombres` es el orden deseado.
 
@@ -167,19 +182,51 @@ class Juego:
             objetivo += [n for n in actual if n not in objetivo]
             if objetivo == actual:
                 return True
-            # Selection sort: para cada posición, arrastrar el món que debe
-            # ocuparla hasta ella. Pocos elementos, así que da igual de ineficiente.
-            for destino in range(len(objetivo)):
-                actual = self.orden_equipo()
-                if len(actual) <= destino:
-                    break
-                if actual[destino] == objetivo[destino]:
-                    continue
-                origen = actual.index(objetivo[destino])
-                if origen == destino:
-                    continue
-                if not self._arrastrar_slot(origen, destino):
-                    return False
+            # **Reintentos.** El fallo medido: 157 de 729 intentos (21%), y el
+            # 87% con equipo de 2-3 móns, que es justo cuando el HUD acaba de
+            # **re-renderizar** tras una captura. El arrastre de puntero cae en
+            # tierra si el slot se está moviendo, el orden no cambia, y como
+            # antes solo se comprobaba **al final** el resultado era un fallo
+            # seco: el bot entraba al jefe con el món equivocado delante.
+            #
+            # El caso del log `log-2026-10-13_14-03-02_p243980.txt`:
+            #   [prep -> Magikarp] rival Rock/Ground -> ['Krabby', 'Bulbasaur', 'Magikarp']
+            #   ⋯ no se pudo reordenar (quedó ['Magikarp', 'Krabby', 'Bulbasaur'])
+            # Krabby es Agua y le pega x2 a Roca; se peleó con Magikarp (Normal)
+            # y perdió. El planificador acertó y el arrastre no llegó.
+            #
+            # **Dos pasadas, no tres, y cada una avisa.** La version de 3
+            # pasadas era correcta pero se comia el prep entero: en la pantalla
+            # de `prep` (que tiene un modal) el arrastre no cuela, asi que las
+            # tres pasadas fallan y tardan ~60 s. El detector de bucles de
+            # `lote_100.py` mata a los 50 s de no ver lineas nuevas, y se
+            # llevo dos runs que iban bien (`atascada_257751.txt` y
+            # `atascada_262874.txt`: los dos logs se cortan en `⋯ prep:` con 1
+            # insignia y sin haber perdido).
+            #
+            # El limite real no es el numero de pasadas sino **no quedarse
+            # mudo**: una linea por pasada hace que se vea que se avanza.
+            for intento in range(2):
+                for destino in range(len(objetivo)):
+                    actual = self.orden_equipo()
+                    if len(actual) <= destino:
+                        break
+                    if actual[destino] == objetivo[destino]:
+                        continue
+                    origen = actual.index(objetivo[destino])
+                    if origen == destino:
+                        continue
+                    self._arrastrar_slot(origen, destino)
+                    # **Se comprueba este arrastre, no el final.** Antes un
+                    # arrastre que no surtiese efecto no se notaba hasta el
+                    # final, cuando ya no se podia arreglar; aqui se abandona la
+                    # pasada y se vuelve a empezar con el orden real.
+                    if self.orden_equipo()[destino] != objetivo[destino]:
+                        self._avisar(f"  · reordenado: el arrastre {origen}->"
+                                     f"{destino} no movio nada, otra pasada")
+                        break
+                if self.orden_equipo() == objetivo:
+                    return True
             return self.orden_equipo() == objetivo
         except Exception:  # noqa: BLE001
             return False
@@ -401,6 +448,8 @@ class Juego:
                     .some(e => e.offsetParent !== null)"""
             )
             if not abierto:
+                self._avisar(f"  · objeto: el clic no abrio ninguna ventana "
+                             f"(bolsa #{indice_item}, món={nombre_mons})")
                 self._dump_tras_clic_item(indice_item, nombre_mons)
                 return False
 
@@ -440,8 +489,15 @@ class Juego:
             # Un clic a un objeto equivocado tambien devuelve True, asi que la
             # unica senal fiable es que el objeto **desaparecio de la bolsa**.
             if despues >= antes:
-                print(f"[EQUIP] el clic no sirvio: bolsa {antes}->{despues} "
-                      f"(món={nombre_mons})", flush=True)
+                # **Al log del bot, no a stdout.** Con `print()` esto salia
+                # por la salida del proceso y no aparecia en el log de la run:
+                # el `prep` se quedaba mudo y el detector de bucles de
+                # `lote_100.py` mataba la partida creyendo que estaba colgada
+                # (dos runs que iban bien, `atascada_267357.txt` y
+                # `atascada_267587.txt`). Un fallo que no se ve desde fuera no
+                # verifica nada.
+                self._avisar(f"  · objeto: el clic no sirvio (bolsa "
+                             f"{antes}->{despues}, món={nombre_mons})")
                 self._dump_modal_equip(indice_item, indice_mons, nombre_mons)
                 self.cerrar_modal_item()
                 return False

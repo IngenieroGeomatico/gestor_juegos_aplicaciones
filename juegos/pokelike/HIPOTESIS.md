@@ -498,6 +498,25 @@ gimnasio (con qué abre el rival, cuánto daño entra al abridor) para separar
 falta para decidir si el cuello 2 es de orden defensivo (quién abre) o de
 nivel dentro del combate.
 
+### 1.9 Lote de 100 runs (línea base, no validación)
+
+Decisión del usuario: lanzar 100 runs con la estrategia actual (reserva por
+ventaja) para ver "hasta dónde llega". Lo que sale **no valida la estrategia**
+— §1.7 dice que es inerte contra el cuello — sino que fija la **línea base**
+del bot con ella puesta, contra la que comparar cualquier cambio futuro.
+
+Se lanza con `scripts/medir/lote_100.py`, que encadena ~50 tandas de 2 (el
+tope de `lanzar_tanda.py`; con más la sesión se queda sin memoria y las runs
+mueren por el entorno). Cada tanda pasa integridad (387 checks) y prueba de
+humo antes de gastar juego, espera a las 2 runs, ingiere en `corpus.db` y va
+imprimiendo la media de insignias. Detalle por run en `data/medidas.json`.
+
+**Referencia histórica**: 1,14 insignias/run sobre 284 runs (8 posibles), con
+1 `CHAMPION`. Si el lote de 100 no mejora de forma clara ese 1,14, la
+estrategia de reserva no aporta al resultado global (lo esperable: es inerte
+en el cuello) y el cuello 2 (§1.8, equipo entero y aun así perder) sigue sin
+explicación.
+
 Queda descartado que el orden por ventaja de tipos arregle Misty/Erika: los
 jefes donde Bulbasaur no tiene ventaja (Surge, Koga, Sabrina, Blaine) no son
 los cuellos (Erika 51%, Misty 54% son los peores y tienen ventaja).

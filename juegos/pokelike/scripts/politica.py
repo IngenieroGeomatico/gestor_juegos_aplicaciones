@@ -1466,3 +1466,148 @@ def decidir_batalla(tiene_auto: bool) -> Decision:
     if tiene_auto:
         return Decision("auto_battle", True, "el juego ofrece auto-battle: lo uso")
     return Decision("continuar", True, "pulso continuar hasta el final")
+
+
+# ---------------------------------------------------------------- Elite Four
+
+def orden_para_elite_four(equipo: list[dict], region: str) -> list[str]:
+    """Orden óptimo para toda la Elite Four.
+
+    Estrategia del usuario:
+    - Posición 1 → supereficaz contra el primer miembro (Lorelei)
+    - Posición 2 → supereficaz contra el segundo miembro (Bruno)
+    - Posición 3 → supereficaz contra el tercer miembro (Agatha)
+    - Posición 4 → supereficaz contra el cuarto miembro (Lance)
+    - Si un Pokémon es eficaz contra varios, se queda con el primero
+
+    Los miembros de la Elite Four se leen de `regiones.json` → `elite_four_datos`.
+    """
+    from pkl_movimientos import tipos_de
+
+    region_datos = regiones().get(region, {})
+    elite = region_datos.get("elite_four_datos") or []
+    if not elite:
+        return [m.get("nombre") or "" for m in equipo]
+
+    # Para cada miembro de la Elite Four, encontrar el Pokémon más eficaz
+    asignados: list[str] = []
+    usados: set[str] = set()
+
+    # **La posición 1 tiene que cubrir a Lorelei Y a Lance.** Es el ajuste que
+    # decide si se pasa la Liga. El plan anterior daba la posición 1 al mejor
+    # contra Lorelei y nada más, y el bot **cayía siempre en Lance**, que es el
+    # cuarto: venció a Lorelei, Bruno y Agatha con este orden exacto y perdió
+    # contra el siguiente (`log-2026-10-16_06-56-01_p84591.txt`).
+    #
+    # El orden no se puede cambiar entre combates —en la Liga no hay pantalla de
+    # mapa entre uno y otro, y dentro del `prep` el arrastre no cuela (17
+    # intentos, 0 aciertos)— así que el mismo plan vale para los cinco. Por eso
+    # el delantero tiene que servir para el primero **y** para el último.
+    _tipos_lorelei = [T.normalizar(t)
+                      for t in ((elite[0].get("tipos_equipo") or [])
+                                if elite else [])]
+    _tipos_lance = [T.normalizar(t)
+                    for t in ((elite[-1].get("tipos_equipo") or [])
+                              if elite else [])]
+    _puente = sorted({*_tipos_lorelei, *_tipos_lance})
+
+    for _idx, miembro in enumerate(elite):
+        tipos_miembro = [T.normalizar(t) for t in (miembro.get("tipos_equipo") or [])]
+        if not tipos_miembro:
+            continue
+        # El primero se mide contra **los dos extremos**, no solo contra Lorelei.
+        objetivo = _puente if (_idx == 0 and _puente) else tipos_miembro
+
+        # Buscar el Pokémon más eficaz contra este miembro
+        mejor: dict | None = None
+        mejor_puntuacion = -1.0
+
+        for m in equipo:
+            nombre = m.get("nombre") or ""
+            if nombre in usados:
+                continue
+            tipos_m = [T.normalizar(t) for t in (m.get("tipos") or [])]
+            if not tipos_m:
+                continue
+
+            # Puntuación: cuánto pega contra el peor caso del miembro
+            from pkl_movimientos import multiplicador as _mult
+            peor = min((_mult(t, r) for t in tipos_m for r in objetivo), default=1.0)
+            puntuacion = peor
+
+            if puntuacion > mejor_puntuacion:
+                mejor_puntuacion = puntuacion
+                mejor = m
+
+        if mejor:
+            asignados.append(mejor.get("nombre") or "")
+            usados.add(mejor.get("nombre") or "")
+
+    # Añadir los que no se asignaron (por si el equipo tiene más de 4)
+    for m in equipo:
+        nombre = m.get("nombre") or ""
+        if nombre not in usados:
+            asignados.append(nombre)
+
+    return asignados
+
+
+def orden_para_campeon(equipo: list[dict], region: str) -> list[str]:
+    """Reordenar 1-a-1 para el combate contra el campeón.
+
+    Estrategia del usuario:
+    - Nuestro #1 eficaz contra su #1
+    - Nuestro #2 eficaz contra su #2
+    - Nuestro #3 eficaz contra su #3
+    - etc.
+
+    El equipo del campeón se lee de `regiones.json` → `campeon_datos`.
+    """
+    from pkl_movimientos import tipos_de, multiplicador as _mult
+
+    region_datos = regiones().get(region, {})
+    campeon = region_datos.get("campeon_datos") or {}
+    equipo_campeon = campeon.get("equipo") or []
+
+    if not equipo_campeon:
+        return [m.get("nombre") or "" for m in equipo]
+
+    # Para cada Pokémon del campeón, encontrar el nuestro más eficaz
+    asignados: list[str] = []
+    usados: set[str] = set()
+
+    for pok_campeon in equipo_campeon:
+        tipos_rival = tipos_de(pok_campeon)
+        if not tipos_rival:
+            continue
+
+        mejor: dict | None = None
+        mejor_puntuacion = -1.0
+
+        for m in equipo:
+            nombre = m.get("nombre") or ""
+            if nombre in usados:
+                continue
+            tipos_m = [T.normalizar(t) for t in (m.get("tipos") or [])]
+            if not tipos_m:
+                continue
+
+            # Puntuación: cuánto pega contra este Pokémon del campeón
+            peor = min((_mult(t, r) for t in tipos_m for r in tipos_rival), default=1.0)
+            puntuacion = peor
+
+            if puntuacion > mejor_puntuacion:
+                mejor_puntuacion = puntuacion
+                mejor = m
+
+        if mejor:
+            asignados.append(mejor.get("nombre") or "")
+            usados.add(mejor.get("nombre") or "")
+
+    # Añadir los que no se asignaron
+    for m in equipo:
+        nombre = m.get("nombre") or ""
+        if nombre not in usados:
+            asignados.append(nombre)
+
+    return asignados

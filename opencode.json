@@ -4,12 +4,12 @@
     "pdf-mcp": {
       "type": "local",
       "command": ["/home/radi/.local/bin/pdf-mcp"],
-      "enabled": true
+      "disabled": true
     },
     "firefox": {
       "type": "local",
-      "command": ["/home/radi/.local/bin/firefox-mcp", "--connect-existing"],
-      "enabled": true
+      "command": ["/home/radi/.local/bin/firefox-mcp"],
+      "disabled": false
     }
   }
 }
