@@ -879,8 +879,16 @@ def elegir_captura(equipo: list[dict], candidatos: list[dict],
             cobertura_txt = ""
             if region:
                 apertura, total, ok = cobertura_region(tipos, region)
+                # El castigo por debilidad va **en el texto a proposito**. Si un
+                # filtro puede descartar al candidato, tiene que dejar rastro:
+                # sin esto, un lote inerte no se distingue de un termino que no
+                # se estaba aplicando. Ya paso con el veto de nivel, que
+                # descartaba todos los salvajes de la ruta en silencio y se
+                # atribuia a mala suerte.
+                _deb = debilidad_region(tipos, region)
                 cobertura_txt = (f"2x apertura={apertura} 2x region={total} "
-                                 f"sin 0.5x={ok} ")
+                                 f"sin 0.5x={ok} deb2x={_deb} "
+                                 f"castigo={_deb * PESO_DEBILIDAD_REGION:.0f} ")
             detalle = (f"{c['nombre']} {tipos}: {cobertura_txt}"
                        f"entrenadores={cobertura_entrenadores(tipos):.2f} "
                        f"nuevos={sorted(nuevos) or '-'} stats={stats} "

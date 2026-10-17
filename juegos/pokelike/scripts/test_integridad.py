@@ -4005,6 +4005,12 @@ def test_la_captura_mira_la_defensa_y_no_solo_el_ataque() -> None:
           "-> con peso 0 la linea se evalua y no resta: un no-op con aspecto "
           "de arreglo")
 
+    check("el castigo deja rastro en el log de captura",
+          "deb2x=" in cuerpo and "castigo=" in cuerpo,
+          "-> sin el dato en el log, un lote inerte no se distingue de un "
+          "termino que no se estaba aplicando; es la leccion del veto de nivel "
+          "que descartaba salvajes en silencio")
+
 
 def main() -> int:
     test_la_captura_mira_la_defensa_y_no_solo_el_ataque()
