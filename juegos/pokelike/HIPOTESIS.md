@@ -686,6 +686,62 @@ la apertura que le pegan 2x, y `PESO_DEBILIDAD_REGION` los resta.
   que si el starter es el Bulbasaur, el món débil contra Misty sigue entrando
   por ahí. Es el siguiente sitio a mirar si H22 sale inerte.
 
+**H23 · La defensiva de `utilidad_contra` devuelve el mejor caso, no el peor
+(documentada, sin tocar todavía).**
+
+`utilidad_contra` docstring: *"**Defensiva = peor caso**, porque ahí sí es el
+peor: el ataque rival es de tipo desconocido y un solo món con una debilidad real
+se lo lleva."* El código hace lo contrario:
+
+```python
+de = min(T.mejor_efectividad([objetivo], [t]) for t in tipos)   # min = MEJOR caso
+```
+
+Un `min` sobre el daño recibido elige el tipo que **menos** sufre, o sea esconde
+la debilidad. Medido (tipos reales de `data/`):
+
+| món | tipos | objetivo | `de` hoy (min) | peor caso real (max) |
+|---|---|---|---|---|
+| Bulbasaur | Planta/Veneno | Psíquico | 1.00 | **2.00** |
+| Bulbasaur | Planta/Veneno | Agua | 0.50 | 1.00 |
+| Squirtle | Agua | Psíquico | 1.00 | 1.00 |
+| Charmander | Fuego | Roca | 2.00 | 2.00 |
+
+La fila que importa es la primera: el Veneno de Bulbasaur es **2x débil al
+Psíquico de Starmie**, y la cuenta devuelve 1.00 — "neutro".
+
+**Por qué llega hasta el starter.** `elegir_starter` puntúa con
+`ventaja = ofensiva × aguante_bueno(defensiva)`, y `aguante_bueno` (=`2.0/de` para
+`de>=1`) convierte un `de` falso de 1.00 en factor 2.0 en vez de 1.0. Resultado
+contra el Psíquico de Misty:
+
+| starter | hoy | corregido |
+|---|---|---|
+| Bulbasaur (Planta/Veneno) | 2.00 | **1.00** |
+| Squirtle (Agua) | 2.00 | 2.00 |
+| Voltorb (Eléctrico) | 2.00 | 2.00 |
+
+O sea: **hoy el starter que gana el gimnasio y el que lo pierde puntúan
+idénticos.** No es que la defensa no se mirase en `elegir_starter` — se mira, y
+devuelve una cifra que no distingue. Eso explica el docstring de `elegir_starter`
+("En Kanto sale Bulbasaur") sin necesidad de suponer nada más.
+
+**Alcance: no es un cambio de una letra.** Cuatro sitios leen `[1]`, y dos son de
+ordenación, no de starter: `348` (`ventaja` → starter), `929`, `1159` y `1175`
+(los dos últimos, ayudas de orden). Los que solo usan `[0]` (471, 540, 542, 712,
+722, 740, 742) no cambian.
+
+- **Criterio de falsación, antes de lanzar**: si el brazo corregido no **baja la
+  derrota contra Misty y Erika** (§1.9: 53,8% y 50,5%), H23 es falsa.
+- **No se toca hasta que cierre el lote de H22**, y luego se mide **sola**: H22
+  (filtro de captura) y H23 (starter y orden) son las dos mitades de la misma
+  ceguera, y lanzarlas juntas deja sin saber cuál de las dos movió la aguja.
+- **Aviso de riesgo**: `aguante_bueno(2.0)=1.0` y `aguante_bueno(1.0)=2.0`, así
+  que corregir parte por la mitad `ventaja` de **todo món con un 2x** contra la
+  apertura. En Kanto eso probablemente **cambia el starter de Bulbasaur a
+  Squirtle**, que es un cambio grande en la apertura de toda run. Por eso se
+  mide, no se razona.
+
 ---
 
 ## 2. Controles ya resueltos
