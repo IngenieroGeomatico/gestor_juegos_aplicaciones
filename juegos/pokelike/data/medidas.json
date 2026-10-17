@@ -65259,6 +65259,237 @@
           "niveles": "34-39"
         }
       ]
+    },
+    {
+      "fecha": "2026-10-17 00:54",
+      "runs": 32,
+      "media_insignias": 1.3125,
+      "detalle": [
+        {
+          "log": "log-2026-10-16_22-54-33_p178681.txt",
+          "resultado": "GAME_OVER",
+          "insignias": 1,
+          "equipo": 3,
+          "niveles": "10-13"
+        },
+        {
+          "log": "log-2026-10-16_22-54-30_p178603.txt",
+          "resultado": "GAME_OVER",
+          "insignias": 1,
+          "equipo": 3,
+          "niveles": "16-17"
+        },
+        {
+          "log": "log-2026-10-16_23-00-00_p181846.txt",
+          "resultado": "GAME_OVER",
+          "insignias": 3,
+          "equipo": 6,
+          "niveles": "22-30"
+        },
+        {
+          "log": "log-2026-10-16_22-59-57_p181628.txt",
+          "resultado": "GAME_OVER",
+          "insignias": 3,
+          "equipo": 5,
+          "niveles": "24-36"
+        },
+        {
+          "log": "log-2026-10-16_23-08-50_p183295.txt",
+          "resultado": "GAME_OVER",
+          "insignias": 0,
+          "equipo": 2,
+          "niveles": "5-6"
+        },
+        {
+          "log": "log-2026-10-16_23-08-53_p183507.txt",
+          "resultado": "GAME_OVER",
+          "insignias": 1,
+          "equipo": 3,
+          "niveles": "14-18"
+        },
+        {
+          "log": "log-2026-10-16_23-13-47_p184383.txt",
+          "resultado": "GAME_OVER",
+          "insignias": 1,
+          "equipo": 3,
+          "niveles": "10-11"
+        },
+        {
+          "log": "log-2026-10-16_23-13-50_p184591.txt",
+          "resultado": "GAME_OVER",
+          "insignias": 1,
+          "equipo": 5,
+          "niveles": "9-13"
+        },
+        {
+          "log": "log-2026-10-16_23-16-47_p185340.txt",
+          "resultado": "GAME_OVER",
+          "insignias": 1,
+          "equipo": 4,
+          "niveles": "12-15"
+        },
+        {
+          "log": "log-2026-10-16_23-16-51_p185559.txt",
+          "resultado": "GAME_OVER",
+          "insignias": 3,
+          "equipo": 5,
+          "niveles": "22-44"
+        },
+        {
+          "log": "log-2026-10-16_23-24-09_p186376.txt",
+          "resultado": "GAME_OVER",
+          "insignias": 0,
+          "equipo": 2,
+          "niveles": "4-5"
+        },
+        {
+          "log": "log-2026-10-16_23-24-28_p186844.txt",
+          "resultado": "GAME_OVER",
+          "insignias": 1,
+          "equipo": 4,
+          "niveles": "9-17"
+        },
+        {
+          "log": "log-2026-10-16_23-24-25_p186639.txt",
+          "resultado": "GAME_OVER",
+          "insignias": 2,
+          "equipo": 6,
+          "niveles": "17-23"
+        },
+        {
+          "log": "log-2026-10-16_23-31-58_p187943.txt",
+          "resultado": "GAME_OVER",
+          "insignias": 1,
+          "equipo": 6,
+          "niveles": "14-25"
+        },
+        {
+          "log": "log-2026-10-16_23-32-01_p188150.txt",
+          "resultado": "GAME_OVER",
+          "insignias": 2,
+          "equipo": 6,
+          "niveles": "15-21"
+        },
+        {
+          "log": "log-2026-10-16_23-47-51_p190373.txt",
+          "resultado": "GAME_OVER",
+          "insignias": 0,
+          "equipo": 3,
+          "niveles": "6-11"
+        },
+        {
+          "log": "log-2026-10-16_23-47-48_p190168.txt",
+          "resultado": "GAME_OVER",
+          "insignias": 1,
+          "equipo": 3,
+          "niveles": "15-15"
+        },
+        {
+          "log": "log-2026-10-17_00-08-32_p192156.txt",
+          "resultado": "GAME_OVER",
+          "insignias": 0,
+          "equipo": 2,
+          "niveles": "4-5"
+        },
+        {
+          "log": "log-2026-10-17_00-09-00_p192641.txt",
+          "resultado": "GAME_OVER",
+          "insignias": 1,
+          "equipo": 2,
+          "niveles": "15-17"
+        },
+        {
+          "log": "log-2026-10-17_00-08-57_p192434.txt",
+          "resultado": "GAME_OVER",
+          "insignias": 5,
+          "equipo": 6,
+          "niveles": "39-47"
+        },
+        {
+          "log": "log-2026-10-17_00-21-59_p194209.txt",
+          "resultado": "GAME_OVER",
+          "insignias": 1,
+          "equipo": 5,
+          "niveles": "13-18"
+        },
+        {
+          "log": "log-2026-10-17_00-21-56_p193996.txt",
+          "resultado": "GAME_OVER",
+          "insignias": 1,
+          "equipo": 5,
+          "niveles": "12-20"
+        },
+        {
+          "log": "log-2026-10-17_00-26-20_p195104.txt",
+          "resultado": "GAME_OVER",
+          "insignias": 0,
+          "equipo": 2,
+          "niveles": "9-9"
+        },
+        {
+          "log": "log-2026-10-17_00-26-23_p195314.txt",
+          "resultado": "GAME_OVER",
+          "insignias": 1,
+          "equipo": 2,
+          "niveles": "14-18"
+        },
+        {
+          "log": "log-2026-10-17_00-30-15_p196318.txt",
+          "resultado": "GAME_OVER",
+          "insignias": 2,
+          "equipo": 5,
+          "niveles": "21-32"
+        },
+        {
+          "log": "log-2026-10-17_00-30-12_p196113.txt",
+          "resultado": "GAME_OVER",
+          "insignias": 4,
+          "equipo": 6,
+          "niveles": "32-44"
+        },
+        {
+          "log": "log-2026-10-17_00-42-13_p197896.txt",
+          "resultado": "GAME_OVER",
+          "insignias": 1,
+          "equipo": 5,
+          "niveles": "7-15"
+        },
+        {
+          "log": "log-2026-10-17_00-42-16_p198104.txt",
+          "resultado": "GAME_OVER",
+          "insignias": 2,
+          "equipo": 6,
+          "niveles": "15-21"
+        },
+        {
+          "log": "log-2026-10-17_00-47-19_p198987.txt",
+          "resultado": "GAME_OVER",
+          "insignias": 0,
+          "equipo": 2,
+          "niveles": "4-5"
+        },
+        {
+          "log": "log-2026-10-17_00-47-23_p199213.txt",
+          "resultado": "GAME_OVER",
+          "insignias": 1,
+          "equipo": 2,
+          "niveles": "18-20"
+        },
+        {
+          "log": "log-2026-10-17_00-51-07_p200192.txt",
+          "resultado": "GAME_OVER",
+          "insignias": 0,
+          "equipo": 4,
+          "niveles": "10-13"
+        },
+        {
+          "log": "log-2026-10-17_00-51-04_p199978.txt",
+          "resultado": "GAME_OVER",
+          "insignias": 1,
+          "equipo": 3,
+          "niveles": "12-16"
+        }
+      ]
     }
   ]
 }

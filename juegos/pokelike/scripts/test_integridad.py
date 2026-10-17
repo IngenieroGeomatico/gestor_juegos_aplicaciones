@@ -3966,7 +3966,48 @@ def test_el_delantero_de_la_liga_cubre_lorelei_y_lance() -> None:
           "que aguanta a Lorelei y a Lance a la vez")
 
 
+def test_la_captura_mira_la_defensa_y_no_solo_el_ataque() -> None:
+    """El filtro de captura tiene que preguntar tambien que le hacen a el.
+
+    **Por que.** `cobertura_region` es solo ofensiva: cuenta los gimnasios a los
+    que el candidato pega 2x, y nunca los que le pegan 2x a el. Medido el 17-10,
+    y es el muro del juego: contra Misty (`tipos_equipo` = Psiquico/Agua) el
+    Bulbasaur pega 2x al Agua **y recibe 2x del Psiquico**, mientras un Voltorb
+    pega 2x al Agua y no recibe 2x de nada. Ofensivamente empatan, asi que el
+    filtro los veia iguales. Misty gana el 53,8% de las veces y es el escalon
+    donde muere el **43%** de las runs de 1 insignia (416 de 958).
+
+    **Y por que este test y no solo el valor.** La defensa ya existia en
+    `elegir_captura`, pero en la rama `else` de `region`, y `region` se pasa
+    siempre: era **codigo muerto**. Un test que solo mirara el numero no habria
+    pillado eso.
+    """
+    import inspect
+    import politica as P
+    import pkl_tipos as T
+
+    cuerpo = inspect.getsource(P.elegir_captura)
+    check("la captura mira la defensa en la rama que SI se ejecuta",
+          "debilidad_region(tipos, region) * PESO_DEBILIDAD_REGION" in cuerpo,
+          "-> la defensa vuelve a quedar muerta: el candidato que pega 2x al "
+          "gimnasio y recibe 2x de el vale lo mismo que el que no recibe nada")
+
+    b = [T.normalizar(t) for t in ("Planta", "Veneno")]
+    v = [T.normalizar("Electrico")]
+    check("el debil doble cuenta dos gimnasios y el sano uno",
+          P.debilidad_region(b, "Kanto") == 2 and P.debilidad_region(v, "Kanto") == 1,
+          f"-> Bulbasaur={P.debilidad_region(b, 'Kanto')} (Tierra de Brock y "
+          f"Psiquico de Misty), Voltorb={P.debilidad_region(v, 'Kanto')} "
+          "(solo Tierra): si no sale 2 y 1, la ventana de gimnasios cambio")
+
+    check("el peso es positivo o el termino no hace nada",
+          P.PESO_DEBILIDAD_REGION > 0,
+          "-> con peso 0 la linea se evalua y no resta: un no-op con aspecto "
+          "de arreglo")
+
+
 def main() -> int:
+    test_la_captura_mira_la_defensa_y_no_solo_el_ataque()
     test_el_delantero_de_la_liga_cubre_lorelei_y_lance()
     test_las_capturas_no_roban_la_exp_de_equipo()
     test_el_jefe_aplazado_tira_mas_mapa_si_falta_nivel()

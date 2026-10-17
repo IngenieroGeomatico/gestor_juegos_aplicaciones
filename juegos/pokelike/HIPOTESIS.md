@@ -582,6 +582,110 @@ y el regex solo casaba la victoria. Se arregló y salieron las 1.942 derrotas, q
 cuadran exactamente con los 1.942 `GAME_OVER` del corpus. Sin esa comprobación,
 la BBDD habría mentido con toda la autoridad de una BBDD.
 
+**No consultar `corpus.db` mientras hay un lote en marcha.** `lote_100.py`
+ingiere cada run al terminarla, así que lanza escrituras sobre el mismo fichero
+que se está leyendo. Medido el 16-10: la misma consulta devolvió filas y luego
+cero filas sin cambiar nada, y un `where insignias >= 4` que debía casar con 50
+runs devolvió 0. Las lecturas inconsistentes se confunden con un hallazgo. Se
+espera a que el lote cierre.
+
+### 1.10 El muro es Misty, y las capturas son un síntoma (16-10)
+
+Medición sobre las 958 runs que terminan con **1 insignia** (el escalón que se
+come el 76% de las partidas):
+
+| último rival | runs |
+|---|---|
+| **Gym Battle vs Misty!** | **416** |
+| Bug Catcher / Ace Trainer / Officer (sumados) | 176 |
+
+La caída 1→2 insignias (958 → 225) es el precipicio real del juego, muy por
+encima del salto a la Liga. Y cuadra con §1.9: Misty es el muro más bajo (53,8%).
+
+**Lo que NO hay que concluir: que capturar más sea la palanca.** Los datos
+invitan a ello y es una trampa:
+
+| capturas en la run | n | media insignias | champions |
+|---|---|---|---|
+| 0–1 | 531 | 0,20 | 0 |
+| 2–3 | 949 | 1,04 | 0 |
+| **4–6** | **524** | **2,22** | **11 (todos)** |
+| 7+ | 29 | 2,07 | 0 |
+
+Los 11 campeones del corpus capturaron 4-6 veces y ninguno 2-3, así que parece
+la palanca obvia. **Pero las capturas son un síntoma de haber sobrevivido**, no
+la causa: medido en los logs vivos, el bot **captura en el 100% de las pantallas
+de captura que ve** (`sin candidatos: huyo` = 0 en 4 runs; cada run ve 2 pantallas
+y hace 2 capturas). No hay huidas que arreglar. Lo que limita las capturas es
+que la run **muere antes de llegar a más pantallas**: 2 pantallas en 40-90 pasos.
+Subir el peso de la captura no cambia nada; lo que cambia el número de capturas
+es durar más.
+
+**El patrón de muerte, en crudo** (`log-2026-10-16_22-54-33_p178681.txt`):
+
+```
+step 32-34  3/3 vivos al 100%  -> elige entrenador (score 193.5) -> GANA pero pierde Bulbasaur
+step 36     2/3 vivos, 48%     -> disp=['entrenador','item']      -> elige item (score 90.5)
+step 38-39  2/3 vivos, 48%     -> disp=['entrenador']  ¡única salida! -> score -49.5 -> GAME_OVER
+```
+
+No es una mala decisión: es una **espiral sin salida**. El bot sabía que el
+entrenador era suicida (`-49.5`, penalización `-140` por "2 móns en pie, 1
+caído y sin cura a mano") y lo peleó porque era el único nodo. Cuando el
+entrenador es la única salida, la §2 del módulo ya lo dice: la puerta correcta
+no es "no entres". El daño estaba hecho al perder el món, y con un equipo de 3
+un solo caído ya es media run.
+
+**Hipótesis abierta (H21), pendiente de A/B:**
+
+> La escalera de riesgo del entrenador **no cambia la decisión** cuando el
+> entrenador es el único nodo, así que la única palanca es no llegar ahí: el
+> bot debe **no pelear entrenadores con el equipo ya tocado aunque el combate
+> esté por delante en el mapa**, priorizando la rama con centro.
+
+- **Criterio de falsación, escrito antes de mirar los datos**: si el brazo con
+  la rama-centro priorizada no baja el número de runs que mueren con **caídos al
+  abrir la pelea**, H21 es falsa.
+- **Brazo de control**: el bot actual. **Un solo cambio**: el peso de la rama
+  que lleva a centro cuando hay caídos.
+- **Aviso de trampa ya medida** (§1.3): el pokecenter antes del gimnasio ya se
+  elige el 100% de las veces que está disponible, así que el margen está en las
+  pantallas donde **no** hay centro, no en las que sí.
+
+**H22 · El filtro de captura no miraba la defensa (implementada, en medida).**
+
+El hallazgo es de código, no de pesos: en `politica.elegir_captura`, la rama que
+**siempre** se ejecuta (`region` se pasa siempre desde `_elegir_captura`) llama a
+`cobertura_region`, que es **solo ofensiva** — cuenta los gimnasios a los que el
+candidato pega 2x y nunca los que le pegan 2x a él. La defensa existía, pero en
+la rama `else` de `region`: **código muerto**. Y `utilidad_contra` ya devolvía la
+defensiva como segundo valor; el llamador solo usaba `[0]`.
+
+El caso que lo motivó, con los datos reales de `data/regiones.json`:
+
+| candidato contra Misty (`tipos_equipo` = Psíquico/Agua) | pega 2x | recibe 2x |
+|---|---|---|
+| Bulbasaur (Planta/Veneno) | al Agua ✅ | **del Psíquico** ✗ |
+| Voltorb (Eléctrico) | al Agua ✅ | de nada ✅ |
+
+Ofensivamente empatan, así que el filtro los veía iguales y decidía por variedad.
+
+Arreglo: `debilidad_region(tipos, region, n_gimnasios=3)` cuenta los gimnasios de
+la apertura que le pegan 2x, y `PESO_DEBILIDAD_REGION` los resta.
+
+- **Criterio de falsación, escrito antes del lote**: si el brazo con la defensa
+  no **baja la tasa de derrota contra Misty y Erika** (§1.9: 53,8% y 50,5%), H22
+  es falsa y el término se quita.
+- **Aviso de que puede ser inerte, y por qué se lanza igual**: comprobado a mano,
+  con peso 12 (castigo 24 en Bulbasaur) **la decisión emblemática NO se
+  invierte**. Bulbasaur saca 2x en la apertura=2 (Brock *y* Misty) y dobla en
+  variedad (dos tipos nuevos valen 24), así que sigue ganando. Si el término no
+  cambia ninguna captura, el lote saldrá clavado a la línea base y lo sabremos
+  por eso.
+- **La otra mitad sin tocar**: el **starter** no pasa por `elegir_captura`, así
+  que si el starter es el Bulbasaur, el món débil contra Misty sigue entrando
+  por ahí. Es el siguiente sitio a mirar si H22 sale inerte.
+
 ---
 
 ## 2. Controles ya resueltos

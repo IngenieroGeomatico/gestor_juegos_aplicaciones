@@ -415,6 +415,48 @@ def cobertura_region(tipos: list[str], region: str,
             sum(1 for v in valores if v >= 1.0))
 
 
+# Cuánto resta cada gimnasio que le pega 2x al candidato. Va alto a propósito:
+# la comparación que decide la captura es de 40 puntos (el bono de "pego 2x al
+# gimnasio que toca"), así que una penalización pequeña no cambia nada. Medido
+# sobre el caso que la motivó (abajo): con 3 no se invertía la decisión.
+PESO_DEBILIDAD_REGION = 12.0
+
+
+def debilidad_region(tipos: list[str], region: str,
+                     n_gimnasios: int = 3) -> int:
+    """Cuántos de los primeros gimnasios le pegan **2x** a un món de `tipos`.
+
+    `cobertura_region` es **solo ofensiva**: pregunta "¿le pego 2x a alguien?"
+    y nunca "¿me pega 2x alguien?". Sin la vuelta, el filtro no distingue el
+    món que gana el gimnasio del que lo pierde, y el caso medido es el muro del
+    juego:
+
+    - Misty (`tipos_equipo` = Psíquico/Agua, `data/regiones.json`)
+    - Bulbasaur (Planta/Veneno): pega 2x al Agua ✅ y **recibe 2x del Psíquico**
+    - Voltorb (Eléctrico): pega 2x al Agua ✅ y **no recibe 2x de nada**
+
+    Ofensivamente empatan, así que el filtro los veía iguales y elegía por
+    variedad y stats. Consecuencia: Misty gana el 53,8% de las veces y es el
+    escalón donde muere el **43%** de las runs de 1 insignia (416 de 958).
+
+    **Por qué solo los 3 primeros gimnasios.** Es donde se mueren las runs —la
+    caída 1→2 insignias se come el 76% de las partidas— y es la misma ventana
+    que `cobertura_region` usa para pesar la apertura. Penalizar los 8 haría que
+    un món flojo contra Blaine (el 7º) no se capturase nunca, y para entonces ya
+    hay otras cinco plazas.
+
+    `n_gimnasios=3` a propósito: si se cambia, se cambia también el peso
+    `PESO_DEBILIDAD_REGION`, porque no son independientes.
+    """
+    from pkl_movimientos import multiplicador as _mult
+
+    equipos = [e for e in (tipos_del_rival(region, i)
+                           for i in range(n_gimnasios)) if e]
+    return sum(1 for equipo in equipos
+               if max((_mult(r, t) for r in equipo for t in tipos),
+                      default=1.0) >= 2.0)
+
+
 def _stats_clave(c: dict) -> tuple[int, int]:
     """(special, hp): los dos stats que deciden, porque todos los golpes son
     especiales y la vida decide si aguanta la pelea."""
@@ -778,7 +820,18 @@ def elegir_captura(equipo: list[dict], candidatos: list[dict],
         if region:
             apertura, total, ok = cobertura_region(tipos, region)
             region_score = 3.0 * apertura + total + ok * 0.3
+            # **Y la vuelta: lo que ellos le hacen a él.** Sin esto la nota de
+            # arriba es medio partido, y el medio que faltaba es justo el que
+            # decide Misty: Bulbasaur pega 2x al Agua y recibe 2x del Psíquico,
+            # Voltorb pega 2x al Agua y no recibe 2x de nada. Ofensivamente
+            # empatan, así que el filtro los veía iguales.
+            region_score -= debilidad_region(tipos, region) * PESO_DEBILIDAD_REGION
         else:
+            # Rama **muerta** desde que `jugar_pokelike` pasa `region` siempre
+            # (`self.region`, en `_elegir_captura`). Se deja porque la defensa
+            # de aquí —`aguante_bueno(de)`— es la única que existía, y es la que
+            # ahora aplica la línea de arriba para toda la región. No borrar sin
+            # comprobar antes que ningún otro llamador entra por aquí.
             of, de = utilidad_contra(tipos, ref[0] if ref else None)
             region_score = of * 10 + aguante_bueno(de) * 2
 
