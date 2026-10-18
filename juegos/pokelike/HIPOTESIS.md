@@ -984,6 +984,62 @@ nada que arreglar.
 
 ---
 
+### H25 · El entrenador con equipo corto (cerrada: **inerte para el muro**)
+
+**De dónde salió.** De las 13 runs que murieron sin insignia en `lote_liga5`,
+**11 lo hicieron con `equipo=2`**. El log de una deja la decisión entera:
+
+```
+nodo=n1_0 tipo=entrenador equipo=2 vivos=2 niv=4-5  disponibles=trainer,catch
+razon=entrenador score=85.0 (mucha exp, faltan ~10 de nivel)
+opc: entrenador=85 batalla=85        <- empate, y ganó el entrenador
+>>> COMBATE PERDIDO contra Firebreather! | 0-1
+```
+
+El bono de ruta (`extra * peso_ruta`, ×3,5 mientras falte nivel) se suma
+**después** del peso base y vale 60-300: el entrenador (34) empata con la captura
+(60) y gana el desempate. Y el bucle se refuerza solo — con 2 móns la captura no
+gana, así que no se ganan cuerpos, así que se sigue en 2.
+
+**Qué se hizo.** Con menos de 3 móns y sin cura, el entrenador no cobra el bono
+de exp (`PENALIZACION_ENTRENADOR_EQUIPO_CORTO`, −60; ajustable por
+`PKL_PENALIZACION_ENTRENADOR_EQUIPO_CORTO`). Resta al entrenador, **no** empuja a
+la captura: ni toca `captura_por_nivel` ni es veto, así que el salvaje sigue
+siendo la fuente de exp y el entrenador se juega si es el único nodo.
+
+**La medida.** A/B con la misma huella, 2 brazos alternando por tanda, 39 tandas y
+246 min (`lote_h25.log`, huella `b213a18b7b27`), sin límite de pasos.
+
+| brazo | n (sin humo) | 0 insignias | media |
+|---|---|---|---|
+| `pone` (−60) | 42 | **24%** | 1,14 |
+| `quita` (0) | 38 | **24%** | 1,37 |
+
+0,06σ, p≈0,95. La media va mejor en el **control**.
+
+**Veredicto: inerte.** El arreglo explica muertes sueltas —el empate es real— pero
+no mueve el muro: los dos brazos caen en la tasa de la era reciente (19-24%) y no
+en el 9,3% de la era buena. La ventana de la regresión sigue sin culpable, y la
+lección es que **una muerte ejemplar no es una tasa**: el mecanismo estaba bien
+diagnosticado y aun así no era el que movía el número.
+
+Se queda puesto: el efecto medido es indistinguible de cero, aplica R1 (si se
+puede evitar al entrenador, se evita) y la variable de entorno permite volver al
+control sin tocar código. Si algún día molesta, se quita con el mismo A/B.
+
+**Trampa de método que apareció aquí (importante para cualquier consulta al
+corpus).** Cada tanda lanza **una prueba de humo de 12 pasos**, y esa prueba de
+humo hereda el entorno del brazo: acaba en `corpus.db` etiquetada con el brazo y
+**siempre con 0 insignias**. Medido: el mismo grupo da 49% de 0 insignias con las
+pruebas dentro y 24% sin ellas (40 `PRUEBA` de 120 runs). Cualquier tasa sacada
+del corpus **tiene que filtrar `resultado != 'PRUEBA'`**, o sale al doble.
+
+Dos detalles más del corpus, para no volver a tropezar: `brazo` guarda la
+cabecera **entera y con los `==`** (`'== brazo=pone | PKL_...=0 | codigo=? =='`), no
+el nombre del brazo — hay que filtrar por `like '== brazo=pone%'`; y la columna
+`codigo` sale **vacía** en las runs nuevas porque el proceso de la run escribe
+`codigo=?` en su cabecera (no conoce la huella, que la calcula el lote).
+
 ## 5. Reglas de método
 
 Estas son las únicas reglas que se aplican a cualquier lote. Cada una se pagan
