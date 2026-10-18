@@ -151,6 +151,26 @@ wiki devuelve el texto entero.
 - **El MCP Firefox no puede jugar**: ni clic ni teclado avanzan. Solo el Firefox
   del bot (que bloquea las peticiones del consentimiento) entra al juego.
 
+### Trampas de la medida (nuestras, no del sitio)
+
+- **Cada tanda lanza una prueba de humo de 12 pasos** que hereda el entorno del
+  brazo: acaba en `corpus.db` etiquetada con el brazo y **siempre con 0
+  insignias**. El mismo grupo da 49% de 0 insignias con las pruebas dentro y 24%
+  sin ellas (40 `PRUEBA` de 120 runs). **Toda tasa sacada del corpus tiene que
+  filtrar `resultado != 'PRUEBA'`**, o sale al doble. Y `pasos >= 30` **no**
+  sustituye a ese filtro: quita el humo pero también las muertes tempranas, que
+  son justo las que se quieren contar.
+- `brazo` guarda la cabecera **entera y con los `==`**
+  (`'== brazo=pone | PKL_...=0 | codigo=? =='`), no el nombre del brazo: filtrar
+  por `like '== brazo=pone%'`.
+- La columna `codigo` sale **vacía** en las runs nuevas: el proceso de la run
+  escribe `codigo=?` en su cabecera porque no conoce la huella (la calcula el
+  lote, que la imprime al abrir y la guarda en `medidas.json`).
+- Contar runs de un lote leyendo su log: el log lista cada run **dos veces** (en
+  su tanda y en el resumen). Usar el patrón
+  `(GAME_OVER|CHAMPION) +insignias=` y deduplicar por nombre de log, o sale el
+  doble.
+
 ## Antes de tocar código
 
 - Un `GAME_OVER` **no** se arregla reintentando.
