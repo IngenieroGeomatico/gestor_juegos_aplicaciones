@@ -148,6 +148,35 @@ def huella_codigo() -> str:
     return h.hexdigest()[:12]
 
 
+def configurar_brazo(spec: str) -> tuple[str, dict[str, str]]:
+    """`nombre:CLAVE=valor,CLAVE=valor` -> (nombre, {"PKL_CLAVE": valor, ...}).
+
+    **Por qué aquí y no en `experimento.py`.** `experimento.py` ya hace esto
+    —brazo al azar, `PKL_*`, p-valor— pero lanza **de una en una** y con
+    `timeout=1800`, y las runs de aquí van sin límite de pasos: un corte de 30
+    minutos de reloj es un corte por entorno, no por juego. Aquí el brazo se
+    asigna por **tanda** (las 2 runs de una tanda salen del mismo proceso padre,
+    así que comparten brazo) y se alterna en ronda, que de paso reparte cada
+    brazo entre las horas del día en vez de jugárselo todo a la madrugada.
+
+    El nombre viaja en `PKL_BRAZO` y `jugar_pokelike.py` lo escribe en la
+    cabecera del log (`== brazo=... ==`), de donde `pkl_corpus.py` lo lee para la
+    columna `run.brazo`. El brazo acaba en el corpus, no solo en el log del lote.
+
+    **Cuidado**: los brazos tienen que declarar las mismas claves. `os.environ`
+    es del proceso padre y persiste entre tandas, así que una clave que un brazo
+    ponga y el siguiente no, se quedaría puesta en el siguiente.
+    """
+    nombre, _, resto = spec.partition(":")
+    env = {"PKL_BRAZO": nombre.strip()}
+    for par in resto.split(","):
+        if not par.strip():
+            continue
+        clave, _, valor = par.partition("=")
+        env[f"PKL_{clave.strip().upper()}"] = valor.strip()
+    return nombre.strip(), env
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="Lote grande de runs, de dos en dos")
     ap.add_argument("--runs", type=int, default=100,
@@ -158,6 +187,12 @@ def main() -> int:
     ap.add_argument("--tope-pasos", type=int, default=0,
                     help="corte duro por run (0 = sin corte, corre hasta morir)")
     ap.add_argument("--sin-humo", action="store_true")
+    ap.add_argument("--brazo", action="append", default=[], metavar="NOMBRE:CLAVE=VAL",
+                    help="brazo de A/B, repetible, formato "
+                         "NOMBRE:CLAVE=VALOR[,CLAVE=VALOR]. Se alternan por tanda "
+                         "y el nombre va a PKL_BRAZO. Ej: "
+                         "--brazo pone:PENALIZACION_ENTRENADOR_EQUIPO_CORTO=-60 "
+                         "--brazo quita:PENALIZACION_ENTRENADOR_EQUIPO_CORTO=0")
     args = ap.parse_args()
 
     regiones = [r.strip() for r in args.regiones.split(",") if r.strip()]
@@ -171,9 +206,15 @@ def main() -> int:
     # diferencia es ruido o un cambio en `politica.py` que nadie recuerda.
     huella = huella_codigo()
     print(f"huella de codigo (scripts/*.py): {huella}", flush=True)
+    brazos = [configurar_brazo(b) for b in args.brazo]
+    if brazos:
+        print("brazos A/B: " + " | ".join(
+            f"{n} -> {' '.join(f'{k}={v}' for k, v in sorted(e.items()))}"
+            for n, e in brazos), flush=True)
     pendientes = args.runs
     tanda = 0
     resultados: list[dict] = []
+    brazo = ""
     # Los logs que ya existen **antes** de empezar: son historico, no parte
     # del lote. Se van sumando segun termina cada tanda.
     conocidos = logs_actuales()
@@ -194,6 +235,12 @@ def main() -> int:
         if args.sin_humo:
             cmd += ["--sin-humo"]
 
+        # **El brazo de A/B va en el entorno del padre**: `lanzar_tanda.py` lanza
+        # las runs con `Popen` sin `env=`, así que las heredan tal cual.
+        if brazos:
+            brazo, entorno = brazos[(tanda - 1) % len(brazos)]
+            os.environ.update(entorno)
+            print(f"  brazo: {brazo}", flush=True)
         proc = subprocess.run(cmd, capture_output=True, text=True)
         salida = (proc.stdout or "") + (proc.stderr or "")
         # Si la integridad o el humo fallan, lanzar_tanda NO ha arrancado nada.
@@ -324,6 +371,11 @@ def main() -> int:
         # runs del lote, asi que no entran en la media.
         nuevos = [leer_log(p) for p in frescos]
         nuevos = [r for r in nuevos if r["resultado"] != "PRUEBA"]
+        # El brazo viaja con la run. Sin esto, el log dice qué brazo tocaba en
+        # cada tanda pero no se puede cruzar con el resultado sin releerlo a
+        # mano, que es justo el trabajo que este A/B quiere ahorrar.
+        for r in nuevos:
+            r["brazo"] = brazo
         resultados.extend(nuevos)
         print("  nuevas runs:")
         for r in nuevos:
@@ -341,6 +393,20 @@ def main() -> int:
         print(f"  media insignias = {media:.2f}")
         print(f"  champions = {sum(1 for r in resultados if r['resultado'] == 'CHAMPION')}")
         print(f"  game_over = {sum(1 for r in resultados if r['resultado'] == 'GAME_OVER')}")
+    # **Resumen por brazo.** La métrica primaria es la **tasa de 0 insignias**,
+    # no la media: con n=50 la media tiene +-0,4 de error, y el porcentaje de
+    # runs que mueren en el muro detecta el doble con la mitad de runs.
+    if brazos and resultados:
+        por_brazo: dict[str, list[dict]] = {}
+        for r in resultados:
+            por_brazo.setdefault(r.get("brazo") or "(sin brazo)", []).append(r)
+        print("  --- por brazo (metrica primaria: 0 insignias) ---")
+        for nombre, filas in sorted(por_brazo.items()):
+            n = len(filas)
+            cero = sum(1 for f in filas if f["insignias"] == 0)
+            media = sum(f["insignias"] for f in filas) / n
+            print(f"  {nombre}: n={n}  0ins={cero} ({100*cero/n:.0f}%)  "
+                  f"media={media:.2f}")
     print(f"  corpus (lote): {resumen_corpus(desde_run)}")
     print(f"  duracion total: {(time.time()-t0)/60:.0f} min")
 

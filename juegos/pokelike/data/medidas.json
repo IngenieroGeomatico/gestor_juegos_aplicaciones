@@ -65854,6 +65854,28 @@
           "niveles": "16-34"
         }
       ]
+    },
+    {
+      "fecha": "2026-10-18 13:17",
+      "runs": 2,
+      "huella": "c19d2415510e",
+      "media_insignias": 1.0,
+      "detalle": [
+        {
+          "log": "log-2026-10-18_13-12-32_p113965.txt",
+          "resultado": "GAME_OVER",
+          "insignias": 1,
+          "equipo": 3,
+          "niveles": "11-18"
+        },
+        {
+          "log": "log-2026-10-18_13-12-35_p114163.txt",
+          "resultado": "GAME_OVER",
+          "insignias": 1,
+          "equipo": 4,
+          "niveles": "16-20"
+        }
+      ]
     }
   ]
 }

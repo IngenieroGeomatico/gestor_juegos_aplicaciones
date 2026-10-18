@@ -4107,6 +4107,31 @@ def test_la_huella_del_codigo_identifica_el_lote() -> None:
           len(h1) == 12 and all(c in "0123456789abcdef" for c in h1),
           f"-> {h1!r}")
 
+    # **El A/B del lote tiene que llegar de verdad al planificador.** El fallo
+    # más caro posible es que el orquestador escriba una variable que nadie lee:
+    # los dos brazos correrían el mismo código y el lote entero (16 h) no mediría
+    # nada. Se comprueba de punta a punta, con un proceso nuevo.
+    import os
+    import subprocess
+
+    nombre, env = LOTE.configurar_brazo("quita:PENALIZACION_ENTRENADOR_EQUIPO_CORTO=0")
+    check("el brazo se traduce a variables PKL_*",
+          nombre == "quita" and env.get("PKL_BRAZO") == "quita"
+          and env.get("PKL_PENALIZACION_ENTRENADOR_EQUIPO_CORTO") == "0",
+          f"-> {nombre} {env}")
+
+    out = subprocess.run(
+        [sys.executable, "-c",
+         "import sys; sys.path.insert(0, sys.argv[1]); import planificador as P; "
+         "print(P.PENALIZACION_ENTRENADOR_EQUIPO_CORTO)",
+         str(raiz)],
+        env={**os.environ, **env}, capture_output=True, text=True, timeout=180)
+    check("y el planificador lo lee: con el brazo a 0 la penalización es 0",
+          out.stdout.strip() == "0.0",
+          f"-> salio {out.stdout.strip()!r} en vez de 0.0: la variable del A/B no "
+          f"llega al planificador y los dos brazos correrian el mismo codigo "
+          f"({out.stderr[-200:]})")
+
 
 def test_el_equipo_corto_no_paga_el_bono_de_exp_del_entrenador() -> None:
     """Con menos de 3 móns y sin cura, el entrenador no recibe el bono de exp.
