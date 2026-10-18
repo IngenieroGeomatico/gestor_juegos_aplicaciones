@@ -742,6 +742,52 @@ ordenación, no de starter: `348` (`ventaja` → starter), `929`, `1159` y `1175
   Squirtle**, que es un cambio grande en la apertura de toda run. Por eso se
   mide, no se razona.
 
+**H24 · En el mapa de la Liga el bot caza, y entra al Alto Mando tocado.**
+
+Primera vez en cuatro lotes que llegan runs a la Liga (3 de 51, lote
+`lote_defensa2`), así que esto ya no es teoría. El bot **lo dice él mismo**:
+
+```
+DEC nodo mapa=Elite Four & Champion nodo=n7_0 tipo=jefe razon=jefe score=4.0
+(jefe: única salida, se entra igual (1 caído(s), carry flojo (41%)))
+```
+
+Y con qué entró, medido en los `ps_abre` de los dos casos:
+
+| run | entra a la Liga con | resultado |
+|---|---|---|
+| 1 | Aerodactyl `0/168`, Golduck `78/186` | gana Lorelei, Bruno y Agatha → muere en **Lance** con 2 vivos |
+| 3 | Gengar `47/135` | Lorelei le mata **5 de 6** → muere en **Bruno** |
+
+**El Alto Mando son 4 combates consecutivos sin cura entre ellos** (~14 s entre
+uno y otro). El PS es un recurso que no se recupera dentro: llegar tocado es
+llegar muerto. Y el bot se pasa el mapa de la Liga como si fuera una ruta normal:
+
+```
+n2_0 batalla score=112.0 (capturar: equipo de 6 y ya a nivel, ampliar...)
+n6_0 batalla score=5.0 (cazar: ya en pie y a nivel; deja 1 combate(s) al jefe)
+```
+
+**29 batallas y 29 entrenadores en una sola run del mapa de la Liga.** El nodo
+de cura existe ahí (`n6_2 tipo=cura crudo=pokecenter`) pero no se reserva para
+el final. Detalle que lo clava: en `n6_0` el marcador ya dice `deja 1 combate(s)
+al jefe`, el score es `5.0` —y aun así pelea, porque el score es **positivo**—.
+Ninguna regla dice "en este mapa cada pelea cuesta PS y no da nada".
+
+- **Arreglo propuesto**: en el mapa de la Liga (`insignias >= len(jefes)`), las
+  peleas no ganan nivel (ya se va por encima del rival) y solo gastan PS, así que
+  pasan a penalizarse, y la cura se prioriza **inmediatamente antes del jefe**.
+- **Criterio de falsación**: si una run sigue entrando al Alto Mando con algún
+  món a 0 PS, el arreglo no está funcionando. La prueba es directa y no
+  estadística: **el `ps_abre` de Lorelei tiene que salir sin ningún `0/`**.
+- **Nota**: el reparto por miembro **sí funciona**. Run 1 ganó Lorelei, Bruno y
+  Agatha con el orden estático de `orden_para_elite_four` (posición 1→Lorelei,
+  2→Bruno, 3→Agatha, 4→Lance). Lo que falla no es el orden, es con qué llega.
+- **Segunda mitad, subordinada**: los reserva (posiciones 5-6) son los que acaban
+  peleando contra Lance —en run 1, Gyarados y Golduck, los dos Agua, que pegan
+  **0,5x** al Agua de Lance—. Pero eso solo importa si se llega entero; con 5 de 6
+  en pie pelea la posición 4 (Venusaur, 2x al Agua). **Primero H24, luego esto.**
+
 ---
 
 ## 2. Controles ya resueltos
