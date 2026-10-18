@@ -230,6 +230,18 @@ PESO_TRADE = 45.0
 PESO_ENTRENADOR_SANO = 34.0
 PESO_BATALLA_NIVEL = 15.0    # cazar sube nivel: es la prioridad maxima
 PESO_BATALLA_A_NIVEL = 4.0
+
+# **H25: con el equipo corto y sin cura, al entrenador no se le da el bono de
+# exp.** El bono de ruta (`extra * peso_ruta`, ×3,5 mientras falte nivel) se
+# suma **después** del peso base, y vale 60-300; por eso el entrenador (34) le
+# gana a la captura (60) en la puntuación final aunque su peso sea menor: el 18-10
+# el entrenador que mató la run salió con `score=85.0` con la captura en la misma
+# pantalla. Un equipo de 2 que pierde una pelea no tiene red: es GAME_OVER.
+# El valor es una constante con `os.environ` propio (los `EXP` son booleanos) para
+# poder hacer el A/B con 0 en el brazo de control sin tocar código.
+PENALIZACION_ENTRENADOR_EQUIPO_CORTO = float(
+    os.environ.get("PKL_PENALIZACION_ENTRENADOR_EQUIPO_CORTO", "-60")
+)
 # El tutor va segundo: por debajo de nivel y por encima de los objetos. Solo
 # tiene sentido a nivel, que es cuando se aplica.
 PESO_TUTOR_SIN_NIVEL = 1.0
@@ -1036,6 +1048,43 @@ def puntuar(tipo: str, ctx: Contexto, es_captura: bool = False) -> tuple[float, 
             if riesgo[0] is not None:
                 return (riesgo[0], riesgo[2])
         if falta > 1:
+            # **H25: con el equipo corto, el entrenador no.**
+            #
+            # El 18-10, **11 de las 13 runs que murieron sin insignia lo hicieron
+            # con `equipo=2`**, y el patrón entero se ve en el log de una:
+            #
+            #     DEC nodo nodo=n1_0 tipo=entrenador equipo=2 vivos=2 niv=4-5
+            #              disponibles=trainer,catch
+            #              razon=entrenador score=85.0 (mucha exp, faltan ~10)
+            #     >>> COMBATE PERDIDO contra Firebreather! | 0-1
+            #     resultado : GAME_OVER
+            #
+            # Tenía una captura en la misma pantalla y eligió al entrenador. Su
+            # peso base (34) **pierde** contra el de la captura (60), pero el bono
+            # de ruta se suma después y mientras falte nivel va por 3,5: el
+            # entrenador acabó en 85 y la captura no llegó. Y el bucle se refuerza
+            # solo: con 2 móns la captura pierde, así que no se ganan cuerpos, así
+            # que se sigue en 2 hasta que una pelea perdida termina la run.
+            #
+            # `riesgo_entrenador` no cubre este caso **a propósito**: su escalera
+            # pide `caidos >= 1` y su nota razona que "un equipo de un solo món
+            # sano es el inicio normal de la partida y ahí pelear es justo lo que
+            # hay que hacer". Es verdad para pelear en general y falso para elegir
+            # **entrenador habiendo captura**: la captura da el mismo nivel de pelea
+            # y además un món, y R1 dice que si se puede evitar al entrenador, se
+            # evita. Perder con 3+ móns deja equipo; perder con 2 no.
+            #
+            # No es veto y no toca `captura_por_nivel`: esto **resta al
+            # entrenador**, no empuja a la captura, así que la pelea salvaje sigue
+            # siendo la fuente de exp normal y si el entrenador es el único nodo de
+            # la pantalla se pelea igual. Lo que se mide es solo el orden cuando
+            # hay alternativa.
+            if len(equipo) < 3 and not ctx.hay_cura_disponible:
+                return (PESO_ENTRENADOR_SANO + 2.0
+                        + PENALIZACION_ENTRENADOR_EQUIPO_CORTO,
+                        f"entrenador aplazado: {len(equipo)} món(s) y una pelea "
+                        f"perdida es GAME_OVER (faltan ~{falta:.0f} de nivel, y la "
+                        f"captura de esta pantalla da el món que falta)")
             return (PESO_ENTRENADOR_SANO + 2.0,
                     f"entrenador: mucha exp, faltan ~{falta:.0f} de nivel")
         # Ya se esta al nivel del lider: el entrenador deja de ser la fuente de

@@ -4108,10 +4108,70 @@ def test_la_huella_del_codigo_identifica_el_lote() -> None:
           f"-> {h1!r}")
 
 
+def test_el_equipo_corto_no_paga_el_bono_de_exp_del_entrenador() -> None:
+    """Con menos de 3 móns y sin cura, el entrenador no recibe el bono de exp.
+
+    **Por qué.** El 18-10, 11 de las 13 runs que murieron sin insignia lo
+    hicieron con `equipo=2`, y en una de ellas el log deja la decisión entera:
+
+        nodo=n1_0 tipo=entrenador equipo=2 vivos=2 niv=4-5
+        disponibles=trainer,catch
+        razon=entrenador score=85.0 (mucha exp, faltan ~10)
+        opc: entrenador=85 batalla=85      <- empate, y ganó el entrenador
+        >>> COMBATE PERDIDO contra Firebreather! | 0-1
+
+    El bono de ruta (`extra * peso_ruta`, x3.5 mientras falte nivel) se suma
+    **después** del peso base y vale 60-300, así que el entrenador (34) empataba
+    con la captura (60 de peso) y el desempate lo ganaba él. La penalización
+    rompe ese empate: lo que se comprueba aquí es que con el equipo corto el
+    entrenador puntúa **por debajo** de lo que puntuaba, y que el caso normal
+    (equipo largo) no se toca.
+    """
+    plan = PL.plan_para("Kanto", 0)
+
+    def m(n, nv, tp=None):
+        return {"nombre": n, "tipos": tp or ["Planta"], "baseStats": {"hp": 40},
+                "nivel": nv, "ps": 100, "ps_max": 100}
+
+    corto = [m("Bulbasaur", 5), m("Paras", 4)]
+    largo = [m("Bulbasaur", 5), m("Paras", 4), m("Pidgey", 4), m("Rattata", 4)]
+
+    ctx_corto = PL.Contexto(equipo=corto, plan=plan, hay_cura_disponible=False,
+                            nivel_rival=4)
+    ctx_largo = PL.Contexto(equipo=largo, plan=plan, hay_cura_disponible=False,
+                            nivel_rival=4)
+
+    s_corto, raz_corto = PL.puntuar("entrenador", ctx_corto)
+    s_largo, raz_largo = PL.puntuar("entrenador", ctx_largo)
+
+    check("con 2 móns el entrenador puntúa por debajo que con 4",
+          s_corto < s_largo, f"-> 2 móns {s_corto} vs 4 móns {s_largo}")
+    check("y la diferencia es exactamente la penalización de equipo corto",
+          abs((s_largo - s_corto) - abs(PL.PENALIZACION_ENTRENADOR_EQUIPO_CORTO)) < 1e-6,
+          f"-> {s_largo} - {s_corto} != "
+          f"{abs(PL.PENALIZACION_ENTRENADOR_EQUIPO_CORTO)}: si cambia el valor, "
+          f"cambia el A/B y la calibración deja de estar documentada")
+    check("el motivo lo dice y sale en el log",
+          "aplazado" in raz_corto and "GAME_OVER" in raz_corto,
+          f"-> sin rastro en el log no se puede falsar: {raz_corto}")
+    check("el caso normal (equipo largo) sigue cobrando el bono de exp",
+          "aplazado" not in raz_largo and "mucha exp" in raz_largo,
+          f"-> {raz_largo}")
+
+    # Con pokecenter delante no se penaliza: el corte de emergencia de R8 ya
+    # obliga a curar, y castigar al entrenador solo taparía la cura (mismo
+    # criterio que `riesgo_entrenador`).
+    _, raz_cura = PL.puntuar(
+        "entrenador", replace(ctx_corto, hay_cura_disponible=True))
+    check("con cura disponible el equipo corto no penaliza al entrenador",
+          "aplazado" not in raz_cura, f"-> {raz_cura}")
+
+
 def main() -> int:
     test_la_captura_mira_la_defensa_y_no_solo_el_ataque()
     test_en_el_mapa_de_la_liga_no_se_pelea()
     test_la_huella_del_codigo_identifica_el_lote()
+    test_el_equipo_corto_no_paga_el_bono_de_exp_del_entrenador()
     test_el_delantero_de_la_liga_cubre_lorelei_y_lance()
     test_las_capturas_no_roban_la_exp_de_equipo()
     test_el_jefe_aplazado_tira_mas_mapa_si_falta_nivel()
