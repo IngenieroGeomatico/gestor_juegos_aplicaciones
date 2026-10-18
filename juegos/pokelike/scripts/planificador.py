@@ -615,6 +615,23 @@ def _alguien_le_gana(ctx: Contexto, tipos_rival: list[str]) -> bool:
     return False
 
 
+# Lo que resta pelear en el mapa de la Liga. Va muy negativo a proposito: en ese
+# mapa los nodos de pelea sacan 53-138 y los de cura 50, asi que un descuento
+# suave los dejaria ganando igual. -60 los manda por debajo de `item` (34) y de
+# `cura` (50) sin llegar al rango de las penalizaciones por riesgo (-110, -140),
+# que son para casos de vida o muerte.
+PENALIZACION_PELEA_LIGA = -60.0
+
+
+def es_mapa_de_liga(plan: Plan) -> bool:
+    """¿Estamos en el mapa del Alto Mando? (las insignias ya no suben de 8).
+
+    El `>=` es deliberado: si el contador leyera 9 por un desfase, la regla
+    tiene que seguir activa en el mapa donde mas duele, no apagarse justo ahi.
+    """
+    return plan.insignias >= len(nombres_jefes(plan.region))
+
+
 def puntuar(tipo: str, ctx: Contexto, es_captura: bool = False) -> tuple[float, str]:
     """Puntúa un tipo de nodo con el plan a la vista.
 
@@ -636,6 +653,30 @@ def puntuar(tipo: str, ctx: Contexto, es_captura: bool = False) -> tuple[float, 
     equipo, plan = ctx.equipo, ctx.plan
     if not equipo:
         return (PESO_BATALLA_NIVEL, "equipo vacío: que caiga algo")
+
+    # **H24: en el mapa de la Liga, pelear es perder.**
+    #
+    # El Alto Mando son 4 combates **consecutivos y sin cura entre ellos** (~14 s
+    # de uno a otro): el PS no se recupera dentro, asi que cada pelea de este
+    # mapa se paga en la unica moneda que no se puede reponer. Y no compra nada,
+    # porque se llega por encima del rival (el mapa es el ultimo y el plan ya
+    # pide paridad).
+    #
+    # Medido en las 3 runs que llegaron a la Liga en `lote_defensa2`, y es lo que
+    # las mato. No fue el orden —run 1 gano Lorelei, Bruno y Agatha con el orden
+    # estatico—, fue con que llegaron:
+    #   run 1: entra con Aerodactyl 0/168 y Golduck 78/186 -> muere en Lance
+    #   run 3: entra con Gengar 47/135 -> Lorelei le mata 5 de 6 -> muere en Bruno
+    # Y el bot lo decia al pasar: "se entra igual (1 caido(s), carry flojo (41%))".
+    # Se pasaba el mapa cazando: 29 batallas y 29 entrenadores en una sola run,
+    # con el nodo de cura disponible y sin reservar para el final.
+    #
+    # **La captura se salva si faltan cuerpos** (R2: no se veta por tener pocos
+    # mons): el veto es contra la pelea inutil, no contra el món que falta.
+    if tipo in ("batalla", "entrenador") and es_mapa_de_liga(plan):
+        if not (es_captura and len(equipo) < 4):
+            return (PENALIZACION_PELEA_LIGA,
+                    "liga: pelear gasta PS y no da nivel; se va al jefe")
 
     ratio, caidos, vivos = _estado(equipo)
     liston = nivel_min_para(plan, equipo)

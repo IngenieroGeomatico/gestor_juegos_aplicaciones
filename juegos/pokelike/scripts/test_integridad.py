@@ -589,8 +589,13 @@ def test_la_escalera_de_riesgo_no_puede_atar_al_bot() -> None:
           peor > 0, f"-> {peor} ({raz})")
 
     # Y tiene que perder contra una alternativa segura cuando la hay.
+    # **Con un plan de ruta normal, no con `plan_para("Kanto", 9)`**: ese era un
+    # estado imposible —Kanto tiene 8 gimnasios— y desde H24 se lee como mapa de
+    # la Liga, asi que el nodo de batalla recibia la penalizacion de Liga (-60) y
+    # la comparacion dejaba de medir lo que dice medir. El gimnasio 7 da un plan
+    # igual de tardio (listón alto), que es lo que este test necesita.
     s_batalla, _ = PL.puntuar("batalla", replace(
-        ctx, capturas_pantalla=3, plan=PL.plan_para("Kanto", 9)))
+        ctx, capturas_pantalla=3, plan=PL.plan_para("Kanto", 7)))
     check("el_entrenador_desmontado_pierde_contra_cazar",
           peor < s_batalla, f"-> entrenador {peor} vs batalla {s_batalla}")
 
@@ -4012,8 +4017,56 @@ def test_la_captura_mira_la_defensa_y_no_solo_el_ataque() -> None:
           "que descartaba salvajes en silencio")
 
 
+def test_en_el_mapa_de_la_liga_no_se_pelea() -> None:
+    """H24: con las 8 insignias cada pelea gasta PS y no compra nada.
+
+    **Por que.** El Alto Mando son 4 combates consecutivos sin cura entre ellos
+    (~14 s de uno a otro): el PS no se recupera dentro, asi que llegar tocado es
+    llegar muerto. Y el bot se pasaba el mapa de la Liga cazando —29 batallas y
+    29 entrenadores en una sola run— con el nodo de cura disponible y sin
+    reservarlo para el final.
+
+    Medido en las 3 runs que llegaron en `lote_defensa2`: la 1 entro con
+    Aerodactyl 0/168 y Golduck 78/186 y murio en Lance; la 3 entro con Gengar
+    47/135 y Lorelei le mato 5 de 6. Las dos perdieron por entrar tocadas.
+    """
+    import planificador as PL
+
+    liga, gym7 = PL.plan_para("Kanto", 8), PL.plan_para("Kanto", 7)
+    check("el mapa de la Liga se detecta por las insignias",
+          PL.es_mapa_de_liga(liga) and not PL.es_mapa_de_liga(gym7),
+          "-> si el gimnasio 7 contase como Liga, se penalizarian peleas de "
+          "ruta normales y el bot se quedaria sin subir nivel")
+
+    completo = [{"nombre": f"m{i}", "tipos": ["Agua"], "nivel": 60,
+                 "ps": 100, "ps_max": 100} for i in range(6)]
+    corto = completo[:3]
+
+    s_pelea, _ = PL.puntuar("batalla", PL.Contexto(equipo=completo, plan=liga))
+    s_entre, _ = PL.puntuar("entrenador", PL.Contexto(equipo=completo, plan=liga))
+    check("en la Liga la pelea y el entrenador se penalizan",
+          s_pelea == PL.PENALIZACION_PELEA_LIGA
+          and s_entre == PL.PENALIZACION_PELEA_LIGA,
+          f"-> batalla={s_pelea}, entrenador={s_entre}: si salen positivos, el "
+          f"bot vuelve a cazar en el mapa donde el PS no se repone")
+
+    s_capt_corto, _ = PL.puntuar("batalla", PL.Contexto(equipo=corto, plan=liga),
+                                 es_captura=True)
+    check("la captura se salva si faltan cuerpos (R2)",
+          s_capt_corto != PL.PENALIZACION_PELEA_LIGA,
+          "-> con 3 mons el veto no puede aplicarse: el veto es contra la pelea "
+          "inutil, no contra el mon que falta")
+
+    s_gym, _ = PL.puntuar("batalla", PL.Contexto(equipo=completo, plan=gym7))
+    check("fuera de la Liga la pelea NO se penaliza",
+          s_gym > PL.PENALIZACION_PELEA_LIGA,
+          f"-> un gimnasio normal da {s_gym}: el veto tiene que ser solo del "
+          f"mapa de la Liga")
+
+
 def main() -> int:
     test_la_captura_mira_la_defensa_y_no_solo_el_ataque()
+    test_en_el_mapa_de_la_liga_no_se_pelea()
     test_el_delantero_de_la_liga_cubre_lorelei_y_lance()
     test_las_capturas_no_roban_la_exp_de_equipo()
     test_el_jefe_aplazado_tira_mas_mapa_si_falta_nivel()
