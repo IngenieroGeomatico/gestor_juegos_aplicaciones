@@ -122,6 +122,32 @@ def run_max_id() -> int:
         con.close()
 
 
+def huella_codigo() -> str:
+    """SHA256 de `scripts/*.py`: con qué código corrió el lote.
+
+    **Por qué existe.** El 18-10 la pregunta "esto antes funcionaba, ¿qué ha
+    cambiado?" no se pudo contestar con datos. `lote_liga` murió sin insignia el
+    **6%** de las veces y `lote_liga4` el **21%**, misma máquina y misma región,
+    pero los logs de lote no guardaban qué código había corrido cada uno. Hubo
+    que tirar de arqueología de commits, y `d3e2ba9` había empaquetado varios
+    días de trabajo de golpe, así que ni eso era fiable. Con 11% (12/110) contra
+    21% (31/147) de diferencia —2,2σ, p≈0,03—, saber qué brazo era cada lote no
+    es un lujo.
+
+    Con la huella, comparar dos lotes es comparar dos cadenas: si coinciden, la
+    diferencia es ruido o entorno; si no, el delta de código es el único
+    sospechoso. Se calcula sobre `scripts/*.py` sin recursión (ahí vive la
+    política) y en orden alfabético para que sea estable entre máquinas.
+    """
+    import hashlib
+
+    h = hashlib.sha256()
+    for f in sorted(SCRIPTS.glob("*.py")):
+        h.update(f.name.encode())
+        h.update(f.read_bytes())
+    return h.hexdigest()[:12]
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="Lote grande de runs, de dos en dos")
     ap.add_argument("--runs", type=int, default=100,
@@ -140,6 +166,11 @@ def main() -> int:
 
     # ID de run del corpus antes de empezar: separa "el lote" de "el histórico".
     desde_run = run_max_id() + 1
+    # **Con qué código corre esto.** Sin esta línea, dos lotes con la misma
+    # región y la misma máquina no se pueden comparar: no se sabe si la
+    # diferencia es ruido o un cambio en `politica.py` que nadie recuerda.
+    huella = huella_codigo()
+    print(f"huella de codigo (scripts/*.py): {huella}", flush=True)
     pendientes = args.runs
     tanda = 0
     resultados: list[dict] = []
@@ -322,6 +353,7 @@ def main() -> int:
     datos.setdefault("lotes", []).append({
         "fecha": time.strftime("%Y-%m-%d %H:%M"),
         "runs": len(resultados),
+        "huella": huella,
         "media_insignias": (sum(r["insignias"] for r in resultados) / len(resultados))
         if resultados else 0,
         "detalle": resultados,

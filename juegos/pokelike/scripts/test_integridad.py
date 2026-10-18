@@ -4064,9 +4064,54 @@ def test_en_el_mapa_de_la_liga_no_se_pelea() -> None:
           f"mapa de la Liga")
 
 
+def test_la_huella_del_codigo_identifica_el_lote() -> None:
+    """El lote tiene que decir con que codigo corrio.
+
+    **Por que.** El 18-10 no se pudo contestar "esto antes funcionaba, ?que ha
+    cambiado?": `lote_liga` murio sin insignia el 6% y `lote_liga4` el 21%, misma
+    maquina y region, y los logs de lote no guardaban que codigo corrio cada uno.
+    Con la huella, dos lotes con la misma cadena son el mismo brazo; con distinta,
+    el delta de codigo es el unico sospechoso.
+    """
+    import hashlib
+    import sys
+    from pathlib import Path
+
+    raiz = Path(__file__).resolve().parent
+    sys.path.insert(0, str(raiz / "medir"))
+    import lote_100 as LOTE
+
+    h1, h2 = LOTE.huella_codigo(), LOTE.huella_codigo()
+    check("la huella es estable entre llamadas", h1 == h2,
+          f"-> {h1} vs {h2}: si cambia sola, no sirve para comparar lotes")
+
+    scripts = sorted(LOTE.SCRIPTS.glob("*.py"))
+    manual = hashlib.sha256()
+    for f in scripts:
+        manual.update(f.name.encode())
+        manual.update(f.read_bytes())
+    check("la huella cubre TODOS los scripts/*.py, no un subconjunto",
+          h1 == manual.hexdigest()[:12],
+          "-> si no cubre todos, un cambio en un script olvidado no moveria la "
+          "huella y dos lotes distintos parecerian el mismo brazo")
+
+    solo_nombres = hashlib.sha256()
+    for f in scripts:
+        solo_nombres.update(f.name.encode())
+    check("la huella depende del CONTENIDO, no solo de los nombres",
+          h1 != solo_nombres.hexdigest()[:12],
+          "-> si solo mirara nombres, editar politica.py no cambiaria la huella "
+          "y el arreglo entero seria invisible")
+
+    check("la huella tiene 12 caracteres hexadecimales",
+          len(h1) == 12 and all(c in "0123456789abcdef" for c in h1),
+          f"-> {h1!r}")
+
+
 def main() -> int:
     test_la_captura_mira_la_defensa_y_no_solo_el_ataque()
     test_en_el_mapa_de_la_liga_no_se_pelea()
+    test_la_huella_del_codigo_identifica_el_lote()
     test_el_delantero_de_la_liga_cubre_lorelei_y_lance()
     test_las_capturas_no_roban_la_exp_de_equipo()
     test_el_jefe_aplazado_tira_mas_mapa_si_falta_nivel()
