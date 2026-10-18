@@ -4169,27 +4169,54 @@ def test_el_equipo_corto_no_paga_el_bono_de_exp_del_entrenador() -> None:
     s_corto, raz_corto = PL.puntuar("entrenador", ctx_corto)
     s_largo, raz_largo = PL.puntuar("entrenador", ctx_largo)
 
-    check("con 2 móns el entrenador puntúa por debajo que con 4",
-          s_corto < s_largo, f"-> 2 móns {s_corto} vs 4 móns {s_largo}")
-    check("y la diferencia es exactamente la penalización de equipo corto",
-          abs((s_largo - s_corto) - abs(PL.PENALIZACION_ENTRENADOR_EQUIPO_CORTO)) < 1e-6,
-          f"-> {s_largo} - {s_corto} != "
-          f"{abs(PL.PENALIZACION_ENTRENADOR_EQUIPO_CORTO)}: si cambia el valor, "
-          f"cambia el A/B y la calibración deja de estar documentada")
-    check("el motivo lo dice y sale en el log",
-          "aplazado" in raz_corto and "GAME_OVER" in raz_corto,
-          f"-> sin rastro en el log no se puede falsar: {raz_corto}")
-    check("el caso normal (equipo largo) sigue cobrando el bono de exp",
-          "aplazado" not in raz_largo and "mucha exp" in raz_largo,
-          f"-> {raz_largo}")
+    # **La batería de integridad corre DENTRO del entorno del brazo del A/B**, así
+    # que este test no puede leer la constante ambiental: en el brazo de control
+    # vale 0 y el test fallaría justo para el brazo que el A/B necesita medir.
+    # Pasó tal cual: el lote murió en la tanda 2 sin lanzar nada, y el brazo de
+    # control no habría llegado a correr nunca. El valor se fija aquí y se
+    # restaura al final, como hace el test de la escalera.
+    original = PL.PENALIZACION_ENTRENADOR_EQUIPO_CORTO
+    try:
+        PL.PENALIZACION_ENTRENADOR_EQUIPO_CORTO = -60.0
+        s_corto, raz_corto = PL.puntuar("entrenador", ctx_corto)
+        s_largo, raz_largo = PL.puntuar("entrenador", ctx_largo)
 
-    # Con pokecenter delante no se penaliza: el corte de emergencia de R8 ya
-    # obliga a curar, y castigar al entrenador solo taparía la cura (mismo
-    # criterio que `riesgo_entrenador`).
-    _, raz_cura = PL.puntuar(
-        "entrenador", replace(ctx_corto, hay_cura_disponible=True))
-    check("con cura disponible el equipo corto no penaliza al entrenador",
-          "aplazado" not in raz_cura, f"-> {raz_cura}")
+        check("con 2 móns el entrenador puntúa por debajo que con 4",
+              s_corto < s_largo, f"-> 2 móns {s_corto} vs 4 móns {s_largo}")
+        check("y la diferencia es exactamente la penalización de equipo corto",
+              abs((s_largo - s_corto) - abs(
+                  PL.PENALIZACION_ENTRENADOR_EQUIPO_CORTO)) < 1e-6,
+              f"-> {s_largo} - {s_corto} != "
+              f"{abs(PL.PENALIZACION_ENTRENADOR_EQUIPO_CORTO)}: si cambia el "
+              f"valor, cambia el A/B y la calibración deja de estar documentada")
+        check("el motivo lo dice y sale en el log",
+              "aplazado" in raz_corto and "GAME_OVER" in raz_corto,
+              f"-> sin rastro en el log no se puede falsar: {raz_corto}")
+        check("el caso normal (equipo largo) sigue cobrando el bono de exp",
+              "aplazado" not in raz_largo and "mucha exp" in raz_largo,
+              f"-> {raz_largo}")
+
+        # Con pokecenter delante no se penaliza: el corte de emergencia de R8 ya
+        # obliga a curar, y castigar al entrenador solo taparía la cura (mismo
+        # criterio que `riesgo_entrenador`).
+        _, raz_cura = PL.puntuar(
+            "entrenador", replace(ctx_corto, hay_cura_disponible=True))
+        check("con cura disponible el equipo corto no penaliza al entrenador",
+              "aplazado" not in raz_cura, f"-> {raz_cura}")
+
+        # **El brazo de control tiene que ser neutral**: con la penalización a 0,
+        # el equipo de 2 y el de 4 puntúan igual. Sin esto, un A/B que salga
+        # plano no se distingue de una penalización que se aplica a los dos
+        # brazos, que es el fallo que deja un lote de 100 tandas sin medir nada.
+        PL.PENALIZACION_ENTRENADOR_EQUIPO_CORTO = 0.0
+        s_ctrl_corto, _ = PL.puntuar("entrenador", ctx_corto)
+        s_ctrl_largo, _ = PL.puntuar("entrenador", ctx_largo)
+        check("el brazo de control (penalización 0) es neutral: 2 móns = 4 móns",
+              abs(s_ctrl_corto - s_ctrl_largo) < 1e-6,
+              f"-> 2 móns {s_ctrl_corto} vs 4 móns {s_ctrl_largo}: el control "
+              f"hereda la penalización y los dos brazos miden lo mismo")
+    finally:
+        PL.PENALIZACION_ENTRENADOR_EQUIPO_CORTO = original
 
 
 def main() -> int:
