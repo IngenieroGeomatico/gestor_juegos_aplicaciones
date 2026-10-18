@@ -4219,11 +4219,40 @@ def test_el_equipo_corto_no_paga_el_bono_de_exp_del_entrenador() -> None:
         PL.PENALIZACION_ENTRENADOR_EQUIPO_CORTO = original
 
 
+def test_la_huella_del_lote_llega_hasta_la_cabecera_de_la_run() -> None:
+    """El nombre de la variable de la huella tiene que ser el mismo en los dos.
+
+    **Por qué existe.** El 18-10 no se pudo contestar "¿con qué código corrió
+    cada lote?": `run.codigo` salía vacío en todas las runs nuevas porque la
+    cabecera escribía `codigo=?` — el lote calculaba la huella y no se la pasaba a
+    nadie. El fallo es de una línea y no lo caza nada en tiempo de ejecución: las
+    runs corren perfectas y el dato se pierde en silencio. Por eso se comprueba en
+    los dos ficheros, que es donde vive el desacuerdo.
+    """
+    import re
+
+    raiz = Path(__file__).resolve().parent
+    lote = (raiz / "medir" / "lote_100.py").read_text(encoding="utf-8")
+    juego = (raiz / "jugar_pokelike.py").read_text(encoding="utf-8")
+
+    m = re.search(r'os\.environ\["(\w+)"\] = huella', lote)
+    check("el lote pone la huella en una variable de entorno",
+          bool(m) and m.group(1).startswith("PKL_"),
+          f"-> {'no la pone' if not m else m.group(1)}")
+    var = m.group(1) if m else ""
+    check(f"y la cabecera de la run escribe ESA variable en `codigo=` "
+          f"(si no, el corpus lo guarda vacio y no se puede comparar eras)",
+          f"os.environ.get('{var}'" in juego and "codigo={" in juego,
+          f"-> la cabecera no lee `{var}`: la huella se queda en el log del lote "
+          f"y `run.codigo` sale vacio")
+
+
 def main() -> int:
     test_la_captura_mira_la_defensa_y_no_solo_el_ataque()
     test_en_el_mapa_de_la_liga_no_se_pelea()
     test_la_huella_del_codigo_identifica_el_lote()
     test_el_equipo_corto_no_paga_el_bono_de_exp_del_entrenador()
+    test_la_huella_del_lote_llega_hasta_la_cabecera_de_la_run()
     test_el_delantero_de_la_liga_cubre_lorelei_y_lance()
     test_las_capturas_no_roban_la_exp_de_equipo()
     test_el_jefe_aplazado_tira_mas_mapa_si_falta_nivel()

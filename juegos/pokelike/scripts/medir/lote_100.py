@@ -245,6 +245,19 @@ def main() -> int:
             brazo, entorno = brazos[(tanda - 1) % len(brazos)]
             os.environ.update(entorno)
             print(f"  brazo: {brazo}", flush=True)
+        # **La huella va SIEMPRE, y sin brazo también.** La run la escribe en su
+        # cabecera (`codigo=`, leyendo `PKL_HASH`) y de ahí la lee `pkl_corpus.py`
+        # para `run.codigo`. El 18-10 esa pregunta —"¿con qué código corrió cada
+        # lote?"— no se pudo contestar: la columna salía vacía en todas las runs
+        # nuevas porque el proceso de la run escribía `codigo=?` (nadie le pasaba
+        # la huella), y sin eso comparar eras es arqueología de commits.
+        #
+        # Y `PKL_BRAZO` se pone a la huella cuando no hay brazos porque la
+        # cabecera **solo se escribe si hay brazo**: así un lote normal también
+        # queda agrupado en el corpus, con la huella como nombre de brazo.
+        os.environ["PKL_HASH"] = huella
+        if not brazos:
+            os.environ["PKL_BRAZO"] = huella
         proc = subprocess.run(cmd, capture_output=True, text=True)
         salida = (proc.stdout or "") + (proc.stderr or "")
         # Si la integridad o el humo fallan, lanzar_tanda NO ha arrancado nada.
