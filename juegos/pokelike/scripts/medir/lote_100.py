@@ -178,6 +178,10 @@ def configurar_brazo(spec: str) -> tuple[str, dict[str, str]]:
 
 
 def main() -> int:
+    import os  # local: `main` ya lo importa más abajo, y sin esto `os` es local
+    # en toda la función y el uso del brazo (antes de esa línea) petaba con
+    # UnboundLocalError — que es como se quedó el A/B sin arrancar.
+
     ap = argparse.ArgumentParser(description="Lote grande de runs, de dos en dos")
     ap.add_argument("--runs", type=int, default=100,
                     help="cuántas runs en total (se lanzan de 2 en 2)")
