@@ -271,6 +271,11 @@ CAPTURA_NECESIDAD = os.environ.get("PKL_CAPTURA_NECESIDAD", "0").strip().lower()
     "1", "true", "si", "yes")
 PESO_CAPTURA_RELLENO = float(
     os.environ.get("PKL_PESO_CAPTURA_RELLENO", "12.0"))
+# Valor de rama de una captura por delante (R10), **solo con la necesidad
+# abierta**: un entrenador por delante vale 4.0 dentro de `coste`, y una
+# captura vale un món más un nivel, o sea más. El término topa a 2 capturas
+# para que una rama con muchas no tape la decisión del jefe.
+PESO_CAPTURA_RAMA = float(os.environ.get("PKL_PESO_CAPTURA_RAMA", "8.0"))
 # El trade es el nodo más rentable del juego: +3 niveles y PS completos, y la
 # guía lo llama "la mecánica más fuerte". Solo aparece con peso 5 frente a 30
 # de los entrenadores, así que es raro y hay que quererlo.
@@ -1518,6 +1523,24 @@ def elegir(equipo: list[dict], nodos: list[dict], ctx_extra: dict | None = None,
                 if _ratio_actual <= UMBRAL_PUERTA_JEFE or _caidos_actual:
                     n_cur = P.centros_por_delante(nodos, edges, limpio)
                     n_centro = n_cur.get(str(n.get("id")), 0)
+                # **R10 · la rama hacia una captura, solo si hay hueco.**
+                # Sin necesidad, ir a capturar es gastar una pelea en un cuerpo
+                # que no tapa nada; con el hueco abierto (un caído o menos de 3
+                # vivos) es la única forma de reponerlo, y el nodo más cercano
+                # puede estar en otra rama. Esto es lo que faltaba: el grafo
+                # valoraba combates, entrenadores, salvajes y curas, pero no
+                # capturas, así que "reestructurar hacia otra captura" era
+                # imposible: no la veía.
+                if CAPTURA_NECESIDAD:
+                    _, _caidos_cap, _vivos_cap = _estado(equipo)
+                    if _caidos_cap or _vivos_cap < 3:
+                        cap = P.capturas_por_delante(nodos, edges, limpio)
+                        n_cap = cap.get(str(n.get("id")), 0)
+                        if n_cap:
+                            s += min(n_cap, 2) * PESO_CAPTURA_RAMA
+                            razon += (f"; +{min(n_cap, 2)} captura(s) por "
+                                      f"delante x{PESO_CAPTURA_RAMA:.0f} "
+                                      f"(hueco abierto)")
                 if coste or n_centro or n_salv:
                     # El peso de la ruta tiene que **dominar** cuando falta
                     # nivel, no solo sumar: un entrenador puntúa 34, así que

@@ -1583,6 +1583,49 @@ def salvajes_por_delante(nodos: list[dict], edges: list,
     return {nid: min(v, tope) for nid, v in memo.items()}
 
 
+def capturas_por_delante(nodos: list[dict], edges: list,
+                         tope: int = 8) -> dict[str, int]:
+    """Cuántas **pantallas de captura** deja cada rama (R10).
+
+    Ni `combates_por_delante` ni `salvajes_por_delante` las ven: los dos cuentan
+    con `tipo_de_estado`, que traduce `catch` y `battle` al mismo `"batalla"`.
+    El único que distingue el crudo del juego es este contador. Sin él el
+    planificador no puede "reestructurar el grafo hacia otra captura" (R10):
+    no la ve en el horizonte y acaba coleccionando cuerpos sin hueco.
+    """
+    por_id = {str(n["id"]): n for n in nodos if n.get("id")}
+    hijos: dict[str, list[str]] = {}
+    for e in edges:
+        if isinstance(e, dict):
+            origen, destino = e.get("from"), e.get("to")
+        else:
+            origen = e[0] if len(e) > 0 else None
+            destino = e[1] if len(e) > 1 else None
+        if origen is not None and destino is not None:
+            hijos.setdefault(str(origen), []).append(str(destino))
+
+    memo: dict[str, int] = {}
+    en_curso: set[str] = set()
+
+    def valor(nid: str, prof: int = 0) -> int:
+        if nid in memo:
+            return memo[nid]
+        if nid in en_curso or prof > 14:
+            return 0
+        en_curso.add(nid)
+        n = por_id.get(nid)
+        crudo = str(n.get("tipo") or "").strip().lower() if n else ""
+        propio = 1 if crudo == "catch" else 0
+        mejor = max((valor(h, prof + 1) for h in hijos.get(nid, [])), default=0)
+        en_curso.discard(nid)
+        memo[nid] = propio + mejor
+        return memo[nid]
+
+    for nid in por_id:
+        valor(nid)
+    return {nid: min(v, tope) for nid, v in memo.items()}
+
+
 # ---------------------------------------------------------------- decisiones triviales
 
 def decidir_batalla(tiene_auto: bool) -> Decision:
