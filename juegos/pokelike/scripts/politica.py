@@ -632,7 +632,12 @@ def elegir_captura(equipo: list[dict], candidatos: list[dict],
     # "Geodude 4 + Geodude 10 + Bulbasaur 12", dos de tres plazas del mismo tipo.
     tipos_equipo = {T.normalizar(t) for m in equipo for t in (m.get("tipos") or [])}
     ya_capturados = {(m.get("nombre") or "").strip().lower() for m in equipo}
-    arranque = len(vivos) < 2
+    # R2 (fijado por el usuario el 19-10-2026): con menos de 3 vivos **manda el
+    # cuerpo** y cualquier candidato vale, porque la plaza vacía es peor que un
+    # tipo repetido. Antes el arranque era con menos de 2 vivos: con 2 en pie ya
+    # se aplicaban los filtros de cobertura y el equipo se quedaba corto justo
+    # cuando más falta hacía rellenarlo.
+    arranque = len(vivos) < 3
     # OJO: el `if vivos else 0` de antes solo cubría el equipo vacío. Con el
     # equipo lleno de móns **vivos pero con `nivel == 0`** (el selector
     # `.team-slot-lv` ausente o sin dígitos deja `nivel: 0`) el generador se
