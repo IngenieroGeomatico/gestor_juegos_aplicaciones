@@ -223,6 +223,39 @@ PESO_JEFE_AUTOSADO = 4.0     # forzado, se entra (es la única salida)
 # La primera captura de la pantalla. Va por encima del entrenador a proposito:
 # es el paso 1 del libro de jugadas y sin un segundo món no hay equipo.
 PESO_CAPTURA = 60.0
+# **H26: la deuda de nivel de la captura de relleno se mide por el MAS FLOJO.**
+#
+# Medido el 19-10 sobre 26 codigos del corpus (filtrando `resultado != 'PRUEBA'`),
+# el unico dato que separa las eras SIN estar contaminado por lo que dura la run
+# es el estado al llegar al primer gimnasio:
+#
+#     codigo      mons vivos   nivel minimo   %0 insignias
+#     6ff56b8e        2,6          8,2           14%
+#     a839ce20        2,4          8,1           20%
+#     f56a010e        2,5          7,9           23%
+#     447c7444        2,7          7,8           26%
+#     9f4572603d9a    3,0          6,8           24%   <- hoy
+#
+# Hoy se llega con **mas cuerpos y 1,3 niveles menos por abajo**. Y la causa esta
+# en como se mide `falta`: sale de la MEDIA (`medio`, ~linea 697), asi que una
+# captura recien cogida de nivel bajo casi no mueve la media -> el equipo sigue
+# "a nivel" (`falta <= 1`) -> captura otra vez -> y el minimo se hunde, que es
+# justo el numero que correlaciona con la tasa de 0 insignias. El bucle se
+# alimenta solo: cada cuerpo flojo tapa su propia senal.
+#
+# La regla del usuario que lo permite es literal y no toca R2 (la primera
+# captura sigue siendo sagrada, `len(equipo) < 2` -> PESO_CAPTURA sin
+# condiciones): **"captura de relleno con el equipo en deuda de nivel"** es lo
+# que hay que vetar, y la deuda la fija el món que va por detras, no la media de
+# los que van por delante.
+#
+# `PKL_CAPTURA_DEUDA_POR_MIN=0` devuelve el comportamiento viejo (medir por la
+# media), que es lo que hace falta para poder deshacerlo sin editar codigo.
+CAPTURA_DEUDA_POR_MIN = os.environ.get(
+    "PKL_CAPTURA_DEUDA_POR_MIN", "1").strip().lower() not in (
+        "0", "false", "no", "off")
+PESO_CAPTURA_DEUDA_FLOJO = float(
+    os.environ.get("PKL_PESO_CAPTURA_DEUDA_FLOJO", "2.0"))
 # El trade es el nodo más rentable del juego: +3 niveles y PS completos, y la
 # guía lo llama "la mecánica más fuerte". Solo aparece con peso 5 frente a 30
 # de los entrenadores, así que es raro y hay que quererlo.
@@ -945,6 +978,26 @@ def puntuar(tipo: str, ctx: Contexto, es_captura: bool = False) -> tuple[float, 
                         f"cazar {falta:.0f} nivel(es) por encima del entrenador: "
                         f"el equipo ya tiene {len(equipo)} móns, ahora toca "
                         f"ganar experiencia")
+            # **H26: la puerta de la captura de relleno.** El equipo esta a
+            # nivel *de media* (`falta <= 1`), pero si el mas flojo va por
+            # debajo del liston, esa captura no amplia el equipo: mete un cuerpo
+            # que no aguanta el gimnasio y encima se lleva la exp de una pelea.
+            # Pesa 2.0, por debajo de cazar a nivel (4.0), del item (12) y del
+            # entrenador (34): el bot pelea y sube a los que ya tiene en vez de
+            # coleccionar. No es un veto duro a proposito — si la captura es la
+            # unica salida del mapa, se coge igual.
+            #
+            # El log tiene que dejar rastro (un veto silencioso es
+            # indistinguible de un bug): de ahi el `no ampliar: ...` con el
+            # nivel del flojo y el liston.
+            if CAPTURA_DEUDA_POR_MIN:
+                _niveles_validos = [n for n in niveles if n and n > 0]
+                flojo = min(_niveles_validos) if _niveles_validos else 0
+                if flojo and liston - flojo > 1:
+                    return (PESO_CAPTURA_DEUDA_FLOJO,
+                            f"no ampliar: el mas flojo va a nivel {flojo} y el "
+                            f"liston es {liston}; primero se sube a los que ya "
+                            f"estan (media {medio:.1f}, equipo de {len(equipo)})")
             return (PESO_CAPTURA,
                     f"capturar: equipo de {len(equipo)} y ya a nivel, ampliar "
                     f"con el mas alto de esta pantalla")

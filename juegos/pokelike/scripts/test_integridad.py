@@ -4247,11 +4247,77 @@ def test_la_huella_del_lote_llega_hasta_la_cabecera_de_la_run() -> None:
           f"y `run.codigo` sale vacio")
 
 
+def test_la_captura_de_relleno_se_mide_por_el_mas_flojo_no_por_la_media() -> None:
+    """**Por qué.** Medido el 19-10, el estado al llegar al primer gimnasio es lo
+    único que separa las eras sin estar contaminado por lo que dura la run:
+
+        codigo 6ff56b8e -> 2,6 vivos, mínimo 8,2 -> 14% de runs sin insignia
+        codigo a839ce20 -> 2,4 vivos, mínimo 8,1 -> 20%
+        codigo 9f4572603d9a (hoy) -> 3,0 vivos, mínimo 6,8 -> 24%
+
+    Se llega con más cuerpos y 1,3 niveles menos por abajo. La causa está en
+    que `falta` sale de la **media**: una captura recién cogida casi no mueve la
+    media, el equipo sigue "a nivel" y vuelve a capturar, mientras el mínimo se
+    hunde. La captura de relleno pasa a medir la deuda por el món más flojo.
+
+    Los dos equipos del test tienen **la misma media** y solo cambia el flojo:
+    si la puerta se midiera por la media, los dos puntuarían igual.
+    """
+    plan = PL.plan_para("Kanto", 0)
+
+    def m(n, nv):
+        return {"nombre": n, "tipos": ["Planta"], "baseStats": {"hp": 40},
+                "nivel": nv, "ps": 100, "ps_max": 100}
+
+    # El listón lo dice el planificador, no el test: si cambia, el test no se
+    # desincroniza (el listón no depende de los niveles del equipo).
+    liston = PL.nivel_min_para(plan, [m("Bulbasaur", 1)])
+    sano = [m("Bulbasaur", liston + 1), m("Paras", liston)]
+    flojo = [m("Bulbasaur", liston + 1), m("Paras", liston - 3)]
+
+    def ctx(equipo):
+        return PL.Contexto(equipo=equipo, plan=plan, hay_cura_disponible=False,
+                           nivel_rival=liston)
+
+    original = PL.CAPTURA_DEUDA_POR_MIN
+    try:
+        PL.CAPTURA_DEUDA_POR_MIN = True
+        s_sano, raz_sano = PL.puntuar("batalla", ctx(sano), es_captura=True)
+        s_flojo, raz_flojo = PL.puntuar("batalla", ctx(flojo), es_captura=True)
+
+        check("con el más flojo a nivel, la captura de relleno amplía",
+              "ampliar" in raz_sano and "no ampliar" not in raz_sano,
+              f"-> {s_sano}: {raz_sano}")
+        check("con el más flojo 3 por debajo del listón, la puerta la frena",
+              s_flojo < s_sano and "no ampliar" in raz_flojo,
+              f"-> flojo {s_flojo} vs sano {s_sano}: {raz_flojo}")
+        check("y el motivo sale en el log con el nivel del flojo y el listón "
+              "(un veto silencioso es indistinguible de un bug)",
+              str(liston) in raz_flojo and str(liston - 3) in raz_flojo,
+              f"-> sin el nivel en el log no se puede falsar: {raz_flojo}")
+        check("R2: la primera captura (equipo de 1) sigue sin condiciones, "
+              "aunque el món vaya por debajo del listón",
+              "hacen falta" in PL.puntuar(
+                  "batalla", ctx([m("Bulbasaur", liston - 5)]),
+                  es_captura=True)[1],
+              "-> si esto falla, se rompió R2 y con un món la run se acaba")
+
+        PL.CAPTURA_DEUDA_POR_MIN = False
+        s_viejo, raz_viejo = PL.puntuar("batalla", ctx(flojo), es_captura=True)
+        check("PKL_CAPTURA_DEUDA_POR_MIN=0 devuelve el comportamiento viejo "
+              "(la media): sin eso el cambio no se puede deshacer",
+              "no ampliar" not in raz_viejo and s_viejo > s_flojo,
+              f"-> con el flag a 0: {s_viejo}: {raz_viejo}")
+    finally:
+        PL.CAPTURA_DEUDA_POR_MIN = original
+
+
 def main() -> int:
     test_la_captura_mira_la_defensa_y_no_solo_el_ataque()
     test_en_el_mapa_de_la_liga_no_se_pelea()
     test_la_huella_del_codigo_identifica_el_lote()
     test_el_equipo_corto_no_paga_el_bono_de_exp_del_entrenador()
+    test_la_captura_de_relleno_se_mide_por_el_mas_flojo_no_por_la_media()
     test_la_huella_del_lote_llega_hasta_la_cabecera_de_la_run()
     test_el_delantero_de_la_liga_cubre_lorelei_y_lance()
     test_las_capturas_no_roban_la_exp_de_equipo()

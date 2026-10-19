@@ -1146,3 +1146,40 @@ es recursivo**. Por eso el código de las hipótesis cerradas está en
 `scripts/archivo/`: fuera del hash, sin poder invalidar un lote en curso, y sin
 borrar el guion con el que se lanzó cada tanda. El `README.md` de `archivo/`
 dice qué es cada cosa y por qué ya no se usa.
+## H26 — La captura de relleno se mide por el món más flojo (ABIERTA)
+
+**Dato de partida (19-10, corpus con `resultado != 'PRUEBA'`, 26 códigos).** El
+único estado que separa las eras **sin** estar contaminado por lo que dura la run
+es el equipo **al llegar al primer gimnasio**, que es el estado *antes* del muro:
+
+| codigo | vivos | nivel mín. | %0 insignias |
+|---|---|---|---|
+| `6ff56b8e` | 2,6 | **8,2** | **14%** |
+| `a839ce20` | 2,4 | 8,1 | 20% |
+| `f56a010e` | 2,5 | 7,9 | 23% |
+| `447c7444` | 2,7 | 7,8 | 26% |
+| `9f4572603d9a` (19-10) | **3,0** | **6,8** | 24% |
+
+Se llega con más cuerpos y 1,3 niveles menos por abajo. Mecanismo propuesto:
+`falta = liston - medio` sale de la **media**, así que un cuerpo flojo recién
+cogido casi no mueve la media, el equipo sigue "a nivel" y vuelve a capturar
+mientras el mínimo se hunde.
+
+**Cambio.** `CAPTURA_DEUDA_POR_MIN` (env `PKL_CAPTURA_DEUDA_POR_MIN=0` lo
+deshace): la captura de relleno (equipo ≥2 y media a nivel) exige que el món más
+flojo esté a ≤1 del listón; si no, pesa `PESO_CAPTURA_DEUDA_FLOJO` = 2.0, por
+debajo de cazar a nivel (4.0), del ítem (12) y del entrenador (34). No es veto
+duro: si es la única salida del mapa, se coge igual. R2 no se toca.
+
+**La rama vive** (60 logs del 19-10): 32 eventos de "ya a nivel, ampliar" con
+equipo de **3-6**; la captura garantizada de R2 sale con `equipo de 1` en los
+254 eventos, sin excepción.
+
+**Aviso medido:** esos 32 eventos son de media partida, **no** del gimnasio 1. El
+origen de los cuerpos de relleno del arranque (3,0 vivos contra 2,4-2,6 de la era
+buena) sigue sin culpable: las capturas tempranas pasan todas por el camino de
+R2 y no hay segunda vía con equipo ≥2 antes del primer gimnasio.
+
+**Falsación.** Métrica primaria: %0 insignias del lote de 200 del código nuevo
+frente al 24% de `9f4572603d9a` (margen ±6 con n=200). Secundarias: nivel mínimo
+al gimnasio 1 (objetivo ≥8,1) y vivos (objetivo ~2,5).
