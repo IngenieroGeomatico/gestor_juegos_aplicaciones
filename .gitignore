@@ -264,3 +264,10 @@ juegos/heroquest/rag/chroma_db_lite/
 
 # Corpus de logs de Pokelike: regenerable, no se versiona.
 juegos/pokelike/log/corpus.db
+
+# Logs de lote y medidas de Pokelike. Los `.log` de cada lote son artefactos de
+# medida, y `eras_historicas/` es la copia de los logs de las eras antiguas
+# (41 MB): es la unica copia que queda de aquellos runs, pero se conserva en
+# disco, no en el repo. Dentro van tambien `medidas.json`-like y el mapa de
+# huellas de la historia (`huellas_historia.json`), regenerables.
+juegos/pokelike/data/lotes/
