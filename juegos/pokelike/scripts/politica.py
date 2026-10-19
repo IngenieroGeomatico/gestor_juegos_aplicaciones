@@ -157,6 +157,18 @@ MIN_STATS_CAPTURA = 220
 # `PKL_CAPTURA_PERMISIVA=0` lo devuelve al filtro estricto de siempre.
 CAPTURA_PERMISIVA = os.environ.get("PKL_CAPTURA_PERMISIVA", "1").strip().lower() in (
     "1", "true", "si", "yes")
+# R2 (usuario, 19-10-2026): «una captura por pantalla, y solo si el candidato
+# vale», y si no vale, reestructurar el grafo hacia otra captura (R10). La
+# valvula permisiva de arriba solo debe mandar cuando faltan cuerpos.
+#
+# **No activar sin R10.** El filtro estricto ya se midio solo, en el A/B de
+# arriba: 1,03 insignias/run contra 1,57 del permisivo, y el mecanismo eran
+# justo los rechazos de captura sin alternativa (0,84 -> 0,00). R2 y R10 son
+# las dos mitades de la misma regla: la puerta sin la reestructuracion es el
+# brazo perdedor. Por defecto 0 = comportamiento de siempre; cuando R10 este
+# dentro, `PKL_CAPTURA_EXIGENTE=1` activa la regla.
+CAPTURA_EXIGENTE = os.environ.get("PKL_CAPTURA_EXIGENTE", "0").strip().lower() in (
+    "1", "true", "si", "yes")
 # Listones antiguos, solo como respaldo si faltaran los datos reales.
 NIVEL_OBJETIVO_BASE = 9
 NIVEL_POR_INSIGNIA = 5
@@ -627,6 +639,12 @@ def elegir_captura(equipo: list[dict], candidatos: list[dict],
 
     vivos = [m for m in equipo if (m.get("ps") or 0) > 0]
 
+    # R2: la valvula permisiva solo manda si faltan cuerpos (<3 vivos). Con el
+    # equipo sano se aplica la puerta estricta, y solo tiene sentido con R10
+    # (ver el comentario de CAPTURA_EXIGENTE).
+    permisiva_ahora = CAPTURA_PERMISIVA and not (
+        CAPTURA_EXIGENTE and len(vivos) >= 3)
+
     # Para la diversidad se cuenta TODO el roster, también los caídos: si no,
     # al caer un Geodude se podía volver a capturar otro y acabar con
     # "Geodude 4 + Geodude 10 + Bulbasaur 12", dos de tres plazas del mismo tipo.
@@ -738,7 +756,7 @@ def elegir_captura(equipo: list[dict], candidatos: list[dict],
         # llegaba al primer gimnasio con un solo món. Medido: GAME_OVER con
         # equipo de 2.
         if (len(vivos) >= 3 and (c.get("nivel") or 0) < mejor_nivel
-                and not nuevos and not CAPTURA_PERMISIVA):
+                and not nuevos and not permisiva_ahora):
             continue
         if objetivo:
             # Contra el gimnasio que toca: no puede ser 0.5x contra **todo** su
@@ -899,7 +917,7 @@ def elegir_captura(equipo: list[dict], candidatos: list[dict],
                        f"nuevos={sorted(nuevos) or '-'} stats={stats} "
                        f"nivel={nivel_cand}")
 
-    if mejor is None and CAPTURA_PERMISIVA:
+    if mejor is None and permisiva_ahora:
         # **Regla del usuario: "es mejor capturar que rechazar".**
         #
         # Si el filtro estricto deja a todos los candidatos fuera, aqui se
@@ -958,8 +976,12 @@ def elegir_captura(equipo: list[dict], candidatos: list[dict],
                 return "especie repetida"
             if not ({t for t in tipos_c} - tipos_equipo) and not _mejora_a(c, equipo):
                 return "no aporta tipo nuevo"
-            if len(vivos) >= 3 and (c.get("nivel") or 0) < niv_max:
-                return "nivel por debajo del equipo"
+            # Igual que el filtro del bucle: la calidad de nivel solo veta si el
+            # candidato **no aporta un tipo nuevo**; un Nv3 del tipo que falta
+            # se acepta, para no llegar al gimnasio sin ese tipo.
+            if (len(vivos) >= 3 and (c.get("nivel") or 0) < niv_max
+                    and not ({t for t in tipos_c} - tipos_equipo)):
+                return "nivel por debajo del equipo y sin tipo nuevo"
             # El mismo umbral que el filtro duro del bucle: con menos de 2 en
             # pie solo se cae el 0.5x; con 2 o más hay que llegar a neutro.
             if objetivo:
