@@ -3165,6 +3165,12 @@ class Bot:
                      f"PKL_ESCALERA_RIESGO={os.environ.get('PKL_ESCALERA_RIESGO', '1')} | "
                      f"PKL_TRADE={os.environ.get('PKL_TRADE', '1')} | "
                      f"PKL_RUTA_SIN_GASTO={os.environ.get('PKL_RUTA_SIN_GASTO', '0')} | "
+                     # **H27 va en la cabecera** para que el corpus pueda
+                     # agrupar por ella: el peso de la pelea salvaje cambió de
+                     # 15 a 20 y sin la etiqueta no se puede saber con cual
+                     # corrió cada lote (el mismo fallo que con `codigo`).
+                     f"PKL_PESO_BATALLA_NIVEL="
+                     f"{os.environ.get('PKL_PESO_BATALLA_NIVEL', '20')} | "
                      f"codigo={os.environ.get('PKL_HASH', '?')} ==")
         if max_pasos and max_pasos > 0:
             # R1: el presupuesto es solo informativo y para las pruebas cortas.

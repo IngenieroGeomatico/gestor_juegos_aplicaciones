@@ -1033,7 +1033,7 @@ def test_la_skill_del_camino_no_se_desincroniza() -> None:
 
     pesos = {
         "PESO_CURA_CAIDOS": 50, "PESO_CAPTURA": 60, "PESO_TRADE": 45,
-        "PESO_ENTRENADOR_SANO": 34, "PESO_BATALLA_NIVEL": 15,
+        "PESO_ENTRENADOR_SANO": 34, "PESO_BATALLA_NIVEL": 20,
         "PESO_BATALLA_A_NIVEL": 4, "PESO_OBJETO": 12, "PESO_INCOGNITA": 9,
     }
     for nombre, esperado in pesos.items():
@@ -1893,7 +1893,7 @@ def test_la_skill_del_camino_no_se_desincroniza() -> None:
     txt = skill.read_text(encoding="utf-8")
     pesos = {
         "PESO_CURA_CAIDOS": 50, "PESO_CAPTURA": 60, "PESO_TRADE": 45,
-        "PESO_ENTRENADOR_SANO": 34, "PESO_BATALLA_NIVEL": 15,
+        "PESO_ENTRENADOR_SANO": 34, "PESO_BATALLA_NIVEL": 20,
         "PESO_BATALLA_A_NIVEL": 4, "PESO_OBJETO": 12, "PESO_INCOGNITA": 9,
     }
     for nombre, esperado in pesos.items():
@@ -4312,12 +4312,58 @@ def test_la_captura_de_relleno_se_mide_por_el_mas_flojo_no_por_la_media() -> Non
         PL.CAPTURA_DEUDA_POR_MIN = original
 
 
+def test_la_pelea_salvaje_gana_al_item_sin_pisar_las_reglas() -> None:
+    """H27: la pelea salvaje (20) manda sobre el ítem normal, y no sobre las reglas.
+
+    **Por qué.** La era buena peleaba ~1 salvaje más por run antes de la primera
+    insignia (3,35-3,81 contra 2,24-2,49), y cada salvaje es un nivel: el hueco
+    de nivel mínimo al jefe (8,2 contra 7,2) es exactamente ese nivel. El margen
+    era de tres puntos (15 contra 12) para la única fuente de exp que sube el
+    nivel. Subirlo tiene dos techos que **no** son negociables, y este test los
+    fija: la cura con el equipo bajo (R8, 25) y el entrenador (R7, 34).
+    """
+    plan = PL.plan_para("Kanto", 0)
+
+    def m(n, nv):
+        return {"nombre": n, "tipos": ["Planta"], "baseStats": {"hp": 40},
+                "nivel": nv, "ps": 100, "ps_max": 100}
+
+    liston = PL.nivel_min_para(plan, [m("Bulbasaur", 1)])
+    # Equipo en deuda de nivel (media 5,5 por debajo del listón): es la rama que
+    # se pisa en el arranque, no la de "ya a nivel".
+    equipo = [m("Bulbasaur", liston - 6), m("Paras", liston - 5)]
+    ctx = PL.Contexto(equipo=equipo, plan=plan, hay_cura_disponible=False,
+                      nivel_rival=liston - 6)
+    s, raz = PL.puntuar("batalla", ctx, es_captura=False)
+
+    check("en deuda de nivel la pelea salvaje puntúa al menos PESO_BATALLA_NIVEL",
+          s >= PL.PESO_BATALLA_NIVEL and "cazar sube nivel" in raz,
+          f"-> {s}: {raz}")
+    check("y cazar gana al ítem normal y a la incógnita",
+          PL.PESO_BATALLA_NIVEL > PL.PESO_OBJETO > PL.PESO_INCOGNITA,
+          f"-> cazar {PL.PESO_BATALLA_NIVEL} vs item {PL.PESO_OBJETO} vs "
+          f"incógnita {PL.PESO_INCOGNITA}: si el margen se pierde, el bot "
+          f"vuelve a cambiar peleas por inventario")
+    check("R8: la cura con el equipo bajo sigue mandando sobre cazar",
+          PL.PESO_BATALLA_NIVEL < PL.PESO_CURA_BAJO,
+          f"-> cazar {PL.PESO_BATALLA_NIVEL} contra cura-bajo "
+          f"{PL.PESO_CURA_BAJO}: subir cazar por encima de la cura rompe R8")
+    check("R7: el entrenador sigue mandando sobre cazar",
+          PL.PESO_BATALLA_NIVEL < PL.PESO_ENTRENADOR_SANO,
+          f"-> cazar {PL.PESO_BATALLA_NIVEL} contra entrenador "
+          f"{PL.PESO_ENTRENADOR_SANO}")
+    check("R2: la captura sigue mandando sobre cazar",
+          PL.PESO_BATALLA_NIVEL < PL.PESO_CAPTURA,
+          f"-> cazar {PL.PESO_BATALLA_NIVEL} contra captura {PL.PESO_CAPTURA}")
+
+
 def main() -> int:
     test_la_captura_mira_la_defensa_y_no_solo_el_ataque()
     test_en_el_mapa_de_la_liga_no_se_pelea()
     test_la_huella_del_codigo_identifica_el_lote()
     test_el_equipo_corto_no_paga_el_bono_de_exp_del_entrenador()
     test_la_captura_de_relleno_se_mide_por_el_mas_flojo_no_por_la_media()
+    test_la_pelea_salvaje_gana_al_item_sin_pisar_las_reglas()
     test_la_huella_del_lote_llega_hasta_la_cabecera_de_la_run()
     test_el_delantero_de_la_liga_cubre_lorelei_y_lance()
     test_las_capturas_no_roban_la_exp_de_equipo()

@@ -261,7 +261,33 @@ PESO_CAPTURA_DEUDA_FLOJO = float(
 # de los entrenadores, así que es raro y hay que quererlo.
 PESO_TRADE = 45.0
 PESO_ENTRENADOR_SANO = 34.0
-PESO_BATALLA_NIVEL = 15.0    # cazar sube nivel: es la prioridad maxima
+# **H27: en el arranque, la pelea salvaje vale más (15 -> 20).**
+#
+# Medido el 19-10 sobre el corpus (fase 0 insignias, `resultado != 'PRUEBA'`),
+# la era buena y la reciente se separan por UNA cosa, y no es un peso perdido:
+#
+#     codigo       pantallas que ofrecen pelea /run   elegidas /run   %0
+#     6ff56b8e              2,95                          3,55        14%
+#     89aee993              2,96                          3,81        26%
+#     a839ce20              3,06                          3,55        20%
+#     f56a010e              2,83                          3,35        23%
+#     9f4572603d9a          2,07                          2,24        24%
+#     d1045cb2e505          2,25                          2,49        24%
+#
+# La era buena peleaba ~1 salvaje más por run antes de la primera insignia, y
+# cada salvaje es un nivel (`R2: cazar sube nivel`): el hueco de nivel mínimo al
+# jefe (8,2 contra 7,2) es exactamente ese nivel. En el cara a cara de la misma
+# pantalla (pelea contra item), la era buena eligió pelear 27 de 27 veces; hoy
+# 12 de 15, con la pelea puntuando 62,8 contra 103,5 del item.
+#
+# El margen era de tres puntos (15 contra 12) para la ÚNICA fuente de exp que
+# sube el nivel. Con 20 el margen es real y siguen mandando los que tienen que
+# mandar: cura con equipo bajo (25, R8), entrenador (34, R7), trade (45) y
+# captura (60, R2). Lo que NO se toca es `PESO_BATALLA_A_NIVEL` (4): la rama "ya
+# a nivel" apenas se pisa en el arranque (el listón de Brock es 14 y el equipo
+# llega con media ~8) y bajarla o subirla sin medir sería girar dos perillas a
+# la vez. `PKL_PESO_BATALLA_NIVEL=15` deshace el cambio sin editar código.
+PESO_BATALLA_NIVEL = float(os.environ.get("PKL_PESO_BATALLA_NIVEL", "20"))
 PESO_BATALLA_A_NIVEL = 4.0
 
 # **H25: con el equipo corto y sin cura, al entrenador no se le da el bono de

@@ -1183,3 +1183,40 @@ R2 y no hay segunda vía con equipo ≥2 antes del primer gimnasio.
 **Falsación.** Métrica primaria: %0 insignias del lote de 200 del código nuevo
 frente al 24% de `9f4572603d9a` (margen ±6 con n=200). Secundarias: nivel mínimo
 al gimnasio 1 (objetivo ≥8,1) y vivos (objetivo ~2,5).
+
+## H27 — En el arranque, la pelea salvaje vale más (15 → 20) (ABIERTA)
+
+**Dato de partida (19-10, corpus, fase 0 insignias, `resultado != 'PRUEBA'`).**
+La era buena y la reciente se separan por una sola cosa, y no es un peso perdido:
+**cuántas peleas salvajes se juegan antes de la primera insignia.**
+
+| codigo | pantallas que ofrecen pelea /run | elegidas /run | %0 insignias |
+|---|---|---|---|
+| `6ff56b8e` | 2,95 | **3,55** | 14% |
+| `89aee993` | 2,96 | **3,81** | 26% |
+| `a839ce20` | 3,06 | **3,55** | 20% |
+| `f56a010e` | 2,83 | **3,35** | 23% |
+| `9f4572603d9a` | 2,07 | 2,24 | 24% |
+| `d1045cb2e505` | 2,25 | 2,49 | 24% |
+
+Cada salvaje es un nivel (`R2: cazar sube nivel`), y el hueco de nivel mínimo al
+primer jefe (8,2 contra 7,2) es exactamente ese nivel. En el cara a cara de la
+misma pantalla (pelea contra ítem) la era buena eligió pelear **27 de 27** veces;
+el 19-10 con H26, **12 de 15**, con la pelea puntuando 62,8 contra 103,5 del
+ítem. El margen era de tres puntos (15 contra 12) para la **única** fuente de exp
+que sube el nivel.
+
+**Cambio.** `PESO_BATALLA_NIVEL` 15 → 20 (`PKL_PESO_BATALLA_NIVEL=15` lo
+deshace). Techos que no se pisan, y que el test comprueba: cura con equipo bajo
+(25, **R8**), entrenador (34, **R7**), captura (60, **R2**). `PESO_BATALLA_A_NIVEL`
+(4) **no** se toca: esa rama apenas se pisa en el arranque (listón de Brock 14
+contra media ~8) y mover dos perillas a la vez no mide nada.
+
+**Falsación.** Primaria: %0 insignias del lote de 200 del código nuevo contra el
+24% de `9f4572603d9a`. Secundaria y más sensible, porque es la variable que el
+cambio mueve: **peleas salvajes elegidas por run en la fase 0** (objetivo ≥3,3,
+hoy 2,24) y nivel mínimo al primer jefe (objetivo ≥8,1, hoy 7,2). Si la mezcla de
+nodos no se mueve, el peso no es la palanca y el siguiente sitio donde mirar es
+el **valor de ruta** (`combates_por_delante × 3.5`), que es lo que domina la
+puntuación final (529 frente a 15 de base) y lo que decidió los 3 casos en que
+el ítem ganó la pantalla.

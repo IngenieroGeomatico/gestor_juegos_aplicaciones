@@ -96,7 +96,7 @@ equipo** de antes, y el bot solo pulsa auto-battle y lee el PS real.
 | `capturar` (primera de la pantalla) | 60 |
 | `trade` | 45 |
 | `entrenador` | 34 |
-| `batalla` cazando nivel | 15 |
+| `batalla` cazando nivel | **20** |
 | `batalla` ya a nivel | 4 |
 | `jefe` listo | 12 |
 | `item` | 12 |

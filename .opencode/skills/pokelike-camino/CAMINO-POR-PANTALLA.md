@@ -72,7 +72,7 @@ Este orden importa, porque cambiarlo invierte las decisiones:
 | `capturar` | **60** | primera captura de la pantalla |
 | `trade` | **45** | siempre que falte nivel |
 | `entrenador` | **34** | mucha exp, y nivel del rival <= mejor del equipo + 2 |
-| `batalla` | 15 | cazar por nivel |
+| `batalla` | **20** | cazar por nivel: única fuente que sube el nivel |
 | `item` | 12 | normal |
 | `jefe` | 12 | listo |
 | `tutor` | 9 / 1 | con nivel / sin nivel |
