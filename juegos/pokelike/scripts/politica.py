@@ -960,9 +960,14 @@ def elegir_captura(equipo: list[dict], candidatos: list[dict],
                 return "no aporta tipo nuevo"
             if len(vivos) >= 3 and (c.get("nivel") or 0) < niv_max:
                 return "nivel por debajo del equipo"
-            if objetivo and min((utilidad_contra(tipos_c, r)[0] for r in objetivo),
-                                default=1.0) < 0.5:
-                return "0.5x contra el gimnasio"
+            # El mismo umbral que el filtro duro del bucle: con menos de 2 en
+            # pie solo se cae el 0.5x; con 2 o más hay que llegar a neutro.
+            if objetivo:
+                of_min = min((utilidad_contra(tipos_c, r)[0] for r in objetivo),
+                             default=1.0)
+                if of_min < (0.5 if len(vivos) < 2 else 1.0):
+                    return ("0.5x contra el gimnasio" if of_min < 0.5
+                            else "no llega a neutro contra el gimnasio")
             if futuros and min((utilidad_contra(tipos_c, r)[0] for r in futuros),
                                default=1.0) < 0.5:
                 return "0.5x contra los proximos"
