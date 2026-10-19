@@ -1035,7 +1035,21 @@ def test_la_skill_del_camino_no_se_desincroniza() -> None:
         "PESO_CURA_CAIDOS": 50, "PESO_CAPTURA": 60, "PESO_TRADE": 45,
         "PESO_ENTRENADOR_SANO": 34, "PESO_BATALLA_NIVEL": 20,
         "PESO_BATALLA_A_NIVEL": 4, "PESO_OBJETO": 12, "PESO_INCOGNITA": 9,
+        "PESO_TUTOR_SIN_NIVEL": 13, "PESO_TUTOR_CON_NIVEL": 16,
     }
+    # Invariante de R12: la MT va por encima del objeto y por debajo de cazar
+    # nivel. El comentario del codigo decia justo eso y los numeros decian lo
+    # contrario (objeto 12 contra tutor 9/1.0) durante meses, sin que nada
+    # avisara: esta comprobacion lo habria cazado el primer dia.
+    check("R12: el tutor con nivel pesa mas que el objeto",
+          PLAN.PESO_TUTOR_CON_NIVEL > PLAN.PESO_OBJETO,
+          f"-> tutor {PLAN.PESO_TUTOR_CON_NIVEL} vs objeto {PLAN.PESO_OBJETO}")
+    check("R12: el tutor sin nivel tambien pesa mas que el objeto",
+          PLAN.PESO_TUTOR_SIN_NIVEL > PLAN.PESO_OBJETO,
+          f"-> tutor {PLAN.PESO_TUTOR_SIN_NIVEL} vs objeto {PLAN.PESO_OBJETO}")
+    check("R12: la MT queda por debajo de cazar nivel",
+          PLAN.PESO_TUTOR_SIN_NIVEL < PLAN.PESO_BATALLA_NIVEL,
+          f"-> tutor {PLAN.PESO_TUTOR_SIN_NIVEL} vs batalla {PLAN.PESO_BATALLA_NIVEL}")
     for nombre, esperado in pesos.items():
         real = getattr(PLAN, nombre, None)
         if real is None:
@@ -1895,7 +1909,21 @@ def test_la_skill_del_camino_no_se_desincroniza() -> None:
         "PESO_CURA_CAIDOS": 50, "PESO_CAPTURA": 60, "PESO_TRADE": 45,
         "PESO_ENTRENADOR_SANO": 34, "PESO_BATALLA_NIVEL": 20,
         "PESO_BATALLA_A_NIVEL": 4, "PESO_OBJETO": 12, "PESO_INCOGNITA": 9,
+        "PESO_TUTOR_SIN_NIVEL": 13, "PESO_TUTOR_CON_NIVEL": 16,
     }
+    # Invariante de R12: la MT va por encima del objeto y por debajo de cazar
+    # nivel. El comentario del codigo decia justo eso y los numeros decian lo
+    # contrario (objeto 12 contra tutor 9/1.0) durante meses, sin que nada
+    # avisara: esta comprobacion lo habria cazado el primer dia.
+    check("R12: el tutor con nivel pesa mas que el objeto",
+          PLAN.PESO_TUTOR_CON_NIVEL > PLAN.PESO_OBJETO,
+          f"-> tutor {PLAN.PESO_TUTOR_CON_NIVEL} vs objeto {PLAN.PESO_OBJETO}")
+    check("R12: el tutor sin nivel tambien pesa mas que el objeto",
+          PLAN.PESO_TUTOR_SIN_NIVEL > PLAN.PESO_OBJETO,
+          f"-> tutor {PLAN.PESO_TUTOR_SIN_NIVEL} vs objeto {PLAN.PESO_OBJETO}")
+    check("R12: la MT queda por debajo de cazar nivel",
+          PLAN.PESO_TUTOR_SIN_NIVEL < PLAN.PESO_BATALLA_NIVEL,
+          f"-> tutor {PLAN.PESO_TUTOR_SIN_NIVEL} vs batalla {PLAN.PESO_BATALLA_NIVEL}")
     for nombre, esperado in pesos.items():
         real = getattr(PLAN, nombre, None)
         if real is None:

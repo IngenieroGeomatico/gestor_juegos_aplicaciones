@@ -75,7 +75,7 @@ Este orden importa, porque cambiarlo invierte las decisiones:
 | `batalla` | **20** | cazar por nivel: única fuente que sube el nivel |
 | `item` | 12 | normal |
 | `jefe` | 12 | listo |
-| `tutor` | 9 / 1 | con nivel / sin nivel |
+| `tutor` | **16** / **13** | con nivel / sin nivel: por encima del objeto (`item` 12) y por debajo de cazar nivel (20) |
 | `incognita` | 9 | relleno |
 | `batalla` | 4 | ya a nivel |
 

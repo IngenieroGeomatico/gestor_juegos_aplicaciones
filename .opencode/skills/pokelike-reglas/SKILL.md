@@ -17,14 +17,40 @@ para que al implementarlas se sepa dónde tocar y qué se invierte.
 | # | Regla | Dónde vive en el código |
 |---|---|---|
 | 1 | **La run nunca se corta automáticamente.** Solo acaba por pérdida (`GAME_OVER`) o por completar la región (`CHAMPION`). | `jugar()`: el bucle no lleva tope de pasos, y un atasco escala recuperación en lugar de cortar. |
-| 2 | **Al inicio de cada pantalla se captura un Pokémon**, sin más condiciones. La comparación de "completar el equipo o tener mejores ataques" es **solo para cuando ya hay 6**. Con menos de 6 **no se veta nada**: entra el primer candidato con ventaja. | `politica.elegir_captura` + `capturas_pantalla` (se reinicia **por nodo**). |
+| 2 | **Al inicio de cada pantalla se captura un Pokémon, una sola vez y solo si el candidato vale.** Vale si aporta contra el **gimnasio actual o el siguiente** (tipos de `regiones.json` × `tipos.json`) o si **equilibra los tipos** del equipo (aporta un tipo que no hay, o quita una doble debilidad). Con **menos de 3 vivos manda el cuerpo**: cualquier candidato vale, porque la plaza vacía es peor que un tipo repetido. Si el candidato **no vale, no se captura**, y el descarte **deja traza** (`razon_captura=descartado: …`): un veto silencioso es indistinguible de un bug. Con 6 en el equipo sigue la comparación de antes (nivel +3 o stats ×1,15 contra el peor). | `politica.elegir_captura` + `capturas_pantalla` (se reinicia **por nodo**). |
 | 3 | **Reordenar antes de cada combate** por efectividad; con menos del 50% de vida, el món va **último** (sigue jugando y ganando exp, no se le expulsa). | `politica.orden_deseado` + `_reservar_heridos`. |
 | 4 | **Las MT van al Pokémon principal**; si ya no se le pueden añadir más, al siguiente de **más nivel**. | `puntuar_objeto` / reparto de la bolsa. |
 | 5 | **Los objetos van al Pokémon que mejor les viene**: un objeto que mejora ataques de Planta, a un Pokémon de Planta. | `pkl_items.elegir_objetos` puntúa cada objeto contra los **tipos de cada món**. |
 | 6 | **Si aparece un cambio de Pokémon, se cambia al peor**: primero el **caído**, luego, si hay dos del mismo tipo, el **peor de los repetidos**, y si no, el peor por stats y nivel. | `jugar_pokelike._peor_para_sustituir` (cubierto por `test_sacar_el_tipo_repetido`). |
-| 7 | **Priorizar los combates de entrenador** para ganar nivel: son la única fuente que sube a todo el equipo. | `PESO_ENTRENADOR_SANO`, y el veto que impide pelear trainers por encima del equipo. |
+| 7 | **Priorizar los combates de entrenador** para ganar nivel: son la única fuente que sube a todo el equipo. El entrenador **anuncia su tipo**, así que su peso se modula por **emparejamiento** (sube si el mejor món del equipo le pega ×2 y no recibe ×2, baja si es al revés), y la rama vale más si **desemboca en el pokecenter**: el grafo óptimo es el de más entrenadores ganables hasta la cura. | `PESO_ENTRENADOR_SANO`, el emparejamiento, `entrenadores_por_delante` y `centros_por_delante`, y el veto que impide pelear trainers por encima del equipo. |
 | 8 | **Pasar por el pokecenter obligatoriamente** si hay caídos, o el equipo está ≤ 75%, o el carry está < 50%. | El corte de emergencia de `puntuar` (peso −5) y `UMBRAL_PUERTA_JEFE`. |
 | 9 | **Tipo repetido, plaza desperdiciada.** Dos móns del mismo tipo: el segundo no aporta nada que el primero no tenga. Al sustituir, sale el repetido para liberar la diversidad. El caído manda sobre esta regla. | `_peor_para_sustituir`, con `navegador.mons_en_swap` para saber qué món entra. |
+| 10 | **Necesidad de captura, y reestructurar el grafo cuando no se cubre.** Hay necesidad si (a) falta cobertura contra el **gimnasio actual o el siguiente**, (b) ha **caído un món** en el grafo hacia el gimnasio y no se ha repuesto, o (c) hay **menos de 3 vivos**. Con necesidad, el nodo de captura conserva su peso alto y las ramas que **llevan a un nodo de captura** suben de valor: reestructurar el grafo es **elegir la ruta hacia otra captura**, no gastar el reroll del mapa. Sin necesidad (o con la captura de la pantalla ya hecha), `capturar` cae a peso de relleno y el bot prefiere pelear. | `planificador`: término de necesidad de captura en el peso del nodo y valor de rama hacia capturas; `politica.elegir_captura` decide la validez. |
+| 11 | **Con repetidos en el equipo, el trade sube de peso.** Si hay dos móns del mismo tipo, el nodo de `trade` gana valor para cambiar la plaza repetida por diversidad (es la vía de arreglar el R9 sin gastar una captura). El caído sigue mandando: primero se repone la plaza, luego se canjea. | Peso del nodo `trade` en `planificador.py`, condicionado a los tipos repetidos del equipo. |
+| 12 | **Los objetos de poder por tipo y las MT son prioridad alta.** Un objeto que sube el tipo (`miracle_seed`, `charcoal`…) no es un +40%: hace **atacar con ese tipo**, y vale mucho más que un plus genérico — a un món de ese tipo (R5). La MT es daño **permanente que no depende del nivel**, así que su nodo (`tutor`) no debe quedar por debajo de un objeto suelto. | `pkl_items.tipo_de_boost` y `P_BOOST_PROPIO`; pesos `PESO_TUTOR_*` en `planificador.py`. |
+
+## Pendiente de implementar (fijado por el usuario el 19-10-2026)
+
+Estas reglas están **fijadas** (filas 2, 7, 10, 11 y 12 de la tabla) pero
+**todavía no están en el código**: el bot juega hoy con R2 sin puerta de validez,
+el entrenador sin emparejamiento, la captura sin término de necesidad, el trade
+fijo y el tutor por debajo del objeto.
+
+Orden de trabajo acordado, una palanca por vez y con bandera reversible
+(`PKL_*=0` deshace), probando cada una con partida corta antes de lote de 200:
+
+1. **R2 + R10**: puerta de validez en `politica.elegir_captura` con **traza
+   obligatoria** del descarte, y término de necesidad de captura en el peso del
+   nodo y en el valor de rama hacia capturas. Cuerpos primero con <3 vivos.
+2. **R12**: revisar el desajuste ya visible — el comentario de
+   `planificador.py` dice que el tutor va **por encima** de los objetos, pero
+   los números dicen lo contrario: `item` = 12 contra `PESO_TUTOR_CON_NIVEL` = 9,
+   y `PESO_TUTOR_SIN_NIVEL` = 1.0 (demasiado bajo para "las MT son muy
+   importantes"). Y la tabla de pesos de esta skill **no tiene fila de `tutor`**,
+   que es lo que dejó pasar el desajuste.
+3. **R11**: peso del `trade` condicionado a tipos repetidos en el equipo.
+4. **R7 (emparejamiento)**: el entrenador anuncia su tipo; sube el peso si el
+   mejor món le pega ×2 y no recibe ×2.
 
 ## Reglas que salieron de medir
 

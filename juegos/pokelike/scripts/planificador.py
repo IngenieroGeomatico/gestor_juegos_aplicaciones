@@ -303,8 +303,20 @@ PENALIZACION_ENTRENADOR_EQUIPO_CORTO = float(
 )
 # El tutor va segundo: por debajo de nivel y por encima de los objetos. Solo
 # tiene sentido a nivel, que es cuando se aplica.
-PESO_TUTOR_SIN_NIVEL = 1.0
-PESO_TUTOR_CON_NIVEL = 9.0
+#
+# Esa frase y los números no coincidían: el objeto estaba en 12 y el tutor en
+# 9/1.0, así que un objeto suelto pesaba más que una MT, que es daño permanente
+# que no depende del nivel. El usuario lo fijó (R12 de `pokelike-reglas`): «los
+# objetos de poder por tipo y las MT son muy importantes». Ahora el tutor queda
+# por encima del objeto (12) y por debajo de la batalla que caza nivel (20), que
+# es exactamente lo que dice el comentario de arriba. Con `PKL_PESO_TUTOR_*=0`
+# se vuelve al 9/1.0 de antes.
+PESO_TUTOR_SIN_NIVEL = float(
+    os.environ.get("PKL_PESO_TUTOR_SIN_NIVEL", "13.0")
+)
+PESO_TUTOR_CON_NIVEL = float(
+    os.environ.get("PKL_PESO_TUTOR_CON_NIVEL", "16.0")
+)
 # Los objetos van por detrás del nivel y del tutor, como pidió el usuario, pero
 # **por delante de la batalla que no aporta nivel**: si no, nunca se coge ninguno
 # y la bolsa queda vacía toda la partida. Medido: con el objeto en 3.0 y la
