@@ -182,10 +182,19 @@ while [ "$lanzadas" -lt "$PEDIDAS" ]; do
     PIDS+=("$PID_RUN")
   done
   if [ "${#PIDS[@]}" -gt 0 ]; then
-    wait -n "${PIDS[@]}" 2>/dev/null || wait "${PIDS[@]}" 2>/dev/null || true
+    # **`wait -n` SIN lista de PIDs.** Con la lista, si alguno ya no es hijo
+    # (lo recogio un `wait` anterior) bash devuelve error y el `|| wait` de
+    # respaldo espera a TODOS los que quedan: el lote se queda a un run por
+    # vez sin decir nada. Medido el 19-10: 44 runs en 2 h y una sola viva.
+    # Sin argumentos espera a cualquier hijo y siempre acierta.
+    wait -n 2>/dev/null || true
     _VIVOS=()
     for _p in "${PIDS[@]}"; do
-      kill -0 "$_p" 2>/dev/null && _VIVOS+=("$_p")
+      # Un hijo terminado pero aun sin recoger esta en estado Z y `kill -0` lo
+      # daria por vivo: se quedaria en la lista ocupando plaza para siempre.
+      [ -d "/proc/$_p" ] || continue
+      [ "$(awk '/^State:/{print $2}' "/proc/$_p/status" 2>/dev/null)" = "Z" ] && continue
+      _VIVOS+=("$_p")
     done
     PIDS=("${_VIVOS[@]}")
   fi
@@ -202,10 +211,12 @@ done
 
 # Drenar lo que quede vivo antes de dar el lote por terminado.
 while [ "${#PIDS[@]}" -gt 0 ]; do
-  wait -n "${PIDS[@]}" 2>/dev/null || break
+  wait -n 2>/dev/null || break
   _VIVOS=()
   for _p in "${PIDS[@]}"; do
-    kill -0 "$_p" 2>/dev/null && _VIVOS+=("$_p")
+    [ -d "/proc/$_p" ] || continue
+    [ "$(awk '/^State:/{print $2}' "/proc/$_p/status" 2>/dev/null)" = "Z" ] && continue
+    _VIVOS+=("$_p")
   done
   PIDS=("${_VIVOS[@]}")
 done
