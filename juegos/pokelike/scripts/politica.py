@@ -939,9 +939,40 @@ def elegir_captura(equipo: list[dict], candidatos: list[dict],
                 f"(nivel={c.get('nivel')}, stats={st}); si el tipo esta "
                 f"repetido, el nodo de cambio saca al anterior")
     if mejor is None:
+        # **Por qué se descartó cada candidato, en la traza (R2).** El usuario
+        # fijó que si el candidato no vale, no se captura — pero un veto que no
+        # se ve es indistinguible de un bug, y en este bot ya pasó dos veces:
+        # `GAME_OVER` con equipo de 2 y otro con 0 capturas en 18 pasos. La
+        # función explicaba por qué **acepta** y nunca por qué descarta. Esto no
+        # toca los filtros: recomputa el motivo dominante de cada uno para que
+        # la huida se lea en el log.
+        niv_max = max((m.get("nivel") or 0) for m in vivos) if vivos else 0
+
+        def _motivo(c: dict) -> str:
+            tipos_c = [T.normalizar(t) for t in (c.get("tipos") or []) if t]
+            if not tipos_c:
+                return "sin tipos"
+            if (sum((c.get("baseStats") or {}).values()) or 0) < MIN_STATS_CAPTURA:
+                return "stats bajas"
+            if (c.get("nombre") or "").strip().lower() in ya_capturados:
+                return "especie repetida"
+            if not ({t for t in tipos_c} - tipos_equipo) and not _mejora_a(c, equipo):
+                return "no aporta tipo nuevo"
+            if len(vivos) >= 3 and (c.get("nivel") or 0) < niv_max:
+                return "nivel por debajo del equipo"
+            if objetivo and min((utilidad_contra(tipos_c, r)[0] for r in objetivo),
+                                default=1.0) < 0.5:
+                return "0.5x contra el gimnasio"
+            if futuros and min((utilidad_contra(tipos_c, r)[0] for r in futuros),
+                               default=1.0) < 0.5:
+                return "0.5x contra los proximos"
+            return "no aporta x2 a gimnasio ni a entrenadores del mapa"
+
+        descartes = [f"{c.get('nombre')}: {_motivo(c)}" for c in candidatos[:4]]
+        cola = ("; descartes -> " + " | ".join(descartes)) if descartes else ""
         return Decision("capturar", None,
                         f"nada útil contra {'/'.join(ref) or '?'} "
-                        f"con {len(vivos)} món(s) en pie: huyo")
+                        f"con {len(vivos)} món(s) en pie: huyo{cola}")
     return Decision("capturar", mejor.get("atajo"), detalle)
 
 
