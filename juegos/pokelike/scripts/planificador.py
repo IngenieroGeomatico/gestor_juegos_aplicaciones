@@ -280,7 +280,28 @@ PESO_CAPTURA_RAMA = float(os.environ.get("PKL_PESO_CAPTURA_RAMA", "8.0"))
 # guía lo llama "la mecánica más fuerte". Solo aparece con peso 5 frente a 30
 # de los entrenadores, así que es raro y hay que quererlo.
 PESO_TRADE = 45.0
+# **R11 (usuario, 19-10-2026): con tipos repetidos, el trade sube.**
+#
+# La guía lo llama "la mecánica más fuerte" y a nivel ya valía 12, por debajo
+# del entrenador (34): dos móns del mismo tipo son una plaza desperdiciada
+# (R9) y el trade es la única vía de canjearla sin gastar una captura. Sube a
+# 45, el mismo peso que cuando falta nivel. El caído manda: si hay un caído,
+# primero se repone la plaza y el trade se queda en 12.
+TRADE_REPETIDO = os.environ.get("PKL_TRADE_REPETIDO", "0").strip().lower() in (
+    "1", "true", "si", "yes")
+PESO_TRADE_REPETIDO = float(
+    os.environ.get("PKL_PESO_TRADE_REPETIDO", "45.0"))
 PESO_ENTRENADOR_SANO = 34.0
+# **R7 (usuario, 19-10-2026): el entrenador anuncia su tipo.**
+#
+# El peso del entrenador se modula por emparejamiento: +1 PESO_ENTRENADOR_SANO
+# si algún món vivo le pega x2 sin recibirlo, -0,5 si es al revés. Es lo que
+# convierte "pelear entrenadores" en "pelear los entrenadores que se pueden
+# ganar", que es la mitad que faltaba de la regla (la rama que desemboca en el
+# pokecenter ya se valora con `centros_por_delante`).
+ENTRENADOR_EMPAREJAMIENTO = os.environ.get(
+    "PKL_ENTRENADOR_EMPAREJAMIENTO", "0").strip().lower() in (
+        "1", "true", "si", "yes")
 # **H27: en el arranque, la pelea salvaje vale más (15 -> 20).**
 #
 # Medido el 19-10 sobre el corpus (fase 0 insignias, `resultado != 'PRUEBA'`),
@@ -716,6 +737,35 @@ def _alguien_le_gana(ctx: Contexto, tipos_rival: list[str]) -> bool:
         if peor >= 1.0:
             return True
     return False
+
+
+def _emparejamiento_entrenador(ctx: Contexto,
+                               tipos_rival: list[str]) -> tuple[float, str]:
+    """R7: factor de peso del entrenador según el emparejamiento.
+
+    Devuelve el factor que se aplica al peso del nodo:
+      - **2.0** si algún món vivo le pega x2 sin recibirlo x2.
+      - **0.5** si el entrenador le pega x2 a alguien y nosotros no tenemos x2.
+      - **1.0** cuando no hay señal (ni una cosa ni la otra).
+    """
+    from pkl_movimientos import multiplicador as _mult
+
+    peor = ""
+    for m in ctx.equipo or []:
+        if (m.get("ps") or 0) <= 0:
+            continue
+        tipos = [T.normalizar(t) for t in (m.get("tipos") or []) if t]
+        if not tipos:
+            continue
+        atk = min((_mult(tipos[0], r) for r in tipos_rival if r), default=0.0)
+        df = max((_mult(r, tipos[0]) for r in tipos_rival if r), default=0.0)
+        if atk >= 2.0 and df < 2.0:
+            return 2.0, f"x2 a favor con {m.get('nombre')} sin recibirlo"
+        if df >= 2.0 and atk < 2.0 and not peor:
+            peor = str(m.get("nombre") or "")
+    if peor:
+        return 0.5, f"el entrenador pega x2 y no tenemos x2 ({peor})"
+    return 1.0, ""
 
 
 # Lo que resta pelear en el mapa de la Liga. Va muy negativo a proposito: en ese
@@ -1224,6 +1274,24 @@ def puntuar(tipo: str, ctx: Contexto, es_captura: bool = False) -> tuple[float, 
             return (PESO_TRADE,
                     f"trade: +3 niveles y PS completos, faltan "
                     f"~{falta:.0f} de nivel (el nodo más fuerte del juego)")
+        # **R11: con tipos repetidos, el trade es la vía para canjear la plaza
+        # repetida** (arregla R9 sin gastar una captura). El caído manda:
+        # primero se repone la plaza y luego se canjea, así que con caídos no
+        # sube. Con el flag apagado queda el 12 de siempre.
+        if TRADE_REPETIDO and not caidos:
+            cuenta: dict[str, int] = {}
+            for _m in equipo:
+                if (_m.get("ps") or 0) <= 0:
+                    continue
+                for _t in (_m.get("tipos") or []):
+                    _k = str(_t or "").strip().lower()
+                    if _k:
+                        cuenta[_k] = cuenta.get(_k, 0) + 1
+            rep = sorted(t for t, n in cuenta.items() if n >= 2)
+            if rep:
+                return (PESO_TRADE_REPETIDO,
+                        f"trade: tipo repetido en el equipo ({', '.join(rep)}); "
+                        f"canjear la plaza repetida sin gastar captura")
         return (12.0, "trade: a nivel ya, no hace falta")
 
     if tipo == "tutor":
@@ -1593,6 +1661,17 @@ def elegir(equipo: list[dict], nodos: list[dict], ctx_extra: dict | None = None,
                     if n_centro:
                         razon += (f"; +{n_centro} pokecenter(s) por delante "
                                   f"x{PESO_CURA_POR_DELANTE:.0f}")
+            # **R7: emparejamiento del entrenador.** El entrenador anuncia su
+            # tipo; si algún vivo le pega x2 sin recibirlo, el nodo sube un
+            # PESO_ENTRENADOR_SANO entero; si es al revés, baja la mitad.
+            if (ENTRENADOR_EMPAREJAMIENTO and tipo == "entrenador"
+                    and not _es_captura(n)):
+                _tipos_r = _tipos_del_entrenador(ctx_n)
+                if _tipos_r:
+                    _f, _mot = _emparejamiento_entrenador(ctx_n, _tipos_r)
+                    if _f != 1.0:
+                        s += (_f - 1.0) * PESO_ENTRENADOR_SANO
+                        razon += f"; R7 {_mot} (x{_f:g})"
             # Escalera de riesgo sobre el score **final**, ya con el bono de
             # ruta dentro. Sin esto el unico efecto era bajar un peso de
             # 0.5-2.0 que el bono de 60-300 tapaba siempre: medido en 24 runs,
