@@ -256,6 +256,21 @@ CAPTURA_DEUDA_POR_MIN = os.environ.get(
         "0", "false", "no", "off")
 PESO_CAPTURA_DEUDA_FLOJO = float(
     os.environ.get("PKL_PESO_CAPTURA_DEUDA_FLOJO", "2.0"))
+# **R10 (usuario, 19-10-2026): la captura sin necesidad es relleno.**
+#
+# Necesidad = hueco de cuerpo: hay un caido sin reponer (`caidos >= 1`) o
+# quedan menos de 3 vivos. Con necesidad la captura sigue pesando
+# PESO_CAPTURA (60); sin ella, "ampliar con el mejor de la pantalla" es
+# coleccionar cuerpos que no tapan hueco y que se comen la exp de una pelea
+# (el entrenador da +2 a todo el equipo; la captura, solo al nuevo).
+# Baja a peso de relleno (~12), el mismo orden que el objeto suelto.
+#
+# Por defecto 0 = comportamiento de siempre, para poder hacer el A/B contra
+# R2+R10 sin tocar codigo.
+CAPTURA_NECESIDAD = os.environ.get("PKL_CAPTURA_NECESIDAD", "0").strip().lower() in (
+    "1", "true", "si", "yes")
+PESO_CAPTURA_RELLENO = float(
+    os.environ.get("PKL_PESO_CAPTURA_RELLENO", "12.0"))
 # El trade es el nodo más rentable del juego: +3 niveles y PS completos, y la
 # guía lo llama "la mecánica más fuerte". Solo aparece con peso 5 frente a 30
 # de los entrenadores, así que es raro y hay que quererlo.
@@ -1036,6 +1051,18 @@ def puntuar(tipo: str, ctx: Contexto, es_captura: bool = False) -> tuple[float, 
                             f"no ampliar: el mas flojo va a nivel {flojo} y el "
                             f"liston es {liston}; primero se sube a los que ya "
                             f"estan (media {medio:.1f}, equipo de {len(equipo)})")
+            # **R10: sin necesidad abierta, esta captura es relleno.**
+            # La necesidad se mide con lo que ya tiene el scorer: un caido
+            # (hueco de cuerpo, tanto si queda plaza como si hay que sustituir)
+            # o menos de 3 vivos. Con ella, la captura vale sus 60; sin ella,
+            # "ampliar con el mas alto" no tapa ningun hueco y se lleva la exp
+            # de una pelea que el entrenador repartiria a todo el equipo.
+            vivos_ahora = sum(1 for m in equipo if (m.get("ps") or 0) > 0)
+            if CAPTURA_NECESIDAD and not (caidos or vivos_ahora < 3):
+                return (PESO_CAPTURA_RELLENO,
+                        f"capturar de relleno: equipo de {len(equipo)} sin "
+                        f"hueco (caidos={caidos}, vivos={vivos_ahora}); no "
+                        f"amplia, solo mete un cuerpo mas")
             return (PESO_CAPTURA,
                     f"capturar: equipo de {len(equipo)} y ya a nivel, ampliar "
                     f"con el mas alto de esta pantalla")
