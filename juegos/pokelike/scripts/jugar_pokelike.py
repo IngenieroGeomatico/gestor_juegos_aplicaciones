@@ -852,6 +852,12 @@ class Bot:
             except Exception as exc:  # noqa: BLE001
                 self.log(f"  !! reroll falló: {exc}")
 
+        # **R7 necesita el tipo del entrenador, y la tabla del mapa puede venir
+        # vacía** si el estado no lo exponía al cargar. Se reintenta aquí, con
+        # caché: lo que llegue tarde se recupera, y lo que ya está no se vuelve
+        # a pedir.
+        self._refrescar_tipos_por_sprite(m)
+
         d = PL.elegir(equipo, m["nodos"],
                       ctx_extra={
                           "hay_cura": self.hay_cura_disponible(m),
@@ -2121,6 +2127,40 @@ class Bot:
             out.setdefault(str(sprite).lower(), tipos)
             out.setdefault(str(sprite).replace("-", "").lower(), tipos)
         return out
+
+    def _refrescar_tipos_por_sprite(self, m: dict) -> None:
+        """Reintenta los tipos de los entrenadores que falten (R7).
+
+        La tabla se llena al cargar el mapa, y si en ese instante el estado no
+        exponía aún la especialidad (`trainerSpecialtyTypes` devuelve null),
+        quedaba vacía para **todo** el mapa. Medido el 20-10: cero disparos de
+        R7 en 89 runs, con la lógica correcta y los datos ausentes. Un veto
+        silencioso otra vez.
+
+        Se pregunta solo por los sprites que faltan y se guarda en la misma
+        tabla, con las tres claves de siempre: a partir de ahí no cuesta nada.
+        """
+        faltan = []
+        for n in m.get("nodos", []):
+            if (n.get("tipo") or n.get("type")) not in ("entrenador", "trainer"):
+                continue
+            sp = str(n.get("sprite") or "")
+            if sp and sp not in self._tipos_por_sprite:
+                faltan.append(sp)
+        for sp in dict.fromkeys(faltan):
+            try:
+                tipos = [str(t) for t in (self.j.trainer_tipos(sp) or [])
+                         if str(t) and str(t).lower() != "diversos"]
+            except Exception:  # noqa: BLE001
+                tipos = []
+            if tipos:
+                self._tipos_por_sprite.setdefault(sp, tipos)
+                self._tipos_por_sprite.setdefault(sp.lower(), tipos)
+                self._tipos_por_sprite.setdefault(
+                    sp.replace("-", "").lower(), tipos)
+        if faltan:
+            self.log(f"  · especialidades de entrenador: +{len(faltan)} "
+                     f"sprites (total {len(self._tipos_por_sprite)})")
 
     def tipos_de_entrenadores_del_mapa(self, mapa: dict) -> list[str]:
         """Tipos de los entrenadores accesibles en este mapa.
