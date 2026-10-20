@@ -175,7 +175,15 @@ memoria_disponible_mb() {
 # reconstruir esa ruta, que ya se equivoco una vez: el recolector miraba
 # `log/h17/h17.vivos` y el fichero real es `log/h17.vivos`, asi que no recogia a
 # nadie y los huerfanos se acumulaban.
-fichero_vivos() { ls "$RAIZ"/juegos/pokelike/log/*.vivos 2>/dev/null | head -1; }
+# **El fichero de vivas de ESTE lote, por ruta exacta.**
+#
+# Antes era `ls log/*.vivos | head -1`, y con mas de un lote en disco elegia el
+# primero por orden alfabetico. Medido el 20-10: durante el lote r11r7b eligio
+# `r11r7.vivos` (un lote abortado), asi que ninguna run real estaba en la tabla
+# y el recolector las mato a todas como huerfanas: 130 runs cortadas y el lote
+# entero contado como "0 insignias". El fallo no estaba en el bot, estaba en
+# mirar el fichero equivocado.
+fichero_vivos() { printf '%s\n' "$RAIZ/juegos/pokelike/log/$(basename "$LOGS_DIR").vivos"; }
 
 # **Recolector de huerfanos.**
 #
